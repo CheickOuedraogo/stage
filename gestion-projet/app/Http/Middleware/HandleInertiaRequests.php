@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -35,11 +36,33 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user ? [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role?->value,
+                    'role_label' => $user->role?->shortLabel(),
+                    'is_active' => $user->is_active,
+                    'avatar_url' => $user->avatar_url,
+                    'telephone' => $user->telephone,
+                    'unread_notifications' => $user->unreadNotifications()->count(),
+                ] : null,
+            ],
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+                'warning' => $request->session()->get('warning'),
+            ],
+            'maintenance' => [
+                'active' => Setting::isMaintenanceActive(),
+                'until' => Setting::get('maintenance_until'),
+                'reason' => Setting::get('maintenance_reason'),
             ],
         ];
     }
