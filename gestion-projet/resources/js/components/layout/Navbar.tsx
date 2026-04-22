@@ -4,7 +4,9 @@ import { auditLog as adminAuditLog, dashboard as adminDashboard } from '@/routes
 import { index as usersIndex } from '@/routes/admin/users';
 import { dashboard as acDashboard } from '@/routes/ac';
 import { dashboard as dafDashboard } from '@/routes/daf';
+import { index as dafProjetsIndex } from '@/routes/daf/projets';
 import { dashboard as porteurDashboard } from '@/routes/porteur';
+import { index as porteurProjetsIndex } from '@/routes/porteur/projets';
 import { edit as profileEdit } from '@/routes/profile';
 import type { User } from '@/types';
 import { Link, router, usePage } from '@inertiajs/react';
@@ -42,7 +44,7 @@ function getNavItems(role: User['role'], notifs: number): NavItem[] {
         ],
         daf: [
             { label: 'Tableau de bord', href: dafDashboard.url(), icon: ChartBarIcon },
-            { label: 'Projets', href: '#', icon: FolderIcon },
+            { label: 'Projets', href: dafProjetsIndex.url(), icon: FolderIcon },
             { label: 'Demandes', href: '#', icon: ClipboardDocumentListIcon },
             { label: 'Versements', href: '#', icon: CreditCardIcon },
             { label: 'Notifications', href: '#', icon: BellIcon, badge: notifBadge },
@@ -54,7 +56,7 @@ function getNavItems(role: User['role'], notifs: number): NavItem[] {
             { label: 'Notifications', href: '#', icon: BellIcon, badge: notifBadge },
         ],
         porteur: [
-            { label: 'Mes projets', href: porteurDashboard.url(), icon: FolderIcon },
+            { label: 'Mes projets', href: porteurProjetsIndex.url(), icon: FolderIcon },
             { label: 'Mes demandes', href: '#', icon: ClipboardDocumentListIcon },
             { label: 'Notifications', href: '#', icon: BellIcon, badge: notifBadge },
         ],
