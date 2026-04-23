@@ -49,7 +49,7 @@ export default function UserForm({ user, roles }: UserFormProps) {
                         Retour
                     </Button>
                 </Link>
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                     {isEditing ? `Modifier ${user?.name}` : 'Nouvel utilisateur'}
                 </h2>
             </div>
@@ -84,7 +84,7 @@ export default function UserForm({ user, roles }: UserFormProps) {
                             />
 
                             <div className="space-y-1">
-                                <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
                                     Rôle <span className="text-red-500" aria-hidden="true">*</span>
                                 </label>
                                 <select
@@ -93,7 +93,7 @@ export default function UserForm({ user, roles }: UserFormProps) {
                                     onChange={(e) => setData('role', e.target.value as User['role'])}
                                     aria-label="Sélectionner le rôle"
                                     aria-invalid={!!errors.role}
-                                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
+                                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                                 >
                                     {roles.map((r) => (
                                         <option key={r.value} value={r.value}>{r.label}</option>

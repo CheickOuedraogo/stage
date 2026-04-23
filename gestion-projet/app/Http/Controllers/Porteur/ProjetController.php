@@ -96,11 +96,14 @@ class ProjetController extends Controller
 
         $convention->load(['bailleur:id,nom,sigle,type,pays', 'rubriques', 'versements']);
 
+        $hasDemandeActive = $convention->demandesDepenses()->active()->exists();
+
         return Inertia::render('porteur/Projets/Convention', [
             'projet' => [
                 'id' => $projet->id,
                 'titre' => $projet->titre,
             ],
+            'has_demande_active' => $hasDemandeActive,
             'convention' => [
                 'id' => $convention->id,
                 'titre' => $convention->titre,
