@@ -131,7 +131,7 @@ class ProjetSeeder extends Seeder
             ],
             [
                 'sigle' => 'FORMASUP',
-                'titre' => 'Formation et Renforcement des Capacités Pédagogiques',
+                'titre' => 'Renforcement des Capacités Pédagogiques des Enseignants-Chercheurs du Burkina Faso',
                 'status' => ProjectStatus::Termine,
                 'montant_estime' => 180_000_000,
                 'date_debut' => '2021-03-01',
@@ -144,7 +144,7 @@ class ProjetSeeder extends Seeder
             ],
             [
                 'sigle' => 'AQUA-SAHEL',
-                'titre' => 'Gestion Durable des Ressources en Eau au Sahel',
+                'titre' => 'Gestion Intégrée et Durable des Ressources en Eau dans les Provinces Sahéliennes du Burkina Faso',
                 'status' => ProjectStatus::EnAttenteFinancement,
                 'montant_estime' => 320_000_000,
                 'date_debut' => null,
@@ -156,7 +156,7 @@ class ProjetSeeder extends Seeder
             ],
             [
                 'sigle' => 'INNOV-SANTE',
-                'titre' => 'Innovation en Santé Publique Communautaire',
+                'titre' => 'Approches Innovantes pour le Renforcement des Systèmes de Santé Communautaire en Milieu Rural',
                 'status' => ProjectStatus::Annule,
                 'montant_estime' => 150_000_000,
                 'date_debut' => '2022-09-01',
@@ -192,7 +192,7 @@ class ProjetSeeder extends Seeder
             ],
             [
                 'sigle' => 'AGRI-SMART',
-                'titre' => 'Agriculture Intelligente face au Changement Climatique',
+                'titre' => 'Agriculture Climato-Intelligente et Sécurisation des Revenus Agricoles au Sahel Burkinabè',
                 'status' => ProjectStatus::Suspendu,
                 'montant_estime' => 280_000_000,
                 'date_debut' => '2022-07-01',
@@ -204,7 +204,7 @@ class ProjetSeeder extends Seeder
             ],
             [
                 'sigle' => 'GENRE-DEV',
-                'titre' => 'Genre et Développement Inclusif à l\'Université',
+                'titre' => 'Promotion de l\'Égalité de Genre et de l\'Inclusion dans l\'Enseignement Supérieur Burkinabè',
                 'status' => ProjectStatus::EnAttenteFinancement,
                 'montant_estime' => 160_000_000,
                 'date_debut' => null,
@@ -225,6 +225,18 @@ class ProjetSeeder extends Seeder
                 'objectifs' => "## Objectifs\n\n1. Installer **500 kWc** de panneaux solaires sur 3 campus\n2. Réduire la facture énergétique de **60%**\n3. Assurer une alimentation électrique continue pour les laboratoires\n4. Former **15 techniciens** à la maintenance des installations",
                 'activites' => "## Activités\n\n### Phase 1 — Études et conception\n- Audit énergétique des trois campus\n- Dimensionnement des installations\n- Appel d'offres international\n\n### Phase 2 — Installation\n- Travaux de génie civil\n- Installation des équipements\n- Tests et mise en service\n\n### Phase 3 — Exploitation\n- Formation des techniciens\n- Mise en place d'un contrat de maintenance\n- Suivi des performances",
                 'porteur_index' => 9,
+            ],
+            [
+                'sigle' => 'BIOTECH-BF',
+                'titre' => 'Biotechnologies Végétales pour la Résistance aux Stress Climatiques au Sahel',
+                'status' => ProjectStatus::EnCours,
+                'montant_estime' => 380_000_000,
+                'date_debut' => '2023-04-01',
+                'date_fin_prevue' => '2026-03-31',
+                'description' => "## Présentation\n\nLe projet **BIOTECH-BF** explore les mécanismes moléculaires de tolérance aux stress abiotiques (sécheresse, chaleur, salinité) chez les cultures vivrières sahéliennes (sorgho, mil, niébé). Il vise à identifier des gènes candidats pour l'amélioration variétale.\n\n## Contexte scientifique\n\nFace au changement climatique, les rendements agricoles sahéliens chutent de 5 à 10% par décennie. Les biotechnologies végétales offrent des leviers pour développer des variétés mieux adaptées sans recourir aux OGM.\n\n## Partenaires\n\n- **INERA** — Ouagadougou (données agronomiques terrain)\n- **IRD** — Montpellier (analyse génomique)\n- **Wageningen University** — Pays-Bas (plateforme phénotypage)\n- **Laboratoire de Biologie Moléculaire — UJKZ** (équipe principale)\n\n## Infrastructures mobilisées\n\n- Laboratoire de biologie moléculaire de l'UFR/SVT (UJKZ)\n- Serre de phénotypage de l'INERA/Kamboinsé\n- 3 stations expérimentales (Dori, Fada N'Gourma, Léo)",
+                'objectifs' => "## Objectif général\n\nIdentifier et caractériser les déterminants génétiques et moléculaires de la tolérance aux stress abiotiques chez les cultures sahéliennes, en vue de leur valorisation dans les programmes d'amélioration variétale.\n\n## Objectifs spécifiques\n\n1. Constituer une collection de **500 accessions** de sorgho, mil et niébé évaluées sous stress\n2. Identifier **30 gènes candidats** impliqués dans la réponse aux stress\n3. Développer **5 marqueurs moléculaires** utilisables en sélection assistée\n4. Renforcer les capacités de **12 chercheurs et 20 doctorants** en biotechnologies\n5. Produire **15 publications** dans des revues scientifiques internationales à comité de lecture",
+                'activites' => "## Plan d'activités\n\n### Composante 1 — Caractérisation des accessions (Années 1-2)\n- Collecte de matériel génétique dans 6 régions agro-écologiques\n- Évaluation phénotypique en conditions contrôlées et en plein champ\n- Extraction ADN et genotypage SNP (500K marqueurs)\n- Analyses GWAS (Genome-Wide Association Studies)\n\n### Composante 2 — Biologie moléculaire (Années 2-3)\n- Séquençage transcriptomique (RNA-seq) sous stress\n- Clonage et caractérisation fonctionnelle des gènes d'intérêt\n- Développement de constructions transgéniques pour la validation\n- Tests de tolérance sur plantes modèles (*Arabidopsis thaliana*)\n\n### Composante 3 — Valorisation et renforcement de capacités\n- Formation de 12 chercheurs en bioinformatique et génomique\n- Encadrement de 8 thèses de doctorat\n- Dépôt de 3 demandes de brevets\n- Organisation d'un symposium international à Ouagadougou",
+                'porteur_index' => 0,
             ],
         ];
 
@@ -452,6 +464,53 @@ class ProjetSeeder extends Seeder
                 ],
                 'versements' => [
                     ['montant' => 36_000_000, 'type' => VersementType::Avance, 'date' => '2023-11-01', 'ref' => 'VRS-DDC-2023-002'],
+                ],
+            ],
+            [
+                'projet' => 'BIOTECH-BF',
+                'bailleur' => 'bm',
+                'titre' => 'Convention BM-BIOTECH-2023-001 — Recherche génomique et biotechnologies végétales',
+                'montant_fcfa' => 220_000_000,
+                'forme' => ConventionForme::Don,
+                'status' => ConventionStatus::Active,
+                'date_signature' => '2023-03-15',
+                'date_debut' => '2023-04-01',
+                'date_fin' => '2026-03-31',
+                'description' => "Don de la Banque Mondiale pour financer les volets génomique, équipements de laboratoire et renforcement de capacités du projet BIOTECH-BF. Cette convention finance spécifiquement la plateforme de génotypage SNP, les équipements d'analyse moléculaire et les missions scientifiques.",
+                'rubriques' => [
+                    ['libelle' => 'Équipements de laboratoire', 'montant_prevu' => 65_000_000],
+                    ['libelle' => 'Réactifs et consommables de laboratoire', 'montant_prevu' => 40_000_000],
+                    ['libelle' => 'Missions scientifiques et collaborations', 'montant_prevu' => 35_000_000],
+                    ['libelle' => 'Séquençage et bioinformatique', 'montant_prevu' => 50_000_000],
+                    ['libelle' => 'Formation et bourses doctorales', 'montant_prevu' => 20_000_000],
+                    ['libelle' => 'Fonctionnement et coordination', 'montant_prevu' => 10_000_000],
+                ],
+                'versements' => [
+                    ['montant' => 66_000_000, 'type' => VersementType::Avance, 'date' => '2023-05-10', 'ref' => 'VRS-BM-2023-005'],
+                    ['montant' => 55_000_000, 'type' => VersementType::Tranche, 'date' => '2024-05-20', 'ref' => 'VRS-BM-2024-005'],
+                ],
+            ],
+            [
+                'projet' => 'BIOTECH-BF',
+                'bailleur' => 'afd',
+                'titre' => 'Convention AFD-BIOTECH-2023-002 — Terrain et stations expérimentales',
+                'montant_fcfa' => 160_000_000,
+                'forme' => ConventionForme::Don,
+                'status' => ConventionStatus::Active,
+                'date_signature' => '2023-05-20',
+                'date_debut' => '2023-06-01',
+                'date_fin' => '2026-03-31',
+                'description' => 'Financement AFD pour les activités de terrain, la gestion des stations expérimentales et les actions de valorisation des résultats du projet BIOTECH-BF dans les zones rurales du Burkina Faso.',
+                'rubriques' => [
+                    ['libelle' => 'Travaux de terrain et collecte d\'échantillons', 'montant_prevu' => 45_000_000],
+                    ['libelle' => 'Missions et déplacements', 'montant_prevu' => 30_000_000],
+                    ['libelle' => 'Gestion des stations expérimentales', 'montant_prevu' => 40_000_000],
+                    ['libelle' => 'Valorisation et transfert de technologie', 'montant_prevu' => 25_000_000],
+                    ['libelle' => 'Dissémination et publications', 'montant_prevu' => 20_000_000],
+                ],
+                'versements' => [
+                    ['montant' => 48_000_000, 'type' => VersementType::Avance, 'date' => '2023-07-15', 'ref' => 'VRS-AFD-2023-003'],
+                    ['montant' => 40_000_000, 'type' => VersementType::Tranche, 'date' => '2024-06-10', 'ref' => 'VRS-AFD-2024-003'],
                 ],
             ],
         ];

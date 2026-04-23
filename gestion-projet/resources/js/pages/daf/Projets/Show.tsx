@@ -62,19 +62,19 @@ export default function DafProjetShow({ projet }: Props) {
             <div className="mb-6 flex items-center gap-3">
                 <Link
                     href={dafProjetsIndex.url()}
-                    className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+                    className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 dark:bg-slate-800 text-gray-500 dark:text-slate-400 transition-colors"
                     aria-label="Retour à la liste des projets"
                 >
                     <ArrowLeftIcon className="w-4 h-4" />
                 </Link>
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 flex-wrap">
-                        <h2 className="text-xl font-bold text-gray-900 truncate">{projet.titre}</h2>
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-white truncate">{projet.titre}</h2>
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${projectStatusClass(projet.status)}`}>
                             {projet.status_label}
                         </span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-0.5">
+                    <p className="text-sm text-gray-600 dark:text-slate-400 mt-0.5">
                         Porteur : {projet.porteur.nom}
                         {projet.porteur.telephone && ` · ${projet.porteur.telephone}`}
                     </p>
@@ -83,44 +83,44 @@ export default function DafProjetShow({ projet }: Props) {
 
             {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div className="bg-white border border-gray-200 rounded-xl p-4">
-                    <p className="text-xs text-gray-500 mb-1">Budget estimé</p>
-                    <p className="font-mono font-bold text-gray-900 text-sm">{formatCurrency(projet.montant_estime)}</p>
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Budget estimé</p>
+                    <p className="font-mono font-bold text-gray-900 dark:text-white text-sm">{formatCurrency(projet.montant_estime)}</p>
                 </div>
-                <div className="bg-white border border-gray-200 rounded-xl p-4">
-                    <p className="text-xs text-gray-500 mb-1">Total conventions</p>
-                    <p className="font-mono font-bold text-gray-900 text-sm">{formatCurrency(projet.montant_conventions)}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{totalConventions} convention{totalConventions !== 1 ? 's' : ''}</p>
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Total conventions</p>
+                    <p className="font-mono font-bold text-gray-900 dark:text-white text-sm">{formatCurrency(projet.montant_conventions)}</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{totalConventions} convention{totalConventions !== 1 ? 's' : ''}</p>
                 </div>
-                <div className="bg-white border border-gray-200 rounded-xl p-4">
-                    <p className="text-xs text-gray-500 mb-1">Versements reçus</p>
-                    <p className="font-mono font-bold text-gray-900 text-sm">{formatCurrency(projet.total_versements)}</p>
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Versements reçus</p>
+                    <p className="font-mono font-bold text-gray-900 dark:text-white text-sm">{formatCurrency(projet.total_versements)}</p>
                 </div>
-                <div className="bg-white border border-gray-200 rounded-xl p-4">
-                    <p className="text-xs text-gray-500 mb-1">Rubriques budgétaires</p>
-                    <p className="text-2xl font-bold text-gray-900">{totalRubriques}</p>
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Rubriques budgétaires</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalRubriques}</p>
                 </div>
             </div>
 
             {/* Dates */}
             {(projet.date_debut || projet.date_fin_prevue) && (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6 flex flex-wrap gap-6 text-sm">
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4 mb-6 flex flex-wrap gap-6 text-sm">
                     {projet.date_debut && (
                         <div>
-                            <p className="text-xs text-gray-500">Début</p>
-                            <p className="font-medium text-gray-900">{formatDate(projet.date_debut)}</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-400">Début</p>
+                            <p className="font-medium text-gray-900 dark:text-white">{formatDate(projet.date_debut)}</p>
                         </div>
                     )}
                     {projet.date_fin_prevue && (
                         <div>
-                            <p className="text-xs text-gray-500">Fin prévue</p>
-                            <p className="font-medium text-gray-900">{formatDate(projet.date_fin_prevue)}</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-400">Fin prévue</p>
+                            <p className="font-medium text-gray-900 dark:text-white">{formatDate(projet.date_fin_prevue)}</p>
                         </div>
                     )}
                     {projet.date_fin_reelle && (
                         <div>
-                            <p className="text-xs text-gray-500">Terminé le</p>
-                            <p className="font-medium text-gray-900">{formatDate(projet.date_fin_reelle)}</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-400">Terminé le</p>
+                            <p className="font-medium text-gray-900 dark:text-white">{formatDate(projet.date_fin_reelle)}</p>
                         </div>
                     )}
                 </div>
@@ -128,8 +128,8 @@ export default function DafProjetShow({ projet }: Props) {
 
             {/* Convention chart */}
             {conventionsChartData.length > 0 && (
-                <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-4">Conventions — Montant vs Versements reçus</h3>
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-5 mb-6">
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Conventions — Montant vs Versements reçus</h3>
                     <ResponsiveContainer width="100%" height={220}>
                         <BarChart data={conventionsChartData} margin={CHART_MARGIN}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -151,9 +151,9 @@ export default function DafProjetShow({ projet }: Props) {
                 {/* Description */}
                 <div className="lg:col-span-2 space-y-5">
                     {projet.description && (
-                        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                            <div className="px-5 py-3.5 border-b border-gray-100">
-                                <h3 className="text-sm font-semibold text-gray-900">Description</h3>
+                        <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                            <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800">
+                                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Description</h3>
                             </div>
                             <div className="p-5">
                                 <MarkdownRenderer content={projet.description} />
@@ -161,9 +161,9 @@ export default function DafProjetShow({ projet }: Props) {
                         </div>
                     )}
                     {projet.objectifs && (
-                        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                            <div className="px-5 py-3.5 border-b border-gray-100">
-                                <h3 className="text-sm font-semibold text-gray-900">Objectifs</h3>
+                        <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                            <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800">
+                                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Objectifs</h3>
                             </div>
                             <div className="p-5">
                                 <MarkdownRenderer content={projet.objectifs} />
@@ -174,19 +174,19 @@ export default function DafProjetShow({ projet }: Props) {
 
                 {/* Conventions */}
                 <div>
-                    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                        <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
-                            <h3 className="text-sm font-semibold text-gray-900">Conventions</h3>
-                            <span className="text-xs text-gray-500">{totalConventions}</span>
+                    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                        <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+                            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Conventions</h3>
+                            <span className="text-xs text-gray-500 dark:text-slate-400">{totalConventions}</span>
                         </div>
-                        <div className="divide-y divide-gray-100">
+                        <div className="divide-y divide-gray-100 dark:divide-slate-800">
                             {projet.conventions.length === 0 ? (
-                                <p className="p-5 text-sm text-gray-500 text-center">Aucune convention</p>
+                                <p className="p-5 text-sm text-gray-500 dark:text-slate-400 text-center">Aucune convention</p>
                             ) : (
                                 projet.conventions.map((c) => (
                                     <div
                                         key={c.id}
-                                        className="p-4 hover:bg-blue-50 transition-colors cursor-pointer"
+                                        className="p-4 hover:bg-blue-50 dark:hover:bg-blue-900/20 dark:bg-blue-900/20 transition-colors cursor-pointer"
                                         onClick={() => router.visit(dafConventionShow.url({ projet: projet.id, convention: c.id }))}
                                         role="link"
                                         tabIndex={0}
@@ -194,31 +194,31 @@ export default function DafProjetShow({ projet }: Props) {
                                         aria-label={`Voir la convention ${c.titre}`}
                                     >
                                         <div className="flex items-start justify-between gap-2 mb-1">
-                                            <p className="text-xs font-semibold text-gray-900">{c.bailleur.sigle ?? c.bailleur.nom}</p>
+                                            <p className="text-xs font-semibold text-gray-900 dark:text-white">{c.bailleur.sigle ?? c.bailleur.nom}</p>
                                             <span className={`shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${conventionStatusClass(c.status)}`}>
                                                 {c.status_label}
                                             </span>
                                         </div>
-                                        <p className="text-xs text-gray-600 mb-2 line-clamp-1">{c.titre}</p>
+                                        <p className="text-xs text-gray-600 dark:text-slate-400 mb-2 line-clamp-1">{c.titre}</p>
                                         <div className="grid grid-cols-2 gap-2 text-xs">
                                             <div>
-                                                <p className="text-gray-500">Montant</p>
-                                                <p className="font-mono font-medium text-gray-900">{formatCurrency(c.montant_fcfa)}</p>
+                                                <p className="text-gray-500 dark:text-slate-400">Montant</p>
+                                                <p className="font-mono font-medium text-gray-900 dark:text-white">{formatCurrency(c.montant_fcfa)}</p>
                                             </div>
                                             <div>
-                                                <p className="text-gray-500">Versé</p>
-                                                <p className="font-mono font-medium text-gray-900">{formatCurrency(c.total_versements)}</p>
+                                                <p className="text-gray-500 dark:text-slate-400">Versé</p>
+                                                <p className="font-mono font-medium text-gray-900 dark:text-white">{formatCurrency(c.total_versements)}</p>
                                             </div>
                                         </div>
                                         {c.montant_fcfa > 0 && (
-                                            <div className="mt-2 w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                            <div className="mt-2 w-full h-1.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
                                                 <div
                                                     className="h-full bg-emerald-500 rounded-full"
                                                     style={{ width: `${clampPercent(c.total_versements, c.montant_fcfa)}%` }}
                                                 />
                                             </div>
                                         )}
-                                        <div className="mt-1.5 text-xs text-gray-500">
+                                        <div className="mt-1.5 text-xs text-gray-500 dark:text-slate-400">
                                             {c.rubriques_count} rubrique{c.rubriques_count !== 1 ? 's' : ''} · {c.forme_label}
                                         </div>
                                     </div>

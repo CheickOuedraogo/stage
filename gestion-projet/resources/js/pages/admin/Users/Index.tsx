@@ -38,8 +38,8 @@ export default function UsersIndex({ users, filters, roles }: UsersIndexProps) {
 
             <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Utilisateurs</h2>
-                    <p className="text-sm text-gray-500 mt-0.5">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Utilisateurs</h2>
+                    <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">
                         {users.total} utilisateur{users.total !== 1 ? 's' : ''} au total
                     </p>
                 </div>
@@ -52,10 +52,10 @@ export default function UsersIndex({ users, filters, roles }: UsersIndexProps) {
             </div>
 
             {/* Filters */}
-            <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6">
+            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4 mb-6">
                 <div className="flex flex-col sm:flex-row gap-3">
                     <div className="flex-1 relative">
-                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
+                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-slate-500" aria-hidden="true" />
                         <input
                             type="search"
                             placeholder="Rechercher par nom ou email…"
@@ -63,14 +63,14 @@ export default function UsersIndex({ users, filters, roles }: UsersIndexProps) {
                             onChange={(e) => setSearch(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && applyFilter({ search })}
                             aria-label="Rechercher un utilisateur"
-                            className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
+                            className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                         />
                     </div>
                     <select
                         value={filters.role ?? ''}
                         onChange={(e) => applyFilter({ role: e.target.value || undefined })}
                         aria-label="Filtrer par rôle"
-                        className="px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        className="px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                     >
                         <option value="">Tous les rôles</option>
                         {roles.map((r) => (
@@ -81,7 +81,7 @@ export default function UsersIndex({ users, filters, roles }: UsersIndexProps) {
                         value={filters.active ?? ''}
                         onChange={(e) => applyFilter({ active: e.target.value || undefined })}
                         aria-label="Filtrer par statut"
-                        className="px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        className="px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                     >
                         <option value="">Tous les statuts</option>
                         <option value="1">Actifs</option>
@@ -91,49 +91,36 @@ export default function UsersIndex({ users, filters, roles }: UsersIndexProps) {
             </div>
 
             {/* Table */}
-            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm" aria-label="Liste des utilisateurs">
                         <thead>
-                            <tr className="border-b border-gray-200 bg-gray-50">
-                                <th className="text-left px-6 py-3.5 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                    Utilisateur
-                                </th>
-                                <th className="text-left px-6 py-3.5 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                    Rôle
-                                </th>
-                                <th className="text-left px-6 py-3.5 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                    Statut
-                                </th>
-                                <th className="text-left px-6 py-3.5 text-xs font-semibold text-gray-600 uppercase tracking-wider hidden md:table-cell">
-                                    Créé le
-                                </th>
-                                <th className="text-right px-6 py-3.5 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                    Actions
-                                </th>
+                            <tr className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
+                                <th className="text-left px-6 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Utilisateur</th>
+                                <th className="text-left px-6 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Rôle</th>
+                                <th className="text-left px-6 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Statut</th>
+                                <th className="text-left px-6 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider hidden md:table-cell">Créé le</th>
+                                <th className="text-right px-6 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
                             {users.data.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-16 text-center text-gray-400">
+                                    <td colSpan={5} className="px-6 py-16 text-center text-gray-400 dark:text-slate-500">
                                         <UserIcon className="w-10 h-10 mx-auto mb-2 opacity-40" />
                                         <p>Aucun utilisateur trouvé</p>
                                     </td>
                                 </tr>
                             ) : (
-                                users.data.map((user) => (
-                                    <UserRow key={user.id} user={user} />
-                                ))
+                                users.data.map((user) => <UserRow key={user.id} user={user} />)
                             )}
                         </tbody>
                     </table>
                 </div>
 
-                {/* Pagination */}
                 {users.last_page > 1 && (
-                    <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
-                        <p className="text-xs text-gray-500">
+                    <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-slate-700">
+                        <p className="text-xs text-gray-500 dark:text-slate-400">
                             {users.from}–{users.to} sur {users.total}
                         </p>
                         <div className="flex gap-1.5">
@@ -145,10 +132,10 @@ export default function UsersIndex({ users, filters, roles }: UsersIndexProps) {
                                     className={[
                                         'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
                                         link.active
-                                            ? 'bg-gray-900 text-white'
+                                            ? 'bg-slate-800 dark:bg-slate-700 text-white'
                                             : link.url
-                                            ? 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
-                                            : 'text-gray-300 cursor-default pointer-events-none',
+                                            ? 'bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800'
+                                            : 'text-gray-300 dark:text-slate-600 cursor-default pointer-events-none',
                                     ].join(' ')}
                                     dangerouslySetInnerHTML={{ __html: link.label }}
                                 />
@@ -171,44 +158,38 @@ function UserRow({ user }: { user: User & { created_at: string } }) {
     };
 
     return (
-        <tr className="hover:bg-gray-50 transition-colors">
+        <tr className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
             <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
                     {user.avatar_url ? (
                         <img src={user.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover" />
                     ) : (
-                        <div className="w-9 h-9 rounded-full bg-gray-200 text-gray-700 text-xs font-bold flex items-center justify-center shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-slate-300 text-xs font-bold flex items-center justify-center shrink-0">
                             {getInitials(user.name)}
                         </div>
                     )}
                     <div>
-                        <p className="font-medium text-gray-900">{user.name}</p>
-                        <p className="text-xs text-gray-500">{user.email}</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{user.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-slate-400">{user.email}</p>
                     </div>
                 </div>
             </td>
-            <td className="px-6 py-4">
-                <Badge variant={user.role as any}>{user.role_label}</Badge>
-            </td>
+            <td className="px-6 py-4"><Badge variant={user.role as any}>{user.role_label}</Badge></td>
             <td className="px-6 py-4">
                 <Badge variant={user.is_active ? 'success' : 'muted'} dot>
                     {user.is_active ? 'Actif' : 'Désactivé'}
                 </Badge>
             </td>
-            <td className="px-6 py-4 hidden md:table-cell text-gray-500 text-xs">
+            <td className="px-6 py-4 hidden md:table-cell text-gray-500 dark:text-slate-400 text-xs">
                 {formatDate(user.created_at)}
             </td>
             <td className="px-6 py-4">
                 <div className="flex items-center justify-end gap-2">
                     <Link href={adminAuditLog.url({ query: { user_id: user.id } })}>
-                        <Button variant="ghost" size="sm" aria-label={`Journal de ${user.name}`}>
-                            Journal
-                        </Button>
+                        <Button variant="ghost" size="sm" aria-label={`Journal de ${user.name}`}>Journal</Button>
                     </Link>
                     <Link href={usersEdit.url(user.id)}>
-                        <Button variant="ghost" size="sm" aria-label={`Modifier ${user.name}`}>
-                            Modifier
-                        </Button>
+                        <Button variant="ghost" size="sm" aria-label={`Modifier ${user.name}`}>Modifier</Button>
                     </Link>
                     {!isSelf && (
                         <Button
