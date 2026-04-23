@@ -153,7 +153,7 @@ export default function ProfileEdit() {
                                     onChange={(e) => profileForm.setData('name', e.target.value)}
                                     required
                                     aria-invalid={!!profileForm.errors.name}
-                                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 dark:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
+                                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
                                 />
                                 {profileForm.errors.name && (
                                     <p className="text-xs text-red-600">{profileForm.errors.name}</p>
@@ -172,7 +172,7 @@ export default function ProfileEdit() {
                                     onChange={(e) => profileForm.setData('telephone', e.target.value)}
                                     placeholder="+226 70 00 00 00"
                                     aria-invalid={!!profileForm.errors.telephone}
-                                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 dark:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
+                                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
                                 />
                                 {profileForm.errors.telephone && (
                                     <p className="text-xs text-red-600">{profileForm.errors.telephone}</p>
@@ -243,7 +243,7 @@ export default function ProfileEdit() {
                                 autoComplete="current-password"
                                 required
                                 aria-invalid={!!passwordForm.errors.current_password}
-                                className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 dark:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
+                                className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
                             />
                             {passwordForm.errors.current_password && (
                                 <p className="text-xs text-red-600">{passwordForm.errors.current_password}</p>
@@ -264,7 +264,7 @@ export default function ProfileEdit() {
                                     required
                                     aria-invalid={!!passwordForm.errors.password}
                                     placeholder="Min. 8 caractères"
-                                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 dark:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
+                                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
                                 />
                                 {passwordForm.errors.password && (
                                     <p className="text-xs text-red-600">{passwordForm.errors.password}</p>
@@ -283,7 +283,7 @@ export default function ProfileEdit() {
                                     autoComplete="new-password"
                                     required
                                     aria-invalid={!!passwordForm.errors.password_confirmation}
-                                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 dark:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
+                                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
                                 />
                                 {passwordForm.errors.password_confirmation && (
                                     <p className="text-xs text-red-600">{passwordForm.errors.password_confirmation}</p>
