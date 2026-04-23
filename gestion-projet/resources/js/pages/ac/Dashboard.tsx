@@ -1,95 +1,122 @@
 import AppLayout from '@/components/layout/AppLayout';
-import { Card, CardContent } from '@/components/ui/Card';
+import { formatCurrency } from '@/lib/utils';
+import { show as demandeShow } from '@/actions/App/Http/Controllers/Ac/DemandeDepenseController';
+import { index as acDemandesIndex } from '@/routes/ac/demandes';
 import type { PageProps } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import {
+    ArrowRightIcon,
+    BanknotesIcon,
+    ClipboardDocumentCheckIcon,
     ClipboardDocumentListIcon,
     CreditCardIcon,
-    InformationCircleIcon,
 } from '@heroicons/react/24/outline';
 
+interface Stats {
+    demandes_en_attente: number;
+    rapports_soumis: number;
+    paiements_effectues: number;
+    montant_paye: number;
+}
+
+interface Demande {
+    id: number;
+    objet: string;
+    montant: number;
+    status: string;
+    status_label: string;
+    badge_class: string;
+    porteur: string;
+    convention: string;
+    created_at: string;
+}
+
+interface Props extends PageProps {
+    stats: Stats;
+    demandes_recentes: Demande[];
+}
+
 export default function AcDashboard() {
-    const { auth } = usePage<PageProps>().props;
+    const { auth, stats, demandes_recentes } = usePage<Props>().props;
     const firstName = auth.user?.name.split(' ').find((p) => !p.includes('.')) ?? auth.user?.name;
 
     return (
         <AppLayout title="Tableau de bord">
             <Head title="Tableau de bord Agent Comptable — CIFEU" />
 
-            <div className="mb-8">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-                    Bonjour, {firstName}
-                </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                    Agent Comptable — Contrôle et enregistrement des paiements
-                </p>
+            <div className="mb-6">
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Bonjour, {firstName}</h2>
+                <p className="text-sm text-slate-500 mt-1">Agent Comptable — Contrôle et enregistrement des paiements</p>
             </div>
 
-            <div className="mb-8 flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
-                <InformationCircleIcon className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" aria-hidden="true" />
-                <div>
-                    <p className="font-medium text-blue-800 dark:text-blue-200 text-sm">
-                        Circuit de validation disponible au Sprint 3
-                    </p>
-                    <p className="text-blue-700 dark:text-blue-300 text-xs mt-0.5">
-                        La validation des demandes approuvées par la DAF et l'enregistrement des paiements seront disponibles au Sprint 3.
-                    </p>
+            {/* Stats */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <Link href={acDemandesIndex.url()} className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4 hover:border-amber-300 hover:shadow-sm transition-all">
+                    <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center mb-3">
+                        <ClipboardDocumentListIcon className="w-5 h-5 text-amber-600" />
+                    </div>
+                    <p className="text-2xl font-bold font-mono text-slate-900 dark:text-white">{stats.demandes_en_attente}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">À valider</p>
+                </Link>
+
+                <Link href={acDemandesIndex.url()} className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4 hover:border-purple-300 hover:shadow-sm transition-all">
+                    <div className="w-9 h-9 rounded-lg bg-purple-100 flex items-center justify-center mb-3">
+                        <ClipboardDocumentCheckIcon className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <p className="text-2xl font-bold font-mono text-slate-900 dark:text-white">{stats.rapports_soumis}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Rapports à valider</p>
+                </Link>
+
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
+                    <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center mb-3">
+                        <CreditCardIcon className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <p className="text-2xl font-bold font-mono text-slate-900 dark:text-white">{stats.paiements_effectues}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Paiements effectués</p>
+                </div>
+
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
+                    <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center mb-3">
+                        <BanknotesIcon className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <p className="text-lg font-bold font-mono text-slate-900 dark:text-white leading-tight">{formatCurrency(stats.montant_paye)}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Montant décaissé</p>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-                <Card>
-                    <CardContent>
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">Demandes en attente</p>
-                                <p className="text-3xl font-bold font-mono text-slate-300 dark:text-slate-600 mt-1 select-none">—</p>
-                                <p className="text-xs text-slate-400 dark:text-slate-600 mt-1">Disponible Sprint 3</p>
-                            </div>
-                            <div className="w-11 h-11 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
-                                <ClipboardDocumentListIcon className="w-5 h-5 text-amber-400 dark:text-amber-600" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardContent>
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">Paiements effectués</p>
-                                <p className="text-3xl font-bold font-mono text-slate-300 dark:text-slate-600 mt-1 select-none">—</p>
-                                <p className="text-xs text-slate-400 dark:text-slate-600 mt-1">Disponible Sprint 3</p>
-                            </div>
-                            <div className="w-11 h-11 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
-                                <CreditCardIcon className="w-5 h-5 text-emerald-400 dark:text-emerald-600" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
-            <Card>
-                <CardContent>
-                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Fonctionnalités à venir</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-slate-600 dark:text-slate-400">
-                        {[
-                            { sprint: 'S3', label: 'Validation des demandes approuvées DAF' },
-                            { sprint: 'S3', label: 'Enregistrement des paiements' },
-                            { sprint: 'S3', label: 'Téléchargement des justificatifs PDF' },
-                            { sprint: 'S4', label: 'Tableau de bord complet avec indicateurs' },
-                            { sprint: 'S4', label: 'Historique des paiements avec filtres' },
-                        ].map((f) => (
-                            <div key={f.label} className="flex items-center gap-2.5">
-                                <span className="shrink-0 inline-flex items-center justify-center w-8 h-5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
-                                    {f.sprint}
-                                </span>
-                                <span>{f.label}</span>
-                            </div>
+            {/* Demandes en attente */}
+            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Demandes à traiter</h3>
+                    <Link href={acDemandesIndex.url()} className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium">
+                        Voir tout <ArrowRightIcon className="w-3 h-3" />
+                    </Link>
+                </div>
+                {demandes_recentes.length === 0 ? (
+                    <p className="p-8 text-center text-sm text-slate-500">Aucune demande en attente</p>
+                ) : (
+                    <div className="divide-y divide-gray-100 dark:divide-slate-800">
+                        {demandes_recentes.map((d) => (
+                            <Link
+                                key={d.id}
+                                href={demandeShow.url(d.id)}
+                                className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+                            >
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{d.objet}</p>
+                                    <p className="text-xs text-slate-500 mt-0.5 truncate">{d.porteur} — {d.convention}</p>
+                                </div>
+                                <div className="shrink-0 text-right">
+                                    <p className="text-sm font-mono font-semibold text-slate-900 dark:text-white">{formatCurrency(d.montant)}</p>
+                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-0.5 ${d.badge_class}`}>
+                                        {d.status_label}
+                                    </span>
+                                </div>
+                            </Link>
                         ))}
                     </div>
-                </CardContent>
-            </Card>
+                )}
+            </div>
         </AppLayout>
     );
 }

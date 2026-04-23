@@ -1,11 +1,15 @@
 import { cn, getInitials } from '@/lib/utils';
+import { useDarkMode } from '@/hooks/useDarkMode';
 import { logout } from '@/routes';
 import { auditLog as adminAuditLog, dashboard as adminDashboard } from '@/routes/admin';
 import { index as usersIndex } from '@/routes/admin/users';
 import { dashboard as acDashboard } from '@/routes/ac';
+import { index as acDemandesIndex } from '@/routes/ac/demandes';
 import { dashboard as dafDashboard } from '@/routes/daf';
+import { index as dafDemandesIndex } from '@/routes/daf/demandes';
 import { index as dafProjetsIndex } from '@/routes/daf/projets';
 import { dashboard as porteurDashboard } from '@/routes/porteur';
+import { index as porteurDemandesIndex } from '@/routes/porteur/demandes';
 import { index as porteurProjetsIndex } from '@/routes/porteur/projets';
 import { edit as profileEdit } from '@/routes/profile';
 import type { User } from '@/types';
@@ -20,6 +24,8 @@ import {
     CreditCardIcon,
     FolderIcon,
     HomeIcon,
+    MoonIcon,
+    SunIcon,
     UserCircleIcon,
     UsersIcon,
     XMarkIcon,
@@ -45,19 +51,19 @@ function getNavItems(role: User['role'], notifs: number): NavItem[] {
         daf: [
             { label: 'Tableau de bord', href: dafDashboard.url(), icon: ChartBarIcon },
             { label: 'Projets', href: dafProjetsIndex.url(), icon: FolderIcon },
-            { label: 'Demandes', href: '#', icon: ClipboardDocumentListIcon },
+            { label: 'Demandes', href: dafDemandesIndex.url(), icon: ClipboardDocumentListIcon },
             { label: 'Versements', href: '#', icon: CreditCardIcon },
             { label: 'Notifications', href: '#', icon: BellIcon, badge: notifBadge },
         ],
         ac: [
             { label: 'Tableau de bord', href: acDashboard.url(), icon: HomeIcon },
-            { label: 'Demandes', href: '#', icon: ClipboardDocumentListIcon },
+            { label: 'Demandes', href: acDemandesIndex.url(), icon: ClipboardDocumentListIcon },
             { label: 'Paiements', href: '#', icon: CreditCardIcon },
             { label: 'Notifications', href: '#', icon: BellIcon, badge: notifBadge },
         ],
         porteur: [
             { label: 'Mes projets', href: porteurProjetsIndex.url(), icon: FolderIcon },
-            { label: 'Mes demandes', href: '#', icon: ClipboardDocumentListIcon },
+            { label: 'Mes demandes', href: porteurDemandesIndex.url(), icon: ClipboardDocumentListIcon },
             { label: 'Notifications', href: '#', icon: BellIcon, badge: notifBadge },
         ],
     };
@@ -79,6 +85,7 @@ export function Navbar({ user }: NavbarProps) {
     const { url } = usePage();
     const [mobileOpen, setMobileOpen] = useState(false);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
+    const { isDark, toggle: toggleDark } = useDarkMode();
 
     const items = getNavItems(user.role, user.unread_notifications);
 
@@ -88,10 +95,10 @@ export function Navbar({ user }: NavbarProps) {
 
     return (
         <>
-            <header className="h-14 bg-white border-b border-gray-200 flex items-center px-4 lg:px-6 gap-4 sticky top-0 z-30">
+            <header className="h-14 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 flex items-center px-4 lg:px-6 gap-4 sticky top-0 z-30">
                 {/* Mobile hamburger */}
                 <button
-                    className="lg:hidden p-1.5 rounded-md hover:bg-gray-100 text-gray-600 transition-colors"
+                    className="lg:hidden p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-600 dark:text-slate-400 transition-colors"
                     onClick={() => setMobileOpen((v) => !v)}
                     aria-label="Menu de navigation"
                     aria-expanded={mobileOpen}
@@ -100,7 +107,7 @@ export function Navbar({ user }: NavbarProps) {
                 </button>
 
                 {/* Brand */}
-                <span className="text-sm font-semibold text-gray-900 tracking-tight shrink-0">CIFEU</span>
+                <span className="text-sm font-semibold text-gray-900 dark:text-white tracking-tight shrink-0">CIFEU</span>
 
                 {/* Desktop nav */}
                 <nav className="hidden lg:flex items-center gap-1 flex-1 ml-4" aria-label="Navigation principale">
@@ -115,8 +122,8 @@ export function Navbar({ user }: NavbarProps) {
                                 className={cn(
                                     'relative flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
                                     active
-                                        ? 'text-gray-900 bg-gray-100'
-                                        : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50',
+                                        ? 'text-gray-900 dark:text-white bg-gray-100 dark:bg-slate-800'
+                                        : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-800',
                                 )}
                             >
                                 <Icon className="w-4 h-4 shrink-0" />
@@ -127,7 +134,7 @@ export function Navbar({ user }: NavbarProps) {
                                     </span>
                                 )}
                                 {active && (
-                                    <span className="absolute bottom-0 left-3 right-3 h-0.5 bg-gray-900 rounded-full" aria-hidden="true" />
+                                    <span className="absolute bottom-0 left-3 right-3 h-0.5 bg-blue-600 dark:bg-blue-400 rounded-full" aria-hidden="true" />
                                 )}
                             </Link>
                         );
@@ -137,12 +144,25 @@ export function Navbar({ user }: NavbarProps) {
                 {/* Spacer for desktop (nav already fills it) */}
                 <div className="flex-1 lg:hidden" />
 
-                {/* Right: notifications + user */}
+                {/* Right: dark mode + notifications + user */}
                 <div className="flex items-center gap-2">
+                    {/* Dark mode toggle */}
+                    <button
+                        onClick={toggleDark}
+                        className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                        aria-label={isDark ? 'Passer en mode clair' : 'Passer en mode sombre'}
+                        title={isDark ? 'Mode clair' : 'Mode sombre'}
+                    >
+                        {isDark
+                            ? <SunIcon className="w-4.5 h-4.5" />
+                            : <MoonIcon className="w-4.5 h-4.5" />
+                        }
+                    </button>
+
                     {/* Notifications */}
                     <Link
                         href="#"
-                        className="relative p-2 rounded-md hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-colors"
+                        className="relative p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                         aria-label={`${user.unread_notifications} notification${user.unread_notifications !== 1 ? 's' : ''}`}
                     >
                         <BellIcon className="w-4.5 h-4.5" style={{ width: '1.125rem', height: '1.125rem' }} />
@@ -160,7 +180,7 @@ export function Navbar({ user }: NavbarProps) {
                     <div className="relative">
                         <button
                             onClick={() => setUserMenuOpen((v) => !v)}
-                            className="flex items-center gap-2 p-1 rounded-md hover:bg-gray-100 transition-colors"
+                            className="flex items-center gap-2 p-1 rounded-md hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
                             aria-label="Menu utilisateur"
                             aria-expanded={userMenuOpen}
                         >
@@ -168,14 +188,14 @@ export function Navbar({ user }: NavbarProps) {
                                 <img
                                     src={user.avatar_url}
                                     alt={`Avatar de ${user.name}`}
-                                    className="w-7 h-7 rounded-full object-cover ring-2 ring-gray-200"
+                                    className="w-7 h-7 rounded-full object-cover ring-2 ring-gray-200 dark:ring-slate-600"
                                 />
                             ) : (
-                                <div className="w-7 h-7 rounded-full bg-gray-900 text-white text-xs font-bold flex items-center justify-center">
+                                <div className="w-7 h-7 rounded-full bg-slate-700 dark:bg-slate-600 text-white text-xs font-bold flex items-center justify-center">
                                     {getInitials(user.name)}
                                 </div>
                             )}
-                            <span className="hidden sm:block text-sm font-medium text-gray-700 max-w-[120px] truncate">
+                            <span className="hidden sm:block text-sm font-medium text-gray-700 dark:text-slate-300 max-w-[120px] truncate">
                                 {user.name.split(' ')[0]}
                             </span>
                         </button>
@@ -188,17 +208,17 @@ export function Navbar({ user }: NavbarProps) {
                                     aria-hidden="true"
                                 />
                                 <div
-                                    className="absolute right-0 top-full mt-1.5 w-56 bg-white rounded-xl shadow-lg border border-gray-200 z-20 overflow-hidden"
+                                    className="absolute right-0 top-full mt-1.5 w-56 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 z-20 overflow-hidden"
                                     role="menu"
                                 >
-                                    <div className="px-4 py-3 border-b border-gray-100">
-                                        <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
-                                        <p className="text-xs text-gray-500 truncate">{user.role_label}</p>
+                                    <div className="px-4 py-3 border-b border-gray-100 dark:border-slate-700">
+                                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.name}</p>
+                                        <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{user.role_label}</p>
                                     </div>
                                     <div className="py-1">
                                         <Link
                                             href={profileEdit.url()}
-                                            className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                            className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
                                             role="menuitem"
                                             onClick={() => setUserMenuOpen(false)}
                                         >
@@ -207,7 +227,7 @@ export function Navbar({ user }: NavbarProps) {
                                         </Link>
                                         <button
                                             onClick={handleLogout}
-                                            className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                                            className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                             role="menuitem"
                                         >
                                             <ArrowRightStartOnRectangleIcon className="w-4 h-4" />
@@ -225,12 +245,12 @@ export function Navbar({ user }: NavbarProps) {
             {mobileOpen && (
                 <>
                     <div
-                        className="fixed inset-0 z-20 bg-black/20"
+                        className="fixed inset-0 z-20 bg-black/20 dark:bg-black/40"
                         onClick={() => setMobileOpen(false)}
                         aria-hidden="true"
                     />
                     <nav
-                        className="fixed top-14 left-0 right-0 z-30 bg-white border-b border-gray-200 py-2 px-4 space-y-1 shadow-sm"
+                        className="fixed top-14 left-0 right-0 z-30 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 py-2 px-4 space-y-1 shadow-sm"
                         aria-label="Navigation mobile"
                     >
                         {items.map((item) => {
@@ -245,8 +265,8 @@ export function Navbar({ user }: NavbarProps) {
                                     className={cn(
                                         'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                                         active
-                                            ? 'text-gray-900 bg-gray-100'
-                                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50',
+                                            ? 'text-gray-900 dark:text-white bg-gray-100 dark:bg-slate-800'
+                                            : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-800',
                                     )}
                                 >
                                     <Icon className="w-5 h-5 shrink-0" />

@@ -87,6 +87,24 @@ class ConventionController extends Controller
         return back()->with('success', 'Versement enregistré.');
     }
 
+    public function updateVersement(Request $request, Projet $projet, Convention $convention, Versement $versement): RedirectResponse
+    {
+        abort_unless($convention->projet_id === $projet->id, 404);
+        abort_unless($versement->convention_id === $convention->id, 404);
+
+        $validated = $request->validate([
+            'montant' => ['required', 'integer', 'min:1'],
+            'date_reception' => ['required', 'date', 'before_or_equal:today'],
+            'type' => ['required', Rule::enum(VersementType::class)],
+            'reference' => ['nullable', 'string', 'max:100'],
+            'description' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $versement->update($validated);
+
+        return back()->with('success', 'Versement mis à jour.');
+    }
+
     public function destroyVersement(Projet $projet, Convention $convention, Versement $versement): RedirectResponse
     {
         abort_unless($convention->projet_id === $projet->id, 404);

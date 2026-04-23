@@ -72,27 +72,27 @@ export default function DafProjetsIndex({ projets, stats }: Props) {
             <Head title="Projets — CIFEU" />
 
             <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Projets</h2>
-                <p className="text-sm text-gray-500 mt-1">Vue d'ensemble de tous les projets</p>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Projets</h2>
+                <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Vue d'ensemble de tous les projets</p>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div className="bg-white border border-gray-200 rounded-xl p-4">
-                    <p className="text-xs text-gray-500 mb-1">Total projets</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Total projets</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
                 </div>
-                <div className="bg-white border border-gray-200 rounded-xl p-4">
-                    <p className="text-xs text-gray-500 mb-1">En cours</p>
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">En cours</p>
                     <p className="text-2xl font-bold text-emerald-600">{stats.en_cours}</p>
                 </div>
-                <div className="bg-white border border-gray-200 rounded-xl p-4">
-                    <p className="text-xs text-gray-500 mb-1">Budget total estimé</p>
-                    <p className="text-base font-mono font-bold text-gray-900">{formatCurrency(stats.total_budget)}</p>
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Budget total estimé</p>
+                    <p className="text-base font-mono font-bold text-gray-900 dark:text-white">{formatCurrency(stats.total_budget)}</p>
                 </div>
-                <div className="bg-white border border-gray-200 rounded-xl p-4">
-                    <p className="text-xs text-gray-500 mb-1">Total conventions</p>
-                    <p className="text-base font-mono font-bold text-gray-900">{formatCurrency(stats.total_conventions)}</p>
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Total conventions</p>
+                    <p className="text-base font-mono font-bold text-gray-900 dark:text-white">{formatCurrency(stats.total_conventions)}</p>
                 </div>
             </div>
 
@@ -100,8 +100,8 @@ export default function DafProjetsIndex({ projets, stats }: Props) {
             {projets.length > 0 && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
                     {/* Bar chart */}
-                    <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-5">
-                        <h3 className="text-sm font-semibold text-gray-900 mb-4">Budget estimé vs Conventions signées</h3>
+                    <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-5">
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Budget estimé vs Conventions signées</h3>
                         <ResponsiveContainer width="100%" height={220}>
                             <BarChart data={barData} margin={CHART_MARGIN}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -119,8 +119,8 @@ export default function DafProjetsIndex({ projets, stats }: Props) {
                     </div>
 
                     {/* Pie chart */}
-                    <div className="bg-white border border-gray-200 rounded-xl p-5">
-                        <h3 className="text-sm font-semibold text-gray-900 mb-4">Répartition par statut</h3>
+                    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-5">
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Répartition par statut</h3>
                         <ResponsiveContainer width="100%" height={220}>
                             <PieChart>
                                 <Pie data={pieData} dataKey="count" nameKey="label" cx="50%" cy="50%" outerRadius={70} innerRadius={35} paddingAngle={3}>
@@ -140,23 +140,23 @@ export default function DafProjetsIndex({ projets, stats }: Props) {
             )}
 
             {/* Table */}
-            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm" aria-label="Liste des projets">
                         <thead>
-                            <tr className="border-b border-gray-200 bg-gray-50">
-                                <th className="text-left px-6 py-3.5 text-xs font-semibold text-gray-600 uppercase tracking-wider">Projet</th>
-                                <th className="text-left px-6 py-3.5 text-xs font-semibold text-gray-600 uppercase tracking-wider">Porteur</th>
-                                <th className="text-left px-6 py-3.5 text-xs font-semibold text-gray-600 uppercase tracking-wider">Statut</th>
-                                <th className="text-right px-6 py-3.5 text-xs font-semibold text-gray-600 uppercase tracking-wider">Budget estimé</th>
-                                <th className="text-right px-6 py-3.5 text-xs font-semibold text-gray-600 uppercase tracking-wider">Conventions</th>
-                                <th className="text-left px-6 py-3.5 text-xs font-semibold text-gray-600 uppercase tracking-wider hidden lg:table-cell">Fin prévue</th>
+                            <tr className="border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
+                                <th className="text-left px-6 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Projet</th>
+                                <th className="text-left px-6 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Porteur</th>
+                                <th className="text-left px-6 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Statut</th>
+                                <th className="text-right px-6 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Budget estimé</th>
+                                <th className="text-right px-6 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Conventions</th>
+                                <th className="text-left px-6 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider hidden lg:table-cell">Fin prévue</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
                             {projets.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-16 text-center text-gray-400">
+                                    <td colSpan={6} className="px-6 py-16 text-center text-gray-400 dark:text-slate-500">
                                         <FolderIcon className="w-10 h-10 mx-auto mb-2 opacity-40" />
                                         <p>Aucun projet</p>
                                     </td>
@@ -165,24 +165,24 @@ export default function DafProjetsIndex({ projets, stats }: Props) {
                                 projets.map((projet) => (
                                     <tr
                                         key={projet.id}
-                                        className="hover:bg-blue-50 transition-colors cursor-pointer"
+                                        className="hover:bg-blue-50 dark:hover:bg-blue-900/20 dark:bg-blue-900/20 transition-colors cursor-pointer"
                                         onClick={() => router.visit(dafProjetsShow.url(projet.id))}
                                     >
                                         <td className="px-6 py-4">
-                                            <p className="font-medium text-gray-900 max-w-xs truncate">{projet.titre}</p>
+                                            <p className="font-medium text-gray-900 dark:text-white max-w-xs truncate">{projet.titre}</p>
                                         </td>
-                                        <td className="px-6 py-4 text-gray-600 text-xs">{projet.porteur}</td>
+                                        <td className="px-6 py-4 text-gray-600 dark:text-slate-400 text-xs">{projet.porteur}</td>
                                         <td className="px-6 py-4">
                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${projectStatusClass(projet.status)}`}>
                                                 {projet.status_label}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-right font-mono text-gray-900 text-xs">{formatCurrency(projet.montant_estime)}</td>
+                                        <td className="px-6 py-4 text-right font-mono text-gray-900 dark:text-white text-xs">{formatCurrency(projet.montant_estime)}</td>
                                         <td className="px-6 py-4 text-right">
-                                            <p className="font-mono text-xs text-gray-900">{formatCurrency(projet.montant_conventions)}</p>
-                                            <p className="text-xs text-gray-500">{projet.conventions_count} convention{projet.conventions_count !== 1 ? 's' : ''}</p>
+                                            <p className="font-mono text-xs text-gray-900 dark:text-white">{formatCurrency(projet.montant_conventions)}</p>
+                                            <p className="text-xs text-gray-500 dark:text-slate-400">{projet.conventions_count} convention{projet.conventions_count !== 1 ? 's' : ''}</p>
                                         </td>
-                                        <td className="px-6 py-4 text-gray-600 text-xs hidden lg:table-cell">
+                                        <td className="px-6 py-4 text-gray-600 dark:text-slate-400 text-xs hidden lg:table-cell">
                                             {projet.date_fin_prevue ? formatDate(projet.date_fin_prevue) : '—'}
                                         </td>
                                     </tr>

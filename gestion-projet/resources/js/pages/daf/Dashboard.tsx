@@ -1,112 +1,159 @@
 import AppLayout from '@/components/layout/AppLayout';
-import { Card, CardContent } from '@/components/ui/Card';
+import { formatCurrency } from '@/lib/utils';
+import { show as demandeShow } from '@/actions/App/Http/Controllers/Daf/DemandeDepenseController';
+import { index as dafDemandesIndex } from '@/routes/daf/demandes';
+import { index as dafProjetsIndex } from '@/routes/daf/projets';
 import type { PageProps } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import {
+    ArrowRightIcon,
+    BanknotesIcon,
     ChartBarIcon,
+    ClipboardDocumentCheckIcon,
     ClipboardDocumentListIcon,
     FolderIcon,
-    InformationCircleIcon,
 } from '@heroicons/react/24/outline';
 
+interface Stats {
+    projets_actifs: number;
+    conventions_actives: number;
+    demandes_en_attente: number;
+    demandes_en_attente_ac: number;
+    rapports_soumis: number;
+    budget_total: number;
+    versements_total: number;
+}
+
+interface Demande {
+    id: number;
+    objet: string;
+    montant: number;
+    status: string;
+    status_label: string;
+    badge_class: string;
+    porteur: string;
+    convention: string;
+    created_at: string;
+}
+
+interface Props extends PageProps {
+    stats: Stats;
+    demandes_recentes: Demande[];
+}
+
 export default function DafDashboard() {
-    const { auth } = usePage<PageProps>().props;
+    const { auth, stats, demandes_recentes } = usePage<Props>().props;
     const firstName = auth.user?.name.split(' ').find((p) => !p.includes('.')) ?? auth.user?.name;
+    const tauxMobilisation = stats.budget_total > 0
+        ? Math.min(100, Math.round((stats.versements_total / stats.budget_total) * 100))
+        : 0;
 
     return (
         <AppLayout title="Tableau de bord">
             <Head title="Tableau de bord DAF — CIFEU" />
 
-            <div className="mb-8">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-                    Bonjour, {firstName}
-                </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                    Direction Administration et Finances — Suivi de la gestion financière
-                </p>
+            <div className="mb-6">
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Bonjour, {firstName}</h2>
+                <p className="text-sm text-slate-500 mt-1">Direction Administration et Finances — Suivi de la gestion financière</p>
             </div>
 
-            <div className="mb-8 flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
-                <InformationCircleIcon className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" aria-hidden="true" />
-                <div>
-                    <p className="font-medium text-blue-800 dark:text-blue-200 text-sm">
-                        Données financières disponibles au Sprint 2
-                    </p>
-                    <p className="text-blue-700 dark:text-blue-300 text-xs mt-0.5">
-                        Les projets, conventions, versements et rubriques budgétaires seront accessibles après la mise en place des données de base.
-                    </p>
+            {/* Stats */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <Link href={dafProjetsIndex.url()} className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4 hover:border-blue-300 hover:shadow-sm transition-all group">
+                    <div className="flex items-start justify-between mb-3">
+                        <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <FolderIcon className="w-5 h-5 text-blue-600" />
+                        </div>
+                    </div>
+                    <p className="text-2xl font-bold font-mono text-slate-900 dark:text-white">{stats.projets_actifs}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Projets actifs</p>
+                </Link>
+
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
+                    <div className="flex items-start justify-between mb-3">
+                        <div className="w-9 h-9 rounded-lg bg-violet-100 flex items-center justify-center">
+                            <ChartBarIcon className="w-5 h-5 text-violet-600" />
+                        </div>
+                    </div>
+                    <p className="text-2xl font-bold font-mono text-slate-900 dark:text-white">{stats.conventions_actives}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Conventions actives</p>
+                </div>
+
+                <Link href={dafDemandesIndex.url()} className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4 hover:border-amber-300 hover:shadow-sm transition-all group">
+                    <div className="flex items-start justify-between mb-3">
+                        <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center">
+                            <ClipboardDocumentListIcon className="w-5 h-5 text-amber-600" />
+                        </div>
+                    </div>
+                    <p className="text-2xl font-bold font-mono text-slate-900 dark:text-white">{stats.demandes_en_attente}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Demandes à valider</p>
+                </Link>
+
+                <Link href={dafDemandesIndex.url()} className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4 hover:border-purple-300 hover:shadow-sm transition-all">
+                    <div className="flex items-start justify-between mb-3">
+                        <div className="w-9 h-9 rounded-lg bg-purple-100 flex items-center justify-center">
+                            <ClipboardDocumentCheckIcon className="w-5 h-5 text-purple-600" />
+                        </div>
+                    </div>
+                    <p className="text-2xl font-bold font-mono text-slate-900 dark:text-white">{stats.rapports_soumis}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Rapports à valider</p>
+                </Link>
+            </div>
+
+            {/* Budget mobilisation */}
+            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-5 mb-6">
+                <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                        <BanknotesIcon className="w-4 h-4 text-emerald-600" />
+                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Mobilisation budgétaire globale</span>
+                    </div>
+                    <span className="text-sm font-bold text-emerald-600">{tauxMobilisation}%</span>
+                </div>
+                <div className="w-full h-2.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden mb-3">
+                    <div
+                        className="h-full bg-emerald-500 rounded-full transition-all duration-700"
+                        style={{ width: `${tauxMobilisation}%` }}
+                    />
+                </div>
+                <div className="flex items-center justify-between text-xs font-mono text-slate-600">
+                    <span>Versements reçus : <span className="font-bold text-slate-900 dark:text-white">{formatCurrency(stats.versements_total)}</span></span>
+                    <span>Budget total : <span className="font-bold text-slate-900 dark:text-white">{formatCurrency(stats.budget_total)}</span></span>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-                <Card>
-                    <CardContent>
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">Projets actifs</p>
-                                <p className="text-3xl font-bold font-mono text-slate-300 dark:text-slate-600 mt-1 select-none">—</p>
-                                <p className="text-xs text-slate-400 dark:text-slate-600 mt-1">Disponible Sprint 2</p>
-                            </div>
-                            <div className="w-11 h-11 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
-                                <FolderIcon className="w-5 h-5 text-blue-400 dark:text-blue-600" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardContent>
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">Demandes en attente</p>
-                                <p className="text-3xl font-bold font-mono text-slate-300 dark:text-slate-600 mt-1 select-none">—</p>
-                                <p className="text-xs text-slate-400 dark:text-slate-600 mt-1">Disponible Sprint 3</p>
-                            </div>
-                            <div className="w-11 h-11 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
-                                <ClipboardDocumentListIcon className="w-5 h-5 text-amber-400 dark:text-amber-600" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardContent>
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">Budget global (FCFA)</p>
-                                <p className="text-3xl font-bold font-mono text-slate-300 dark:text-slate-600 mt-1 select-none">—</p>
-                                <p className="text-xs text-slate-400 dark:text-slate-600 mt-1">Disponible Sprint 2</p>
-                            </div>
-                            <div className="w-11 h-11 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
-                                <ChartBarIcon className="w-5 h-5 text-emerald-400 dark:text-emerald-600" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
-            <Card>
-                <CardContent>
-                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Fonctionnalités à venir</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-slate-600 dark:text-slate-400">
-                        {[
-                            { sprint: 'S2', label: 'Consultation des projets et conventions' },
-                            { sprint: 'S2', label: 'Gestion des rubriques budgétaires' },
-                            { sprint: 'S2', label: 'Enregistrement des versements' },
-                            { sprint: 'S3', label: 'Validation des demandes de dépense' },
-                            { sprint: 'S4', label: 'Graphiques et tableau de bord complet' },
-                            { sprint: 'S4', label: 'Génération de rapports PDF/Excel' },
-                        ].map((f) => (
-                            <div key={f.label} className="flex items-center gap-2.5">
-                                <span className="shrink-0 inline-flex items-center justify-center w-8 h-5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
-                                    {f.sprint}
-                                </span>
-                                <span>{f.label}</span>
-                            </div>
+            {/* Demandes récentes */}
+            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Demandes en attente de traitement</h3>
+                    <Link href={dafDemandesIndex.url()} className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium">
+                        Voir tout <ArrowRightIcon className="w-3 h-3" />
+                    </Link>
+                </div>
+                {demandes_recentes.length === 0 ? (
+                    <p className="p-8 text-center text-sm text-slate-500">Aucune demande en attente</p>
+                ) : (
+                    <div className="divide-y divide-gray-100 dark:divide-slate-800">
+                        {demandes_recentes.map((d) => (
+                            <Link
+                                key={d.id}
+                                href={demandeShow.url(d.id)}
+                                className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+                            >
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{d.objet}</p>
+                                    <p className="text-xs text-slate-500 mt-0.5 truncate">{d.porteur} — {d.convention}</p>
+                                </div>
+                                <div className="shrink-0 text-right">
+                                    <p className="text-sm font-mono font-semibold text-slate-900 dark:text-white">{formatCurrency(d.montant)}</p>
+                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-0.5 ${d.badge_class}`}>
+                                        {d.status_label}
+                                    </span>
+                                </div>
+                            </Link>
                         ))}
                     </div>
-                </CardContent>
-            </Card>
+                )}
+            </div>
         </AppLayout>
     );
 }

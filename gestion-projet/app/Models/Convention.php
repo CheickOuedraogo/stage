@@ -51,6 +51,16 @@ class Convention extends Model
         return $this->hasMany(Versement::class);
     }
 
+    public function demandesDepenses(): HasMany
+    {
+        return $this->hasMany(DemandeDepense::class);
+    }
+
+    public function paiementsDirects(): HasMany
+    {
+        return $this->hasMany(PaiementDirect::class);
+    }
+
     /** Somme des rubriques budgétaires */
     public function getTotalRubriquesAttribute(): int
     {

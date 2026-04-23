@@ -73,15 +73,15 @@ export default function ProfileEdit() {
 
             {/* Page header */}
             <div className="mb-8 max-w-2xl mx-auto">
-                <h2 className="text-2xl font-bold text-gray-900">Mon profil</h2>
-                <p className="text-sm text-gray-500 mt-1">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Mon profil</h2>
+                <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
                     Gérez vos informations personnelles et votre mot de passe
                 </p>
             </div>
 
             <div className="max-w-2xl mx-auto space-y-6">
                 {/* Identity card */}
-                <div className="bg-white border border-gray-200 rounded-xl p-6">
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
                     <div className="flex items-center gap-6">
                         {/* Avatar */}
                         <div className="relative shrink-0">
@@ -118,9 +118,9 @@ export default function ProfileEdit() {
                         </div>
 
                         <div>
-                            <p className="text-lg font-semibold text-gray-900">{user.name}</p>
-                            <p className="text-sm text-gray-500">{user.email}</p>
-                            <p className="text-xs text-gray-400 mt-1">{roleLabels[user.role] ?? user.role_label}</p>
+                            <p className="text-lg font-semibold text-gray-900 dark:text-white">{user.name}</p>
+                            <p className="text-sm text-gray-500 dark:text-slate-400">{user.email}</p>
+                            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{roleLabels[user.role] ?? user.role_label}</p>
                             {previewUrl && (
                                 <p className="text-xs text-blue-600 mt-1 font-medium">
                                     Nouvelle photo sélectionnée — enregistrez pour appliquer
@@ -131,19 +131,19 @@ export default function ProfileEdit() {
                 </div>
 
                 {/* Personal info form */}
-                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                    <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100">
-                        <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                            <UserIcon className="w-4 h-4 text-gray-600" />
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                    <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100 dark:border-slate-800">
+                        <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                            <UserIcon className="w-4 h-4 text-gray-600 dark:text-slate-400" />
                         </div>
-                        <h3 className="text-sm font-semibold text-gray-900">Informations personnelles</h3>
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Informations personnelles</h3>
                     </div>
 
                     <form onSubmit={submitProfile} className="p-6 space-y-5" noValidate>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             {/* Name */}
                             <div className="space-y-1.5">
-                                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
                                     Nom complet <span className="text-red-500" aria-hidden="true">*</span>
                                 </label>
                                 <input
@@ -153,7 +153,7 @@ export default function ProfileEdit() {
                                     onChange={(e) => profileForm.setData('name', e.target.value)}
                                     required
                                     aria-invalid={!!profileForm.errors.name}
-                                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
+                                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 dark:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
                                 />
                                 {profileForm.errors.name && (
                                     <p className="text-xs text-red-600">{profileForm.errors.name}</p>
@@ -162,7 +162,7 @@ export default function ProfileEdit() {
 
                             {/* Phone */}
                             <div className="space-y-1.5">
-                                <label htmlFor="telephone" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="telephone" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
                                     Téléphone
                                 </label>
                                 <input
@@ -172,7 +172,7 @@ export default function ProfileEdit() {
                                     onChange={(e) => profileForm.setData('telephone', e.target.value)}
                                     placeholder="+226 70 00 00 00"
                                     aria-invalid={!!profileForm.errors.telephone}
-                                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
+                                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 dark:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
                                 />
                                 {profileForm.errors.telephone && (
                                     <p className="text-xs text-red-600">{profileForm.errors.telephone}</p>
@@ -182,7 +182,7 @@ export default function ProfileEdit() {
 
                         {/* Email (read-only) */}
                         <div className="space-y-1.5">
-                            <label className="block text-sm font-medium text-gray-700">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">
                                 Adresse e-mail
                             </label>
                             <input
@@ -191,9 +191,9 @@ export default function ProfileEdit() {
                                 disabled
                                 readOnly
                                 aria-label="Adresse e-mail (non modifiable)"
-                                className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                                className="w-full px-3.5 py-2.5 text-sm border border-gray-200 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-slate-400 cursor-not-allowed"
                             />
-                            <p className="text-xs text-gray-400">L'adresse e-mail ne peut pas être modifiée.</p>
+                            <p className="text-xs text-gray-400 dark:text-slate-500">L'adresse e-mail ne peut pas être modifiée.</p>
                         </div>
 
                         <div className="flex justify-end pt-1">
@@ -222,17 +222,17 @@ export default function ProfileEdit() {
                 </div>
 
                 {/* Password form */}
-                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                    <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100">
-                        <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                            <KeyIcon className="w-4 h-4 text-gray-600" />
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                    <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100 dark:border-slate-800">
+                        <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                            <KeyIcon className="w-4 h-4 text-gray-600 dark:text-slate-400" />
                         </div>
-                        <h3 className="text-sm font-semibold text-gray-900">Changer le mot de passe</h3>
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Changer le mot de passe</h3>
                     </div>
 
                     <form onSubmit={submitPassword} className="p-6 space-y-5" noValidate>
                         <div className="space-y-1.5">
-                            <label htmlFor="current_password" className="block text-sm font-medium text-gray-700">
+                            <label htmlFor="current_password" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
                                 Mot de passe actuel <span className="text-red-500" aria-hidden="true">*</span>
                             </label>
                             <input
@@ -243,7 +243,7 @@ export default function ProfileEdit() {
                                 autoComplete="current-password"
                                 required
                                 aria-invalid={!!passwordForm.errors.current_password}
-                                className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
+                                className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 dark:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
                             />
                             {passwordForm.errors.current_password && (
                                 <p className="text-xs text-red-600">{passwordForm.errors.current_password}</p>
@@ -252,7 +252,7 @@ export default function ProfileEdit() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <div className="space-y-1.5">
-                                <label htmlFor="new_password" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="new_password" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
                                     Nouveau mot de passe <span className="text-red-500" aria-hidden="true">*</span>
                                 </label>
                                 <input
@@ -264,7 +264,7 @@ export default function ProfileEdit() {
                                     required
                                     aria-invalid={!!passwordForm.errors.password}
                                     placeholder="Min. 8 caractères"
-                                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
+                                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 dark:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
                                 />
                                 {passwordForm.errors.password && (
                                     <p className="text-xs text-red-600">{passwordForm.errors.password}</p>
@@ -272,7 +272,7 @@ export default function ProfileEdit() {
                             </div>
 
                             <div className="space-y-1.5">
-                                <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700">
+                                <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
                                     Confirmer <span className="text-red-500" aria-hidden="true">*</span>
                                 </label>
                                 <input
@@ -283,7 +283,7 @@ export default function ProfileEdit() {
                                     autoComplete="new-password"
                                     required
                                     aria-invalid={!!passwordForm.errors.password_confirmation}
-                                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
+                                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 dark:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
                                 />
                                 {passwordForm.errors.password_confirmation && (
                                     <p className="text-xs text-red-600">{passwordForm.errors.password_confirmation}</p>
@@ -291,7 +291,7 @@ export default function ProfileEdit() {
                             </div>
                         </div>
 
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-gray-400 dark:text-slate-500">
                             Minimum 8 caractères avec majuscules, minuscules et chiffres.
                         </p>
 
