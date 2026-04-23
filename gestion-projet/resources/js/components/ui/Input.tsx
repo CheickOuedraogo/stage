@@ -14,7 +14,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         return (
             <div className="space-y-1.5">
                 {label && (
-                    <label htmlFor={inputId} className="block text-sm font-medium text-gray-700">
+                    <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 dark:text-slate-300">
                         {label}
                         {props.required && (
                             <span className="ml-1 text-red-500" aria-hidden="true">*</span>
@@ -25,13 +25,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                     ref={ref}
                     id={inputId}
                     className={cn(
-                        'w-full px-3.5 py-2.5 text-sm rounded-lg bg-white text-gray-900 placeholder:text-gray-400',
-                        'focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900',
+                        'w-full px-3.5 py-2.5 text-sm rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500',
+                        'focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:focus:ring-blue-400/50 dark:focus:border-blue-400',
                         'transition-colors duration-150',
-                        'disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed',
+                        'disabled:bg-gray-50 dark:disabled:bg-slate-800 disabled:text-gray-500 dark:disabled:text-slate-500 disabled:cursor-not-allowed',
                         error
-                            ? 'border border-red-400 text-red-900'
-                            : 'border border-gray-300',
+                            ? 'border border-red-400 dark:border-red-500 text-red-900 dark:text-red-300'
+                            : 'border border-gray-300 dark:border-slate-600',
                         className,
                     )}
                     aria-invalid={!!error}
@@ -39,10 +39,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                     {...props}
                 />
                 {error && (
-                    <p id={`${inputId}-error`} className="text-xs text-red-600">{error}</p>
+                    <p id={`${inputId}-error`} className="text-xs text-red-600 dark:text-red-400">{error}</p>
                 )}
                 {hint && !error && (
-                    <p id={`${inputId}-hint`} className="text-xs text-gray-500">{hint}</p>
+                    <p id={`${inputId}-hint`} className="text-xs text-gray-500 dark:text-slate-400">{hint}</p>
                 )}
             </div>
         );
