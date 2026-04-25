@@ -7,6 +7,7 @@ import type { PageProps } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowRightIcon,
+    BanknotesIcon,
     ClipboardDocumentListIcon,
     FolderIcon,
     FolderOpenIcon,
@@ -31,13 +32,39 @@ interface Demande {
     created_at: string;
 }
 
+interface ProjetBudget {
+    titre: string;
+    status: string;
+    montant_estime: number;
+    versements: number;
+    depenses: number;
+    disponible: number;
+}
+
 interface Props extends PageProps {
     stats: Stats;
     demandes_recentes: Demande[];
+    projets_budget: ProjetBudget[];
 }
 
+const STATUS_COLORS: Record<string, string> = {
+    en_cours: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+    en_attente_financement: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+    suspendu: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+    termine: 'bg-slate-100 text-slate-700 dark:bg-slate-700/30 dark:text-slate-400',
+    annule: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+};
+
+const STATUS_LABELS: Record<string, string> = {
+    en_cours: 'En cours',
+    en_attente_financement: 'En attente',
+    suspendu: 'Suspendu',
+    termine: 'Terminé',
+    annule: 'Annulé',
+};
+
 export default function PorteurDashboard() {
-    const { auth, stats, demandes_recentes } = usePage<Props>().props;
+    const { auth, stats, demandes_recentes, projets_budget } = usePage<Props>().props;
     const firstName = auth.user?.name.split(' ').find((p) => !p.includes('.')) ?? auth.user?.name;
 
     return (
@@ -83,6 +110,51 @@ export default function PorteurDashboard() {
                     <p className="text-xs text-slate-500 mt-0.5">Demandes totales</p>
                 </Link>
             </div>
+
+            {/* Budget par projet */}
+            {projets_budget.length > 0 && (
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden mb-6">
+                    <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <BanknotesIcon className="w-4 h-4 text-emerald-600" />
+                            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Suivi budgétaire de vos projets</h3>
+                        </div>
+                        <Link href={projetsIndex.url()} className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium">
+                            Voir tout <ArrowRightIcon className="w-3 h-3" />
+                        </Link>
+                    </div>
+                    <div className="divide-y divide-gray-100 dark:divide-slate-800">
+                        {projets_budget.map((p, i) => {
+                            const taux = p.versements > 0
+                                ? Math.min(100, Math.round((p.depenses / p.versements) * 100))
+                                : 0;
+                            return (
+                                <div key={i} className="px-5 py-4">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2 min-w-0">
+                                            <span className="text-sm font-medium text-slate-900 dark:text-white truncate">{p.titre}</span>
+                                            <span className={`shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[p.status] ?? ''}`}>
+                                                {STATUS_LABELS[p.status] ?? p.status}
+                                            </span>
+                                        </div>
+                                        <span className="text-xs font-mono text-emerald-600 font-semibold shrink-0 ml-2">{formatCurrency(p.disponible)} dispo.</span>
+                                    </div>
+                                    <div className="w-full h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden mb-2">
+                                        <div
+                                            className={`h-full rounded-full transition-all ${taux >= 90 ? 'bg-red-500' : taux >= 70 ? 'bg-amber-500' : 'bg-blue-500'}`}
+                                            style={{ width: `${taux}%` }}
+                                        />
+                                    </div>
+                                    <div className="flex justify-between text-xs font-mono text-slate-500">
+                                        <span>Dépensé : <span className="text-slate-700 dark:text-slate-300 font-semibold">{formatCurrency(p.depenses)}</span></span>
+                                        <span>Reçu : <span className="text-slate-700 dark:text-slate-300 font-semibold">{formatCurrency(p.versements)}</span></span>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
 
             {/* Demandes récentes */}
             <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">

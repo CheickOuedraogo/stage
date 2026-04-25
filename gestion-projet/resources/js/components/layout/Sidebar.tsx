@@ -1,13 +1,24 @@
 import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
-import { dashboard as adminDashboard } from '@/routes/admin';
+import { auditLog as adminAuditLog, dashboard as adminDashboard } from '@/routes/admin';
+import { index as adminChatIndex } from '@/routes/admin/chat';
+import { index as adminFaqIndex } from '@/routes/admin/faq';
 import { index as usersIndex } from '@/routes/admin/users';
 import { dashboard as acDashboard } from '@/routes/ac';
+import { index as acChatIndex } from '@/routes/ac/chat';
 import { index as acDemandesIndex } from '@/routes/ac/demandes';
+import { index as acPaiementsIndex } from '@/routes/ac/paiements';
 import { dashboard as dafDashboard } from '@/routes/daf';
+import { index as dafChatIndex } from '@/routes/daf/chat';
 import { index as dafDemandesIndex } from '@/routes/daf/demandes';
+import { index as dafProjetsIndex } from '@/routes/daf/projets';
+import { index as dafRapportsIndex } from '@/routes/daf/rapports';
+import { index as dafRubriquesIndex } from '@/routes/daf/rubriques';
+import { index as dafVersementsIndex } from '@/routes/daf/versements';
+import { index as porteurFaqIndex } from '@/routes/porteur/faq';
 import { index as projetsIndex } from '@/routes/porteur/projets';
 import { index as porteurDemandesIndex } from '@/routes/porteur/demandes';
+import { index as notificationsIndex } from '@/routes/notifications';
 import { edit as profileEdit } from '@/routes/profile';
 import type { User } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
@@ -40,30 +51,33 @@ function getNavItems(role: User['role'], notifs: number): NavItem[] {
         admin: [
             { label: 'Tableau de bord', href: adminDashboard.url(), icon: HomeIcon },
             { label: 'Utilisateurs', href: usersIndex.url(), icon: UsersIcon },
+            { label: 'Journal d\'audit', href: adminAuditLog.url(), icon: ClipboardDocumentListIcon },
+            { label: 'FAQ', href: adminFaqIndex.url(), icon: BookOpenIcon },
+            { label: 'Messages', href: adminChatIndex.url(), icon: ChatBubbleLeftRightIcon },
         ],
         daf: [
             { label: 'Tableau de bord', href: dafDashboard.url(), icon: ChartBarIcon },
-            { label: 'Projets', href: projetsIndex.url(), icon: FolderIcon },
+            { label: 'Projets', href: dafProjetsIndex.url(), icon: FolderIcon },
             { label: 'Demandes', href: dafDemandesIndex.url(), icon: ClipboardDocumentListIcon },
-            { label: 'Versements', href: '#', icon: ScaleIcon },
-            { label: 'Rubriques', href: '#', icon: BookOpenIcon },
-            { label: 'Rapports', href: '#', icon: ChartBarIcon },
-            { label: 'Assistance', href: '#', icon: ChatBubbleLeftRightIcon },
-            { label: 'Notifications', href: '#', icon: BellIcon, badge: notifBadge },
+            { label: 'Versements', href: dafVersementsIndex.url(), icon: ScaleIcon },
+            { label: 'Rubriques', href: dafRubriquesIndex.url(), icon: BookOpenIcon },
+            { label: 'Rapports', href: dafRapportsIndex.url(), icon: ChartBarIcon },
+            { label: 'Assistance', href: dafChatIndex.url(), icon: ChatBubbleLeftRightIcon },
+            { label: 'Notifications', href: notificationsIndex.url(), icon: BellIcon, badge: notifBadge },
         ],
         ac: [
             { label: 'Tableau de bord', href: acDashboard.url(), icon: HomeIcon },
             { label: 'Demandes', href: acDemandesIndex.url(), icon: ClipboardDocumentListIcon },
-            { label: 'Paiements', href: '#', icon: CreditCardIcon },
-            { label: 'Assistance', href: '#', icon: ChatBubbleLeftRightIcon },
-            { label: 'Notifications', href: '#', icon: BellIcon, badge: notifBadge },
+            { label: 'Paiements', href: acPaiementsIndex.url(), icon: CreditCardIcon },
+            { label: 'Assistance', href: acChatIndex.url(), icon: ChatBubbleLeftRightIcon },
+            { label: 'Notifications', href: notificationsIndex.url(), icon: BellIcon, badge: notifBadge },
         ],
         porteur: [
             { label: 'Mes Projets', href: projetsIndex.url(), icon: FolderIcon },
             { label: 'Mes Demandes', href: porteurDemandesIndex.url(), icon: ClipboardDocumentListIcon },
             { label: 'Mon Profil', href: profileEdit.url(), icon: UserCircleIcon },
-            { label: 'Assistance', href: '#', icon: ChatBubbleLeftRightIcon },
-            { label: 'Notifications', href: '#', icon: BellIcon, badge: notifBadge },
+            { label: 'Assistance', href: porteurFaqIndex.url(), icon: ChatBubbleLeftRightIcon },
+            { label: 'Notifications', href: notificationsIndex.url(), icon: BellIcon, badge: notifBadge },
         ],
     };
 
