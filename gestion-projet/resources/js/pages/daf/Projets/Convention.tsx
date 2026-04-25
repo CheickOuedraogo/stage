@@ -587,7 +587,7 @@ export default function DafConventionShow({ projet, convention }: Props) {
                                         ))}
                                     </Pie>
                                     <Tooltip
-                                        formatter={(value: number) => [formatCurrency(value), '']}
+                                        formatter={(value) => [formatCurrency(Number(value)), '']}
                                         contentStyle={CHART_TOOLTIP_STYLE}
                                     />
                                 </PieChart>

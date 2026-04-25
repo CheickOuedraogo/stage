@@ -8,9 +8,12 @@ import { index as acDemandesIndex } from '@/routes/ac/demandes';
 import { dashboard as dafDashboard } from '@/routes/daf';
 import { index as dafDemandesIndex } from '@/routes/daf/demandes';
 import { index as dafProjetsIndex } from '@/routes/daf/projets';
+import { index as dafVersementsIndex } from '@/routes/daf/versements';
+import { index as acPaiementsIndex } from '@/routes/ac/paiements';
 import { dashboard as porteurDashboard } from '@/routes/porteur';
 import { index as porteurDemandesIndex } from '@/routes/porteur/demandes';
 import { index as porteurProjetsIndex } from '@/routes/porteur/projets';
+import { index as notificationsIndex } from '@/routes/notifications';
 import { edit as profileEdit } from '@/routes/profile';
 import type { User } from '@/types';
 import { Link, router, usePage } from '@inertiajs/react';
@@ -52,19 +55,19 @@ function getNavItems(role: User['role'], notifs: number): NavItem[] {
             { label: 'Tableau de bord', href: dafDashboard.url(), icon: ChartBarIcon },
             { label: 'Projets', href: dafProjetsIndex.url(), icon: FolderIcon },
             { label: 'Demandes', href: dafDemandesIndex.url(), icon: ClipboardDocumentListIcon },
-            { label: 'Versements', href: '#', icon: CreditCardIcon },
-            { label: 'Notifications', href: '#', icon: BellIcon, badge: notifBadge },
+            { label: 'Versements', href: dafVersementsIndex.url(), icon: CreditCardIcon },
+            { label: 'Notifications', href: notificationsIndex.url(), icon: BellIcon, badge: notifBadge },
         ],
         ac: [
             { label: 'Tableau de bord', href: acDashboard.url(), icon: HomeIcon },
             { label: 'Demandes', href: acDemandesIndex.url(), icon: ClipboardDocumentListIcon },
-            { label: 'Paiements', href: '#', icon: CreditCardIcon },
-            { label: 'Notifications', href: '#', icon: BellIcon, badge: notifBadge },
+            { label: 'Paiements', href: acPaiementsIndex.url(), icon: CreditCardIcon },
+            { label: 'Notifications', href: notificationsIndex.url(), icon: BellIcon, badge: notifBadge },
         ],
         porteur: [
             { label: 'Mes projets', href: porteurProjetsIndex.url(), icon: FolderIcon },
             { label: 'Mes demandes', href: porteurDemandesIndex.url(), icon: ClipboardDocumentListIcon },
-            { label: 'Notifications', href: '#', icon: BellIcon, badge: notifBadge },
+            { label: 'Notifications', href: notificationsIndex.url(), icon: BellIcon, badge: notifBadge },
         ],
     };
 
@@ -161,7 +164,7 @@ export function Navbar({ user }: NavbarProps) {
 
                     {/* Notifications */}
                     <Link
-                        href="#"
+                        href={notificationsIndex.url()}
                         className="relative p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                         aria-label={`${user.unread_notifications} notification${user.unread_notifications !== 1 ? 's' : ''}`}
                     >

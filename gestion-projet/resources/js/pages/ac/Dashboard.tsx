@@ -1,5 +1,5 @@
 import AppLayout from '@/components/layout/AppLayout';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatDate } from '@/lib/utils';
 import { show as demandeShow } from '@/actions/App/Http/Controllers/Ac/DemandeDepenseController';
 import { index as acDemandesIndex } from '@/routes/ac/demandes';
 import type { PageProps } from '@/types';
@@ -7,6 +7,7 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowRightIcon,
     BanknotesIcon,
+    CheckCircleIcon,
     ClipboardDocumentCheckIcon,
     ClipboardDocumentListIcon,
     CreditCardIcon,
@@ -31,13 +32,25 @@ interface Demande {
     created_at: string;
 }
 
+interface PaiementRecent {
+    id: number;
+    montant: number;
+    date_paiement: string;
+    mode_paiement: string;
+    reference: string | null;
+    objet: string;
+    porteur: string;
+    convention: string;
+}
+
 interface Props extends PageProps {
     stats: Stats;
     demandes_recentes: Demande[];
+    paiements_recents: PaiementRecent[];
 }
 
 export default function AcDashboard() {
-    const { auth, stats, demandes_recentes } = usePage<Props>().props;
+    const { auth, stats, demandes_recentes, paiements_recents } = usePage<Props>().props;
     const firstName = auth.user?.name.split(' ').find((p) => !p.includes('.')) ?? auth.user?.name;
 
     return (
@@ -84,38 +97,77 @@ export default function AcDashboard() {
                 </div>
             </div>
 
-            {/* Demandes en attente */}
-            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
-                <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Demandes à traiter</h3>
-                    <Link href={acDemandesIndex.url()} className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium">
-                        Voir tout <ArrowRightIcon className="w-3 h-3" />
-                    </Link>
-                </div>
-                {demandes_recentes.length === 0 ? (
-                    <p className="p-8 text-center text-sm text-slate-500">Aucune demande en attente</p>
-                ) : (
-                    <div className="divide-y divide-gray-100 dark:divide-slate-800">
-                        {demandes_recentes.map((d) => (
-                            <Link
-                                key={d.id}
-                                href={demandeShow.url(d.id)}
-                                className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
-                            >
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{d.objet}</p>
-                                    <p className="text-xs text-slate-500 mt-0.5 truncate">{d.porteur} — {d.convention}</p>
-                                </div>
-                                <div className="shrink-0 text-right">
-                                    <p className="text-sm font-mono font-semibold text-slate-900 dark:text-white">{formatCurrency(d.montant)}</p>
-                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-0.5 ${d.badge_class}`}>
-                                        {d.status_label}
-                                    </span>
-                                </div>
-                            </Link>
-                        ))}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                {/* Demandes en attente */}
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                    <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+                        <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Demandes à traiter</h3>
+                        <Link href={acDemandesIndex.url()} className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium">
+                            Voir tout <ArrowRightIcon className="w-3 h-3" />
+                        </Link>
                     </div>
-                )}
+                    {demandes_recentes.length === 0 ? (
+                        <p className="p-8 text-center text-sm text-slate-500">Aucune demande en attente</p>
+                    ) : (
+                        <div className="divide-y divide-gray-100 dark:divide-slate-800">
+                            {demandes_recentes.map((d) => (
+                                <Link
+                                    key={d.id}
+                                    href={demandeShow.url(d.id)}
+                                    className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+                                >
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{d.objet}</p>
+                                        <p className="text-xs text-slate-500 mt-0.5 truncate">{d.porteur} — {d.convention}</p>
+                                    </div>
+                                    <div className="shrink-0 text-right">
+                                        <p className="text-sm font-mono font-semibold text-slate-900 dark:text-white">{formatCurrency(d.montant)}</p>
+                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-0.5 ${d.badge_class}`}>
+                                            {d.status_label}
+                                        </span>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Paiements récents */}
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                    <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800 flex items-center gap-2">
+                        <CheckCircleIcon className="w-4 h-4 text-emerald-600" />
+                        <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Derniers paiements effectués</h3>
+                    </div>
+                    {paiements_recents.length === 0 ? (
+                        <p className="p-8 text-center text-sm text-slate-500">Aucun paiement enregistré</p>
+                    ) : (
+                        <div className="divide-y divide-gray-100 dark:divide-slate-800">
+                            {paiements_recents.map((p) => (
+                                <div key={p.id} className="px-5 py-3.5">
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{p.objet}</p>
+                                            <p className="text-xs text-slate-500 mt-0.5 truncate">{p.porteur} — {p.convention}</p>
+                                        </div>
+                                        <div className="shrink-0 text-right">
+                                            <p className="text-sm font-mono font-semibold text-emerald-600">{formatCurrency(p.montant)}</p>
+                                            <p className="text-xs text-slate-500 mt-0.5">{formatDate(p.date_paiement)}</p>
+                                        </div>
+                                    </div>
+                                    <div className="mt-1.5 flex items-center gap-2">
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                                            {p.mode_paiement}
+                                        </span>
+                                        {p.reference && (
+                                            <span className="text-xs text-slate-400 font-mono">Réf. {p.reference}</span>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </AppLayout>
     );
