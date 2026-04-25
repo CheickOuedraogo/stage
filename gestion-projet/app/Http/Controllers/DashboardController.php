@@ -92,11 +92,12 @@ class DashboardController extends Controller
             ]);
 
         // Pie chart — versements reçus par projet (top 6)
+        // Use eager-loaded data to avoid ambiguous JOIN on "montant" (versements + conventions both have it)
         $versementsParProjet = Projet::with(['conventions.versements'])
             ->get()
             ->map(fn (Projet $p) => [
                 'name' => mb_strimwidth($p->titre, 0, 20, '…'),
-                'value' => $p->versements()->sum('montant'),
+                'value' => $p->conventions->flatMap->versements->sum('montant'),
             ])
             ->filter(fn ($item) => $item['value'] > 0)
             ->sortByDesc('value')
@@ -104,7 +105,8 @@ class DashboardController extends Controller
             ->values();
 
         // Line chart — paiements effectués par mois (12 derniers mois)
-        $paiementsParMois = Paiement::selectRaw("DATE_FORMAT(date_paiement, '%Y-%m') as mois, SUM(montant) as total")
+        // SUBSTR(date_paiement, 1, 7) works on both SQLite and MySQL (gives YYYY-MM)
+        $paiementsParMois = Paiement::selectRaw('SUBSTR(date_paiement, 1, 7) as mois, SUM(montant) as total')
             ->where('date_paiement', '>=', now()->subYear()->startOfMonth())
             ->groupBy('mois')
             ->orderBy('mois')
