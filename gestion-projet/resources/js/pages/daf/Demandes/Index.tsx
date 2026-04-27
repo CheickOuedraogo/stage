@@ -58,15 +58,27 @@ export default function DafDemandesIndex({ en_attente, historique, filters, stat
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl mb-6 w-fit">
+            <div
+                role="tablist"
+                aria-label="Onglets des demandes"
+                className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl mb-6 w-fit"
+            >
                 {(['attente', 'historique'] as const).map((tab) => (
                     <button
                         key={tab}
+                        role="tab"
+                        aria-selected={activeTab === tab}
+                        aria-controls={`panel-${tab}`}
+                        id={`tab-${tab}`}
                         onClick={() => setActiveTab(tab)}
-                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 ${
+                        onKeyDown={(e) => {
+                            if (e.key === 'ArrowRight') setActiveTab('historique');
+                            if (e.key === 'ArrowLeft') setActiveTab('attente');
+                        }}
+                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
                             activeTab === tab
-                                ? 'bg-white dark:bg-slate-900 dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:text-white dark:hover:text-white'
+                                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                         }`}
                     >
                         {tab === 'attente' ? `En attente (${en_attente.length})` : 'Historique'}
@@ -75,7 +87,7 @@ export default function DafDemandesIndex({ en_attente, historique, filters, stat
             </div>
 
             {activeTab === 'attente' ? (
-                <>
+                <div role="tabpanel" id="panel-attente" aria-labelledby="tab-attente">
                     {en_attente.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20 text-center">
                             <ClipboardDocumentCheckIcon className="w-16 h-16 text-slate-300 dark:text-slate-600 mb-4" />
@@ -89,9 +101,9 @@ export default function DafDemandesIndex({ en_attente, historique, filters, stat
                             ))}
                         </div>
                     )}
-                </>
+                </div>
             ) : (
-                <>
+                <div role="tabpanel" id="panel-historique" aria-labelledby="tab-historique">
                     <div className="mb-4">
                         <select
                             value={status}
@@ -140,7 +152,7 @@ export default function DafDemandesIndex({ en_attente, historique, filters, stat
                             )}
                         </div>
                     )}
-                </>
+                </div>
             )}
         </AppLayout>
     );

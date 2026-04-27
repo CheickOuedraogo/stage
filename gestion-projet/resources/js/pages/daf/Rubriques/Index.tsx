@@ -1,4 +1,5 @@
 import AppLayout from '@/components/layout/AppLayout';
+import { Pagination } from '@/components/ui/Pagination';
 import { formatCurrency } from '@/lib/utils';
 import { show as conventionShow } from '@/routes/daf/projets/conventions';
 import { index as rubriquesIndex } from '@/routes/daf/rubriques';
@@ -149,20 +150,13 @@ export default function DafRubriquesIndex() {
                             </table>
                         </div>
 
-                        {rubriques.last_page > 1 && (
-                            <div className="px-5 py-3.5 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between text-sm">
-                                <p className="text-slate-500">Page {rubriques.current_page} / {rubriques.last_page}</p>
-                                <div className="flex gap-1">
-                                    {rubriques.links.map((link, i) => (
-                                        link.url ? (
-                                            <Link key={i} href={link.url} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${link.active ? 'bg-blue-600 text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'}`} dangerouslySetInnerHTML={{ __html: link.label }} />
-                                        ) : (
-                                            <span key={i} className="px-3 py-1.5 text-xs text-slate-300 dark:text-slate-600" dangerouslySetInnerHTML={{ __html: link.label }} />
-                                        )
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                        <Pagination
+                            currentPage={rubriques.current_page}
+                            lastPage={rubriques.last_page}
+                            total={rubriques.total}
+                            links={rubriques.links}
+                            perPage={30}
+                        />
                     </>
                 )}
             </div>

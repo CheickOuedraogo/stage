@@ -98,7 +98,7 @@ export function Navbar({ user }: NavbarProps) {
 
     return (
         <>
-            <header className="h-14 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 flex items-center px-4 lg:px-6 gap-4 sticky top-0 z-30">
+            <header className="h-14 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-600 flex items-center px-4 lg:px-6 gap-4 sticky top-0 z-30">
                 {/* Mobile hamburger */}
                 <button
                     className="lg:hidden p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-600 dark:text-slate-400 transition-colors"
@@ -211,10 +211,10 @@ export function Navbar({ user }: NavbarProps) {
                                     aria-hidden="true"
                                 />
                                 <div
-                                    className="absolute right-0 top-full mt-1.5 w-56 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 z-20 overflow-hidden"
+                                    className="absolute right-0 top-full mt-1.5 w-56 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-gray-200 dark:border-slate-600 z-20 overflow-hidden"
                                     role="menu"
                                 >
-                                    <div className="px-4 py-3 border-b border-gray-100 dark:border-slate-700">
+                                    <div className="px-4 py-3 border-b border-gray-100 dark:border-slate-600">
                                         <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.name}</p>
                                         <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{user.role_label}</p>
                                     </div>
@@ -253,7 +253,7 @@ export function Navbar({ user }: NavbarProps) {
                         aria-hidden="true"
                     />
                     <nav
-                        className="fixed top-14 left-0 right-0 z-30 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 py-2 px-4 space-y-1 shadow-sm"
+                        className="fixed top-14 left-0 right-0 z-30 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-600 py-2 px-4 space-y-1 shadow-sm"
                         aria-label="Navigation mobile"
                     >
                         {items.map((item) => {

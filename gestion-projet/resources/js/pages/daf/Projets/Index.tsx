@@ -158,7 +158,8 @@ export default function DafProjetsIndex({ projets, stats }: Props) {
                                 <tr>
                                     <td colSpan={6} className="px-6 py-16 text-center text-gray-400 dark:text-slate-500">
                                         <FolderIcon className="w-10 h-10 mx-auto mb-2 opacity-40" />
-                                        <p>Aucun projet</p>
+                                        <p className="font-medium">Aucun projet trouvé</p>
+                                        <p className="text-xs mt-1">Modifiez les filtres ou attendez qu'un porteur soit associé à un projet.</p>
                                     </td>
                                 </tr>
                             ) : (

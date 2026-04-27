@@ -12,11 +12,14 @@ use App\Models\Rubrique;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 class DemandeDepenseSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->createDummyFiles();
+
         $daf = User::where('role', 'daf')->first();
         $ac = User::where('role', 'ac')->first();
 
@@ -378,6 +381,35 @@ class DemandeDepenseSeeder extends Seeder
                 'reference' => $paiement['ref'],
                 'enregistre_par' => $ac?->id,
             ]);
+        }
+    }
+
+    private function createDummyFiles(): void
+    {
+        $minimalPdf = "%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"
+            ."2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n"
+            ."3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]>>endobj\n"
+            ."xref\n0 4\n0000000000 65535 f \ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n190\n%%EOF\n";
+
+        $paths = [
+            'justificatifs/biotech-lot1-facture-proforma.pdf',
+            'justificatifs/biotech-equipements-devis.pdf',
+            'justificatifs/biotech-mission-ordre-mission.pdf',
+            'justificatifs/ntic-fibre-devis-technet.pdf',
+            'justificatifs/ntic-materiel-bon-commande.pdf',
+            'justificatifs/solar-panneaux-facture-proforma.pdf',
+            'justificatifs/solar-panneaux-devis-revise.pdf',
+            'justificatifs/presar-enquete-protocole-budget.pdf',
+            'justificatifs/biodiv-pepinieres-contrats.pdf',
+            'rapports/biotech-lot1-rapport-execution.pdf',
+            'rapports/biotech-equipements-rapport.pdf',
+            'rapports/presar-enquete-rapport-final.pdf',
+        ];
+
+        foreach ($paths as $path) {
+            if (! Storage::disk('private')->exists($path)) {
+                Storage::disk('private')->put($path, $minimalPdf);
+            }
         }
     }
 }
