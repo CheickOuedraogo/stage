@@ -1,4 +1,5 @@
 import AppLayout from '@/components/layout/AppLayout';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import {
     store as faqStore,
     update as faqUpdate,
@@ -169,22 +170,29 @@ function EditForm({ item, onCancel }: { item: FaqItem; onCancel: () => void }) {
 
 function DeleteButton({ item }: { item: FaqItem }) {
     const { delete: destroy, processing } = useForm({});
+    const [open, setOpen] = useState(false);
 
-    const handleDelete = () => {
-        if (confirm('Supprimer cette question ?')) {
-            destroy(faqDestroy.url(item.id));
-        }
-    };
+    const handleDelete = () => setOpen(true);
 
     return (
-        <button
-            onClick={handleDelete}
-            disabled={processing}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-            title="Supprimer"
-        >
-            <TrashIcon className="w-4 h-4" />
-        </button>
+        <>
+            <button
+                onClick={handleDelete}
+                disabled={processing}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                title="Supprimer"
+            >
+                <TrashIcon className="w-4 h-4" />
+            </button>
+            <ConfirmModal
+                open={open}
+                title="Supprimer la question"
+                message={`« ${item.question} » sera définitivement supprimée de la FAQ.`}
+                confirmLabel="Supprimer"
+                onConfirm={() => { destroy(faqDestroy.url(item.id)); setOpen(false); }}
+                onCancel={() => setOpen(false)}
+            />
+        </>
     );
 }
 

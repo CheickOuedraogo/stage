@@ -9,9 +9,12 @@ import {
     rejeterRapport as rejeterRapportAction,
 } from '@/actions/App/Http/Controllers/Daf/DemandeDepenseController';
 import {
-    downloadJustificatif as downloadJustificatifAction,
-    downloadRapport as downloadRapportAction,
+    downloadJustificatif as _downloadJustificatif,
+    downloadRapport as _downloadRapport,
 } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
+
+const downloadJustificatifAction = _downloadJustificatif['/fichiers/demandes/{demande}/justificatif'];
+const downloadRapportAction = _downloadRapport['/fichiers/demandes/{demande}/rapport'];
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
     ArrowLeftIcon,

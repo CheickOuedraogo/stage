@@ -1,8 +1,18 @@
-import { createInertiaApp } from '@inertiajs/react';
+import { createInertiaApp, router } from '@inertiajs/react';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import ErrorPage from './pages/ErrorPage';
 
 const appName = import.meta.env.VITE_APP_NAME || 'CIFEU';
+
+// Branded error pages for 403, 404, 419, 500, 503
+router.on('httpException', (event) => {
+    const status = (event as CustomEvent<{ response: { status: number } }>).detail?.response?.status ?? 500;
+    const el = document.getElementById('app');
+    if (el) {
+        createRoot(el).render(React.createElement(ErrorPage, { status }));
+    }
+});
 
 createInertiaApp({
     title: (title) => (title ? `${title} | ${appName}` : appName),

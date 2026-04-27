@@ -86,7 +86,9 @@ function getNavItems(role: User['role'], notifs: number): NavItem[] {
 
 function isLinkActive(href: string, currentUrl: string): boolean {
     if (href === '#') return false;
-    return currentUrl.startsWith(href);
+    // Exact match OR href is a path prefix followed by '/' or '?'
+    if (currentUrl === href) return true;
+    return currentUrl.startsWith(href + '/') || currentUrl.startsWith(href + '?');
 }
 
 interface SidebarProps {

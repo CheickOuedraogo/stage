@@ -4,9 +4,12 @@ import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils';
 import {
     index as demandesIndex,
     uploadRapport as uploadRapportAction,
-    downloadJustificatif as downloadJustificatifAction,
-    downloadRapport as downloadRapportAction,
+    downloadJustificatif as _downloadJustificatif,
+    downloadRapport as _downloadRapport,
 } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
+
+const downloadJustificatifAction = _downloadJustificatif['/porteur/demandes/{demande}/justificatif'];
+const downloadRapportAction = _downloadRapport['/porteur/demandes/{demande}/rapport-pdf'];
 import { Head, Link, useForm } from '@inertiajs/react';
 import {
     ArrowLeftIcon,

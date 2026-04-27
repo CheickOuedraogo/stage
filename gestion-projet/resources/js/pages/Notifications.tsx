@@ -4,6 +4,7 @@ import {
     readAll as notifReadAll,
 } from '@/routes/notifications';
 import type { PageProps } from '@/types';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     BellIcon,
@@ -81,10 +82,12 @@ export default function Notifications() {
 
             <div className="max-w-2xl">
                 {notifications.data.length === 0 ? (
-                    <div className="text-center py-16 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl">
-                        <BellIcon className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Aucune notification</p>
-                        <p className="text-xs text-slate-500 mt-1">Vous serez notifié ici dès qu'une demande change de statut.</p>
+                    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl">
+                        <EmptyState
+                            icon={BellIcon}
+                            title="Aucune notification"
+                            description="Vous serez notifié ici dès qu'une demande change de statut dans le circuit de validation."
+                        />
                     </div>
                 ) : (
                     <div className="space-y-2">

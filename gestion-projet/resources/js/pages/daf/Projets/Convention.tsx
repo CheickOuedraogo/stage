@@ -1,5 +1,6 @@
 import AppLayout from '@/components/layout/AppLayout';
 import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { clampPercent, conventionStatusClass, formatCurrency, formatDate, truncate, versementTypeClass } from '@/lib/utils';
 import { CHART_PALETTE, CHART_TOOLTIP_STYLE } from '@/lib/charts';
 import { show as dafProjetsShow } from '@/routes/daf/projets';
@@ -73,6 +74,8 @@ export default function DafConventionShow({ projet, convention }: Props) {
     const [editingId, setEditingId] = useState<number | null>(null);
     const [showAddRubrique, setShowAddRubrique] = useState(false);
     const [showAddVersement, setShowAddVersement] = useState(false);
+    const [confirmRubrique, setConfirmRubrique] = useState<number | null>(null);
+    const [confirmVersement, setConfirmVersement] = useState<number | null>(null);
 
     const rubriqueForm = useForm({ libelle: '', montant_prevu: '', description: '' });
     const addVersementForm = useForm({ montant: '', date_reception: '', type: 'tranche', reference: '', description: '' });
@@ -106,8 +109,7 @@ export default function DafConventionShow({ projet, convention }: Props) {
     };
 
     const handleDeleteRubrique = (rubriqeId: number) => {
-        if (!confirm('Supprimer cette rubrique ?')) return;
-        router.delete(destroyRubrique.url({ ...params, rubrique: rubriqeId }));
+        setConfirmRubrique(rubriqeId);
     };
 
     const handleAddVersement = (e: React.FormEvent) => {
@@ -118,8 +120,7 @@ export default function DafConventionShow({ projet, convention }: Props) {
     };
 
     const handleDeleteVersement = (versementId: number) => {
-        if (!confirm('Supprimer ce versement ?')) return;
-        router.delete(destroyVersement.url({ ...params, versement: versementId }));
+        setConfirmVersement(versementId);
     };
 
     const budgetRestant = convention.montant_fcfa - convention.total_rubriques;
@@ -615,6 +616,23 @@ export default function DafConventionShow({ projet, convention }: Props) {
                     )}
                 </div>
             </div>
+
+            <ConfirmModal
+                open={confirmRubrique !== null}
+                title="Supprimer la rubrique"
+                message="Cette action est irréversible. La rubrique et son historique de consommation seront supprimés."
+                confirmLabel="Supprimer"
+                onConfirm={() => { router.delete(destroyRubrique.url({ ...params, rubrique: confirmRubrique! })); setConfirmRubrique(null); }}
+                onCancel={() => setConfirmRubrique(null)}
+            />
+            <ConfirmModal
+                open={confirmVersement !== null}
+                title="Supprimer le versement"
+                message="Ce versement sera définitivement supprimé. Le montant mobilisé de la convention sera recalculé."
+                confirmLabel="Supprimer"
+                onConfirm={() => { router.delete(destroyVersement.url({ ...params, versement: confirmVersement! })); setConfirmVersement(null); }}
+                onCancel={() => setConfirmVersement(null)}
+            />
         </AppLayout>
     );
 }

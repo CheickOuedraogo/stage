@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\ChatController as AdminChatController;
 use App\Http\Controllers\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Admin\MaintenanceController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Daf\ChatController as DafChatController;
 use App\Http\Controllers\Daf\ConventionController as DafConventionController;
@@ -31,6 +32,10 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('guest')->group(function () {
     Route::get('/connexion', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/connexion', [LoginController::class, 'login']);
+
+    // Google OAuth
+    Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('auth.google');
+    Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('auth.google.callback');
 });
 
 Route::post('/deconnexion', [LoginController::class, 'logout'])
@@ -44,6 +49,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::patch('/notifications/{notification}/lue', [NotificationController::class, 'markRead'])->name('notifications.read');
     Route::patch('/notifications/toutes-lues', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+
+    // File downloads — accessible by porteur (owner) + daf + ac
+    Route::get('/fichiers/demandes/{demande}/justificatif', [PorteurDemandeDepenseController::class, 'downloadJustificatif'])->name('demandes.justificatif.download');
+    Route::get('/fichiers/demandes/{demande}/rapport', [PorteurDemandeDepenseController::class, 'downloadRapport'])->name('demandes.rapport.download');
 
     // Profile (all roles)
     Route::get('/profil', [ProfileController::class, 'edit'])->name('profile.edit');
