@@ -3,6 +3,7 @@ import { formatCurrency } from '@/lib/utils';
 import { show as demandeShow } from '@/actions/App/Http/Controllers/Daf/DemandeDepenseController';
 import { index as dafDemandesIndex } from '@/routes/daf/demandes';
 import { index as dafProjetsIndex } from '@/routes/daf/projets';
+import { index as dafRapportsIndex } from '@/routes/daf/rapports';
 import type { PageProps } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
@@ -119,6 +120,17 @@ export default function DafDashboard() {
                     <span>Versements reçus : <span className="font-bold text-slate-900 dark:text-white">{formatCurrency(stats.versements_total)}</span></span>
                     <span>Budget total : <span className="font-bold text-slate-900 dark:text-white">{formatCurrency(stats.budget_total)}</span></span>
                 </div>
+            </div>
+
+            {/* Rapports — raccourci */}
+            <div className="mb-6 flex items-center justify-between bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl px-5 py-3.5">
+                <div className="flex items-center gap-2">
+                    <ChartBarIcon className="w-4 h-4 text-indigo-500" />
+                    <span className="text-sm text-slate-600 dark:text-slate-400">Graphiques et analyses budgétaires détaillées dans les Rapports</span>
+                </div>
+                <Link href={dafRapportsIndex.url()} className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium shrink-0">
+                    Voir les rapports <ArrowRightIcon className="w-3 h-3" />
+                </Link>
             </div>
 
             {/* Demandes récentes */}

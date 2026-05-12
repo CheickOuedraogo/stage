@@ -1,11 +1,13 @@
 import AppLayout from '@/components/layout/AppLayout';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { demandeStatusClass, formatCurrency, formatDate } from '@/lib/utils';
 import {
     index as demandesIndex,
     show as demandeShow,
 } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
+import { index as projetsIndex } from '@/routes/porteur/projets';
 import { Head, Link, router } from '@inertiajs/react';
-import { ClipboardDocumentListIcon } from '@heroicons/react/24/outline';
+import { ClipboardDocumentListIcon, FolderOpenIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 
 interface Demande {
@@ -81,25 +83,37 @@ export default function DemandesIndex({ demandes, conventions, filters, statuses
                         setConventionId(e.target.value);
                         applyFilter({ convention_id: e.target.value || undefined });
                     }}
-                    className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    className="flex-1 min-w-0 max-w-xs px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 truncate"
                     aria-label="Filtrer par convention"
                 >
                     <option value="">Toutes les conventions</option>
-                    {conventions.map((c) => (
-                        <option key={c.id} value={c.id}>{c.projet_titre} — {c.titre}</option>
-                    ))}
+                    {conventions.map((c) => {
+                        const label = `${c.projet_titre} — ${c.titre}`;
+                        return (
+                            <option key={c.id} value={c.id} title={label}>
+                                {label.length > 60 ? label.slice(0, 57) + '…' : label}
+                            </option>
+                        );
+                    })}
                 </select>
             </div>
 
             {demandes.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-center">
-                    <ClipboardDocumentListIcon className="w-16 h-16 text-slate-300 dark:text-slate-600 mb-4" />
-                    <h3 className="text-lg font-medium text-slate-700 dark:text-slate-300 mb-1">
-                        Aucune demande
-                    </h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                        Vos demandes de dépenses apparaîtront ici.
-                    </p>
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl">
+                    <EmptyState
+                        icon={ClipboardDocumentListIcon}
+                        title="Aucune demande pour le moment"
+                        description="Accédez à une convention depuis vos projets pour soumettre votre première demande de dépense."
+                        action={
+                            <Link
+                                href={projetsIndex.url()}
+                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                            >
+                                <FolderOpenIcon className="w-4 h-4" />
+                                Voir mes projets
+                            </Link>
+                        }
+                    />
                 </div>
             ) : (
                 <div className="space-y-3">

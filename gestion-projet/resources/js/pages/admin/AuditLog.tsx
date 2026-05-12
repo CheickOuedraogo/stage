@@ -4,13 +4,18 @@ import { auditLog as adminAuditLog } from '@/routes/admin';
 import { formatDateTime, getInitials } from '@/lib/utils';
 import type { PaginatedData } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { FunnelIcon, UserIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon, FunnelIcon, UserIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useState as useLocalState } from 'react';
 
 interface AuditEntry {
     id: number;
     action: string;
     description: string | null;
     ip_address: string | null;
+    auditable_type: string | null;
+    auditable_id: number | null;
+    old_values: Record<string, unknown> | null;
+    new_values: Record<string, unknown> | null;
     created_at: string;
     user: {
         id: number;
@@ -63,6 +68,92 @@ const actionColors: Record<string, string> = {
     user_activated: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
     user_deactivated: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
 };
+
+const FIELD_LABELS: Record<string, string> = {
+    name: 'Nom',
+    email: 'E-mail',
+    role: 'Rôle',
+    is_active: 'Actif',
+    telephone: 'Téléphone',
+    status: 'Statut',
+    montant: 'Montant',
+    montant_prevu: 'Montant prévu',
+    montant_fcfa: 'Montant FCFA',
+    titre: 'Titre',
+    objet: 'Objet',
+    description: 'Description',
+    motif_rejet: 'Motif rejet',
+    date_fin_reelle: 'Date clôture',
+    date_reception: 'Date réception',
+    reponse: 'Réponse',
+    question: 'Question',
+    ordre: 'Ordre',
+    libelle: 'Libellé',
+};
+
+function formatValue(value: unknown): string {
+    if (value === null || value === undefined) return '—';
+    if (typeof value === 'boolean') return value ? 'Oui' : 'Non';
+    if (typeof value === 'number') return new Intl.NumberFormat('fr-FR').format(value);
+    return String(value);
+}
+
+function ValueDiff({ oldValues, newValues }: { oldValues: Record<string, unknown> | null; newValues: Record<string, unknown> | null }) {
+    const [expanded, setExpanded] = useLocalState(false);
+    if (!oldValues && !newValues) return null;
+
+    const allKeys = Array.from(new Set([
+        ...Object.keys(oldValues ?? {}),
+        ...Object.keys(newValues ?? {}),
+    ])).filter((k) => !['id', 'created_at', 'updated_at', 'remember_token', 'password'].includes(k));
+
+    if (allKeys.length === 0) return null;
+
+    return (
+        <div className="mt-1.5">
+            <button
+                onClick={() => setExpanded((v) => !v)}
+                className="flex items-center gap-1 text-xs text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
+            >
+                <ChevronDownIcon className={`w-3 h-3 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+                {expanded ? 'Masquer les détails' : `Voir les détails (${allKeys.length} champ${allKeys.length > 1 ? 's' : ''})`}
+            </button>
+
+            {expanded && (
+                <div className="mt-2 rounded-lg border border-gray-100 dark:border-slate-800 overflow-hidden text-xs">
+                    <table className="w-full">
+                        <thead>
+                            <tr className="bg-gray-50 dark:bg-slate-800">
+                                <th className="text-left px-3 py-1.5 font-semibold text-gray-600 dark:text-slate-400 w-1/4">Champ</th>
+                                {oldValues && <th className="text-left px-3 py-1.5 font-semibold text-red-600 dark:text-red-400 w-[37.5%]">Avant</th>}
+                                {newValues && <th className="text-left px-3 py-1.5 font-semibold text-emerald-600 dark:text-emerald-400 w-[37.5%]">Après</th>}
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
+                            {allKeys.map((key) => (
+                                <tr key={key} className="hover:bg-gray-50 dark:hover:bg-slate-800/50">
+                                    <td className="px-3 py-1.5 font-medium text-gray-600 dark:text-slate-400">
+                                        {FIELD_LABELS[key] ?? key}
+                                    </td>
+                                    {oldValues && (
+                                        <td className={`px-3 py-1.5 font-mono ${oldValues[key] !== undefined ? 'text-red-700 dark:text-red-400 bg-red-50/50 dark:bg-red-900/10' : 'text-gray-400 dark:text-slate-600'}`}>
+                                            {oldValues[key] !== undefined ? formatValue(oldValues[key]) : '—'}
+                                        </td>
+                                    )}
+                                    {newValues && (
+                                        <td className={`px-3 py-1.5 font-mono ${newValues[key] !== undefined ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/10' : 'text-gray-400 dark:text-slate-600'}`}>
+                                            {newValues[key] !== undefined ? formatValue(newValues[key]) : '—'}
+                                        </td>
+                                    )}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+        </div>
+    );
+}
 
 export default function AuditLog({ logs, users, selectedUserId }: AuditLogProps) {
     const selectedUser = selectedUserId ? users.find((u) => u.id === selectedUserId) : null;
@@ -195,10 +286,16 @@ export default function AuditLog({ logs, users, selectedUserId }: AuditLogProps)
                                                         }`}>
                                                             {actionLabels[log.action] ?? log.action}
                                                         </span>
+                                                        {log.user?.role && (
+                                                            <span className="text-xs text-gray-400 dark:text-slate-500 bg-gray-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                                                                {log.user.role}
+                                                            </span>
+                                                        )}
                                                     </div>
                                                     {log.description && (
-                                                        <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{log.description}</p>
+                                                        <p className="text-xs text-gray-600 dark:text-slate-300">{log.description}</p>
                                                     )}
+                                                    <ValueDiff oldValues={log.old_values} newValues={log.new_values} />
                                                     <div className="flex items-center gap-3 mt-1">
                                                         <span className="text-xs text-gray-400 dark:text-slate-500">{formatDateTime(log.created_at)}</span>
                                                         {log.ip_address && (

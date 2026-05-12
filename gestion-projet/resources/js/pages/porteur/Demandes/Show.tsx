@@ -4,9 +4,12 @@ import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils';
 import {
     index as demandesIndex,
     uploadRapport as uploadRapportAction,
-    downloadJustificatif as downloadJustificatifAction,
-    downloadRapport as downloadRapportAction,
+    downloadJustificatif as _downloadJustificatif,
+    downloadRapport as _downloadRapport,
 } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
+
+const downloadJustificatifAction = _downloadJustificatif['/porteur/demandes/{demande}/justificatif'];
+const downloadRapportAction = _downloadRapport['/porteur/demandes/{demande}/rapport-pdf'];
 import { Head, Link, useForm } from '@inertiajs/react';
 import {
     ArrowLeftIcon,
@@ -69,7 +72,8 @@ const STATUS_ORDER = ['soumise', 'validee_daf', 'validee_ac', 'payee', 'rapport_
 function getStepState(stepStatus: string, currentStatus: string): 'done' | 'current' | 'pending' | 'rejected' {
     const isRejected = currentStatus === 'rejetee_daf' || currentStatus === 'rejetee_ac';
     if (isRejected) {
-        const rejectedAt = currentStatus === 'rejetee_daf' ? 'soumise' : 'validee_daf';
+        // rejectedAt = the step where rejection occurred (DAF or AC decision step)
+        const rejectedAt = currentStatus === 'rejetee_daf' ? 'validee_daf' : 'validee_ac';
         const rejectedIdx = STATUS_ORDER.indexOf(rejectedAt);
         const stepIdx = STATUS_ORDER.indexOf(stepStatus);
         if (stepIdx < rejectedIdx) return 'done';

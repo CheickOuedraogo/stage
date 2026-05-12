@@ -25,6 +25,7 @@ class ConventionController extends Controller
             'bailleur:id,nom,sigle,type,pays',
             'rubriques',
             'versements' => fn ($q) => $q->orderByDesc('date_reception'),
+            'paiementsDirects' => fn ($q) => $q->with('rubrique:id,libelle')->orderByDesc('date_paiement'),
         ]);
 
         return Inertia::render('daf/Projets/Convention', [
@@ -181,6 +182,13 @@ class ConventionController extends Controller
                 'type_label' => $v->type->label(),
                 'reference' => $v->reference,
                 'description' => $v->description,
+            ])->values(),
+            'paiements_directs' => $convention->paiementsDirects->map(fn ($p) => [
+                'id' => $p->id,
+                'montant' => $p->montant,
+                'objet_depense' => $p->objet_depense,
+                'date_paiement' => $p->date_paiement->toDateString(),
+                'rubrique' => $p->rubrique ? ['libelle' => $p->rubrique->libelle] : null,
             ])->values(),
         ];
     }
