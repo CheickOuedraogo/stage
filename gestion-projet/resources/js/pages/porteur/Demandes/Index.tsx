@@ -83,13 +83,18 @@ export default function DemandesIndex({ demandes, conventions, filters, statuses
                         setConventionId(e.target.value);
                         applyFilter({ convention_id: e.target.value || undefined });
                     }}
-                    className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    className="flex-1 min-w-0 max-w-xs px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 truncate"
                     aria-label="Filtrer par convention"
                 >
                     <option value="">Toutes les conventions</option>
-                    {conventions.map((c) => (
-                        <option key={c.id} value={c.id}>{c.projet_titre} — {c.titre}</option>
-                    ))}
+                    {conventions.map((c) => {
+                        const label = `${c.projet_titre} — ${c.titre}`;
+                        return (
+                            <option key={c.id} value={c.id} title={label}>
+                                {label.length > 60 ? label.slice(0, 57) + '…' : label}
+                            </option>
+                        );
+                    })}
                 </select>
             </div>
 

@@ -115,7 +115,7 @@ export default function DafDemandesIndex({ en_attente, historique, filters, stat
                                     { preserveState: true }
                                 );
                             }}
-                            className="px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                            className="px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                             aria-label="Filtrer par statut"
                         >
                             <option value="">Tous les statuts</option>
@@ -162,7 +162,7 @@ function DemandeRow({ demande }: { demande: Demande }) {
     return (
         <Link
             href={demandeShow.url(demande.id)}
-            className="block bg-white dark:bg-slate-900 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-5 hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-700"
+            className="block bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-5 hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-700"
         >
             <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">

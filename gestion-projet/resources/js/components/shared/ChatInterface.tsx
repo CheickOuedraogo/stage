@@ -20,18 +20,31 @@ interface Props {
 export function ChatInterface({ messages: initialMessages, sendUrl, pollUrl, contactName }: Props) {
     const [messages, setMessages] = useState<ChatMsg[]>(initialMessages);
     const bottomRef = useRef<HTMLDivElement>(null);
+    const lastIdRef = useRef(initialMessages.length > 0 ? initialMessages[initialMessages.length - 1].id : 0);
     const form = useForm({ message: '' });
 
-    const lastId = messages.length > 0 ? messages[messages.length - 1].id : 0;
-    const lastIdRef = useRef(lastId);
+    // Sync when Inertia reloads props (e.g. after sending a message)
+    useEffect(() => {
+        setMessages((current) => {
+            const initIds = new Set(initialMessages.map((m) => m.id));
+            // Keep polled messages that are newer than what the server returned
+            const lastInitId = initialMessages.length > 0 ? initialMessages[initialMessages.length - 1].id : 0;
+            const extra = current.filter((m) => !initIds.has(m.id) && m.id > lastInitId);
+            const merged = [...initialMessages, ...extra];
+            if (merged.length > 0) {
+                lastIdRef.current = merged[merged.length - 1].id;
+            }
+            return merged;
+        });
+    }, [initialMessages]);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    // Polling toutes les 4 secondes pour les nouveaux messages
+    // Poll every 3 seconds for incoming messages
     useEffect(() => {
-        const interval = setInterval(async () => {
+        const poll = async () => {
             try {
                 const res = await fetch(`${pollUrl}?since=${lastIdRef.current}`, {
                     headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
@@ -51,8 +64,9 @@ export function ChatInterface({ messages: initialMessages, sendUrl, pollUrl, con
             } catch {
                 // ignore network errors silently
             }
-        }, 4000);
+        };
 
+        const interval = setInterval(poll, 3000);
         return () => clearInterval(interval);
     }, [pollUrl]);
 
@@ -61,16 +75,26 @@ export function ChatInterface({ messages: initialMessages, sendUrl, pollUrl, con
         if (!form.data.message.trim()) return;
         form.post(sendUrl, {
             preserveScroll: true,
+            preserveState: false,
             onSuccess: () => form.reset(),
         });
     };
 
     return (
-        <div className="flex flex-col h-[600px] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
+        <div className="flex flex-col bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden" style={{ height: 'calc(100vh - 10rem)' }}>
             {/* Header */}
-            <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900">
-                <p className="text-sm font-semibold text-slate-900 dark:text-white">Conversation avec {contactName}</p>
-                <p className="text-xs text-slate-400 mt-0.5">Les réponses peuvent prendre un moment</p>
+            <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/60 shrink-0">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center shrink-0">
+                        <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
+                            {contactName.slice(0, 1)}
+                        </span>
+                    </div>
+                    <div>
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white">{contactName}</p>
+                        <p className="text-xs text-slate-400">Les réponses peuvent prendre un moment</p>
+                    </div>
+                </div>
             </div>
 
             {/* Messages */}

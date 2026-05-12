@@ -21,7 +21,7 @@ uses(LazilyRefreshDatabase::class);
 function makeConventionWithRubrique(int $montantRubrique = 10_000_000): array
 {
     $porteur = User::factory()->porteur()->create();
-    $projet = Projet::factory()->for($porteur, 'porteur')->create();
+    $projet = Projet::factory()->enCours()->for($porteur, 'porteur')->create();
     $convention = Convention::factory()->for($projet)->create(['montant_fcfa' => 20_000_000]);
     $rubrique = Rubrique::factory()->for($convention)->create(['montant_prevu' => $montantRubrique]);
 
@@ -560,14 +560,15 @@ describe('AC – valider un rapport', function () {
     });
 });
 
-// ── Porteur: paiements directs ────────────────────────────────────────────────
+// ── DAF: paiements directs ────────────────────────────────────────────────────
 
-describe('Porteur – paiements directs', function () {
+describe('DAF – paiements directs', function () {
     it('enregistre un paiement direct', function () {
-        ['porteur' => $porteur, 'projet' => $projet, 'convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
+        $daf = User::factory()->daf()->create();
+        ['projet' => $projet, 'convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
-        $this->actingAs($porteur)
-            ->post(route('porteur.projets.conventions.paiements-directs.store', [$projet, $convention]), [
+        $this->actingAs($daf)
+            ->post(route('daf.projets.conventions.paiements-directs.store', [$projet, $convention]), [
                 'rubrique_id' => $rubrique->id,
                 'montant' => 1_000_000,
                 'objet_depense' => 'Achat direct',
@@ -580,15 +581,16 @@ describe('Porteur – paiements directs', function () {
             'convention_id' => $convention->id,
             'rubrique_id' => $rubrique->id,
             'montant' => 1_000_000,
-            'enregistre_par' => $porteur->id,
+            'enregistre_par' => $daf->id,
         ]);
     });
 
     it('enregistre un paiement direct sans rubrique', function () {
-        ['porteur' => $porteur, 'projet' => $projet, 'convention' => $convention] = makeConventionWithRubrique();
+        $daf = User::factory()->daf()->create();
+        ['projet' => $projet, 'convention' => $convention] = makeConventionWithRubrique();
 
-        $this->actingAs($porteur)
-            ->post(route('porteur.projets.conventions.paiements-directs.store', [$projet, $convention]), [
+        $this->actingAs($daf)
+            ->post(route('daf.projets.conventions.paiements-directs.store', [$projet, $convention]), [
                 'rubrique_id' => null,
                 'montant' => 2_000_000,
                 'objet_depense' => 'Divers',
@@ -604,41 +606,28 @@ describe('Porteur – paiements directs', function () {
     });
 
     it('supprime un paiement direct', function () {
-        ['porteur' => $porteur, 'projet' => $projet, 'convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
+        $daf = User::factory()->daf()->create();
+        ['projet' => $projet, 'convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         $paiementDirect = PaiementDirect::factory()->create([
             'convention_id' => $convention->id,
             'rubrique_id' => $rubrique->id,
-            'enregistre_par' => $porteur->id,
+            'enregistre_par' => $daf->id,
         ]);
 
-        $this->actingAs($porteur)
-            ->delete(route('porteur.projets.conventions.paiements-directs.destroy', [$projet, $convention, $paiementDirect]))
+        $this->actingAs($daf)
+            ->delete(route('daf.projets.conventions.paiements-directs.destroy', [$projet, $convention, $paiementDirect]))
             ->assertRedirect();
 
         $this->assertModelMissing($paiementDirect);
     });
 
-    it('refuse la suppression d\'un paiement direct appartenant à un autre porteur', function () {
-        $autrePorteur = User::factory()->porteur()->create();
-        ['porteur' => $porteur, 'projet' => $projet, 'convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
-
-        $paiementDirect = PaiementDirect::factory()->create([
-            'convention_id' => $convention->id,
-            'rubrique_id' => $rubrique->id,
-            'enregistre_par' => $autrePorteur->id,
-        ]);
-
-        $this->actingAs($porteur)
-            ->delete(route('porteur.projets.conventions.paiements-directs.destroy', [$projet, $convention, $paiementDirect]))
-            ->assertForbidden();
-    });
-
     it('refuse une date de paiement dans le futur', function () {
-        ['porteur' => $porteur, 'projet' => $projet, 'convention' => $convention] = makeConventionWithRubrique();
+        $daf = User::factory()->daf()->create();
+        ['projet' => $projet, 'convention' => $convention] = makeConventionWithRubrique();
 
-        $this->actingAs($porteur)
-            ->post(route('porteur.projets.conventions.paiements-directs.store', [$projet, $convention]), [
+        $this->actingAs($daf)
+            ->post(route('daf.projets.conventions.paiements-directs.store', [$projet, $convention]), [
                 'montant' => 500_000,
                 'objet_depense' => 'Test',
                 'date_paiement' => today()->addDay()->toDateString(),

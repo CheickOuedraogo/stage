@@ -3,16 +3,21 @@ import { useDarkMode } from '@/hooks/useDarkMode';
 import { logout } from '@/routes';
 import { auditLog as adminAuditLog, dashboard as adminDashboard } from '@/routes/admin';
 import { index as usersIndex } from '@/routes/admin/users';
+import { index as adminFaqIndex } from '@/routes/admin/faq';
+import { index as adminChatIndex } from '@/routes/admin/chat';
 import { dashboard as acDashboard } from '@/routes/ac';
 import { index as acDemandesIndex } from '@/routes/ac/demandes';
+import { index as acChatIndex } from '@/routes/ac/chat';
 import { dashboard as dafDashboard } from '@/routes/daf';
 import { index as dafDemandesIndex } from '@/routes/daf/demandes';
 import { index as dafProjetsIndex } from '@/routes/daf/projets';
-import { index as dafVersementsIndex } from '@/routes/daf/versements';
+import { index as dafRapportsIndex } from '@/routes/daf/rapports';
+import { index as dafChatIndex } from '@/routes/daf/chat';
 import { index as acPaiementsIndex } from '@/routes/ac/paiements';
 import { dashboard as porteurDashboard } from '@/routes/porteur';
 import { index as porteurDemandesIndex } from '@/routes/porteur/demandes';
 import { index as porteurProjetsIndex } from '@/routes/porteur/projets';
+import { index as porteurFaqIndex } from '@/routes/porteur/faq';
 import { index as notificationsIndex } from '@/routes/notifications';
 import { edit as profileEdit } from '@/routes/profile';
 import type { User } from '@/types';
@@ -22,12 +27,15 @@ import {
     Bars3Icon,
     BellIcon,
     ChartBarIcon,
+    ChatBubbleLeftRightIcon,
     ClipboardDocumentCheckIcon,
     ClipboardDocumentListIcon,
     CreditCardIcon,
+    DocumentChartBarIcon,
     FolderIcon,
     HomeIcon,
     MoonIcon,
+    QuestionMarkCircleIcon,
     SunIcon,
     UserCircleIcon,
     UsersIcon,
@@ -50,24 +58,26 @@ function getNavItems(role: User['role'], notifs: number): NavItem[] {
             { label: 'Tableau de bord', href: adminDashboard.url(), icon: HomeIcon },
             { label: 'Utilisateurs', href: usersIndex.url(), icon: UsersIcon },
             { label: 'Journal d\'audit', href: adminAuditLog.url(), icon: ClipboardDocumentCheckIcon },
+            { label: 'FAQ', href: adminFaqIndex.url(), icon: QuestionMarkCircleIcon },
+            { label: 'Messages', href: adminChatIndex.url(), icon: ChatBubbleLeftRightIcon },
         ],
         daf: [
             { label: 'Tableau de bord', href: dafDashboard.url(), icon: ChartBarIcon },
             { label: 'Projets', href: dafProjetsIndex.url(), icon: FolderIcon },
             { label: 'Demandes', href: dafDemandesIndex.url(), icon: ClipboardDocumentListIcon },
-            { label: 'Versements', href: dafVersementsIndex.url(), icon: CreditCardIcon },
-            { label: 'Notifications', href: notificationsIndex.url(), icon: BellIcon, badge: notifBadge },
+            { label: 'Rapports', href: dafRapportsIndex.url(), icon: DocumentChartBarIcon },
+            { label: 'Assistance', href: dafChatIndex.url(), icon: ChatBubbleLeftRightIcon },
         ],
         ac: [
             { label: 'Tableau de bord', href: acDashboard.url(), icon: HomeIcon },
             { label: 'Demandes', href: acDemandesIndex.url(), icon: ClipboardDocumentListIcon },
             { label: 'Paiements', href: acPaiementsIndex.url(), icon: CreditCardIcon },
-            { label: 'Notifications', href: notificationsIndex.url(), icon: BellIcon, badge: notifBadge },
+            { label: 'Assistance', href: acChatIndex.url(), icon: ChatBubbleLeftRightIcon },
         ],
         porteur: [
             { label: 'Mes projets', href: porteurProjetsIndex.url(), icon: FolderIcon },
             { label: 'Mes demandes', href: porteurDemandesIndex.url(), icon: ClipboardDocumentListIcon },
-            { label: 'Notifications', href: notificationsIndex.url(), icon: BellIcon, badge: notifBadge },
+            { label: 'Assistance', href: porteurFaqIndex.url(), icon: QuestionMarkCircleIcon },
         ],
     };
 

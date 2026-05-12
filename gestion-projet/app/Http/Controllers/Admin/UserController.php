@@ -61,6 +61,13 @@ class UserController extends Controller
             'is_active' => true,
         ]);
 
+        AuditLog::log(
+            'created',
+            $user,
+            newValues: ['name' => $user->name, 'email' => $user->email, 'role' => $user->role->value],
+            description: "Création de l'utilisateur « {$user->name} » ({$user->role->shortLabel()})",
+        );
+
         return redirect()->route('admin.users.index')
             ->with('success', "L'utilisateur {$user->name} a été créé avec succès.");
     }
@@ -88,7 +95,24 @@ class UserController extends Controller
             $data['password'] = Hash::make($request->validated('password'));
         }
 
+        $oldValues = $user->only(['name', 'email', 'role', 'telephone', 'is_active']);
         $user->update($data);
+        $newValues = array_intersect_key($user->fresh()->only(['name', 'email', 'role', 'telephone', 'is_active']), $oldValues);
+        $changed = array_filter(
+            $newValues,
+            fn ($v, $k) => $oldValues[$k] !== $v,
+            ARRAY_FILTER_USE_BOTH
+        );
+
+        if (! empty($changed)) {
+            AuditLog::log(
+                'updated',
+                $user,
+                oldValues: array_intersect_key($oldValues, $changed),
+                newValues: $changed,
+                description: "Modification de l'utilisateur « {$user->name} »",
+            );
+        }
 
         return redirect()->route('admin.users.index')
             ->with('success', "L'utilisateur {$user->name} a été mis à jour.");

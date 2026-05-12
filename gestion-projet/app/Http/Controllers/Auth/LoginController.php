@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\AuditLog;
@@ -17,7 +16,7 @@ class LoginController extends Controller
     public function showLoginForm(): Response|RedirectResponse
     {
         if (Auth::check()) {
-            return redirect($this->dashboardRoute());
+            return redirect(Auth::user()->dashboardRoute());
         }
 
         $maintenanceActive = Setting::isMaintenanceActive();
@@ -28,6 +27,7 @@ class LoginController extends Controller
             'maintenanceActive' => $maintenanceActive,
             'maintenanceReason' => $maintenanceReason,
             'maintenanceUntil' => $maintenanceUntil,
+            'googleClientId' => config('services.google.client_id'),
         ]);
     }
 
@@ -61,7 +61,7 @@ class LoginController extends Controller
 
         AuditLog::log('login', $user, description: "Connexion de {$user->name}");
 
-        return redirect($this->dashboardRoute());
+        return redirect($user->dashboardRoute());
     }
 
     public function logout(): RedirectResponse
@@ -78,15 +78,5 @@ class LoginController extends Controller
         request()->session()->regenerateToken();
 
         return redirect()->route('login');
-    }
-
-    private function dashboardRoute(): string
-    {
-        return match (Auth::user()->role) {
-            UserRole::Admin => route('admin.dashboard'),
-            UserRole::Daf => route('daf.dashboard'),
-            UserRole::Ac => route('ac.dashboard'),
-            UserRole::Porteur => route('porteur.dashboard'),
-        };
     }
 }

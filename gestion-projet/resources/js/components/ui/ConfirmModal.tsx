@@ -1,5 +1,5 @@
 import { ExclamationTriangleIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { useEffect, useRef } from 'react';
+import { useEffect, useId, useRef } from 'react';
 
 interface ConfirmModalProps {
     open: boolean;
@@ -23,18 +23,13 @@ export function ConfirmModal({
     onCancel,
 }: ConfirmModalProps) {
     const confirmRef = useRef<HTMLButtonElement>(null);
+    const id = useId();
 
+    // Single effect: focus + keyboard — only active when open
     useEffect(() => {
-        if (open) {
-            confirmRef.current?.focus();
-        }
-    }, [open]);
-
-    useEffect(() => {
-        const handler = (e: KeyboardEvent) => {
-            if (!open) return;
-            if (e.key === 'Escape') onCancel();
-        };
+        if (!open) return;
+        confirmRef.current?.focus();
+        const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
         document.addEventListener('keydown', handler);
         return () => document.removeEventListener('keydown', handler);
     }, [open, onCancel]);
@@ -53,17 +48,11 @@ export function ConfirmModal({
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
             role="dialog"
             aria-modal="true"
-            aria-labelledby="confirm-title"
-            aria-describedby="confirm-message"
+            aria-labelledby={`${id}-title`}
+            aria-describedby={`${id}-message`}
         >
-            {/* Backdrop */}
-            <div
-                className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-                onClick={onCancel}
-                aria-hidden="true"
-            />
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} aria-hidden="true" />
 
-            {/* Modal */}
             <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-700 p-6 animate-in fade-in zoom-in-95 duration-150">
                 <button
                     onClick={onCancel}
@@ -78,10 +67,10 @@ export function ConfirmModal({
                         <ExclamationTriangleIcon className={`w-5 h-5 ${iconColor}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <h2 id="confirm-title" className="text-base font-semibold text-slate-900 dark:text-white">
+                        <h2 id={`${id}-title`} className="text-base font-semibold text-slate-900 dark:text-white">
                             {title}
                         </h2>
-                        <p id="confirm-message" className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                        <p id={`${id}-message`} className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                             {message}
                         </p>
                     </div>

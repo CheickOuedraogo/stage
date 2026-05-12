@@ -21,7 +21,7 @@ class DashboardController extends Controller
 {
     public function admin(): Response
     {
-        $recentAuditLogs = AuditLog::with('user:id,name')
+        $recentAuditLogs = AuditLog::with('user:id,name,role')
             ->latest('created_at')
             ->limit(8)
             ->get()
@@ -30,6 +30,7 @@ class DashboardController extends Controller
                 'action' => $log->action,
                 'description' => $log->description,
                 'user' => $log->user?->name ?? 'Système',
+                'user_role' => $log->user?->role?->shortLabel(),
                 'created_at' => $log->created_at?->diffForHumans() ?? '—',
             ]);
 

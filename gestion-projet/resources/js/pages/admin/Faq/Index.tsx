@@ -8,7 +8,6 @@ import {
 import type { PageProps } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import {
-    ArrowsUpDownIcon,
     CheckIcon,
     PencilIcon,
     PlusIcon,
@@ -189,7 +188,7 @@ function DeleteButton({ item }: { item: FaqItem }) {
                 title="Supprimer la question"
                 message={`« ${item.question} » sera définitivement supprimée de la FAQ.`}
                 confirmLabel="Supprimer"
-                onConfirm={() => { destroy(faqDestroy.url(item.id)); setOpen(false); }}
+                onConfirm={() => destroy(faqDestroy.url(item.id), { onSuccess: () => setOpen(false), onError: () => setOpen(false) })}
                 onCancel={() => setOpen(false)}
             />
         </>
@@ -205,55 +204,58 @@ export default function AdminFaqIndex() {
         <AppLayout title="Gestion FAQ">
             <Head title="Gestion FAQ — Admin — CIFEU" />
 
-            <div className="mb-6 flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Gestion de la FAQ</h2>
-                    <p className="text-sm text-slate-500 mt-1">{items.length} question{items.length !== 1 ? 's' : ''} enregistrée{items.length !== 1 ? 's' : ''}</p>
+            <div className="max-w-3xl mx-auto">
+                <div className="mb-6 flex items-center justify-between">
+                    <div>
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Gestion de la FAQ</h2>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                            {items.length} question{items.length !== 1 ? 's' : ''} — visible{items.filter((i) => i.is_active).length !== 1 ? 's' : ''} : {items.filter((i) => i.is_active).length}
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => { setShowCreate((v) => !v); setEditingId(null); }}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                    >
+                        <PlusIcon className="w-4 h-4" />
+                        {showCreate ? 'Annuler' : 'Nouvelle question'}
+                    </button>
                 </div>
-                <button
-                    onClick={() => { setShowCreate(true); setEditingId(null); }}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
-                >
-                    <PlusIcon className="w-4 h-4" />
-                    Nouvelle question
-                </button>
-            </div>
 
-            <div className="space-y-4">
                 {showCreate && (
-                    <CreateForm onCancel={() => setShowCreate(false)} />
+                    <div className="mb-4">
+                        <CreateForm onCancel={() => setShowCreate(false)} />
+                    </div>
                 )}
 
                 {items.length === 0 && !showCreate ? (
                     <div className="text-center py-16 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl">
-                        <p className="text-slate-500">Aucune question. Cliquez sur « Nouvelle question » pour commencer.</p>
+                        <p className="text-slate-500 text-sm">Aucune question. Cliquez sur « Nouvelle question » pour commencer.</p>
                     </div>
                 ) : (
-                    items.map((item) => (
-                        <div key={item.id} className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
-                            {editingId === item.id ? (
-                                <div className="p-4">
-                                    <EditForm item={item} onCancel={() => setEditingId(null)} />
-                                </div>
-                            ) : (
-                                <div className="px-5 py-4">
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                                            <ArrowsUpDownIcon className="w-4 h-4 text-slate-300 shrink-0" />
-                                            <div className="min-w-0">
-                                                <div className="flex items-center gap-2 flex-wrap">
-                                                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{item.question}</p>
-                                                    {!item.is_active && (
-                                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-slate-400">
-                                                            Masquée
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <p className="text-xs text-slate-400 mt-0.5 font-mono line-clamp-1">{item.reponse.slice(0, 100)}…</p>
+                    <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl divide-y divide-gray-100 dark:divide-slate-800 overflow-hidden">
+                        {items.map((item, idx) => (
+                            <div key={item.id}>
+                                {editingId === item.id ? (
+                                    <div className="p-4 bg-amber-50/50 dark:bg-amber-900/10">
+                                        <EditForm item={item} onCancel={() => setEditingId(null)} />
+                                    </div>
+                                ) : (
+                                    <div className={`px-5 py-4 flex items-center gap-4 group hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors ${!item.is_active ? 'opacity-60' : ''}`}>
+                                        <span className="shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 text-xs font-bold flex items-center justify-center">
+                                            {idx + 1}
+                                        </span>
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{item.question}</p>
+                                                {!item.is_active && (
+                                                    <span className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400">
+                                                        Masquée
+                                                    </span>
+                                                )}
                                             </div>
+                                            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 line-clamp-1">{item.reponse.replace(/[#*`]/g, '').slice(0, 90)}…</p>
                                         </div>
-                                        <div className="flex items-center gap-1 shrink-0">
-                                            <span className="text-xs text-slate-400 font-mono mr-2">#{item.ordre}</span>
+                                        <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button
                                                 onClick={() => { setEditingId(item.id); setShowCreate(false); }}
                                                 className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
@@ -264,10 +266,10 @@ export default function AdminFaqIndex() {
                                             <DeleteButton item={item} />
                                         </div>
                                     </div>
-                                </div>
-                            )}
-                        </div>
-                    ))
+                                )}
+                            </div>
+                        ))}
+                    </div>
                 )}
             </div>
         </AppLayout>

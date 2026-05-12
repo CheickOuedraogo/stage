@@ -4,16 +4,19 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Ac\ChatController as AcChatController;
 use App\Http\Controllers\Ac\DemandeDepenseController as AcDemandeDepenseController;
 use App\Http\Controllers\Ac\PaiementController as AcPaiementController;
+use App\Http\Controllers\Ac\ProjetController as AcProjetController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\ChatController as AdminChatController;
 use App\Http\Controllers\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Admin\MaintenanceController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Auth\GoogleOneTapController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Daf\ChatController as DafChatController;
 use App\Http\Controllers\Daf\ConventionController as DafConventionController;
 use App\Http\Controllers\Daf\DemandeDepenseController as DafDemandeDepenseController;
+use App\Http\Controllers\Daf\PaiementDirectController as DafPaiementDirectController;
 use App\Http\Controllers\Daf\ProjetController as DafProjetController;
 use App\Http\Controllers\Daf\RapportController as DafRapportController;
 use App\Http\Controllers\Daf\RubriqueController as DafRubriqueController;
@@ -22,7 +25,6 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Porteur\DemandeDepenseController as PorteurDemandeDepenseController;
 use App\Http\Controllers\Porteur\FaqController as PorteurFaqController;
-use App\Http\Controllers\Porteur\PaiementDirectController;
 use App\Http\Controllers\Porteur\ProjetController as PorteurProjetController;
 use App\Http\Controllers\Profile\ProfileController;
 use Illuminate\Support\Facades\Auth;
@@ -36,6 +38,7 @@ Route::middleware('guest')->group(function () {
     // Google OAuth
     Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('auth.google');
     Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('auth.google.callback');
+    Route::post('/auth/google/one-tap', [GoogleOneTapController::class, 'store'])->name('auth.google.one-tap');
 });
 
 Route::post('/deconnexion', [LoginController::class, 'logout'])
@@ -98,6 +101,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/projets', [DafProjetController::class, 'index'])->name('projets.index');
         Route::get('/projets/{projet}', [DafProjetController::class, 'show'])->name('projets.show');
         Route::post('/projets/{projet}/cloturer', [DafProjetController::class, 'cloturer'])->name('projets.cloturer');
+        Route::get('/projets/{projet}/bilan', [DafProjetController::class, 'bilan'])->name('projets.bilan');
+        Route::get('/projets/{projet}/bilan/pdf', [DafProjetController::class, 'exporterBilanPdf'])->name('projets.bilan.pdf');
 
         // Conventions d'un projet
         Route::get('/projets/{projet}/conventions/{convention}', [DafConventionController::class, 'show'])->name('projets.conventions.show');
@@ -107,6 +112,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/projets/{projet}/conventions/{convention}/versements', [DafConventionController::class, 'storeVersement'])->name('projets.conventions.versements.store');
         Route::patch('/projets/{projet}/conventions/{convention}/versements/{versement}', [DafConventionController::class, 'updateVersement'])->name('projets.conventions.versements.update');
         Route::delete('/projets/{projet}/conventions/{convention}/versements/{versement}', [DafConventionController::class, 'destroyVersement'])->name('projets.conventions.versements.destroy');
+
+        // Paiements directs (enregistrés par le DAF)
+        Route::post('/projets/{projet}/conventions/{convention}/paiements-directs', [DafPaiementDirectController::class, 'store'])->name('projets.conventions.paiements-directs.store');
+        Route::delete('/projets/{projet}/conventions/{convention}/paiements-directs/{paiementDirect}', [DafPaiementDirectController::class, 'destroy'])->name('projets.conventions.paiements-directs.destroy');
 
         // Versements (vue globale)
         Route::get('/versements', [DafVersementController::class, 'index'])->name('versements.index');
@@ -137,6 +146,10 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('role:ac')->prefix('ac')->name('ac.')->group(function () {
         Route::get('/tableau-de-bord', [DashboardController::class, 'ac'])->name('dashboard');
 
+        // Bilan projet (lecture seule)
+        Route::get('/projets/{projet}/bilan', [AcProjetController::class, 'bilan'])->name('projets.bilan');
+        Route::get('/projets/{projet}/bilan/pdf', [AcProjetController::class, 'exporterBilanPdf'])->name('projets.bilan.pdf');
+
         // Paiements
         Route::get('/paiements', [AcPaiementController::class, 'index'])->name('paiements.index');
 
@@ -162,6 +175,8 @@ Route::middleware(['auth'])->group(function () {
         // Projets
         Route::get('/projets', [PorteurProjetController::class, 'index'])->name('projets.index');
         Route::get('/projets/{projet}', [PorteurProjetController::class, 'show'])->name('projets.show');
+        Route::get('/projets/{projet}/bilan', [PorteurProjetController::class, 'bilan'])->name('projets.bilan');
+        Route::get('/projets/{projet}/bilan/pdf', [PorteurProjetController::class, 'exporterBilanPdf'])->name('projets.bilan.pdf');
         Route::get('/projets/{projet}/conventions/{convention}', [PorteurProjetController::class, 'showConvention'])->name('projets.conventions.show');
 
         // Demandes de dépenses
@@ -175,10 +190,6 @@ Route::middleware(['auth'])->group(function () {
 
         // FAQ
         Route::get('/assistance', [PorteurFaqController::class, 'index'])->name('faq.index');
-
-        // Paiements directs
-        Route::post('/projets/{projet}/conventions/{convention}/paiements-directs', [PaiementDirectController::class, 'store'])->name('projets.conventions.paiements-directs.store');
-        Route::delete('/projets/{projet}/conventions/{convention}/paiements-directs/{paiementDirect}', [PaiementDirectController::class, 'destroy'])->name('projets.conventions.paiements-directs.destroy');
     });
 });
 

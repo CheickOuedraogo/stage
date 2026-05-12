@@ -6,9 +6,11 @@ import { CHART_PALETTE, CHART_TOOLTIP_STYLE } from '@/lib/charts';
 import { show as dafProjetsShow } from '@/routes/daf/projets';
 import { store as storeRubrique, update as updateRubrique, destroy as destroyRubrique } from '@/routes/daf/projets/conventions/rubriques';
 import { store as storeVersement, destroy as destroyVersement } from '@/routes/daf/projets/conventions/versements';
+import { store as storePaiementDirect, destroy as destroyPaiementDirect } from '@/routes/daf/projets/conventions/paiements-directs';
 import { Head, useForm, router } from '@inertiajs/react';
 import {
     ArrowLeftIcon,
+    BanknotesIcon,
     CalendarIcon,
     PencilSquareIcon,
     PlusIcon,
@@ -36,6 +38,14 @@ interface Versement {
     description: string | null;
 }
 
+interface PaiementDirect {
+    id: number;
+    montant: number;
+    objet_depense: string;
+    date_paiement: string;
+    rubrique: { libelle: string } | null;
+}
+
 interface Convention {
     id: number;
     titre: string;
@@ -56,6 +66,7 @@ interface Convention {
     total_versements: number;
     rubriques: Rubrique[];
     versements: Versement[];
+    paiements_directs: PaiementDirect[];
 }
 
 interface Props {
@@ -74,11 +85,20 @@ export default function DafConventionShow({ projet, convention }: Props) {
     const [editingId, setEditingId] = useState<number | null>(null);
     const [showAddRubrique, setShowAddRubrique] = useState(false);
     const [showAddVersement, setShowAddVersement] = useState(false);
+    const [showAddPaiementDirect, setShowAddPaiementDirect] = useState(false);
     const [confirmRubrique, setConfirmRubrique] = useState<number | null>(null);
     const [confirmVersement, setConfirmVersement] = useState<number | null>(null);
+    const [confirmPaiementDirect, setConfirmPaiementDirect] = useState<number | null>(null);
 
     const rubriqueForm = useForm({ libelle: '', montant_prevu: '', description: '' });
     const addVersementForm = useForm({ montant: '', date_reception: '', type: 'tranche', reference: '', description: '' });
+    const paiementDirectForm = useForm({
+        rubrique_id: '',
+        montant: '',
+        objet_depense: '',
+        description: '',
+        date_paiement: new Date().toISOString().split('T')[0],
+    });
 
     const params = { projet: projet.id, convention: convention.id };
 
@@ -101,15 +121,15 @@ export default function DafConventionShow({ projet, convention }: Props) {
         });
     };
 
-    const handleEditRubrique = (e: React.FormEvent, rubriqeId: number) => {
+    const handleEditRubrique = (e: React.FormEvent, rubriqueId: number) => {
         e.preventDefault();
-        rubriqueForm.patch(updateRubrique.url({ ...params, rubrique: rubriqeId }), {
+        rubriqueForm.patch(updateRubrique.url({ ...params, rubrique: rubriqueId }), {
             onSuccess: () => setEditingId(null),
         });
     };
 
-    const handleDeleteRubrique = (rubriqeId: number) => {
-        setConfirmRubrique(rubriqeId);
+    const handleDeleteRubrique = (rubriqueId: number) => {
+        setConfirmRubrique(rubriqueId);
     };
 
     const handleAddVersement = (e: React.FormEvent) => {
@@ -121,6 +141,13 @@ export default function DafConventionShow({ projet, convention }: Props) {
 
     const handleDeleteVersement = (versementId: number) => {
         setConfirmVersement(versementId);
+    };
+
+    const handleAddPaiementDirect = (e: React.FormEvent) => {
+        e.preventDefault();
+        paiementDirectForm.post(storePaiementDirect.url(params), {
+            onSuccess: () => { paiementDirectForm.reset(); setShowAddPaiementDirect(false); },
+        });
     };
 
     const budgetRestant = convention.montant_fcfa - convention.total_rubriques;
@@ -575,6 +602,135 @@ export default function DafConventionShow({ projet, convention }: Props) {
                     </div>
                 </div>
 
+                {/* Paiements directs du bailleur */}
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                    <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <BanknotesIcon className="w-4 h-4 text-amber-500" />
+                            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Paiements directs bailleur</h3>
+                            <span className="text-xs text-gray-400 dark:text-slate-500">{convention.paiements_directs?.length ?? 0}</span>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setShowAddPaiementDirect((v) => !v)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+                        >
+                            {showAddPaiementDirect ? <XMarkIcon className="w-3.5 h-3.5" /> : <PlusIcon className="w-3.5 h-3.5" />}
+                            {showAddPaiementDirect ? 'Annuler' : 'Enregistrer'}
+                        </button>
+                    </div>
+
+                    {showAddPaiementDirect && (
+                        <form onSubmit={handleAddPaiementDirect} className="px-5 py-4 border-b border-amber-100 bg-amber-50 dark:bg-amber-900/20 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Objet *</label>
+                                <input
+                                    type="text"
+                                    value={paiementDirectForm.data.objet_depense}
+                                    onChange={(e) => paiementDirectForm.setData('objet_depense', e.target.value)}
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                                    placeholder="Objet du paiement direct"
+                                    required
+                                />
+                                {paiementDirectForm.errors.objet_depense && <p className="text-xs text-red-600 mt-1">{paiementDirectForm.errors.objet_depense}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Montant (FCFA) *</label>
+                                <input
+                                    type="number"
+                                    min={1}
+                                    value={paiementDirectForm.data.montant}
+                                    onChange={(e) => paiementDirectForm.setData('montant', e.target.value)}
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                                    required
+                                />
+                                {paiementDirectForm.errors.montant && <p className="text-xs text-red-600 mt-1">{paiementDirectForm.errors.montant}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Date *</label>
+                                <input
+                                    type="date"
+                                    value={paiementDirectForm.data.date_paiement}
+                                    max={new Date().toISOString().split('T')[0]}
+                                    onChange={(e) => paiementDirectForm.setData('date_paiement', e.target.value)}
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                                    required
+                                />
+                                {paiementDirectForm.errors.date_paiement && <p className="text-xs text-red-600 mt-1">{paiementDirectForm.errors.date_paiement}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Rubrique (optionnel)</label>
+                                <select
+                                    value={paiementDirectForm.data.rubrique_id}
+                                    onChange={(e) => paiementDirectForm.setData('rubrique_id', e.target.value)}
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                                >
+                                    <option value="">Aucune rubrique</option>
+                                    {convention.rubriques.map((r) => (
+                                        <option key={r.id} value={r.id}>{r.libelle}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="sm:col-span-2 flex justify-end">
+                                <button
+                                    type="submit"
+                                    disabled={paiementDirectForm.processing}
+                                    className="px-4 py-1.5 text-xs font-medium bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 transition-colors"
+                                >
+                                    {paiementDirectForm.processing ? 'Enregistrement…' : 'Enregistrer le paiement'}
+                                </button>
+                            </div>
+                        </form>
+                    )}
+
+                    {!convention.paiements_directs?.length ? (
+                        <p className="p-5 text-sm text-gray-400 dark:text-slate-500 text-center">Aucun paiement direct enregistré</p>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="bg-gray-50 dark:bg-slate-800 border-b border-gray-100 dark:border-slate-800">
+                                        <th className="text-left px-5 py-3 text-xs font-semibold text-gray-600 dark:text-slate-400">Date</th>
+                                        <th className="text-left px-5 py-3 text-xs font-semibold text-gray-600 dark:text-slate-400">Objet</th>
+                                        <th className="text-left px-5 py-3 text-xs font-semibold text-gray-600 dark:text-slate-400">Rubrique</th>
+                                        <th className="text-right px-5 py-3 text-xs font-semibold text-gray-600 dark:text-slate-400">Montant</th>
+                                        <th className="px-5 py-3 w-10"></th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
+                                    {convention.paiements_directs.map((p) => (
+                                        <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-slate-800 group">
+                                            <td className="px-5 py-3 text-gray-600 dark:text-slate-400 whitespace-nowrap">{formatDate(p.date_paiement)}</td>
+                                            <td className="px-5 py-3 text-gray-900 dark:text-white">{p.objet_depense}</td>
+                                            <td className="px-5 py-3 text-gray-500 dark:text-slate-400 text-xs">{p.rubrique?.libelle ?? '—'}</td>
+                                            <td className="px-5 py-3 text-right font-mono font-semibold text-gray-900 dark:text-white whitespace-nowrap">{formatCurrency(p.montant)}</td>
+                                            <td className="px-5 py-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setConfirmPaiementDirect(p.id)}
+                                                    className="opacity-0 group-hover:opacity-100 p-1 rounded text-gray-400 dark:text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                                                    aria-label="Supprimer le paiement direct"
+                                                >
+                                                    <TrashIcon className="w-3.5 h-3.5" />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                                <tfoot>
+                                    <tr className="border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
+                                        <td colSpan={3} className="px-5 py-3 text-xs font-semibold text-gray-700 dark:text-slate-300">Total paiements directs</td>
+                                        <td className="px-5 py-3 text-right font-mono font-bold text-gray-900 dark:text-white">
+                                            {formatCurrency(convention.paiements_directs.reduce((s, p) => s + p.montant, 0))}
+                                        </td>
+                                        <td />
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    )}
+                </div>
+
                 {/* Right: chart + description */}
                 <div className="space-y-5">
                     {rubriquesPieData.length > 0 && (
@@ -622,7 +778,7 @@ export default function DafConventionShow({ projet, convention }: Props) {
                 title="Supprimer la rubrique"
                 message="Cette action est irréversible. La rubrique et son historique de consommation seront supprimés."
                 confirmLabel="Supprimer"
-                onConfirm={() => { router.delete(destroyRubrique.url({ ...params, rubrique: confirmRubrique! })); setConfirmRubrique(null); }}
+                onConfirm={() => router.delete(destroyRubrique.url({ ...params, rubrique: confirmRubrique! }), { onSuccess: () => setConfirmRubrique(null), onError: () => setConfirmRubrique(null) })}
                 onCancel={() => setConfirmRubrique(null)}
             />
             <ConfirmModal
@@ -630,8 +786,16 @@ export default function DafConventionShow({ projet, convention }: Props) {
                 title="Supprimer le versement"
                 message="Ce versement sera définitivement supprimé. Le montant mobilisé de la convention sera recalculé."
                 confirmLabel="Supprimer"
-                onConfirm={() => { router.delete(destroyVersement.url({ ...params, versement: confirmVersement! })); setConfirmVersement(null); }}
+                onConfirm={() => router.delete(destroyVersement.url({ ...params, versement: confirmVersement! }), { onSuccess: () => setConfirmVersement(null), onError: () => setConfirmVersement(null) })}
                 onCancel={() => setConfirmVersement(null)}
+            />
+            <ConfirmModal
+                open={confirmPaiementDirect !== null}
+                title="Supprimer le paiement direct"
+                message="Ce paiement direct sera définitivement supprimé."
+                confirmLabel="Supprimer"
+                onConfirm={() => router.delete(destroyPaiementDirect.url({ ...params, paiement_direct: confirmPaiementDirect! }), { onSuccess: () => setConfirmPaiementDirect(null), onError: () => setConfirmPaiementDirect(null) })}
+                onCancel={() => setConfirmPaiementDirect(null)}
             />
         </AppLayout>
     );

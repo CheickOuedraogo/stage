@@ -6,15 +6,19 @@ use App\Enums\DemandeStatus;
 use App\Enums\ProjectStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Daf\CloturerProjetRequest;
-use App\Models\AuditLog;
 use App\Models\Convention;
 use App\Models\Projet;
+use App\Services\ProjetService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response as HttpResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ProjetController extends Controller
 {
+    public function __construct(private readonly ProjetService $projetService) {}
+
     public function index(): Response
     {
         $projets = Projet::with(['porteur:id,name', 'conventions:id,projet_id,montant_fcfa'])
@@ -55,6 +59,14 @@ class ProjetController extends Controller
         $totalVersements = $projet->conventions->flatMap->versements->sum('montant');
         $montantConventions = $projet->conventions->sum('montant_fcfa');
 
+        $canCloturer = false;
+        $clotureBlockers = null;
+
+        if ($projet->status === ProjectStatus::EnCours) {
+            $clotureBlockers = $this->projetService->getBlockersCloture($projet);
+            $canCloturer = $clotureBlockers === null;
+        }
+
         return Inertia::render('daf/Projets/Show', [
             'projet' => [
                 'id' => $projet->id,
@@ -89,30 +101,47 @@ class ProjetController extends Controller
                     'versements_count' => $c->versements->count(),
                 ]),
                 'analyse_ecarts' => $this->buildAnalyseEcarts($projet),
+                'can_cloturer' => $canCloturer,
+                'cloture_blockers' => $clotureBlockers,
+                'bilan_url' => $projet->status === ProjectStatus::Termine
+                    ? route('daf.projets.bilan', $projet)
+                    : null,
             ],
         ]);
     }
 
     public function cloturer(CloturerProjetRequest $request, Projet $projet): RedirectResponse
     {
-        abort_if(
-            in_array($projet->status, [ProjectStatus::Termine, ProjectStatus::Annule]),
-            422,
-            'Ce projet est déjà clôturé ou annulé.'
-        );
+        $this->authorize('cloturer', $projet);
 
-        $projet->update([
-            'status' => ProjectStatus::Termine,
-            'date_fin_reelle' => $request->date('date_fin_reelle'),
+        $projet->loadMissing('conventions');
+        $this->projetService->verifierConditionsCloture($projet);
+        $this->projetService->cloturer($projet, auth()->user(), $request->date('date_fin_reelle'));
+
+        return back()->with('success', "Le projet « {$projet->titre} » a été clôturé avec succès.");
+    }
+
+    public function bilan(Projet $projet): Response
+    {
+        $this->authorize('voirBilan', $projet);
+
+        $bilan = $this->projetService->genererBilan($projet);
+
+        return Inertia::render('daf/Projets/Bilan', [
+            'bilan' => $bilan,
+            'pdf_url' => route('daf.projets.bilan.pdf', $projet),
         ]);
+    }
 
-        AuditLog::log(
-            'projet.cloture',
-            $projet,
-            description: "Clôture du projet « {$projet->titre} »",
-        );
+    public function exporterBilanPdf(Projet $projet): HttpResponse
+    {
+        $this->authorize('voirBilan', $projet);
 
-        return back()->with('success', 'Projet clôturé avec succès.');
+        $bilan = $this->projetService->genererBilan($projet);
+
+        $pdf = Pdf::loadView('pdf.bilan-projet', compact('bilan'))->setPaper('a4');
+
+        return $pdf->download("bilan-projet-{$projet->id}.pdf");
     }
 
     /** @return array<string, mixed> */
@@ -127,13 +156,12 @@ class ProjetController extends Controller
                 DemandeStatus::Terminee->value,
             ])->sum('montant');
 
-        // Écart budgétaire
         $budgetPrevu = $projet->conventions->sum('montant_fcfa');
         $ecartBudget = $budgetPrevu - $totalDepenses;
 
-        // Écart temporel (en jours)
         $ecartTemps = null;
         $ecartTempsLabel = null;
+
         if ($projet->date_fin_prevue) {
             $dateRef = $projet->date_fin_reelle ?? now();
             $ecartTemps = $projet->date_fin_prevue->diffInDays($dateRef, false);

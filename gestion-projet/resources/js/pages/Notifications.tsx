@@ -80,7 +80,7 @@ export default function Notifications() {
                 )}
             </div>
 
-            <div className="max-w-2xl">
+            <div className="max-w-2xl mx-auto">
                 {notifications.data.length === 0 ? (
                     <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl">
                         <EmptyState

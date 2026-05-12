@@ -7,12 +7,10 @@ import { update as maintenanceUpdate } from '@/routes/admin/maintenance';
 import type { PageProps } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
-    ClipboardDocumentCheckIcon,
     ClipboardDocumentListIcon,
     FolderIcon,
     ShieldCheckIcon,
     UsersIcon,
-    UserGroupIcon,
 } from '@heroicons/react/24/outline';
 import { FormEvent } from 'react';
 
@@ -21,6 +19,7 @@ interface AuditLogEntry {
     action: string;
     description: string | null;
     user: string;
+    user_role: string | null;
     created_at: string;
 }
 
@@ -113,15 +112,13 @@ export default function AdminDashboard({ stats, recent_audit_logs }: AdminDashbo
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 {/* Répartition par rôle */}
                 <Card>
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <CardTitle>Utilisateurs par rôle</CardTitle>
-                            <div className="w-9 h-9 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                                <UserGroupIcon className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                            </div>
+                            <Link href={usersIndex.url()} className="text-xs text-blue-600 hover:text-blue-700 font-medium">Gérer →</Link>
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -132,7 +129,7 @@ export default function AdminDashboard({ stats, recent_audit_logs }: AdminDashbo
                                         {r.role}
                                     </Badge>
                                     <div className="flex items-center gap-2">
-                                        <div className="w-20 h-1.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                        <div className="w-24 h-1.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
                                             <div
                                                 className="h-full bg-blue-500 rounded-full"
                                                 style={{ width: stats.total_users > 0 ? `${Math.round((r.count / stats.total_users) * 100)}%` : '0%' }}
@@ -143,43 +140,13 @@ export default function AdminDashboard({ stats, recent_audit_logs }: AdminDashbo
                                 </div>
                             ))}
                         </div>
-                        <div className="mt-4 pt-3 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
-                            <span>{stats.active_users} actif{stats.active_users !== 1 ? 's' : ''}</span>
-                            <Link href={usersIndex.url()} className="text-blue-600 hover:text-blue-700 font-medium">Gérer →</Link>
-                        </div>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-4 pt-3 border-t border-gray-100 dark:border-slate-800">
+                            {stats.active_users} actif{stats.active_users !== 1 ? 's' : ''} sur {stats.total_users}
+                        </p>
                     </CardContent>
                 </Card>
 
-                {/* Quick links */}
-                <div className="space-y-4">
-                    <Link
-                        href={usersIndex.url()}
-                        className="group flex items-center gap-4 p-5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-sm transition-all duration-200"
-                    >
-                        <div className="w-11 h-11 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
-                            <UsersIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                        </div>
-                        <div>
-                            <p className="font-semibold text-gray-900 dark:text-white text-sm">Gérer les utilisateurs</p>
-                            <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Créer, modifier, activer/désactiver</p>
-                        </div>
-                    </Link>
-
-                    <Link
-                        href={adminAuditLog.url()}
-                        className="group flex items-center gap-4 p-5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm transition-all duration-200"
-                    >
-                        <div className="w-11 h-11 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
-                            <ClipboardDocumentCheckIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                        </div>
-                        <div>
-                            <p className="font-semibold text-gray-900 dark:text-white text-sm">Journal d'audit</p>
-                            <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Consulter l'activité des utilisateurs</p>
-                        </div>
-                    </Link>
-                </div>
-
-                {/* Maintenance toggle */}
+                {/* Maintenance — compact */}
                 <Card>
                     <CardHeader>
                         <div className="flex items-center justify-between">
@@ -195,24 +162,17 @@ export default function AdminDashboard({ stats, recent_audit_logs }: AdminDashbo
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={submitMaintenance} className="space-y-4" noValidate>
-                            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800 rounded-lg">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-700 dark:text-slate-300">
-                                        {data.active ? 'Désactiver la maintenance' : 'Activer la maintenance'}
-                                    </p>
-                                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
-                                        {data.active
-                                            ? 'Les utilisateurs pourront se reconnecter.'
-                                            : 'Tous les utilisateurs seront déconnectés.'}
-                                    </p>
-                                </div>
+                        <form onSubmit={submitMaintenance} className="space-y-3" noValidate>
+                            <div className="flex items-center justify-between">
+                                <p className="text-sm text-gray-600 dark:text-slate-400">
+                                    {data.active ? 'Les utilisateurs sont bloqués.' : 'Système accessible à tous.'}
+                                </p>
                                 <button
                                     type="button"
                                     role="switch"
                                     aria-checked={data.active}
                                     onClick={() => setData('active', !data.active)}
-                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-900 focus:ring-amber-500 ${
+                                    className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-900 focus:ring-amber-500 ${
                                         data.active ? 'bg-amber-500' : 'bg-gray-300 dark:bg-slate-600'
                                     }`}
                                     aria-label="Activer/désactiver le mode maintenance"
@@ -224,34 +184,22 @@ export default function AdminDashboard({ stats, recent_audit_logs }: AdminDashbo
                             </div>
 
                             {data.active && (
-                                <div className="space-y-3">
-                                    <div className="space-y-1">
-                                        <label htmlFor="reason" className="block text-xs font-medium text-gray-700 dark:text-slate-300">
-                                            Raison <span className="text-red-500" aria-hidden="true">*</span>
-                                        </label>
-                                        <textarea
-                                            id="reason"
-                                            value={data.reason}
-                                            onChange={(e) => setData('reason', e.target.value)}
-                                            rows={2}
-                                            required
-                                            placeholder="Ex : Mise à jour du système…"
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label htmlFor="until" className="block text-xs font-medium text-gray-700 dark:text-slate-300">
-                                            Fin estimée
-                                        </label>
-                                        <input
-                                            id="until"
-                                            type="datetime-local"
-                                            value={data.until}
-                                            onChange={(e) => setData('until', e.target.value)}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                                        />
-                                    </div>
-                                </div>
+                                <>
+                                    <textarea
+                                        value={data.reason}
+                                        onChange={(e) => setData('reason', e.target.value)}
+                                        rows={2}
+                                        required
+                                        placeholder="Raison de la maintenance…"
+                                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none"
+                                    />
+                                    <input
+                                        type="datetime-local"
+                                        value={data.until}
+                                        onChange={(e) => setData('until', e.target.value)}
+                                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                    />
+                                </>
                             )}
 
                             <button
@@ -259,7 +207,7 @@ export default function AdminDashboard({ stats, recent_audit_logs }: AdminDashbo
                                 disabled={processing}
                                 className="w-full py-2 px-4 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-slate-800 dark:bg-slate-700 hover:bg-slate-700 dark:hover:bg-slate-600 text-white"
                             >
-                                {processing ? 'Enregistrement…' : data.active ? 'Activer la maintenance' : 'Désactiver la maintenance'}
+                                {processing ? 'Enregistrement…' : 'Appliquer'}
                             </button>
                         </form>
                     </CardContent>
@@ -285,11 +233,14 @@ export default function AdminDashboard({ stats, recent_audit_logs }: AdminDashbo
                             <div key={log.id} className="flex items-start gap-4 px-5 py-3">
                                 <div className="shrink-0 w-2 h-2 mt-1.5 rounded-full bg-indigo-400" />
                                 <div className="min-w-0 flex-1">
-                                    <p className="text-sm text-slate-900 dark:text-white truncate">
+                                    <p className="text-sm text-slate-900 dark:text-white">
                                         <span className="font-medium">{log.user}</span>
-                                        {log.description && <span className="text-slate-500"> — {log.description}</span>}
+                                        {log.user_role && (
+                                            <span className="ml-1.5 text-xs text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">{log.user_role}</span>
+                                        )}
+                                        {log.description && <span className="text-slate-500 dark:text-slate-400"> — {log.description}</span>}
                                     </p>
-                                    <p className="text-xs text-slate-400 mt-0.5 font-mono">{log.action} · {log.created_at}</p>
+                                    <p className="text-xs text-slate-400 mt-0.5">{log.action} · {log.created_at}</p>
                                 </div>
                             </div>
                         ))}
