@@ -3,14 +3,22 @@ import { useDarkMode } from '@/hooks/useDarkMode';
 import { logout } from '@/routes';
 import { auditLog as adminAuditLog, dashboard as adminDashboard } from '@/routes/admin';
 import { index as usersIndex } from '@/routes/admin/users';
+import { index as adminFaqIndex } from '@/routes/admin/faq';
+import { index as adminChatIndex } from '@/routes/admin/chat';
 import { dashboard as acDashboard } from '@/routes/ac';
 import { index as acDemandesIndex } from '@/routes/ac/demandes';
+import { index as acChatIndex } from '@/routes/ac/chat';
 import { dashboard as dafDashboard } from '@/routes/daf';
 import { index as dafDemandesIndex } from '@/routes/daf/demandes';
 import { index as dafProjetsIndex } from '@/routes/daf/projets';
+import { index as dafRapportsIndex } from '@/routes/daf/rapports';
+import { index as dafChatIndex } from '@/routes/daf/chat';
+import { index as acPaiementsIndex } from '@/routes/ac/paiements';
 import { dashboard as porteurDashboard } from '@/routes/porteur';
 import { index as porteurDemandesIndex } from '@/routes/porteur/demandes';
 import { index as porteurProjetsIndex } from '@/routes/porteur/projets';
+import { index as porteurFaqIndex } from '@/routes/porteur/faq';
+import { index as notificationsIndex } from '@/routes/notifications';
 import { edit as profileEdit } from '@/routes/profile';
 import type { User } from '@/types';
 import { Link, router, usePage } from '@inertiajs/react';
@@ -19,12 +27,15 @@ import {
     Bars3Icon,
     BellIcon,
     ChartBarIcon,
+    ChatBubbleLeftRightIcon,
     ClipboardDocumentCheckIcon,
     ClipboardDocumentListIcon,
     CreditCardIcon,
+    DocumentChartBarIcon,
     FolderIcon,
     HomeIcon,
     MoonIcon,
+    QuestionMarkCircleIcon,
     SunIcon,
     UserCircleIcon,
     UsersIcon,
@@ -47,24 +58,26 @@ function getNavItems(role: User['role'], notifs: number): NavItem[] {
             { label: 'Tableau de bord', href: adminDashboard.url(), icon: HomeIcon },
             { label: 'Utilisateurs', href: usersIndex.url(), icon: UsersIcon },
             { label: 'Journal d\'audit', href: adminAuditLog.url(), icon: ClipboardDocumentCheckIcon },
+            { label: 'FAQ', href: adminFaqIndex.url(), icon: QuestionMarkCircleIcon },
+            { label: 'Messages', href: adminChatIndex.url(), icon: ChatBubbleLeftRightIcon },
         ],
         daf: [
             { label: 'Tableau de bord', href: dafDashboard.url(), icon: ChartBarIcon },
             { label: 'Projets', href: dafProjetsIndex.url(), icon: FolderIcon },
             { label: 'Demandes', href: dafDemandesIndex.url(), icon: ClipboardDocumentListIcon },
-            { label: 'Versements', href: '#', icon: CreditCardIcon },
-            { label: 'Notifications', href: '#', icon: BellIcon, badge: notifBadge },
+            { label: 'Rapports', href: dafRapportsIndex.url(), icon: DocumentChartBarIcon },
+            { label: 'Assistance', href: dafChatIndex.url(), icon: ChatBubbleLeftRightIcon },
         ],
         ac: [
             { label: 'Tableau de bord', href: acDashboard.url(), icon: HomeIcon },
             { label: 'Demandes', href: acDemandesIndex.url(), icon: ClipboardDocumentListIcon },
-            { label: 'Paiements', href: '#', icon: CreditCardIcon },
-            { label: 'Notifications', href: '#', icon: BellIcon, badge: notifBadge },
+            { label: 'Paiements', href: acPaiementsIndex.url(), icon: CreditCardIcon },
+            { label: 'Assistance', href: acChatIndex.url(), icon: ChatBubbleLeftRightIcon },
         ],
         porteur: [
             { label: 'Mes projets', href: porteurProjetsIndex.url(), icon: FolderIcon },
             { label: 'Mes demandes', href: porteurDemandesIndex.url(), icon: ClipboardDocumentListIcon },
-            { label: 'Notifications', href: '#', icon: BellIcon, badge: notifBadge },
+            { label: 'Assistance', href: porteurFaqIndex.url(), icon: QuestionMarkCircleIcon },
         ],
     };
 
@@ -95,7 +108,7 @@ export function Navbar({ user }: NavbarProps) {
 
     return (
         <>
-            <header className="h-14 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 flex items-center px-4 lg:px-6 gap-4 sticky top-0 z-30">
+            <header className="h-14 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-600 flex items-center px-4 lg:px-6 gap-4 sticky top-0 z-30">
                 {/* Mobile hamburger */}
                 <button
                     className="lg:hidden p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-600 dark:text-slate-400 transition-colors"
@@ -161,7 +174,7 @@ export function Navbar({ user }: NavbarProps) {
 
                     {/* Notifications */}
                     <Link
-                        href="#"
+                        href={notificationsIndex.url()}
                         className="relative p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                         aria-label={`${user.unread_notifications} notification${user.unread_notifications !== 1 ? 's' : ''}`}
                     >
@@ -208,10 +221,10 @@ export function Navbar({ user }: NavbarProps) {
                                     aria-hidden="true"
                                 />
                                 <div
-                                    className="absolute right-0 top-full mt-1.5 w-56 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 z-20 overflow-hidden"
+                                    className="absolute right-0 top-full mt-1.5 w-56 bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-gray-200 dark:border-slate-600 z-20 overflow-hidden"
                                     role="menu"
                                 >
-                                    <div className="px-4 py-3 border-b border-gray-100 dark:border-slate-700">
+                                    <div className="px-4 py-3 border-b border-gray-100 dark:border-slate-600">
                                         <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.name}</p>
                                         <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{user.role_label}</p>
                                     </div>
@@ -250,7 +263,7 @@ export function Navbar({ user }: NavbarProps) {
                         aria-hidden="true"
                     />
                     <nav
-                        className="fixed top-14 left-0 right-0 z-30 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 py-2 px-4 space-y-1 shadow-sm"
+                        className="fixed top-14 left-0 right-0 z-30 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-600 py-2 px-4 space-y-1 shadow-sm"
                         aria-label="Navigation mobile"
                     >
                         {items.map((item) => {

@@ -108,7 +108,7 @@ export default function DafProjetsIndex({ projets, stats }: Props) {
                                 <XAxis dataKey="name" tick={CHART_AXIS_TICK} />
                                 <YAxis tickFormatter={(v) => (v / 1_000_000).toFixed(0) + 'M'} tick={CHART_AXIS_TICK} width={40} />
                                 <Tooltip
-                                    formatter={(value: number) => [formatCurrency(value), '']}
+                                    formatter={(value) => [formatCurrency(Number(value)), '']}
                                     contentStyle={CHART_TOOLTIP_STYLE}
                                 />
                                 <Legend wrapperStyle={{ fontSize: 11 }} />
@@ -129,7 +129,7 @@ export default function DafProjetsIndex({ projets, stats }: Props) {
                                     ))}
                                 </Pie>
                                 <Tooltip
-                                    formatter={(value: number, name: string) => [`${value} projet${value !== 1 ? 's' : ''}`, name]}
+                                    formatter={(value, name) => [`${Number(value)} projet${Number(value) !== 1 ? 's' : ''}`, String(name)]}
                                     contentStyle={CHART_TOOLTIP_STYLE}
                                 />
                                 <Legend wrapperStyle={{ fontSize: 11 }} />
@@ -158,7 +158,8 @@ export default function DafProjetsIndex({ projets, stats }: Props) {
                                 <tr>
                                     <td colSpan={6} className="px-6 py-16 text-center text-gray-400 dark:text-slate-500">
                                         <FolderIcon className="w-10 h-10 mx-auto mb-2 opacity-40" />
-                                        <p>Aucun projet</p>
+                                        <p className="font-medium">Aucun projet trouvé</p>
+                                        <p className="text-xs mt-1">Modifiez les filtres ou attendez qu'un porteur soit associé à un projet.</p>
                                     </td>
                                 </tr>
                             ) : (

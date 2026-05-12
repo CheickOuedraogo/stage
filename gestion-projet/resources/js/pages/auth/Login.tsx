@@ -1,4 +1,5 @@
 import { login } from '@/routes';
+import { redirect as googleRedirect } from '@/actions/App/Http/Controllers/Auth/GoogleController';
 import type { PageProps } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { FormEvent, useEffect, useState } from 'react';
@@ -54,6 +55,9 @@ export default function Login({ maintenanceActive, maintenanceReason, maintenanc
     const [showAdminForm, setShowAdminForm] = useState(false);
     const isMaintenanceMode = maintenanceActive || flash.success === 'maintenance';
 
+    // Get the global Google client ID if provided
+    const googleClientId = usePage<PageProps & { googleClientId?: string }>().props.googleClientId;
+
     const remaining = useCountdown(isMaintenanceMode ? maintenanceUntil : null);
     const { h, m, s } = remaining != null ? formatCountdown(remaining) : { h: 0, m: 0, s: 0 };
 
@@ -67,6 +71,63 @@ export default function Login({ maintenanceActive, maintenanceReason, maintenanc
         e.preventDefault();
         post(login.url());
     };
+
+    const submitOneTapCredential = (credential: string) => {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/auth/google/one-tap';
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        if (csrfToken) {
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
+        }
+        const credentialInput = document.createElement('input');
+        credentialInput.type = 'hidden';
+        credentialInput.name = 'credential';
+        credentialInput.value = credential;
+        form.appendChild(credentialInput);
+        document.body.appendChild(form);
+        form.submit();
+    };
+
+    // Google One Tap — shows native dialog when a Google account is detected
+    useEffect(() => {
+        if (!googleClientId || isMaintenanceMode || showAdminForm) return;
+
+        const initGoogle = (google: any) => {
+            google.accounts.id.initialize({
+                client_id: googleClientId,
+                callback: (response: any) => submitOneTapCredential(response.credential),
+                auto_select: true,
+                cancel_on_tap_outside: false,
+                use_fedcm_for_prompt: true,
+            });
+            google.accounts.id.prompt();
+        };
+
+        if ((window as any).google?.accounts?.id) {
+            initGoogle((window as any).google);
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.defer = true;
+        script.onload = () => {
+            const google = (window as any).google;
+            if (google?.accounts?.id) initGoogle(google);
+        };
+        document.body.appendChild(script);
+
+        return () => {
+            if (document.body.contains(script)) document.body.removeChild(script);
+            (window as any).google?.accounts?.id?.cancel?.();
+        };
+    }, [googleClientId, isMaintenanceMode, showAdminForm]);
 
     if (isMaintenanceMode && !showAdminForm) {
         return (
@@ -278,13 +339,11 @@ export default function Login({ maintenanceActive, maintenanceReason, maintenanc
                                     </div>
                                 </div>
 
-                                {/* Google button */}
-                                <button
-                                    type="button"
-                                    disabled
-                                    title="Connexion Google — disponible prochainement"
-                                    className="w-full py-2.5 px-4 border border-gray-300 bg-white hover:bg-gray-50 text-gray-500 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-3 cursor-not-allowed opacity-60"
-                                    aria-label="Continuer avec Google (non disponible)"
+                                {/* Google button — full redirect, not Inertia link */}
+                                <a
+                                    href={googleRedirect.url()}
+                                    className="w-full py-2.5 px-4 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-3"
+                                    aria-label="Continuer avec Google"
                                 >
                                     <svg className="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
                                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -293,25 +352,22 @@ export default function Login({ maintenanceActive, maintenanceReason, maintenanc
                                         <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                                     </svg>
                                     Continuer avec Google
-                                </button>
+                                </a>
                             </>
                         )}
                     </form>
                 </div>
 
-                {/* Right panel – decorative (hidden on mobile) */}
-                <div className="hidden lg:flex flex-1 bg-gray-950 items-center justify-center">
-                    <div className="text-center px-12">
-                        <div className="w-16 h-16 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mx-auto mb-6">
-                            <span className="text-white font-bold text-2xl">C</span>
-                        </div>
-                        <h2 className="text-2xl font-bold text-white mb-3">CIFEU</h2>
-                        <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
-                            Circuit Intégré des Financements Extérieurs Universitaires<br />
-                            Université Joseph KI-ZERBO
-                        </p>
-                    </div>
-                </div>
+                {/* Right panel – UJKZ photo */}
+                <div
+                    className="hidden lg:block flex-1 relative overflow-hidden"
+                    style={{
+                        backgroundImage: 'url(/connection_bg.jpg)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                    }}
+                    aria-hidden="true"
+                />
             </div>
         </>
     );

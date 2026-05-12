@@ -12,23 +12,30 @@ use App\Models\Rubrique;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 class DemandeDepenseSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->createDummyFiles();
+
         $daf = User::where('role', 'daf')->first();
         $ac = User::where('role', 'ac')->first();
 
-        $porteurs = User::where('role', 'porteur')->where('is_active', true)->get()->keyBy('email');
+        // Porteurs chargés par email pour un mapping fiable et explicite
+        $porteurs = User::where('role', 'porteur')
+            ->where('is_active', true)
+            ->get()
+            ->keyBy('email');
 
-        $jb = $porteurs['jb.ouedraogo@ujkz.bf'] ?? null;
-        $aminata = $porteurs['a.traore@ujkz.bf'] ?? null;
-        $moussa = $porteurs['m.kabore@ujkz.bf'] ?? null;
-        $fatim = $porteurs['f.zerbo@ujkz.bf'] ?? null;
-        $ibrahim = $porteurs['i.bambara@ujkz.bf'] ?? null;
+        $jb = $porteurs['ocheick418@gmail.com'] ?? null;        // BIOTECH-BF + PAES-UJKZ
+        $aminata = $porteurs['a.traore@ujkz.bf'] ?? null;       // PRESAR
+        $rasmane = $porteurs['r.ouedraogo@ujkz.bf'] ?? null;    // BIODIV-BF
+        $salamata = $porteurs['s.sawadogo@ujkz.bf'] ?? null;    // NTIC-EDU
+        $boly = $porteurs['s.boly@ujkz.bf'] ?? null;            // ENERGY-SOLAR
 
-        // ── 1. Demande terminée — BIOTECH-BF / Pr. Ouédraogo ─────────────────
+        // ── 1. Demande terminée — BIOTECH-BF / Pr. Ouédraogo (JB) ────────────
         $this->creerDemandeParcourue(
             convention: Convention::where('titre', 'like', '%BM-BIOTECH%')->first(),
             rubriqueLibelle: 'Réactifs et consommables de laboratoire',
@@ -51,7 +58,7 @@ class DemandeDepenseSeeder extends Seeder
             ],
         );
 
-        // ── 2. Demande payée avec rapport — BIOTECH-BF ─────────────────────
+        // ── 2. Demande rapport soumis — BIOTECH-BF / Pr. Ouédraogo (JB) ──────
         $this->creerDemandeParcourue(
             convention: Convention::where('titre', 'like', '%BM-BIOTECH%')->first(),
             rubriqueLibelle: 'Équipements de laboratoire',
@@ -74,14 +81,14 @@ class DemandeDepenseSeeder extends Seeder
             ],
         );
 
-        // ── 3. Demande validée AC — BIOTECH-BF (en attente paiement) ─────────
+        // ── 3. Demande validée AC — AFD-BIOTECH (en attente paiement) ────────
         $conv = Convention::where('titre', 'like', '%AFD-BIOTECH%')->first();
         if ($conv && $jb) {
             $rubrique = Rubrique::where('convention_id', $conv->id)
                 ->where('libelle', 'like', '%Mission%')
                 ->first();
             if ($rubrique) {
-                $demande = DemandeDepense::create([
+                DemandeDepense::create([
                     'rubrique_id' => $rubrique->id,
                     'convention_id' => $conv->id,
                     'porteur_id' => $jb->id,
@@ -101,34 +108,37 @@ class DemandeDepenseSeeder extends Seeder
             }
         }
 
-        // ── 4. Demande validée DAF — NTIC-EDU / Dr. Traoré ─────────────────
+        // ── 4. Demande terminée — NTIC-EDU / Dr. Sawadogo (cycle précédent) ──
+        // Status Terminee pour permettre à demande 5 d'exister sur la même convention
         $conv = Convention::where('titre', 'like', '%BM-NTIC%')->first();
-        if ($conv && $aminata) {
-            $rubrique = Rubrique::where('convention_id', $conv->id)
-                ->where('libelle', 'like', '%Infrastructure%')
-                ->first();
-            if ($rubrique) {
-                DemandeDepense::create([
-                    'rubrique_id' => $rubrique->id,
-                    'convention_id' => $conv->id,
-                    'porteur_id' => $aminata->id,
+        if ($conv && $salamata) {
+            $this->creerDemandeParcourue(
+                convention: $conv,
+                rubriqueLibelle: 'Infrastructure réseau et connectivité',
+                porteur: $salamata,
+                daf: $daf,
+                ac: $ac,
+                montant: 35_000_000,
+                objet: 'Installation réseau fibre optique — Bâtiment pédagogique UFR/SEA',
+                description: "Déploiement d'un réseau LAN fibre optique 10 Gbps dans le bâtiment principal de l'UFR/SEA : "
+                    .'câblage structuré Cat6A, baie de brassage 48 ports, 80 prises réseau, switch Cisco Catalyst 2960 '
+                    .'et configuration du routage VLAN. Prestataire : TECHNET Burkina Faso.',
+                justificatif: 'justificatifs/ntic-fibre-devis-technet.pdf',
+                rapport: 'rapports/ntic-fibre-rapport-reception.pdf',
+                status: DemandeStatus::Terminee,
+                dateCreation: '2024-03-01',
+                paiement: [
                     'montant' => 35_000_000,
-                    'objet' => 'Installation réseau fibre optique — Bâtiment pédagogique UFR/SEA',
-                    'description' => "Déploiement d'un réseau LAN fibre optique 10 Gbps dans le bâtiment principal de l'UFR/SEA : "
-                        .'câblage structuré Cat6A, baie de brassage 48 ports, 80 prises réseau, switch Cisco Catalyst 2960 '
-                        .'et configuration du routage VLAN. Prestataire : TECHNET Burkina Faso.',
-                    'justificatif_path' => 'justificatifs/ntic-fibre-devis-technet.pdf',
-                    'status' => DemandeStatus::ValidéeDaf,
-                    'validee_daf_at' => now()->subDays(3),
-                    'validee_daf_par' => $daf?->id,
-                    'created_at' => now()->subDays(15),
-                ]);
-            }
+                    'date' => '2024-04-18',
+                    'mode' => ModePaiement::Virement,
+                    'ref' => 'VIR-BM-2024-0418',
+                ],
+            );
         }
 
-        // ── 5. Demande soumise — NTIC-EDU / Dr. Traoré ──────────────────────
+        // ── 5. Demande soumise — NTIC-EDU / Dr. Sawadogo (nouvelle demande) ──
         $conv = Convention::where('titre', 'like', '%BM-NTIC%')->first();
-        if ($conv && $aminata) {
+        if ($conv && $salamata) {
             $rubrique = Rubrique::where('convention_id', $conv->id)
                 ->where('libelle', 'like', '%Matériel%')
                 ->first();
@@ -136,7 +146,7 @@ class DemandeDepenseSeeder extends Seeder
                 DemandeDepense::create([
                     'rubrique_id' => $rubrique->id,
                     'convention_id' => $conv->id,
-                    'porteur_id' => $aminata->id,
+                    'porteur_id' => $salamata->id,
                     'montant' => 18_500_000,
                     'objet' => 'Acquisition de 25 ordinateurs portables et 5 serveurs — Salle informatique B3',
                     'description' => "Dotation de la salle informatique B3 de l'UJKZ : 25 laptops Dell Latitude 5540 (i7, 16Go RAM, 512Go SSD) "
@@ -149,9 +159,9 @@ class DemandeDepenseSeeder extends Seeder
             }
         }
 
-        // ── 6. Demande rejetée DAF — ENERGY-SOLAR / Pr. Kaboré ─────────────
+        // ── 6. Demande rejetée DAF — ENERGY-SOLAR / Prof. Boly ──────────────
         $conv = Convention::where('titre', 'like', '%AFD-SOLAR%')->first();
-        if ($conv && $moussa) {
+        if ($conv && $boly) {
             $rubrique = Rubrique::where('convention_id', $conv->id)
                 ->where('libelle', 'like', '%panneaux%')
                 ->first();
@@ -159,7 +169,7 @@ class DemandeDepenseSeeder extends Seeder
                 DemandeDepense::create([
                     'rubrique_id' => $rubrique->id,
                     'convention_id' => $conv->id,
-                    'porteur_id' => $moussa->id,
+                    'porteur_id' => $boly->id,
                     'montant' => 45_000_000,
                     'objet' => 'Acquisition 120 panneaux solaires 400Wc — Campus de Koudougou',
                     'description' => "Commande de 120 panneaux solaires monocristallins 400Wc (marque LONGi Solar) pour l'installation "
@@ -175,9 +185,9 @@ class DemandeDepenseSeeder extends Seeder
             }
         }
 
-        // ── 7. Nouvelle demande après rejet — ENERGY-SOLAR ──────────────────
+        // ── 7. Nouvelle demande après rejet — ENERGY-SOLAR / Prof. Boly ──────
         $conv = Convention::where('titre', 'like', '%AFD-SOLAR%')->first();
-        if ($conv && $moussa) {
+        if ($conv && $boly) {
             $rubrique = Rubrique::where('convention_id', $conv->id)
                 ->where('libelle', 'like', '%panneaux%')
                 ->first();
@@ -185,7 +195,7 @@ class DemandeDepenseSeeder extends Seeder
                 DemandeDepense::create([
                     'rubrique_id' => $rubrique->id,
                     'convention_id' => $conv->id,
-                    'porteur_id' => $moussa->id,
+                    'porteur_id' => $boly->id,
                     'montant' => 46_200_000,
                     'objet' => 'Acquisition 120 panneaux solaires 400Wc — Campus Koudougou (dossier révisé)',
                     'description' => 'Dossier révisé suite au rejet DAF du 15/03/2025. '
@@ -199,9 +209,9 @@ class DemandeDepenseSeeder extends Seeder
             }
         }
 
-        // ── 8. Demande terminée — PRESAR / Dr. Zerbo ─────────────────────────
+        // ── 8. Demande terminée — PRESAR / Dr. Traoré (Aminata) ──────────────
         $conv = Convention::where('titre', 'like', '%UEMOA-PRESAR%')->first();
-        if ($conv && $fatim) {
+        if ($conv && $aminata) {
             $rubrique = Rubrique::where('convention_id', $conv->id)
                 ->where('libelle', 'like', '%Enquête%')
                 ->first();
@@ -209,7 +219,7 @@ class DemandeDepenseSeeder extends Seeder
                 $this->creerDemandeParcourue(
                     convention: $conv,
                     rubriqueLibelle: null,
-                    porteur: $fatim,
+                    porteur: $aminata,
                     daf: $daf,
                     ac: $ac,
                     montant: 20_000_000,
@@ -232,9 +242,9 @@ class DemandeDepenseSeeder extends Seeder
             }
         }
 
-        // ── 9. Demande soumise — BIODIV-BF / Pr. Bambara ─────────────────────
+        // ── 9. Demande soumise — BIODIV-BF / Prof. Rasmané OUÉDRAOGO ─────────
         $conv = Convention::where('titre', 'like', '%BAD-BIODIV%')->first();
-        if ($conv && $ibrahim) {
+        if ($conv && $rasmane) {
             $rubrique = Rubrique::where('convention_id', $conv->id)
                 ->where('libelle', 'like', '%Reboisement%')
                 ->first();
@@ -242,7 +252,7 @@ class DemandeDepenseSeeder extends Seeder
                 DemandeDepense::create([
                     'rubrique_id' => $rubrique->id,
                     'convention_id' => $conv->id,
-                    'porteur_id' => $ibrahim->id,
+                    'porteur_id' => $rasmane->id,
                     'montant' => 25_000_000,
                     'objet' => 'Production de 150 000 plants forestiers — Pépinières de Ouagadougou et Bobo-Dioulasso',
                     'description' => "Production en pépinière de 150 000 plants d'espèces forestières locales (Karité, Néré, Caïlcédrat, Vène) "
@@ -256,7 +266,7 @@ class DemandeDepenseSeeder extends Seeder
             }
         }
 
-        // ── 10. Paiements directs — BIOTECH-BF / Pr. Ouédraogo ──────────────
+        // ── 10. Paiements directs — BIOTECH-BF / Pr. Ouédraogo (JB) ─────────
         $conv = Convention::where('titre', 'like', '%BM-BIOTECH%')->first();
         if ($conv && $jb) {
             $rubrique = Rubrique::where('convention_id', $conv->id)
@@ -286,9 +296,9 @@ class DemandeDepenseSeeder extends Seeder
             ]);
         }
 
-        // ── 11. Paiement direct — ENERGY-SOLAR / Pr. Kaboré ─────────────────
+        // ── 11. Paiement direct — ENERGY-SOLAR / Prof. Boly ──────────────────
         $conv = Convention::where('titre', 'like', '%AFD-SOLAR%')->first();
-        if ($conv && $moussa) {
+        if ($conv && $boly) {
             PaiementDirect::create([
                 'convention_id' => $conv->id,
                 'rubrique_id' => null,
@@ -298,7 +308,7 @@ class DemandeDepenseSeeder extends Seeder
                     ."(Ingénieur en énergies renouvelables, Paris) pour la mission d'évaluation technique du projet "
                     .'du 03 au 14 novembre 2024 à Ouagadougou et Koudougou.',
                 'date_paiement' => '2024-11-14',
-                'enregistre_par' => $moussa->id,
+                'enregistre_par' => $boly->id,
             ]);
         }
     }
@@ -378,6 +388,36 @@ class DemandeDepenseSeeder extends Seeder
                 'reference' => $paiement['ref'],
                 'enregistre_par' => $ac?->id,
             ]);
+        }
+    }
+
+    private function createDummyFiles(): void
+    {
+        $minimalPdf = "%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"
+            ."2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n"
+            ."3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]>>endobj\n"
+            ."xref\n0 4\n0000000000 65535 f \ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n190\n%%EOF\n";
+
+        $paths = [
+            'justificatifs/biotech-lot1-facture-proforma.pdf',
+            'justificatifs/biotech-equipements-devis.pdf',
+            'justificatifs/biotech-mission-ordre-mission.pdf',
+            'justificatifs/ntic-fibre-devis-technet.pdf',
+            'justificatifs/ntic-materiel-bon-commande.pdf',
+            'justificatifs/solar-panneaux-facture-proforma.pdf',
+            'justificatifs/solar-panneaux-devis-revise.pdf',
+            'justificatifs/presar-enquete-protocole-budget.pdf',
+            'justificatifs/biodiv-pepinieres-contrats.pdf',
+            'rapports/biotech-lot1-rapport-execution.pdf',
+            'rapports/biotech-equipements-rapport.pdf',
+            'rapports/ntic-fibre-rapport-reception.pdf',
+            'rapports/presar-enquete-rapport-final.pdf',
+        ];
+
+        foreach ($paths as $path) {
+            if (! Storage::disk('private')->exists($path)) {
+                Storage::disk('private')->put($path, $minimalPdf);
+            }
         }
     }
 }

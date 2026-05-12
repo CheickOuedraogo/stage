@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
     'rubrique_id', 'convention_id', 'porteur_id', 'montant', 'objet', 'description',
@@ -83,5 +84,17 @@ class DemandeDepense extends Model
     public function scopeEnAttenteAc(Builder $query): Builder
     {
         return $query->where('status', DemandeStatus::ValidéeDaf);
+    }
+
+    public function getHasJustificatifAttribute(): bool
+    {
+        return (bool) $this->justificatif_path
+            && Storage::disk('private')->exists($this->justificatif_path);
+    }
+
+    public function getHasRapportAttribute(): bool
+    {
+        return (bool) $this->rapport_path
+            && Storage::disk('private')->exists($this->rapport_path);
     }
 }

@@ -10,7 +10,10 @@
     "sail": false,
     "skills": [
         "laravel-best-practices",
+        "socialite-development",
         "wayfinder-development",
-        "pest-testing"
+        "pest-testing",
+        "inertia-react-development",
+        "tailwindcss-development"
     ]
 }

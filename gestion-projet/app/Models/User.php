@@ -13,6 +13,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * @method static Builder active()
+ * @method static Builder byRole(UserRole $role)
+ */
 #[Fillable(['name', 'email', 'password', 'role', 'is_active', 'avatar_path', 'telephone'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
@@ -73,17 +77,37 @@ class User extends Authenticatable
         return $this->hasRole(UserRole::Porteur);
     }
 
+    /** Named route for this user's dashboard — used after login/OAuth redirect. */
+    public function dashboardRoute(): string
+    {
+        return match ($this->role) {
+            UserRole::Admin => route('admin.dashboard'),
+            UserRole::Daf => route('daf.dashboard'),
+            UserRole::Ac => route('ac.dashboard'),
+            UserRole::Porteur => route('porteur.dashboard'),
+        };
+    }
+
     /** Audit logs authored by this user */
     public function auditLogs(): HasMany
     {
         return $this->hasMany(AuditLog::class);
     }
 
+    /** @var list<string> */
+    protected $appends = ['role_label', 'avatar_url'];
+
+    /** Short label for the role (Admin, DAF, AC, Porteur) */
+    public function getRoleLabelAttribute(): ?string
+    {
+        return $this->role?->shortLabel();
+    }
+
     /** Avatar URL — returns null if no avatar */
     public function getAvatarUrlAttribute(): ?string
     {
         return $this->avatar_path
-            ? asset('storage/'.$this->avatar_path)
+            ? asset("storage/{$this->avatar_path}")
             : null;
     }
 }

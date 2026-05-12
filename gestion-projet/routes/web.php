@@ -1,17 +1,30 @@
 <?php
 
 use App\Enums\UserRole;
+use App\Http\Controllers\Ac\ChatController as AcChatController;
 use App\Http\Controllers\Ac\DemandeDepenseController as AcDemandeDepenseController;
+use App\Http\Controllers\Ac\PaiementController as AcPaiementController;
+use App\Http\Controllers\Ac\ProjetController as AcProjetController;
 use App\Http\Controllers\Admin\AuditLogController;
+use App\Http\Controllers\Admin\ChatController as AdminChatController;
+use App\Http\Controllers\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Admin\MaintenanceController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Auth\GoogleOneTapController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Daf\ChatController as DafChatController;
 use App\Http\Controllers\Daf\ConventionController as DafConventionController;
 use App\Http\Controllers\Daf\DemandeDepenseController as DafDemandeDepenseController;
+use App\Http\Controllers\Daf\PaiementDirectController as DafPaiementDirectController;
 use App\Http\Controllers\Daf\ProjetController as DafProjetController;
+use App\Http\Controllers\Daf\RapportController as DafRapportController;
+use App\Http\Controllers\Daf\RubriqueController as DafRubriqueController;
+use App\Http\Controllers\Daf\VersementController as DafVersementController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Porteur\DemandeDepenseController as PorteurDemandeDepenseController;
-use App\Http\Controllers\Porteur\PaiementDirectController;
+use App\Http\Controllers\Porteur\FaqController as PorteurFaqController;
 use App\Http\Controllers\Porteur\ProjetController as PorteurProjetController;
 use App\Http\Controllers\Profile\ProfileController;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +34,11 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('guest')->group(function () {
     Route::get('/connexion', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/connexion', [LoginController::class, 'login']);
+
+    // Google OAuth
+    Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('auth.google');
+    Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('auth.google.callback');
+    Route::post('/auth/google/one-tap', [GoogleOneTapController::class, 'store'])->name('auth.google.one-tap');
 });
 
 Route::post('/deconnexion', [LoginController::class, 'logout'])
@@ -29,6 +47,15 @@ Route::post('/deconnexion', [LoginController::class, 'logout'])
 
 // ── Authenticated routes ─────────────────────────────────────────────────────
 Route::middleware(['auth'])->group(function () {
+
+    // Notifications (all roles)
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('/notifications/{notification}/lue', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::patch('/notifications/toutes-lues', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+
+    // File downloads — accessible by porteur (owner) + daf + ac
+    Route::get('/fichiers/demandes/{demande}/justificatif', [PorteurDemandeDepenseController::class, 'downloadJustificatif'])->name('demandes.justificatif.download');
+    Route::get('/fichiers/demandes/{demande}/rapport', [PorteurDemandeDepenseController::class, 'downloadRapport'])->name('demandes.rapport.download');
 
     // Profile (all roles)
     Route::get('/profil', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -52,6 +79,18 @@ Route::middleware(['auth'])->group(function () {
 
         // Audit log
         Route::get('/journal-audit', [AuditLogController::class, 'index'])->name('audit-log');
+
+        // FAQ CRUD
+        Route::get('/faq', [AdminFaqController::class, 'index'])->name('faq.index');
+        Route::post('/faq', [AdminFaqController::class, 'store'])->name('faq.store');
+        Route::patch('/faq/{faqItem}', [AdminFaqController::class, 'update'])->name('faq.update');
+        Route::delete('/faq/{faqItem}', [AdminFaqController::class, 'destroy'])->name('faq.destroy');
+
+        // Chat admin
+        Route::get('/messages', [AdminChatController::class, 'index'])->name('chat.index');
+        Route::get('/messages/{user}', [AdminChatController::class, 'show'])->name('chat.show');
+        Route::post('/messages/{user}', [AdminChatController::class, 'send'])->name('chat.send');
+        Route::get('/messages/{user}/poll', [AdminChatController::class, 'poll'])->name('chat.poll');
     });
 
     // ── DAF ───────────────────────────────────────────────────────────────
@@ -61,6 +100,9 @@ Route::middleware(['auth'])->group(function () {
         // Projets
         Route::get('/projets', [DafProjetController::class, 'index'])->name('projets.index');
         Route::get('/projets/{projet}', [DafProjetController::class, 'show'])->name('projets.show');
+        Route::post('/projets/{projet}/cloturer', [DafProjetController::class, 'cloturer'])->name('projets.cloturer');
+        Route::get('/projets/{projet}/bilan', [DafProjetController::class, 'bilan'])->name('projets.bilan');
+        Route::get('/projets/{projet}/bilan/pdf', [DafProjetController::class, 'exporterBilanPdf'])->name('projets.bilan.pdf');
 
         // Conventions d'un projet
         Route::get('/projets/{projet}/conventions/{convention}', [DafConventionController::class, 'show'])->name('projets.conventions.show');
@@ -70,6 +112,26 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/projets/{projet}/conventions/{convention}/versements', [DafConventionController::class, 'storeVersement'])->name('projets.conventions.versements.store');
         Route::patch('/projets/{projet}/conventions/{convention}/versements/{versement}', [DafConventionController::class, 'updateVersement'])->name('projets.conventions.versements.update');
         Route::delete('/projets/{projet}/conventions/{convention}/versements/{versement}', [DafConventionController::class, 'destroyVersement'])->name('projets.conventions.versements.destroy');
+
+        // Paiements directs (enregistrés par le DAF)
+        Route::post('/projets/{projet}/conventions/{convention}/paiements-directs', [DafPaiementDirectController::class, 'store'])->name('projets.conventions.paiements-directs.store');
+        Route::delete('/projets/{projet}/conventions/{convention}/paiements-directs/{paiementDirect}', [DafPaiementDirectController::class, 'destroy'])->name('projets.conventions.paiements-directs.destroy');
+
+        // Versements (vue globale)
+        Route::get('/versements', [DafVersementController::class, 'index'])->name('versements.index');
+
+        // Rubriques (vue globale)
+        Route::get('/rubriques', [DafRubriqueController::class, 'index'])->name('rubriques.index');
+
+        // Chat DAF
+        Route::get('/assistance', [DafChatController::class, 'index'])->name('chat.index');
+        Route::post('/assistance', [DafChatController::class, 'send'])->name('chat.send');
+        Route::get('/assistance/poll', [DafChatController::class, 'poll'])->name('chat.poll');
+
+        // Rapports
+        Route::get('/rapports', [DafRapportController::class, 'index'])->name('rapports.index');
+        Route::get('/rapports/execution-budgetaire', [DafRapportController::class, 'executionBudgetaire'])->name('rapports.execution-budgetaire');
+        Route::get('/rapports/cloture', [DafRapportController::class, 'cloture'])->name('rapports.cloture');
 
         // Demandes de dépenses
         Route::get('/demandes', [DafDemandeDepenseController::class, 'index'])->name('demandes.index');
@@ -83,6 +145,18 @@ Route::middleware(['auth'])->group(function () {
     // ── AC ────────────────────────────────────────────────────────────────
     Route::middleware('role:ac')->prefix('ac')->name('ac.')->group(function () {
         Route::get('/tableau-de-bord', [DashboardController::class, 'ac'])->name('dashboard');
+
+        // Bilan projet (lecture seule)
+        Route::get('/projets/{projet}/bilan', [AcProjetController::class, 'bilan'])->name('projets.bilan');
+        Route::get('/projets/{projet}/bilan/pdf', [AcProjetController::class, 'exporterBilanPdf'])->name('projets.bilan.pdf');
+
+        // Paiements
+        Route::get('/paiements', [AcPaiementController::class, 'index'])->name('paiements.index');
+
+        // Chat AC
+        Route::get('/assistance', [AcChatController::class, 'index'])->name('chat.index');
+        Route::post('/assistance', [AcChatController::class, 'send'])->name('chat.send');
+        Route::get('/assistance/poll', [AcChatController::class, 'poll'])->name('chat.poll');
 
         // Demandes de dépenses
         Route::get('/demandes', [AcDemandeDepenseController::class, 'index'])->name('demandes.index');
@@ -101,6 +175,8 @@ Route::middleware(['auth'])->group(function () {
         // Projets
         Route::get('/projets', [PorteurProjetController::class, 'index'])->name('projets.index');
         Route::get('/projets/{projet}', [PorteurProjetController::class, 'show'])->name('projets.show');
+        Route::get('/projets/{projet}/bilan', [PorteurProjetController::class, 'bilan'])->name('projets.bilan');
+        Route::get('/projets/{projet}/bilan/pdf', [PorteurProjetController::class, 'exporterBilanPdf'])->name('projets.bilan.pdf');
         Route::get('/projets/{projet}/conventions/{convention}', [PorteurProjetController::class, 'showConvention'])->name('projets.conventions.show');
 
         // Demandes de dépenses
@@ -112,9 +188,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/demandes/{demande}/justificatif', [PorteurDemandeDepenseController::class, 'downloadJustificatif'])->name('demandes.justificatif');
         Route::get('/demandes/{demande}/rapport-pdf', [PorteurDemandeDepenseController::class, 'downloadRapport'])->name('demandes.rapport-pdf');
 
-        // Paiements directs
-        Route::post('/projets/{projet}/conventions/{convention}/paiements-directs', [PaiementDirectController::class, 'store'])->name('projets.conventions.paiements-directs.store');
-        Route::delete('/projets/{projet}/conventions/{convention}/paiements-directs/{paiementDirect}', [PaiementDirectController::class, 'destroy'])->name('projets.conventions.paiements-directs.destroy');
+        // FAQ
+        Route::get('/assistance', [PorteurFaqController::class, 'index'])->name('faq.index');
     });
 });
 

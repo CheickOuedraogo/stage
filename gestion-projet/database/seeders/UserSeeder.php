@@ -14,17 +14,17 @@ class UserSeeder extends Seeder
         // ── Admin ───────────────────────────────────────────────────────────
         User::create([
             'name' => 'Administrateur CIFEU',
-            'email' => 'admin@cifeu.bf',
+            'email' => 'hcheick77@gmail.com',
             'password' => Hash::make('password'),
             'role' => UserRole::Admin,
             'is_active' => true,
-            'telephone' => '+226 25 30 70 00',
+            'telephone' => '+226 56 19 74 06',
         ]);
 
         // ── DAF ─────────────────────────────────────────────────────────────
         User::create([
-            'name' => 'Inoussa SAWADOGO',
-            'email' => 'daf@cifeu.bf',
+            'name' => 'Ouedraogo Bonaventure',
+            'email' => 'hcheick75@gmail.com',
             'password' => Hash::make('password'),
             'role' => UserRole::Daf,
             'is_active' => true,
@@ -33,85 +33,114 @@ class UserSeeder extends Seeder
 
         // ── AC ──────────────────────────────────────────────────────────────
         User::create([
-            'name' => 'Fatimata COMPAORÉ',
-            'email' => 'ac@cifeu.bf',
+            'name' => 'Savadofo Kader',
+            'email' => 'bouedraogo0412@gmail.com',
             'password' => Hash::make('password'),
             'role' => UserRole::Ac,
             'is_active' => true,
             'telephone' => '+226 25 30 70 02',
         ]);
 
-        // ── Porteurs de projet ───────────────────────────────────────────────
-        $porteurs = [
-            [
-                'name' => 'Pr. Jean-Baptiste OUÉDRAOGO',
-                'email' => 'jb.ouedraogo@ujkz.bf',
-                'telephone' => '+226 70 11 22 33',
-            ],
-            [
-                'name' => 'Dr. Aminata TRAORÉ',
-                'email' => 'a.traore@ujkz.bf',
-                'telephone' => '+226 70 44 55 66',
-            ],
-            [
-                'name' => 'Pr. Moussa KABORÉ',
-                'email' => 'm.kabore@ujkz.bf',
-                'telephone' => '+226 71 22 33 44',
-            ],
-            [
-                'name' => 'Dr. Aïssata ZONGO',
-                'email' => 'a.zongo@ujkz.bf',
-                'telephone' => '+226 70 55 66 77',
-            ],
-            [
-                'name' => 'Pr. Adama COULIBALY',
-                'email' => 'a.coulibaly@ujkz.bf',
-                'telephone' => '+226 71 33 44 55',
-            ],
-            [
-                'name' => 'Dr. Rasmata KINDA',
-                'email' => 'r.kinda@ujkz.bf',
-                'telephone' => '+226 70 66 77 88',
-            ],
-            [
-                'name' => 'Pr. Boubacar BARRY',
-                'email' => 'b.barry@ujkz.bf',
-                'telephone' => '+226 71 44 55 66',
-            ],
-            [
-                'name' => 'Dr. Mariam DIALLO',
-                'email' => 'm.diallo@ujkz.bf',
-                'telephone' => '+226 70 77 88 99',
-            ],
-            [
-                'name' => 'Pr. Souleymane OUATTARA',
-                'email' => 's.ouattara@ujkz.bf',
-                'telephone' => '+226 71 55 66 77',
-            ],
-            [
-                'name' => 'Dr. Bintou SAWADOGO',
-                'email' => 'b.sawadogo@ujkz.bf',
-                'telephone' => '+226 70 88 99 00',
-            ],
-        ];
-
-        foreach ($porteurs as $porteur) {
-            User::create([
-                ...$porteur,
-                'password' => Hash::make('password'),
-                'role' => UserRole::Porteur,
-                'is_active' => true,
-            ]);
-        }
-
-        // One inactive porteur for testing
+        // ── Porteur de projet ───────────────────────────────────────────────
         User::create([
-            'name' => 'Ibrahim TAPSOBA',
-            'email' => 'i.tapsoba@ujkz.bf',
+            'name' => 'Pr. Jean-Baptiste OUÉDRAOGO',
+            'email' => 'ocheick418@gmail.com',
+            'password' => Hash::make('password'),
+            'role' => UserRole::Porteur,
+            'is_active' => true,
+            'telephone' => '+226 70 11 22 33',
+        ]);
+
+        // ── Porteurs de projet supplémentaires (données de démonstration) ──────
+        User::create([
+            'name' => 'Dr. Aminata TRAORÉ',
+            'email' => 'a.traore@ujkz.bf',
+            'password' => Hash::make('password'),
+            'role' => UserRole::Porteur,
+            'is_active' => true,
+            'telephone' => '+226 70 22 33 44',
+        ]);
+
+        User::create([
+            'name' => 'Prof. Moussa KABORÉ',
+            'email' => 'm.kabore@ujkz.bf',
+            'password' => Hash::make('password'),
+            'role' => UserRole::Porteur,
+            'is_active' => true,
+            'telephone' => '+226 70 33 44 55',
+        ]);
+
+        User::create([
+            'name' => 'Dr. Fatoumata ZERBO',
+            'email' => 'f.zerbo@ujkz.bf',
+            'password' => Hash::make('password'),
+            'role' => UserRole::Porteur,
+            'is_active' => true,
+            'telephone' => '+226 70 44 55 66',
+        ]);
+
+        User::create([
+            'name' => 'Dr. Ibrahim BAMBARA',
+            'email' => 'i.bambara@ujkz.bf',
+            'password' => Hash::make('password'),
+            'role' => UserRole::Porteur,
+            'is_active' => true,
+            'telephone' => '+226 70 55 66 77',
+        ]);
+
+        User::create([
+            'name' => 'Prof. Rasmané OUÉDRAOGO',
+            'email' => 'r.ouedraogo@ujkz.bf',
+            'password' => Hash::make('password'),
+            'role' => UserRole::Porteur,
+            'is_active' => true,
+            'telephone' => '+226 70 66 77 88',
+        ]);
+
+        User::create([
+            'name' => 'Dr. Salamata SAWADOGO',
+            'email' => 's.sawadogo@ujkz.bf',
+            'password' => Hash::make('password'),
+            'role' => UserRole::Porteur,
+            'is_active' => true,
+            'telephone' => '+226 70 77 88 99',
+        ]);
+
+        User::create([
+            'name' => 'Prof. Dieudonné NIKIEMA',
+            'email' => 'd.nikiema@ujkz.bf',
+            'password' => Hash::make('password'),
+            'role' => UserRole::Porteur,
+            'is_active' => true,
+            'telephone' => '+226 70 88 99 00',
+        ]);
+
+        User::create([
+            'name' => 'Dr. Mariam COULIBALY',
+            'email' => 'm.coulibaly@ujkz.bf',
+            'password' => Hash::make('password'),
+            'role' => UserRole::Porteur,
+            'is_active' => true,
+            'telephone' => '+226 70 99 00 11',
+        ]);
+
+        User::create([
+            'name' => 'Prof. Souleymane BOLY',
+            'email' => 's.boly@ujkz.bf',
+            'password' => Hash::make('password'),
+            'role' => UserRole::Porteur,
+            'is_active' => true,
+            'telephone' => '+226 71 00 11 22',
+        ]);
+
+        // ── Porteur inactif pour les tests ─────────────────────────────────────
+        User::create([
+            'name' => 'Dr. Adama TAPSOBA',
+            'email' => 'a.tapsoba@ujkz.bf',
             'password' => Hash::make('password'),
             'role' => UserRole::Porteur,
             'is_active' => false,
-            'telephone' => '+226 70 00 11 22',
+            'telephone' => '+226 71 11 22 33',
         ]);
     }
 }
