@@ -10,7 +10,6 @@ import {
     BanknotesIcon,
     ClipboardDocumentListIcon,
     FolderIcon,
-    FolderOpenIcon,
 } from '@heroicons/react/24/outline';
 
 interface Stats {
@@ -77,20 +76,12 @@ export default function PorteurDashboard() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                 <Link href={projetsIndex.url()} className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4 hover:border-blue-300 hover:shadow-sm transition-all">
                     <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center mb-3">
                         <FolderIcon className="w-5 h-5 text-blue-600" />
                     </div>
-                    <p className="text-2xl font-bold font-mono text-slate-900 dark:text-white">{stats.projets_count}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Mes projets</p>
-                </Link>
-
-                <Link href={projetsIndex.url()} className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4 hover:border-emerald-300 hover:shadow-sm transition-all">
-                    <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center mb-3">
-                        <FolderOpenIcon className="w-5 h-5 text-emerald-600" />
-                    </div>
-                    <p className="text-2xl font-bold font-mono text-slate-900 dark:text-white">{stats.projets_actifs}</p>
+                    <p className="text-2xl font-bold font-mono text-slate-900 dark:text-white">{stats.projets_actifs}<span className="text-sm text-slate-400 font-normal ml-1">/ {stats.projets_count}</span></p>
                     <p className="text-xs text-slate-500 mt-0.5">Projets en cours</p>
                 </Link>
 
@@ -98,8 +89,8 @@ export default function PorteurDashboard() {
                     <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center mb-3">
                         <ClipboardDocumentListIcon className="w-5 h-5 text-amber-600" />
                     </div>
-                    <p className="text-2xl font-bold font-mono text-slate-900 dark:text-white">{stats.demandes_actives}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Demandes actives</p>
+                    <p className="text-2xl font-bold font-mono text-slate-900 dark:text-white">{stats.demandes_actives}<span className="text-sm text-slate-400 font-normal ml-1">en cours</span></p>
+                    <p className="text-xs text-slate-500 mt-0.5">Demandes de dépense</p>
                 </Link>
 
                 <Link href={demandesIndex.url()} className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4 hover:border-slate-300 hover:shadow-sm transition-all">
@@ -107,7 +98,7 @@ export default function PorteurDashboard() {
                         <ClipboardDocumentListIcon className="w-5 h-5 text-slate-600" />
                     </div>
                     <p className="text-2xl font-bold font-mono text-slate-900 dark:text-white">{stats.demandes_total}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Demandes totales</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Total demandes</p>
                 </Link>
             </div>
 

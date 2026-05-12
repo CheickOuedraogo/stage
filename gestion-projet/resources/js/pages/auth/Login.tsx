@@ -55,6 +55,9 @@ export default function Login({ maintenanceActive, maintenanceReason, maintenanc
     const [showAdminForm, setShowAdminForm] = useState(false);
     const isMaintenanceMode = maintenanceActive || flash.success === 'maintenance';
 
+    // Get the global Google client ID if provided
+    const googleClientId = usePage<PageProps & { googleClientId?: string }>().props.googleClientId;
+
     const remaining = useCountdown(isMaintenanceMode ? maintenanceUntil : null);
     const { h, m, s } = remaining != null ? formatCountdown(remaining) : { h: 0, m: 0, s: 0 };
 
@@ -68,6 +71,63 @@ export default function Login({ maintenanceActive, maintenanceReason, maintenanc
         e.preventDefault();
         post(login.url());
     };
+
+    const submitOneTapCredential = (credential: string) => {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/auth/google/one-tap';
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        if (csrfToken) {
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
+        }
+        const credentialInput = document.createElement('input');
+        credentialInput.type = 'hidden';
+        credentialInput.name = 'credential';
+        credentialInput.value = credential;
+        form.appendChild(credentialInput);
+        document.body.appendChild(form);
+        form.submit();
+    };
+
+    // Google One Tap — shows native dialog when a Google account is detected
+    useEffect(() => {
+        if (!googleClientId || isMaintenanceMode || showAdminForm) return;
+
+        const initGoogle = (google: any) => {
+            google.accounts.id.initialize({
+                client_id: googleClientId,
+                callback: (response: any) => submitOneTapCredential(response.credential),
+                auto_select: true,
+                cancel_on_tap_outside: false,
+                use_fedcm_for_prompt: true,
+            });
+            google.accounts.id.prompt();
+        };
+
+        if ((window as any).google?.accounts?.id) {
+            initGoogle((window as any).google);
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://accounts.google.com/gsi/client';
+        script.async = true;
+        script.defer = true;
+        script.onload = () => {
+            const google = (window as any).google;
+            if (google?.accounts?.id) initGoogle(google);
+        };
+        document.body.appendChild(script);
+
+        return () => {
+            if (document.body.contains(script)) document.body.removeChild(script);
+            (window as any).google?.accounts?.id?.cancel?.();
+        };
+    }, [googleClientId, isMaintenanceMode, showAdminForm]);
 
     if (isMaintenanceMode && !showAdminForm) {
         return (
@@ -300,29 +360,14 @@ export default function Login({ maintenanceActive, maintenanceReason, maintenanc
 
                 {/* Right panel – UJKZ photo */}
                 <div
-                    className="hidden lg:flex flex-1 relative items-end justify-start overflow-hidden"
+                    className="hidden lg:block flex-1 relative overflow-hidden"
                     style={{
                         backgroundImage: 'url(/connection_bg.jpg)',
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                     }}
                     aria-hidden="true"
-                >
-                    {/* Dark gradient overlay for legibility */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-
-                    {/* Caption */}
-                    <div className="relative z-10 p-10">
-                        <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur-sm rounded-xl px-4 py-2 mb-4">
-                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                            <span className="text-xs text-white/80 font-medium">Système CIFEU</span>
-                        </div>
-                        <h2 className="text-2xl font-bold text-white mb-1 drop-shadow">Université Joseph KI-ZERBO</h2>
-                        <p className="text-sm text-white/60 drop-shadow">
-                            Circuit Intégré des Financements Extérieurs Universitaires
-                        </p>
-                    </div>
-                </div>
+                />
             </div>
         </>
     );

@@ -2,11 +2,11 @@ import AppLayout from '@/components/layout/AppLayout';
 import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer';
 import { clampPercent, conventionStatusClass, formatCurrency, formatDate, projectStatusClass } from '@/lib/utils';
 import { CHART_AXIS_TICK, CHART_MARGIN, CHART_TOOLTIP_STYLE } from '@/lib/charts';
-import { index as dafProjetsIndex } from '@/routes/daf/projets';
+import { index as dafProjetsIndex, bilan as dafProjetBilan } from '@/routes/daf/projets';
 import { cloturer as cloturerProjet } from '@/actions/App/Http/Controllers/Daf/ProjetController';
 import { show as dafConventionShow } from '@/routes/daf/projets/conventions';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { ArrowLeftIcon, CheckBadgeIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, CheckBadgeIcon, DocumentChartBarIcon, ExclamationTriangleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { FormEvent, useState } from 'react';
 
@@ -53,6 +53,9 @@ interface Projet {
     porteur: { nom: string; email: string; telephone: string | null };
     conventions: Convention[];
     analyse_ecarts: AnalyseEcarts;
+    can_cloturer: boolean;
+    cloture_blockers: string | null;
+    bilan_url: string | null;
 }
 
 interface Props {
@@ -64,7 +67,7 @@ export default function DafProjetShow({ projet }: Props) {
     const totalRubriques = projet.conventions.reduce((s, c) => s + c.rubriques_count, 0);
     const [showCloture, setShowCloture] = useState(false);
     const cloturerForm = useForm({ date_fin_reelle: new Date().toISOString().split('T')[0] });
-    const peutCloturer = !['termine', 'annule'].includes(projet.status);
+    const statusEnCours = projet.status === 'en_cours';
 
     const submitCloture = (e: FormEvent) => {
         e.preventDefault();
@@ -104,7 +107,16 @@ export default function DafProjetShow({ projet }: Props) {
                         {projet.porteur.telephone && ` · ${projet.porteur.telephone}`}
                     </p>
                 </div>
-                {peutCloturer && (
+                {projet.bilan_url && (
+                    <Link
+                        href={projet.bilan_url}
+                        className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-blue-400 hover:text-blue-700 transition-all"
+                    >
+                        <DocumentChartBarIcon className="w-4 h-4" />
+                        Voir le bilan
+                    </Link>
+                )}
+                {statusEnCours && projet.can_cloturer && (
                     <button
                         onClick={() => setShowCloture((v) => !v)}
                         className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-emerald-400 hover:text-emerald-700 transition-all"
@@ -113,16 +125,25 @@ export default function DafProjetShow({ projet }: Props) {
                         Clôturer
                     </button>
                 )}
+                {statusEnCours && !projet.can_cloturer && projet.cloture_blockers && (
+                    <div className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 max-w-xs">
+                        <InformationCircleIcon className="w-4 h-4 shrink-0" />
+                        <span className="text-xs">{projet.cloture_blockers}</span>
+                    </div>
+                )}
             </div>
 
             {/* Panneau clôture */}
-            {showCloture && peutCloturer && (
+            {showCloture && projet.can_cloturer && (
                 <div className="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-5">
                     <div className="flex items-center gap-2 mb-3">
                         <ExclamationTriangleIcon className="w-4 h-4 text-amber-600" />
                         <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-400">Clôturer ce projet</h3>
                     </div>
                     <p className="text-xs text-amber-700 dark:text-amber-500 mb-4">Cette action marque le projet comme terminé et enregistre la date de clôture réelle.</p>
+                    {cloturerForm.errors.projet && (
+                        <p className="text-xs text-red-600 dark:text-red-400 mb-3">{cloturerForm.errors.projet}</p>
+                    )}
                     <form onSubmit={submitCloture} className="flex items-end gap-3">
                         <div className="flex-1">
                             <label className="block text-xs font-medium text-amber-800 dark:text-amber-400 mb-1">

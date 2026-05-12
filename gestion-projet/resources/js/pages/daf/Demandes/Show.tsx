@@ -88,7 +88,7 @@ export default function DafDemandeShow({ demande }: Props) {
             <div className="mb-6 flex items-center gap-2 text-sm">
                 <Link
                     href={demandesIndex.url()}
-                    className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:text-white dark:text-slate-400 dark:hover:text-white transition-colors"
+                    className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:text-slate-400 dark:hover:text-white transition-colors"
                 >
                     <ArrowLeftIcon className="w-3.5 h-3.5" />
                     Demandes
@@ -100,7 +100,7 @@ export default function DafDemandeShow({ demande }: Props) {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-6">
                     {/* Détails */}
-                    <div className="bg-white dark:bg-slate-900 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
+                    <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
                         <div className="flex items-start justify-between gap-4 flex-wrap mb-4">
                             <div>
                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mb-2 ${demande.badge_class}`}>
@@ -116,7 +116,7 @@ export default function DafDemandeShow({ demande }: Props) {
                             </span>
                         </div>
 
-                        <dl className="grid grid-cols-2 gap-4 text-sm border-t border-gray-100 dark:border-slate-800 dark:border-slate-700 pt-4">
+                        <dl className="grid grid-cols-2 gap-4 text-sm border-t border-gray-100 dark:border-slate-700 pt-4">
                             <div>
                                 <dt className="text-slate-500 dark:text-slate-400 mb-0.5">Rubrique</dt>
                                 <dd className="font-medium text-gray-800 dark:text-slate-200">{demande.rubrique.libelle}</dd>
@@ -134,7 +134,7 @@ export default function DafDemandeShow({ demande }: Props) {
                         {demande.description && (
                             <div className="mt-4">
                                 <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Description</p>
-                                <p className="text-sm text-gray-600 dark:text-slate-400 dark:text-slate-300 bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3">
+                                <p className="text-sm text-gray-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3">
                                     {demande.description}
                                 </p>
                             </div>
@@ -152,7 +152,7 @@ export default function DafDemandeShow({ demande }: Props) {
                     </div>
 
                     {/* Documents */}
-                    <div className="bg-white dark:bg-slate-900 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
+                    <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
                         <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Documents</h3>
                         <div className="flex flex-wrap gap-3">
                             {demande.has_justificatif && (
@@ -178,7 +178,7 @@ export default function DafDemandeShow({ demande }: Props) {
 
                     {/* Actions validation DAF */}
                     {canValidate && (
-                        <div className="bg-white dark:bg-slate-900 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
+                        <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
                             <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
                                 Décision (1er niveau — conformité & budget)
                             </h3>
@@ -226,7 +226,7 @@ export default function DafDemandeShow({ demande }: Props) {
 
                     {/* Validation rapport */}
                     {canValidateRapport && (
-                        <div className="bg-white dark:bg-slate-900 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
+                        <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
                             <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
                                 Validation du rapport d'exécution
                             </h3>
@@ -255,7 +255,7 @@ export default function DafDemandeShow({ demande }: Props) {
 
                 {/* Sidebar infos */}
                 <div className="space-y-6">
-                    <div className="bg-white dark:bg-slate-900 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
+                    <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
                         <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Informations</h3>
                         <dl className="space-y-3 text-sm">
                             <div>
@@ -283,7 +283,7 @@ export default function DafDemandeShow({ demande }: Props) {
                     </div>
 
                     {demande.paiement && (
-                        <div className="bg-white dark:bg-slate-900 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
+                        <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
                             <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Paiement</h3>
                             <dl className="space-y-3 text-sm">
                                 <div className="flex justify-between">

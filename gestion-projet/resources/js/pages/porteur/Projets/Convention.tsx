@@ -1,13 +1,10 @@
 import AppLayout from '@/components/layout/AppLayout';
-import { Button } from '@/components/ui/Button';
 import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer';
 import { clampPercent, conventionStatusClass, formatCurrency, formatDate, versementTypeClass } from '@/lib/utils';
-import { create as createDemande, store as storePaiementDirect } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
-import { store as storePaiementDirectAction } from '@/actions/App/Http/Controllers/Porteur/PaiementDirectController';
+import { create as createDemande } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
 import { show as projetsShow } from '@/routes/porteur/projets';
-import { Head, Link, router, useForm } from '@inertiajs/react';
-import { ArrowLeftIcon, BanknotesIcon, CalendarIcon, PlusIcon } from '@heroicons/react/24/outline';
-import { useState } from 'react';
+import { Head, Link } from '@inertiajs/react';
+import { ArrowLeftIcon, CalendarIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 interface Rubrique {
     id: number;
@@ -60,23 +57,6 @@ export default function ConventionShow({ projet, convention, has_demande_active 
     const tauxRubriques = clampPercent(convention.total_rubriques, convention.montant_fcfa);
     const totalDepense = convention.rubriques.reduce((s, r) => s + r.montant_depense, 0);
 
-    const [showPaiementDirectForm, setShowPaiementDirectForm] = useState(false);
-    const paiementDirectForm = useForm({
-        rubrique_id: '',
-        montant: '',
-        objet_depense: '',
-        description: '',
-        date_paiement: new Date().toISOString().split('T')[0],
-    });
-
-    function handlePaiementDirect(e: React.FormEvent) {
-        e.preventDefault();
-        paiementDirectForm.post(
-            storePaiementDirectAction.url({ projet: projet.id, convention: convention.id }),
-            { onSuccess: () => { setShowPaiementDirectForm(false); paiementDirectForm.reset(); } }
-        );
-    }
-
     return (
         <AppLayout title={convention.titre}>
             <Head title={`${convention.titre} — CIFEU`} />
@@ -85,7 +65,7 @@ export default function ConventionShow({ projet, convention, has_demande_active 
             <div className="mb-6 flex items-center gap-2 text-sm">
                 <Link
                     href={projetsShow.url(projet.id)}
-                    className="flex items-center gap-1.5 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white transition-colors"
+                    className="flex items-center gap-1.5 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                 >
                     <ArrowLeftIcon className="w-3.5 h-3.5" />
                     {projet.titre}
@@ -182,101 +162,20 @@ export default function ConventionShow({ projet, convention, has_demande_active 
                 )}
 
                 {/* Bouton nouvelle demande */}
-                <div className="lg:col-span-2 flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300">Actions</h3>
-                    <div className="flex gap-3">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setShowPaiementDirectForm(!showPaiementDirectForm)}
-                        >
-                            <BanknotesIcon className="w-4 h-4" />
-                            Paiement direct
-                        </Button>
-                        <Link
-                            href={createDemande.url({ projet: projet.id, convention: convention.id })}
-                            className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                                has_demande_active
-                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed pointer-events-none dark:bg-slate-800 dark:text-slate-600'
-                                    : 'bg-blue-600 hover:bg-blue-700 text-white motion-safe:hover:scale-[1.02] active:scale-[0.98]'
-                            }`}
-                            aria-disabled={has_demande_active}
-                        >
-                            <PlusIcon className="w-4 h-4" />
-                            {has_demande_active ? 'Demande en cours' : 'Nouvelle demande'}
-                        </Link>
-                    </div>
+                <div className="lg:col-span-2 flex items-center justify-end">
+                    <Link
+                        href={createDemande.url({ projet: projet.id, convention: convention.id })}
+                        className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                            has_demande_active
+                                ? 'bg-slate-100 text-slate-400 cursor-not-allowed pointer-events-none dark:bg-slate-800 dark:text-slate-600'
+                                : 'bg-blue-600 hover:bg-blue-700 text-white motion-safe:hover:scale-[1.02] active:scale-[0.98]'
+                        }`}
+                        aria-disabled={has_demande_active}
+                    >
+                        <PlusIcon className="w-4 h-4" />
+                        {has_demande_active ? 'Demande en cours' : 'Nouvelle demande'}
+                    </Link>
                 </div>
-
-                {/* Formulaire paiement direct */}
-                {showPaiementDirectForm && (
-                    <div className="lg:col-span-2 bg-white dark:bg-slate-900 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Enregistrer un paiement direct du bailleur</h3>
-                        <form onSubmit={handlePaiementDirect} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">
-                                    Objet <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    value={paiementDirectForm.data.objet_depense}
-                                    onChange={(e) => paiementDirectForm.setData('objet_depense', e.target.value)}
-                                    className="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                                    placeholder="Objet du paiement direct"
-                                />
-                                {paiementDirectForm.errors.objet_depense && <p className="mt-1 text-xs text-red-600">{paiementDirectForm.errors.objet_depense}</p>}
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">
-                                    Montant (FCFA) <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="number"
-                                    min={1}
-                                    value={paiementDirectForm.data.montant}
-                                    onChange={(e) => paiementDirectForm.setData('montant', e.target.value)}
-                                    className="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-mono bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                                />
-                                {paiementDirectForm.errors.montant && <p className="mt-1 text-xs text-red-600">{paiementDirectForm.errors.montant}</p>}
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">
-                                    Date <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="date"
-                                    value={paiementDirectForm.data.date_paiement}
-                                    max={new Date().toISOString().split('T')[0]}
-                                    onChange={(e) => paiementDirectForm.setData('date_paiement', e.target.value)}
-                                    className="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                                />
-                                {paiementDirectForm.errors.date_paiement && <p className="mt-1 text-xs text-red-600">{paiementDirectForm.errors.date_paiement}</p>}
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">
-                                    Rubrique (optionnel)
-                                </label>
-                                <select
-                                    value={paiementDirectForm.data.rubrique_id}
-                                    onChange={(e) => paiementDirectForm.setData('rubrique_id', e.target.value)}
-                                    className="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                                >
-                                    <option value="">Aucune rubrique</option>
-                                    {convention.rubriques.map((r) => (
-                                        <option key={r.id} value={r.id}>{r.libelle}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="sm:col-span-2 flex gap-3 justify-end pt-2">
-                                <Button type="button" variant="ghost" onClick={() => setShowPaiementDirectForm(false)}>Annuler</Button>
-                                <Button type="submit" loading={paiementDirectForm.processing}>
-                                    <BanknotesIcon className="w-4 h-4" />
-                                    Enregistrer
-                                </Button>
-                            </div>
-                        </form>
-                    </div>
-                )}
 
                 {/* Rubriques */}
                 <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">

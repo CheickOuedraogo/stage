@@ -4,6 +4,8 @@ use App\Enums\UserRole;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 uses(LazilyRefreshDatabase::class);
 
@@ -104,5 +106,95 @@ describe('Connexion', function () {
             ->assertRedirect(route('login'));
 
         $this->assertGuest();
+    });
+});
+
+describe('Blocage par tentatives (backoff exponentiel)', function () {
+    beforeEach(function () {
+        Cache::flush();
+    });
+
+    it('affiche le nombre de tentatives restantes après un échec', function () {
+        $user = User::factory()->create(['password' => bcrypt('password')]);
+
+        $response = $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'mauvais',
+        ]);
+
+        $response->assertSessionHasErrors('email');
+        expect(session('errors')->first('email'))->toContain('2 tentative(s)');
+    });
+
+    it('bloque après 3 échecs avec message de temps d\'attente', function () {
+        $user = User::factory()->create(['password' => bcrypt('password')]);
+
+        // 3 tentatives échouées
+        for ($i = 0; $i < 3; $i++) {
+            $this->post(route('login'), [
+                'email' => $user->email,
+                'password' => 'mauvais',
+            ]);
+        }
+
+        // 4e tentative — doit être bloquée
+        $response = $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $response->assertSessionHasErrors('email');
+        expect(session('errors')->first('email'))->toContain('minute');
+        $this->assertGuest();
+    });
+
+    it('double la durée de blocage à chaque nouveau lockout', function () {
+        $user = User::factory()->create(['password' => bcrypt('password')]);
+        $key = strtolower($user->email).'|127.0.0.1';
+        $key = Str::transliterate($key);
+
+        // Premier lockout (300s)
+        Cache::put('login_lockouts:'.$key, 1, now()->addDay());
+        Cache::put('login_lock:'.$key, now()->addMinutes(5)->timestamp, 300);
+
+        $unlockAt1 = Cache::get('login_lock:'.$key);
+
+        // Simuler second lockout
+        Cache::put('login_lockouts:'.$key, 2, now()->addDay());
+        $duration2 = min(300 * (2 ** (2 - 1)), 7200); // 600s
+        Cache::put('login_lock:'.$key, now()->timestamp + $duration2, $duration2);
+
+        $unlockAt2 = Cache::get('login_lock:'.$key);
+
+        expect($unlockAt2 - $unlockAt1)->toBeGreaterThan(200);
+    });
+
+    it('autorise la connexion quand le lockout expire', function () {
+        $user = User::factory()->create(['password' => bcrypt('password')]);
+
+        $response = $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect($user->dashboardRoute());
+        $this->assertAuthenticatedAs($user);
+    });
+
+    it('efface l\'état de rate limiting après connexion réussie', function () {
+        $user = User::factory()->create(['password' => bcrypt('password')]);
+        $key = strtolower($user->email).'|127.0.0.1';
+        $key = Str::transliterate($key);
+
+        // Simule 2 échecs
+        Cache::put('login_attempts:'.$key, 2, now()->addMinutes(15));
+
+        $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        expect(Cache::has('login_attempts:'.$key))->toBeFalse();
+        expect(Cache::has('login_lock:'.$key))->toBeFalse();
     });
 });

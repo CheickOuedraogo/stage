@@ -8,7 +8,6 @@ use App\Models\DemandeDepense;
 use App\Services\DemandeDepenseService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -130,8 +129,8 @@ class DemandeDepenseController extends Controller
             ...$this->formatDemande($d),
             'description' => $d->description,
             'motif_rejet' => $d->motif_rejet,
-            'has_justificatif' => (bool) $d->justificatif_path && Storage::disk('private')->exists($d->justificatif_path),
-            'has_rapport' => (bool) $d->rapport_path && Storage::disk('private')->exists($d->rapport_path),
+            'has_justificatif' => $d->has_justificatif,
+            'has_rapport' => $d->has_rapport,
             'rapport_validee_daf' => $d->rapport_validee_daf,
             'rapport_validee_ac' => $d->rapport_validee_ac,
             'validee_daf_at' => $d->validee_daf_at?->toDateTimeString(),

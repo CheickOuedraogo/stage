@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Porteur;
 
+use App\Enums\ConventionStatus;
 use App\Enums\DemandeStatus;
+use App\Enums\ProjectStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Convention;
 use App\Models\DemandeDepense;
@@ -62,6 +64,8 @@ class DemandeDepenseController extends Controller
         $porteur = $request->user();
         abort_unless($projet->porteur_id === $porteur->id, 403);
         abort_unless($convention->projet_id === $projet->id, 404);
+        abort_unless($projet->status === ProjectStatus::EnCours, 403);
+        abort_unless($convention->status === ConventionStatus::Active, 403);
 
         $this->service->assertPasDeDemandeActive($convention);
 
@@ -90,6 +94,8 @@ class DemandeDepenseController extends Controller
         $porteur = $request->user();
         abort_unless($projet->porteur_id === $porteur->id, 403);
         abort_unless($convention->projet_id === $projet->id, 404);
+        abort_unless($projet->status === ProjectStatus::EnCours, 403);
+        abort_unless($convention->status === ConventionStatus::Active, 403);
 
         $validated = $request->validate([
             'rubrique_id' => ['required', 'integer', Rule::exists('rubriques', 'id')->where('convention_id', $convention->id)],
@@ -206,8 +212,8 @@ class DemandeDepenseController extends Controller
             ...$this->formatDemande($d),
             'description' => $d->description,
             'motif_rejet' => $d->motif_rejet,
-            'has_justificatif' => (bool) $d->justificatif_path && Storage::disk('private')->exists($d->justificatif_path),
-            'has_rapport' => (bool) $d->rapport_path && Storage::disk('private')->exists($d->rapport_path),
+            'has_justificatif' => $d->has_justificatif,
+            'has_rapport' => $d->has_rapport,
             'rapport_validee_daf' => $d->rapport_validee_daf,
             'rapport_validee_ac' => $d->rapport_validee_ac,
             'validee_daf_at' => $d->validee_daf_at?->toDateTimeString(),

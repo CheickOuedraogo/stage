@@ -18,7 +18,7 @@ class AuditLogController extends Controller
         $logs = AuditLog::with('user:id,name,email,role')
             ->when($userId, fn ($q) => $q->where('user_id', $userId))
             ->orderByDesc('created_at')
-            ->paginate(50)
+            ->paginate(50, ['id', 'user_id', 'action', 'description', 'auditable_type', 'auditable_id', 'old_values', 'new_values', 'ip_address', 'created_at'])
             ->withQueryString();
 
         $users = User::select('id', 'name', 'email', 'role')

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -41,11 +40,6 @@ class GoogleController extends Controller
 
         Auth::login($user, remember: true);
 
-        return redirect(match ($user->role) {
-            UserRole::Admin => route('admin.dashboard'),
-            UserRole::Daf => route('daf.dashboard'),
-            UserRole::Ac => route('ac.dashboard'),
-            UserRole::Porteur => route('porteur.dashboard'),
-        });
+        return redirect($user->dashboardRoute());
     }
 }

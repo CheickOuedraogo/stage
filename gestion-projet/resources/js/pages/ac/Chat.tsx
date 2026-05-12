@@ -15,12 +15,11 @@ export default function AcChat() {
         <AppLayout title="Assistance">
             <Head title="Assistance — Agent Comptable — CIFEU" />
 
-            <div className="mb-6">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Assistance</h2>
-                <p className="text-sm text-slate-500 mt-1">Posez vos questions directement à l'administrateur</p>
-            </div>
-
-            <div className="max-w-2xl">
+            <div className="max-w-2xl mx-auto">
+                <div className="mb-5">
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Assistance</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Questions directement à l'administrateur</p>
+                </div>
                 <ChatInterface
                     messages={messages}
                     sendUrl={chatSend.url()}

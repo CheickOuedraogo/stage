@@ -10,6 +10,7 @@ use App\Models\Paiement;
 use App\Models\Rubrique;
 use App\Models\User;
 use App\Notifications\DemandeStatusChanged;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class DemandeDepenseService
@@ -112,6 +113,7 @@ class DemandeDepenseService
         ]);
 
         $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::ValidéeAc));
+        $this->notifyDaf($demande, DemandeStatus::ValidéeAc);
     }
 
     /**
@@ -128,6 +130,7 @@ class DemandeDepenseService
         ]);
 
         $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::RejetéeAc, $motif));
+        $this->notifyDaf($demande, DemandeStatus::RejetéeAc);
     }
 
     /**
@@ -180,13 +183,16 @@ class DemandeDepenseService
         abort_unless($demande->status === DemandeStatus::RapportSoumis, 403);
         abort_unless($daf->role === UserRole::Daf, 403);
 
-        $demande->update(['rapport_validee_daf' => true]);
-        $demande->refresh();
+        DB::transaction(function () use ($demande) {
+            $demande->newQuery()->where('id', $demande->id)->lockForUpdate()->sole();
+            $demande->update(['rapport_validee_daf' => true]);
+            $demande->refresh();
 
-        if ($demande->rapport_validee_daf && $demande->rapport_validee_ac) {
-            $demande->update(['status' => DemandeStatus::Terminee]);
-            $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::Terminee));
-        }
+            if ($demande->rapport_validee_daf && $demande->rapport_validee_ac) {
+                $demande->update(['status' => DemandeStatus::Terminee]);
+                $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::Terminee));
+            }
+        });
     }
 
     /**
@@ -197,13 +203,16 @@ class DemandeDepenseService
         abort_unless($demande->status === DemandeStatus::RapportSoumis, 403);
         abort_unless($ac->role === UserRole::Ac, 403);
 
-        $demande->update(['rapport_validee_ac' => true]);
-        $demande->refresh();
+        DB::transaction(function () use ($demande) {
+            $demande->newQuery()->where('id', $demande->id)->lockForUpdate()->sole();
+            $demande->update(['rapport_validee_ac' => true]);
+            $demande->refresh();
 
-        if ($demande->rapport_validee_daf && $demande->rapport_validee_ac) {
-            $demande->update(['status' => DemandeStatus::Terminee]);
-            $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::Terminee));
-        }
+            if ($demande->rapport_validee_daf && $demande->rapport_validee_ac) {
+                $demande->update(['status' => DemandeStatus::Terminee]);
+                $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::Terminee));
+            }
+        });
     }
 
     /**
@@ -229,8 +238,16 @@ class DemandeDepenseService
 
     private function notifyAc(DemandeDepense $demande, DemandeStatus $status): void
     {
-        $ac = User::where('role', UserRole::Ac)->first();
-        $ac?->notify(new DemandeStatusChanged($demande, $status));
+        User::where('role', UserRole::Ac->value)
+            ->get()
+            ->each(fn (User $u) => $u->notify(new DemandeStatusChanged($demande, $status)));
+    }
+
+    private function notifyDaf(DemandeDepense $demande, DemandeStatus $status): void
+    {
+        User::where('role', UserRole::Daf->value)
+            ->get()
+            ->each(fn (User $u) => $u->notify(new DemandeStatusChanged($demande, $status)));
     }
 
     private function notifyDafAc(DemandeDepense $demande, DemandeStatus $status): void

@@ -1,16 +1,20 @@
 import { createInertiaApp, router } from '@inertiajs/react';
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, type Root } from 'react-dom/client';
 import ErrorPage from './pages/ErrorPage';
 
 const appName = import.meta.env.VITE_APP_NAME || 'CIFEU';
 
-// Branded error pages for 403, 404, 419, 500, 503
+let appRoot: Root | null = null;
+
+// Branded error pages — reuse existing root to avoid React double-root warning
 router.on('httpException', (event) => {
     const status = (event as CustomEvent<{ response: { status: number } }>).detail?.response?.status ?? 500;
-    const el = document.getElementById('app');
-    if (el) {
-        createRoot(el).render(React.createElement(ErrorPage, { status }));
+    if (appRoot) {
+        appRoot.render(React.createElement(ErrorPage, { status }));
+    } else {
+        const el = document.getElementById('app');
+        if (el) createRoot(el).render(React.createElement(ErrorPage, { status }));
     }
 });
 
@@ -26,7 +30,8 @@ createInertiaApp({
         return page;
     },
     setup({ el, App, props }) {
-        createRoot(el).render(<App {...props} />);
+        appRoot = createRoot(el);
+        appRoot.render(<App {...props} />);
     },
     progress: {
         color: '#3b82f6',
