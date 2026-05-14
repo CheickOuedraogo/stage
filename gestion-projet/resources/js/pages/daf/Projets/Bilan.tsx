@@ -1,7 +1,7 @@
 import AppLayout from '@/components/layout/AppLayout';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { Head } from '@inertiajs/react';
-import { ArrowLeftIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, DocumentArrowDownIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 interface Convention {
     id: number;
@@ -32,11 +32,13 @@ interface PaiementDirect {
 }
 
 interface AnalyseEcarts {
+    budget_initial: number;
     budget_prevu: number;
     total_versements: number;
     total_depenses: number;
     ecart_budget: number;
     taux_execution: number;
+    conventions_depassent_budget_initial: boolean;
     ecart_temps_jours: number | null;
     ecart_temps_label: string | null;
 }
@@ -121,6 +123,20 @@ export default function BilanProjet({ bilan, pdf_url }: Props) {
                     </div>
                 </div>
             </div>
+
+            {/* Alerte dépassement budget initial */}
+            {analyse_ecarts.conventions_depassent_budget_initial && (
+                <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
+                    <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+                    <div className="text-sm">
+                        <p className="font-semibold text-amber-800 dark:text-amber-300">Financement supérieur au budget initial</p>
+                        <p className="mt-0.5 text-amber-700 dark:text-amber-400">
+                            Le total des conventions ({formatCurrency(analyse_ecarts.budget_prevu)}) dépasse le budget initial estimé du projet ({formatCurrency(analyse_ecarts.budget_initial)}).
+                            Écart : +{formatCurrency(analyse_ecarts.budget_prevu - analyse_ecarts.budget_initial)}.
+                        </p>
+                    </div>
+                </div>
+            )}
 
             {/* Synthèse financière */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

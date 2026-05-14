@@ -7,14 +7,17 @@ import { show as dafProjetsShow } from '@/routes/daf/projets';
 import { store as storeRubrique, update as updateRubrique, destroy as destroyRubrique } from '@/routes/daf/projets/conventions/rubriques';
 import { store as storeVersement, destroy as destroyVersement } from '@/routes/daf/projets/conventions/versements';
 import { store as storePaiementDirect, destroy as destroyPaiementDirect } from '@/routes/daf/projets/conventions/paiements-directs';
+import { terminer as terminerConvention, annuler as annulerConvention } from '@/routes/daf/projets/conventions';
 import { Head, useForm, router } from '@inertiajs/react';
 import {
     ArrowLeftIcon,
     BanknotesIcon,
     CalendarIcon,
+    CheckCircleIcon,
     PencilSquareIcon,
     PlusIcon,
     TrashIcon,
+    XCircleIcon,
     XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { useMemo, useState } from 'react';
@@ -89,6 +92,8 @@ export default function DafConventionShow({ projet, convention }: Props) {
     const [confirmRubrique, setConfirmRubrique] = useState<number | null>(null);
     const [confirmVersement, setConfirmVersement] = useState<number | null>(null);
     const [confirmPaiementDirect, setConfirmPaiementDirect] = useState<number | null>(null);
+    const [confirmTerminer, setConfirmTerminer] = useState(false);
+    const [confirmAnnuler, setConfirmAnnuler] = useState(false);
 
     const rubriqueForm = useForm({ libelle: '', montant_prevu: '', description: '' });
     const addVersementForm = useForm({ montant: '', date_reception: '', type: 'tranche', reference: '', description: '' });
@@ -101,6 +106,15 @@ export default function DafConventionShow({ projet, convention }: Props) {
     });
 
     const params = { projet: projet.id, convention: convention.id };
+    const isEditable = convention.status === 'active' || convention.status === 'suspendue';
+
+    const handleTerminer = () => {
+        router.patch(terminerConvention.url(params), {}, { onSuccess: () => setConfirmTerminer(false) });
+    };
+
+    const handleAnnuler = () => {
+        router.patch(annulerConvention.url(params), {}, { onSuccess: () => setConfirmAnnuler(false) });
+    };
 
     const startEdit = (r: Rubrique) => {
         setShowAddRubrique(false);
@@ -201,9 +215,31 @@ export default function DafConventionShow({ projet, convention }: Props) {
                             {convention.bailleur.pays && ` — ${convention.bailleur.pays}`}
                         </p>
                     </div>
-                    <div className="text-right">
-                        <p className="text-xs text-gray-500 dark:text-slate-400">Forme</p>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">{convention.forme_label}</p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <div className="text-right mr-2">
+                            <p className="text-xs text-gray-500 dark:text-slate-400">Forme</p>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">{convention.forme_label}</p>
+                        </div>
+                        {isEditable && (
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={() => setConfirmTerminer(true)}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-900/50 transition-colors"
+                                >
+                                    <CheckCircleIcon className="w-3.5 h-3.5" />
+                                    Terminer
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setConfirmAnnuler(true)}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-700 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 transition-colors"
+                                >
+                                    <XCircleIcon className="w-3.5 h-3.5" />
+                                    Annuler
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-4 text-xs text-gray-600 dark:text-slate-400">
@@ -796,6 +832,22 @@ export default function DafConventionShow({ projet, convention }: Props) {
                 confirmLabel="Supprimer"
                 onConfirm={() => router.delete(destroyPaiementDirect.url({ ...params, paiement_direct: confirmPaiementDirect! }), { onSuccess: () => setConfirmPaiementDirect(null), onError: () => setConfirmPaiementDirect(null) })}
                 onCancel={() => setConfirmPaiementDirect(null)}
+            />
+            <ConfirmModal
+                open={confirmTerminer}
+                title="Terminer la convention"
+                message={`La convention « ${convention.titre} » sera marquée comme terminée. Cette action est requise avant de pouvoir clôturer le projet.`}
+                confirmLabel="Terminer"
+                onConfirm={handleTerminer}
+                onCancel={() => setConfirmTerminer(false)}
+            />
+            <ConfirmModal
+                open={confirmAnnuler}
+                title="Annuler la convention"
+                message={`La convention « ${convention.titre} » sera annulée. Les financements associés ne seront plus comptabilisés dans les calculs de clôture.`}
+                confirmLabel="Annuler la convention"
+                onConfirm={handleAnnuler}
+                onCancel={() => setConfirmAnnuler(false)}
             />
         </AppLayout>
     );
