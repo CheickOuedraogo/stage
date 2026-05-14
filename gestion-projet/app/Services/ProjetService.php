@@ -172,11 +172,13 @@ class ProjetService
             'demandes' => $demandes->all(),
             'paiements_directs' => $paiementsDirects->all(),
             'analyse_ecarts' => [
+                'budget_initial' => $projet->montant_estime,
                 'budget_prevu' => $budgetPrevu,
                 'total_versements' => $totalVersements,
                 'total_depenses' => $totalDepenses,
                 'ecart_budget' => $budgetPrevu - $totalDepenses,
                 'taux_execution' => $budgetPrevu > 0 ? round(($totalDepenses / $budgetPrevu) * 100, 1) : 0,
+                'conventions_depassent_budget_initial' => $budgetPrevu > $projet->montant_estime,
                 'ecart_temps_jours' => $ecartTemps,
                 'ecart_temps_label' => $ecartTempsLabel,
             ],

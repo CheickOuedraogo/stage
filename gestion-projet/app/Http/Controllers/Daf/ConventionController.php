@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Daf;
 
+use App\Enums\ConventionStatus;
 use App\Enums\VersementType;
 use App\Http\Controllers\Controller;
 use App\Models\Convention;
@@ -40,7 +41,7 @@ class ConventionController extends Controller
 
         $validated = $request->validate($this->rubriqueRules());
 
-        $this->assertBudgetOk($convention, $validated['montant_prevu']);
+        $this->assertBudgetOk($projet, $convention, $validated['montant_prevu']);
 
         $convention->rubriques()->create($validated);
 
@@ -54,11 +55,41 @@ class ConventionController extends Controller
 
         $validated = $request->validate($this->rubriqueRules());
 
-        $this->assertBudgetOk($convention, $validated['montant_prevu'], $rubrique->id);
+        $this->assertBudgetOk($projet, $convention, $validated['montant_prevu'], $rubrique->id);
 
         $rubrique->update($validated);
 
         return back()->with('success', 'Rubrique mise à jour.');
+    }
+
+    public function terminer(Projet $projet, Convention $convention): RedirectResponse
+    {
+        abort_unless($convention->projet_id === $projet->id, 404);
+
+        if (! in_array($convention->status, [ConventionStatus::Active, ConventionStatus::Suspendue])) {
+            throw ValidationException::withMessages([
+                'status' => 'Seule une convention active ou suspendue peut être terminée.',
+            ]);
+        }
+
+        $convention->update(['status' => ConventionStatus::Terminee]);
+
+        return back()->with('success', "La convention « {$convention->titre} » est marquée comme terminée.");
+    }
+
+    public function annuler(Projet $projet, Convention $convention): RedirectResponse
+    {
+        abort_unless($convention->projet_id === $projet->id, 404);
+
+        if (! in_array($convention->status, [ConventionStatus::Active, ConventionStatus::Suspendue])) {
+            throw ValidationException::withMessages([
+                'status' => 'Seule une convention active ou suspendue peut être annulée.',
+            ]);
+        }
+
+        $convention->update(['status' => ConventionStatus::Annulee]);
+
+        return back()->with('success', "La convention « {$convention->titre} » a été annulée.");
     }
 
     public function destroyRubrique(Projet $projet, Convention $convention, Rubrique $rubrique): RedirectResponse
@@ -125,8 +156,22 @@ class ConventionController extends Controller
         ];
     }
 
-    private function assertBudgetOk(Convention $convention, int $montant, ?int $excludeRubriqueId = null): void
+    /**
+     * Vérifie que le montant d'une rubrique ne dépasse pas le budget autorisé.
+     *
+     * Si le total des conventions du projet dépasse le budget initial estimé,
+     * la contrainte rubrique ≤ convention est levée (financement supplémentaire
+     * mobilisé au-delà du budget initial).
+     */
+    private function assertBudgetOk(Projet $projet, Convention $convention, int $montant, ?int $excludeRubriqueId = null): void
     {
+        $totalConventions = $projet->conventions()->sum('montant_fcfa');
+        $financement_depasse_budget_initial = $totalConventions > $projet->montant_estime;
+
+        if ($financement_depasse_budget_initial) {
+            return;
+        }
+
         $total = $convention->rubriques()
             ->when($excludeRubriqueId, fn ($q) => $q->where('id', '!=', $excludeRubriqueId))
             ->sum('montant_prevu') + $montant;
@@ -134,9 +179,10 @@ class ConventionController extends Controller
         if ($total > $convention->montant_fcfa) {
             throw ValidationException::withMessages([
                 'montant_prevu' => sprintf(
-                    'Le total des rubriques (%s FCFA) dépasserait le montant de la convention (%s FCFA).',
+                    'Le total des rubriques (%s FCFA) dépasserait le montant de la convention (%s FCFA). Pour lever cette contrainte, le total des conventions doit dépasser le budget initial du projet (%s FCFA).',
                     number_format($total, 0, ',', ' '),
-                    number_format($convention->montant_fcfa, 0, ',', ' ')
+                    number_format($convention->montant_fcfa, 0, ',', ' '),
+                    number_format($projet->montant_estime, 0, ',', ' ')
                 ),
             ]);
         }

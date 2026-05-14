@@ -27,7 +27,6 @@ class LoginController extends Controller
             'maintenanceActive' => $maintenanceActive,
             'maintenanceReason' => $maintenanceReason,
             'maintenanceUntil' => $maintenanceUntil,
-            'googleClientId' => config('services.google.client_id'),
         ]);
     }
 

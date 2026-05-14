@@ -10,8 +10,6 @@ use App\Http\Controllers\Admin\ChatController as AdminChatController;
 use App\Http\Controllers\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Admin\MaintenanceController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Auth\GoogleController;
-use App\Http\Controllers\Auth\GoogleOneTapController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Daf\ChatController as DafChatController;
 use App\Http\Controllers\Daf\ConventionController as DafConventionController;
@@ -35,10 +33,6 @@ Route::middleware('guest')->group(function () {
     Route::get('/connexion', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/connexion', [LoginController::class, 'login']);
 
-    // Google OAuth
-    Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('auth.google');
-    Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('auth.google.callback');
-    Route::post('/auth/google/one-tap', [GoogleOneTapController::class, 'store'])->name('auth.google.one-tap');
 });
 
 Route::post('/deconnexion', [LoginController::class, 'logout'])
@@ -112,6 +106,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/projets/{projet}/conventions/{convention}/versements', [DafConventionController::class, 'storeVersement'])->name('projets.conventions.versements.store');
         Route::patch('/projets/{projet}/conventions/{convention}/versements/{versement}', [DafConventionController::class, 'updateVersement'])->name('projets.conventions.versements.update');
         Route::delete('/projets/{projet}/conventions/{convention}/versements/{versement}', [DafConventionController::class, 'destroyVersement'])->name('projets.conventions.versements.destroy');
+
+        // Changement de statut convention
+        Route::patch('/projets/{projet}/conventions/{convention}/terminer', [DafConventionController::class, 'terminer'])->name('projets.conventions.terminer');
+        Route::patch('/projets/{projet}/conventions/{convention}/annuler', [DafConventionController::class, 'annuler'])->name('projets.conventions.annuler');
 
         // Paiements directs (enregistrés par le DAF)
         Route::post('/projets/{projet}/conventions/{convention}/paiements-directs', [DafPaiementDirectController::class, 'store'])->name('projets.conventions.paiements-directs.store');
