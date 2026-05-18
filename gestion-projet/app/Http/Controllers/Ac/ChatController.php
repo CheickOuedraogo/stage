@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Ac;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\ChatMessage;
+use App\Models\FaqItem;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -45,9 +46,16 @@ class ChatController extends Controller
                 ->update(['is_read' => true]);
         }
 
+        $faqItems = FaqItem::active()
+            ->get()
+            ->filter(fn (FaqItem $f) => $f->isVisibleFor(UserRole::Ac))
+            ->map(fn (FaqItem $f) => ['id' => $f->id, 'question' => $f->question, 'reponse' => $f->reponse])
+            ->values();
+
         return Inertia::render('ac/Chat', [
             'messages' => $messages,
             'admin_online' => false,
+            'faq_items' => $faqItems,
         ]);
     }
 

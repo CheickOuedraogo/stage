@@ -54,8 +54,8 @@ interface Props {
 
 export default function ConventionShow({ projet, convention, has_demande_active }: Props) {
     const tauxCouverture = clampPercent(convention.total_versements, convention.montant_fcfa);
-    const tauxRubriques = clampPercent(convention.total_rubriques, convention.montant_fcfa);
     const totalDepense = convention.rubriques.reduce((s, r) => s + r.montant_depense, 0);
+    const tauxConsomme = clampPercent(totalDepense, convention.total_rubriques);
 
     return (
         <AppLayout title={convention.titre}>
@@ -131,24 +131,24 @@ export default function ConventionShow({ projet, convention, has_demande_active 
                     )}
                 </div>
                 <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
-                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Budget alloué (rubriques)</p>
-                    <p className="text-base font-mono font-bold text-gray-900 dark:text-white">{formatCurrency(convention.total_rubriques)}</p>
-                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{tauxRubriques}% du montant total</p>
-                    <div className="mt-1.5 w-full h-1.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-500 rounded-full" style={{ width: `${tauxRubriques}%` }} />
-                    </div>
-                </div>
-                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
-                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Versements reçus</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Budget reçu</p>
                     <p className="text-base font-mono font-bold text-gray-900 dark:text-white">{formatCurrency(convention.total_versements)}</p>
                     <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{tauxCouverture}% du montant</p>
                     <div className="mt-1.5 w-full h-1.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
                         <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${tauxCouverture}%` }} />
                     </div>
                 </div>
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Budget consommé</p>
+                    <p className="text-base font-mono font-bold text-gray-900 dark:text-white">{formatCurrency(totalDepense)}</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{tauxConsomme}% du budget alloué</p>
+                    <div className="mt-1.5 w-full h-1.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-full bg-amber-500 rounded-full" style={{ width: `${tauxConsomme}%` }} />
+                    </div>
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="space-y-6">
                 {/* Description */}
                 {convention.description && (
                     <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
@@ -162,7 +162,7 @@ export default function ConventionShow({ projet, convention, has_demande_active 
                 )}
 
                 {/* Bouton nouvelle demande */}
-                <div className="lg:col-span-2 flex items-center justify-end">
+                <div className="flex items-center justify-end">
                     <Link
                         href={createDemande.url({ projet: projet.id, convention: convention.id })}
                         className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
@@ -242,7 +242,7 @@ export default function ConventionShow({ projet, convention, has_demande_active 
                 </div>
 
                 {/* Versements */}
-                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden lg:col-span-2">
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
                     <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
                         <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Historique des versements</h3>
                         <span className="text-xs text-gray-500 dark:text-slate-400">{convention.versements.length} versement{convention.versements.length !== 1 ? 's' : ''}</span>

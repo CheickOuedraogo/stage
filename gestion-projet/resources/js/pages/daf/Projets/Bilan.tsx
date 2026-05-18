@@ -50,6 +50,8 @@ interface Bilan {
         porteur: string;
         status: string;
         status_label: string;
+        statut_final: string | null;
+        statut_final_label: string | null;
         date_debut: string | null;
         date_fin_prevue: string | null;
         date_fin_reelle: string | null;
@@ -86,7 +88,18 @@ export default function BilanProjet({ bilan, pdf_url }: Props) {
                         <ArrowLeftIcon className="w-4 h-4" />
                     </button>
                     <div>
-                        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Bilan de clôture</h2>
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Bilan de clôture</h2>
+                            {projet.statut_final && (
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                    projet.statut_final === 'succes'
+                                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                        : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                }`}>
+                                    {projet.statut_final_label}
+                                </span>
+                            )}
+                        </div>
                         <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">{projet.titre}</p>
                     </div>
                 </div>

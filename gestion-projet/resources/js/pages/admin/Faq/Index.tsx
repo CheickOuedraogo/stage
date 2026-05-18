@@ -16,20 +16,65 @@ import {
 } from '@heroicons/react/24/outline';
 import { FormEvent, useState } from 'react';
 
+const ROLE_OPTIONS = [
+    { value: 'all', label: 'Tous' },
+    { value: 'porteur', label: 'Porteur' },
+    { value: 'daf', label: 'DAF' },
+    { value: 'ac', label: 'AC' },
+    { value: 'admin', label: 'Admin' },
+] as const;
+
 interface FaqItem {
     id: number;
     question: string;
     reponse: string;
     ordre: number;
     is_active: boolean;
+    roles_cibles: string[] | null;
 }
 
 interface Props extends PageProps {
     items: FaqItem[];
 }
 
+function RoleCheckboxes({
+    value,
+    onChange,
+}: {
+    value: string[];
+    onChange: (v: string[]) => void;
+}) {
+    const toggle = (role: string) => {
+        if (role === 'all') {
+            onChange(value.includes('all') ? [] : ['all']);
+        } else {
+            const without = value.filter((r) => r !== 'all' && r !== role);
+            onChange(value.includes(role) ? without : [...without, role]);
+        }
+    };
+
+    return (
+        <div>
+            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Rôles ciblés</label>
+            <div className="flex flex-wrap gap-3">
+                {ROLE_OPTIONS.map((opt) => (
+                    <label key={opt.value} className="flex items-center gap-1.5 cursor-pointer text-sm text-slate-700 dark:text-slate-300">
+                        <input
+                            type="checkbox"
+                            checked={value.includes(opt.value)}
+                            onChange={() => toggle(opt.value)}
+                            className="rounded text-blue-600"
+                        />
+                        {opt.label}
+                    </label>
+                ))}
+            </div>
+        </div>
+    );
+}
+
 function CreateForm({ onCancel }: { onCancel: () => void }) {
-    const form = useForm({ question: '', reponse: '', ordre: '' });
+    const form = useForm({ question: '', reponse: '', ordre: '', roles_cibles: ['all'] as string[] });
 
     const submit = (e: FormEvent) => {
         e.preventDefault();
@@ -68,6 +113,7 @@ function CreateForm({ onCancel }: { onCancel: () => void }) {
                 />
                 {form.errors.reponse && <p className="text-xs text-red-600 mt-1">{form.errors.reponse}</p>}
             </div>
+            <RoleCheckboxes value={form.data.roles_cibles} onChange={(v) => form.setData('roles_cibles', v)} />
             <div className="flex gap-3">
                 <button
                     type="submit"
@@ -96,6 +142,7 @@ function EditForm({ item, onCancel }: { item: FaqItem; onCancel: () => void }) {
         reponse: item.reponse,
         ordre: String(item.ordre),
         is_active: item.is_active,
+        roles_cibles: item.roles_cibles ?? ['all'],
     });
 
     const submit = (e: FormEvent) => {
@@ -146,6 +193,7 @@ function EditForm({ item, onCancel }: { item: FaqItem; onCancel: () => void }) {
                     />
                 </div>
             </div>
+            <RoleCheckboxes value={form.data.roles_cibles} onChange={(v) => form.setData('roles_cibles', v)} />
             <div className="flex gap-3">
                 <button
                     type="submit"
@@ -245,13 +293,18 @@ export default function AdminFaqIndex() {
                                             {idx + 1}
                                         </span>
                                         <div className="min-w-0 flex-1">
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2 flex-wrap">
                                                 <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{item.question}</p>
                                                 {!item.is_active && (
                                                     <span className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400">
                                                         Masquée
                                                     </span>
                                                 )}
+                                                {(item.roles_cibles ?? ['all']).map((r) => (
+                                                    <span key={r} className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                                                        {ROLE_OPTIONS.find((o) => o.value === r)?.label ?? r}
+                                                    </span>
+                                                ))}
                                             </div>
                                             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 line-clamp-1">{item.reponse.replace(/[#*`]/g, '').slice(0, 90)}…</p>
                                         </div>

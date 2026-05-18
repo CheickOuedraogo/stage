@@ -40,6 +40,7 @@ describe('Clôture de projet', function () {
         $this->actingAs($daf)
             ->post(route('daf.projets.cloturer', $projet), [
                 'date_fin_reelle' => '2025-12-31',
+                'statut_final' => 'succes',
             ])
             ->assertRedirect();
 
@@ -57,6 +58,7 @@ describe('Clôture de projet', function () {
         $this->actingAs($daf)
             ->post(route('daf.projets.cloturer', $projet), [
                 'date_fin_reelle' => '2025-12-31',
+                'statut_final' => 'succes',
             ]);
 
         Notification::assertSentTo($porteur, ProjetCloture::class);
@@ -73,6 +75,7 @@ describe('Clôture de projet', function () {
         $this->actingAs($daf)
             ->post(route('daf.projets.cloturer', $projet), [
                 'date_fin_reelle' => '2025-12-31',
+                'statut_final' => 'succes',
             ])
             ->assertSessionHasErrors('projet');
 
@@ -87,6 +90,7 @@ describe('Clôture de projet', function () {
         $this->actingAs($daf)
             ->post(route('daf.projets.cloturer', $projet), [
                 'date_fin_reelle' => '2025-12-31',
+                'statut_final' => 'succes',
             ])
             ->assertSessionHasErrors('projet');
 
@@ -104,6 +108,7 @@ describe('Clôture de projet', function () {
         $this->actingAs($daf)
             ->post(route('daf.projets.cloturer', $projet), [
                 'date_fin_reelle' => '2025-12-31',
+                'statut_final' => 'succes',
             ])
             ->assertSessionHasErrors('projet');
     });
@@ -114,6 +119,7 @@ describe('Clôture de projet', function () {
         $this->actingAs($porteur)
             ->post(route('daf.projets.cloturer', $projet), [
                 'date_fin_reelle' => '2025-12-31',
+                'statut_final' => 'succes',
             ])
             ->assertForbidden();
     });
@@ -122,8 +128,28 @@ describe('Clôture de projet', function () {
         ['daf' => $daf, 'projet' => $projet] = makeProjetClotureable();
 
         $this->actingAs($daf)
-            ->post(route('daf.projets.cloturer', $projet), [])
+            ->post(route('daf.projets.cloturer', $projet), ['statut_final' => 'succes'])
             ->assertSessionHasErrors('date_fin_reelle');
+    });
+
+    it('refuse sans statut_final (validation)', function () {
+        ['daf' => $daf, 'projet' => $projet] = makeProjetClotureable();
+
+        $this->actingAs($daf)
+            ->post(route('daf.projets.cloturer', $projet), ['date_fin_reelle' => '2025-12-31'])
+            ->assertSessionHasErrors('statut_final');
+    });
+
+    it('enregistre le statut_final lors de la clôture', function () {
+        ['daf' => $daf, 'projet' => $projet] = makeProjetClotureable();
+
+        $this->actingAs($daf)
+            ->post(route('daf.projets.cloturer', $projet), [
+                'date_fin_reelle' => '2025-12-31',
+                'statut_final' => 'echec',
+            ]);
+
+        expect($projet->fresh()->statut_final->value)->toBe('echec');
     });
 });
 
