@@ -43,6 +43,11 @@
     <h1>Bilan de clôture — {{ $bilan['projet']['titre'] }}</h1>
     <div class="subtitle">Généré le {{ \Carbon\Carbon::now()->format('d/m/Y à H:i') }} — Université Joseph KI-ZERBO / CIFEU</div>
     <div class="badge">{{ $bilan['projet']['status_label'] }}</div>
+    @if($bilan['projet']['statut_final_label'])
+    <div class="badge" style="background: {{ $bilan['projet']['statut_final'] === 'succes' ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)' }}; margin-left: 6px;">
+        {{ $bilan['projet']['statut_final_label'] }}
+    </div>
+    @endif
 </div>
 
 {{-- Informations projet --}}

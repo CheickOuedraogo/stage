@@ -13,7 +13,7 @@ class FaqController extends Controller
 {
     public function index(): Response
     {
-        $items = FaqItem::orderBy('ordre')->get(['id', 'question', 'reponse', 'ordre', 'is_active']);
+        $items = FaqItem::orderBy('ordre')->get(['id', 'question', 'reponse', 'ordre', 'is_active', 'roles_cibles']);
 
         return Inertia::render('admin/Faq/Index', [
             'items' => $items,
@@ -26,6 +26,8 @@ class FaqController extends Controller
             'question' => ['required', 'string', 'max:300'],
             'reponse' => ['required', 'string'],
             'ordre' => ['nullable', 'integer', 'min:0'],
+            'roles_cibles' => ['nullable', 'array'],
+            'roles_cibles.*' => ['string', 'in:all,porteur,daf,ac,admin'],
         ]);
 
         $data['ordre'] ??= FaqItem::max('ordre') + 1;
@@ -42,6 +44,8 @@ class FaqController extends Controller
             'reponse' => ['required', 'string'],
             'ordre' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['boolean'],
+            'roles_cibles' => ['nullable', 'array'],
+            'roles_cibles.*' => ['string', 'in:all,porteur,daf,ac,admin'],
         ]);
 
         $faqItem->update($data);

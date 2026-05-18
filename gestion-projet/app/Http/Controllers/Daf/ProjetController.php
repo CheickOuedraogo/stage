@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Daf;
 
 use App\Enums\DemandeStatus;
 use App\Enums\ProjectStatus;
+use App\Enums\ProjetStatutFinal;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Daf\CloturerProjetRequest;
 use App\Models\Convention;
@@ -75,6 +76,8 @@ class ProjetController extends Controller
                 'objectifs' => $projet->objectifs,
                 'status' => $projet->status->value,
                 'status_label' => $projet->status->label(),
+                'statut_final' => $projet->statut_final?->value,
+                'statut_final_label' => $projet->statut_final?->label(),
                 'montant_estime' => $projet->montant_estime,
                 'montant_conventions' => $montantConventions,
                 'total_versements' => $totalVersements,
@@ -116,7 +119,12 @@ class ProjetController extends Controller
 
         $projet->loadMissing('conventions');
         $this->projetService->verifierConditionsCloture($projet);
-        $this->projetService->cloturer($projet, auth()->user(), $request->date('date_fin_reelle'));
+        $this->projetService->cloturer(
+            $projet,
+            auth()->user(),
+            $request->date('date_fin_reelle'),
+            ProjetStatutFinal::from($request->validated('statut_final')),
+        );
 
         return back()->with('success', "Le projet « {$projet->titre} » a été clôturé avec succès.");
     }

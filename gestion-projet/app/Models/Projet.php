@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ProjectStatus;
+use App\Enums\ProjetStatutFinal;
 use Database\Factories\ProjetFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
-#[Fillable(['porteur_id', 'titre', 'description', 'objectifs', 'activites', 'montant_estime', 'status', 'date_debut', 'date_fin_prevue', 'date_fin_reelle'])]
+#[Fillable(['porteur_id', 'titre', 'description', 'objectifs', 'activites', 'montant_estime', 'status', 'statut_final', 'date_debut', 'date_fin_prevue', 'date_fin_reelle'])]
 class Projet extends Model
 {
     /** @use HasFactory<ProjetFactory> */
@@ -22,6 +23,7 @@ class Projet extends Model
     {
         return [
             'status' => ProjectStatus::class,
+            'statut_final' => ProjetStatutFinal::class,
             'montant_estime' => 'integer',
             'date_debut' => 'date',
             'date_fin_prevue' => 'date',

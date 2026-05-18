@@ -44,6 +44,8 @@ interface Projet {
     objectifs: string | null;
     status: string;
     status_label: string;
+    statut_final: string | null;
+    statut_final_label: string | null;
     montant_estime: number;
     montant_conventions: number;
     total_versements: number;
@@ -66,7 +68,10 @@ export default function DafProjetShow({ projet }: Props) {
     const totalConventions = projet.conventions.length;
     const totalRubriques = projet.conventions.reduce((s, c) => s + c.rubriques_count, 0);
     const [showCloture, setShowCloture] = useState(false);
-    const cloturerForm = useForm({ date_fin_reelle: new Date().toISOString().split('T')[0] });
+    const cloturerForm = useForm({
+        date_fin_reelle: new Date().toISOString().split('T')[0],
+        statut_final: '' as 'succes' | 'echec' | '',
+    });
     const statusEnCours = projet.status === 'en_cours';
 
     const submitCloture = (e: FormEvent) => {
@@ -141,39 +146,60 @@ export default function DafProjetShow({ projet }: Props) {
                         <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-400">Clôturer ce projet</h3>
                     </div>
                     <p className="text-xs text-amber-700 dark:text-amber-500 mb-4">Cette action marque le projet comme terminé et enregistre la date de clôture réelle.</p>
-                    {cloturerForm.errors.projet && (
-                        <p className="text-xs text-red-600 dark:text-red-400 mb-3">{cloturerForm.errors.projet}</p>
+                    {(cloturerForm.errors as Record<string, string>).projet && (
+                        <p className="text-xs text-red-600 dark:text-red-400 mb-3">{(cloturerForm.errors as Record<string, string>).projet}</p>
                     )}
-                    <form onSubmit={submitCloture} className="flex items-end gap-3">
-                        <div className="flex-1">
-                            <label className="block text-xs font-medium text-amber-800 dark:text-amber-400 mb-1">
-                                Date de clôture réelle <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="date"
-                                value={cloturerForm.data.date_fin_reelle}
-                                onChange={(e) => cloturerForm.setData('date_fin_reelle', e.target.value)}
-                                max={new Date().toISOString().split('T')[0]}
-                                className="w-full px-3 py-2 text-sm border border-amber-300 dark:border-amber-700 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50"
-                            />
-                            {cloturerForm.errors.date_fin_reelle && (
-                                <p className="text-xs text-red-600 mt-1">{cloturerForm.errors.date_fin_reelle}</p>
-                            )}
+                    <form onSubmit={submitCloture} className="space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs font-medium text-amber-800 dark:text-amber-400 mb-1">
+                                    Date de clôture réelle <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="date"
+                                    value={cloturerForm.data.date_fin_reelle}
+                                    onChange={(e) => cloturerForm.setData('date_fin_reelle', e.target.value)}
+                                    max={new Date().toISOString().split('T')[0]}
+                                    className="w-full px-3 py-2 text-sm border border-amber-300 dark:border-amber-700 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                                />
+                                {cloturerForm.errors.date_fin_reelle && (
+                                    <p className="text-xs text-red-600 mt-1">{cloturerForm.errors.date_fin_reelle}</p>
+                                )}
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-amber-800 dark:text-amber-400 mb-1">
+                                    Statut final <span className="text-red-500">*</span>
+                                </label>
+                                <select
+                                    value={cloturerForm.data.statut_final}
+                                    onChange={(e) => cloturerForm.setData('statut_final', e.target.value as 'succes' | 'echec' | '')}
+                                    className="w-full px-3 py-2 text-sm border border-amber-300 dark:border-amber-700 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                                >
+                                    <option value="">Choisir…</option>
+                                    <option value="succes">Succès</option>
+                                    <option value="echec">Échec</option>
+                                </select>
+                                {cloturerForm.errors.statut_final && (
+                                    <p className="text-xs text-red-600 mt-1">{cloturerForm.errors.statut_final}</p>
+                                )}
+                            </div>
                         </div>
-                        <button
-                            type="submit"
-                            disabled={cloturerForm.processing}
-                            className="px-4 py-2 text-sm font-medium rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50 transition-colors"
-                        >
-                            {cloturerForm.processing ? 'En cours…' : 'Confirmer la clôture'}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setShowCloture(false)}
-                            className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
-                        >
-                            Annuler
-                        </button>
+                        <div className="flex items-center gap-3">
+                            <button
+                                type="submit"
+                                disabled={cloturerForm.processing || !cloturerForm.data.statut_final}
+                                className="px-4 py-2 text-sm font-medium rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50 transition-colors"
+                            >
+                                {cloturerForm.processing ? 'En cours…' : 'Confirmer la clôture'}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setShowCloture(false)}
+                                className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                            >
+                                Annuler
+                            </button>
+                        </div>
                     </form>
                 </div>
             )}

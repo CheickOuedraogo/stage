@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Daf;
 
+use App\Enums\ProjetStatutFinal;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
 
 class CloturerProjetRequest extends FormRequest
 {
@@ -16,6 +18,7 @@ class CloturerProjetRequest extends FormRequest
     {
         return [
             'date_fin_reelle' => ['required', 'date', 'before_or_equal:today'],
+            'statut_final' => ['required', new Enum(ProjetStatutFinal::class)],
         ];
     }
 
@@ -26,6 +29,8 @@ class CloturerProjetRequest extends FormRequest
             'date_fin_reelle.required' => 'La date de clôture est obligatoire.',
             'date_fin_reelle.date' => 'La date de clôture est invalide.',
             'date_fin_reelle.before_or_equal' => 'La date de clôture ne peut pas être dans le futur.',
+            'statut_final.required' => 'Le statut final du projet est obligatoire.',
+            'statut_final.Illuminate\Validation\Rules\Enum' => 'Le statut final doit être « succès » ou « échec ».',
         ];
     }
 }

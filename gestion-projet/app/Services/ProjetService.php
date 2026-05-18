@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\ConventionStatus;
 use App\Enums\DemandeStatus;
 use App\Enums\ProjectStatus;
+use App\Enums\ProjetStatutFinal;
 use App\Models\AuditLog;
 use App\Models\Convention;
 use App\Models\DemandeDepense;
@@ -67,14 +68,15 @@ class ProjetService
     }
 
     /**
-     * Closes the project: updates status, date, logs to audit, and notifies the porteur.
+     * Closes the project: updates status, date, final outcome, logs to audit, and notifies the porteur.
      */
-    public function cloturer(Projet $projet, User $daf, CarbonInterface $dateFinReelle): void
+    public function cloturer(Projet $projet, User $daf, CarbonInterface $dateFinReelle, ProjetStatutFinal $statutFinal): void
     {
-        DB::transaction(function () use ($projet, $daf, $dateFinReelle): void {
+        DB::transaction(function () use ($projet, $daf, $dateFinReelle, $statutFinal): void {
             $projet->update([
                 'status' => ProjectStatus::Termine,
                 'date_fin_reelle' => $dateFinReelle,
+                'statut_final' => $statutFinal,
             ]);
 
             AuditLog::log(
@@ -164,6 +166,8 @@ class ProjetService
                 'porteur' => $projet->porteur->name,
                 'status' => $projet->status->value,
                 'status_label' => $projet->status->label(),
+                'statut_final' => $projet->statut_final?->value,
+                'statut_final_label' => $projet->statut_final?->label(),
                 'date_debut' => $projet->date_debut?->toDateString(),
                 'date_fin_prevue' => $projet->date_fin_prevue?->toDateString(),
                 'date_fin_reelle' => $projet->date_fin_reelle?->toDateString(),
