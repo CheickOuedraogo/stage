@@ -13,7 +13,7 @@ class FaqController extends Controller
 {
     public function index(): Response
     {
-        $items = FaqItem::orderBy('id_faq')->get(['id_faq', 'faq_question', 'faq_reponse', 'faq_actif', 'roles_cibles']);
+        $items = FaqItem::orderBy('id_faq')->get(['id_faq', 'faq_question', 'faq_reponse', 'faq_actif', 'visible_porteur', 'visible_daf', 'visible_ac']);
 
         return Inertia::render('admin/Faq/Index', [
             'items' => $items,
@@ -23,16 +23,19 @@ class FaqController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'question' => ['required', 'string', 'max:300'],
+            'question' => ['required', 'string', 'max:255'],
             'reponse' => ['required', 'string'],
-            'roles_cibles' => ['nullable', 'array'],
-            'roles_cibles.*' => ['string', 'in:all,porteur,daf,ac,admin'],
+            'visible_porteur' => ['boolean'],
+            'visible_daf' => ['boolean'],
+            'visible_ac' => ['boolean'],
         ]);
 
         FaqItem::create([
             'faq_question' => $data['question'],
             'faq_reponse' => $data['reponse'],
-            'roles_cibles' => $data['roles_cibles'] ?? null,
+            'visible_porteur' => $data['visible_porteur'] ?? true,
+            'visible_daf' => $data['visible_daf'] ?? true,
+            'visible_ac' => $data['visible_ac'] ?? true,
         ]);
 
         return back()->with('success', 'Question ajoutée.');
@@ -41,18 +44,21 @@ class FaqController extends Controller
     public function update(Request $request, FaqItem $faqItem): RedirectResponse
     {
         $data = $request->validate([
-            'question' => ['required', 'string', 'max:300'],
+            'question' => ['required', 'string', 'max:255'],
             'reponse' => ['required', 'string'],
             'is_active' => ['boolean'],
-            'roles_cibles' => ['nullable', 'array'],
-            'roles_cibles.*' => ['string', 'in:all,porteur,daf,ac,admin'],
+            'visible_porteur' => ['boolean'],
+            'visible_daf' => ['boolean'],
+            'visible_ac' => ['boolean'],
         ]);
 
         $faqItem->update([
             'faq_question' => $data['question'],
             'faq_reponse' => $data['reponse'],
             'faq_actif' => $data['is_active'] ?? $faqItem->faq_actif,
-            'roles_cibles' => $data['roles_cibles'] ?? null,
+            'visible_porteur' => $data['visible_porteur'] ?? $faqItem->visible_porteur,
+            'visible_daf' => $data['visible_daf'] ?? $faqItem->visible_daf,
+            'visible_ac' => $data['visible_ac'] ?? $faqItem->visible_ac,
         ]);
 
         return back()->with('success', 'Question mise à jour.');

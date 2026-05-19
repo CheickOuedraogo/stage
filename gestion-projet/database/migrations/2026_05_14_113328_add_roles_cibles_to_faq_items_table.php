@@ -9,14 +9,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('faq_items', function (Blueprint $table): void {
-            $table->json('roles_cibles')->nullable()->after('faq_actif');
+            $table->boolean('visible_porteur')->default(true)->after('faq_actif');
+            $table->boolean('visible_daf')->default(true)->after('visible_porteur');
+            $table->boolean('visible_ac')->default(true)->after('visible_daf');
         });
     }
 
     public function down(): void
     {
         Schema::table('faq_items', function (Blueprint $table): void {
-            $table->dropColumn('roles_cibles');
+            $table->dropColumn(['visible_porteur', 'visible_daf', 'visible_ac']);
         });
     }
 };

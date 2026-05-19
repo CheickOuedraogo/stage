@@ -16,20 +16,14 @@ import {
 } from '@heroicons/react/24/outline';
 import { FormEvent, useState } from 'react';
 
-const ROLE_OPTIONS = [
-    { value: 'all', label: 'Tous' },
-    { value: 'porteur', label: 'Porteur' },
-    { value: 'daf', label: 'DAF' },
-    { value: 'ac', label: 'AC' },
-    { value: 'admin', label: 'Admin' },
-] as const;
-
 interface FaqItem {
     id: number;
     faq_question: string;
     faq_reponse: string;
     faq_actif: boolean;
-    roles_cibles: string[] | null;
+    visible_porteur: boolean;
+    visible_daf: boolean;
+    visible_ac: boolean;
 }
 
 interface Props extends PageProps {
@@ -37,34 +31,33 @@ interface Props extends PageProps {
 }
 
 function RoleCheckboxes({
-    value,
+    visiblePorteur,
+    visibleDaf,
+    visibleAc,
     onChange,
 }: {
-    value: string[];
-    onChange: (v: string[]) => void;
+    visiblePorteur: boolean;
+    visibleDaf: boolean;
+    visibleAc: boolean;
+    onChange: (field: 'visible_porteur' | 'visible_daf' | 'visible_ac', value: boolean) => void;
 }) {
-    const toggle = (role: string) => {
-        if (role === 'all') {
-            onChange(value.includes('all') ? [] : ['all']);
-        } else {
-            const without = value.filter((r) => r !== 'all' && r !== role);
-            onChange(value.includes(role) ? without : [...without, role]);
-        }
-    };
-
     return (
         <div>
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Rôles ciblés</label>
+            <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Visible par</label>
             <div className="flex flex-wrap gap-3">
-                {ROLE_OPTIONS.map((opt) => (
-                    <label key={opt.value} className="flex items-center gap-1.5 cursor-pointer text-sm text-slate-700 dark:text-slate-300">
+                {([
+                    { field: 'visible_porteur' as const, label: 'Porteur', checked: visiblePorteur },
+                    { field: 'visible_daf' as const, label: 'DAF', checked: visibleDaf },
+                    { field: 'visible_ac' as const, label: 'AC', checked: visibleAc },
+                ]).map(({ field, label, checked }) => (
+                    <label key={field} className="flex items-center gap-1.5 cursor-pointer text-sm text-slate-700 dark:text-slate-300">
                         <input
                             type="checkbox"
-                            checked={value.includes(opt.value)}
-                            onChange={() => toggle(opt.value)}
+                            checked={checked}
+                            onChange={(e) => onChange(field, e.target.checked)}
                             className="rounded text-blue-600"
                         />
-                        {opt.label}
+                        {label}
                     </label>
                 ))}
             </div>
@@ -73,7 +66,7 @@ function RoleCheckboxes({
 }
 
 function CreateForm({ onCancel }: { onCancel: () => void }) {
-    const form = useForm({ question: '', reponse: '', roles_cibles: ['all'] as string[] });
+    const form = useForm({ question: '', reponse: '', visible_porteur: true, visible_daf: true, visible_ac: true });
 
     const submit = (e: FormEvent) => {
         e.preventDefault();
@@ -92,7 +85,7 @@ function CreateForm({ onCancel }: { onCancel: () => void }) {
                     value={form.data.question}
                     onChange={(e) => form.setData('question', e.target.value)}
                     required
-                    maxLength={300}
+                    maxLength={255}
                     placeholder="Ex : Comment soumettre une demande ?"
                     className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                 />
@@ -112,7 +105,12 @@ function CreateForm({ onCancel }: { onCancel: () => void }) {
                 />
                 {form.errors.reponse && <p className="text-xs text-red-600 mt-1">{form.errors.reponse}</p>}
             </div>
-            <RoleCheckboxes value={form.data.roles_cibles} onChange={(v) => form.setData('roles_cibles', v)} />
+            <RoleCheckboxes
+                visiblePorteur={form.data.visible_porteur}
+                visibleDaf={form.data.visible_daf}
+                visibleAc={form.data.visible_ac}
+                onChange={(field, value) => form.setData(field, value)}
+            />
             <div className="flex gap-3">
                 <button
                     type="submit"
@@ -140,7 +138,9 @@ function EditForm({ item, onCancel }: { item: FaqItem; onCancel: () => void }) {
         question: item.faq_question,
         reponse: item.faq_reponse,
         is_active: item.faq_actif,
-        roles_cibles: item.roles_cibles ?? ['all'],
+        visible_porteur: item.visible_porteur,
+        visible_daf: item.visible_daf,
+        visible_ac: item.visible_ac,
     });
 
     const submit = (e: FormEvent) => {
@@ -179,7 +179,12 @@ function EditForm({ item, onCancel }: { item: FaqItem; onCancel: () => void }) {
                 />
                 <span className="text-sm text-slate-700 dark:text-slate-300">Visible dans la FAQ</span>
             </label>
-            <RoleCheckboxes value={form.data.roles_cibles} onChange={(v) => form.setData('roles_cibles', v)} />
+            <RoleCheckboxes
+                visiblePorteur={form.data.visible_porteur}
+                visibleDaf={form.data.visible_daf}
+                visibleAc={form.data.visible_ac}
+                onChange={(field, value) => form.setData(field, value)}
+            />
             <div className="flex gap-3">
                 <button
                     type="submit"
@@ -286,9 +291,13 @@ export default function AdminFaqIndex() {
                                                         Masquée
                                                     </span>
                                                 )}
-                                                {(item.roles_cibles ?? ['all']).map((r) => (
-                                                    <span key={r} className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                                                        {ROLE_OPTIONS.find((o) => o.value === r)?.label ?? r}
+                                                {([
+                                                    { key: 'visible_porteur', label: 'Porteur', show: item.visible_porteur },
+                                                    { key: 'visible_daf', label: 'DAF', show: item.visible_daf },
+                                                    { key: 'visible_ac', label: 'AC', show: item.visible_ac },
+                                                ]).filter((r) => r.show).map((r) => (
+                                                    <span key={r.key} className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                                                        {r.label}
                                                     </span>
                                                 ))}
                                             </div>
