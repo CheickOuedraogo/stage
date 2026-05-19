@@ -28,7 +28,6 @@ interface FaqItem {
     id: number;
     faq_question: string;
     faq_reponse: string;
-    faq_ordre: number;
     faq_actif: boolean;
     roles_cibles: string[] | null;
 }
@@ -74,7 +73,7 @@ function RoleCheckboxes({
 }
 
 function CreateForm({ onCancel }: { onCancel: () => void }) {
-    const form = useForm({ question: '', reponse: '', ordre: '', roles_cibles: ['all'] as string[] });
+    const form = useForm({ question: '', reponse: '', roles_cibles: ['all'] as string[] });
 
     const submit = (e: FormEvent) => {
         e.preventDefault();
@@ -140,7 +139,6 @@ function EditForm({ item, onCancel }: { item: FaqItem; onCancel: () => void }) {
     const form = useForm({
         question: item.faq_question,
         reponse: item.faq_reponse,
-        ordre: String(item.faq_ordre),
         is_active: item.faq_actif,
         roles_cibles: item.roles_cibles ?? ['all'],
     });
@@ -172,27 +170,15 @@ function EditForm({ item, onCancel }: { item: FaqItem; onCancel: () => void }) {
                     className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 resize-y font-mono"
                 />
             </div>
-            <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                        type="checkbox"
-                        checked={form.data.is_active}
-                        onChange={(e) => form.setData('is_active', e.target.checked)}
-                        className="rounded text-blue-600"
-                    />
-                    <span className="text-sm text-slate-700 dark:text-slate-300">Visible dans la FAQ</span>
-                </label>
-                <div className="flex items-center gap-1.5">
-                    <label className="text-xs text-slate-500">Ordre :</label>
-                    <input
-                        type="number"
-                        value={form.data.ordre}
-                        onChange={(e) => form.setData('ordre', e.target.value)}
-                        min={0}
-                        className="w-16 px-2 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none"
-                    />
-                </div>
-            </div>
+            <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                    type="checkbox"
+                    checked={form.data.is_active}
+                    onChange={(e) => form.setData('is_active', e.target.checked)}
+                    className="rounded text-blue-600"
+                />
+                <span className="text-sm text-slate-700 dark:text-slate-300">Visible dans la FAQ</span>
+            </label>
             <RoleCheckboxes value={form.data.roles_cibles} onChange={(v) => form.setData('roles_cibles', v)} />
             <div className="flex gap-3">
                 <button

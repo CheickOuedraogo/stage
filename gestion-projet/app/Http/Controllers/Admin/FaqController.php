@@ -13,7 +13,7 @@ class FaqController extends Controller
 {
     public function index(): Response
     {
-        $items = FaqItem::orderBy('faq_ordre')->get(['id', 'faq_question', 'faq_reponse', 'faq_ordre', 'faq_actif', 'roles_cibles']);
+        $items = FaqItem::orderBy('id_faq')->get(['id_faq', 'faq_question', 'faq_reponse', 'faq_actif', 'roles_cibles']);
 
         return Inertia::render('admin/Faq/Index', [
             'items' => $items,
@@ -25,17 +25,13 @@ class FaqController extends Controller
         $data = $request->validate([
             'question' => ['required', 'string', 'max:300'],
             'reponse' => ['required', 'string'],
-            'ordre' => ['nullable', 'integer', 'min:0'],
             'roles_cibles' => ['nullable', 'array'],
             'roles_cibles.*' => ['string', 'in:all,porteur,daf,ac,admin'],
         ]);
 
-        $ordre = $data['ordre'] ?? (FaqItem::max('faq_ordre') + 1);
-
         FaqItem::create([
             'faq_question' => $data['question'],
             'faq_reponse' => $data['reponse'],
-            'faq_ordre' => $ordre,
             'roles_cibles' => $data['roles_cibles'] ?? null,
         ]);
 
@@ -47,7 +43,6 @@ class FaqController extends Controller
         $data = $request->validate([
             'question' => ['required', 'string', 'max:300'],
             'reponse' => ['required', 'string'],
-            'ordre' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['boolean'],
             'roles_cibles' => ['nullable', 'array'],
             'roles_cibles.*' => ['string', 'in:all,porteur,daf,ac,admin'],
@@ -56,7 +51,6 @@ class FaqController extends Controller
         $faqItem->update([
             'faq_question' => $data['question'],
             'faq_reponse' => $data['reponse'],
-            'faq_ordre' => $data['ordre'] ?? $faqItem->faq_ordre,
             'faq_actif' => $data['is_active'] ?? $faqItem->faq_actif,
             'roles_cibles' => $data['roles_cibles'] ?? null,
         ]);
