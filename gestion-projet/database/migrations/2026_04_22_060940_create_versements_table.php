@@ -12,16 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('versements', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('convention_id')->constrained('conventions');
-            $table->unsignedBigInteger('montant');
-            $table->date('date_reception');
-            $table->string('type')->default('tranche'); // avance | tranche
-            $table->text('description')->nullable();
-            $table->string('reference')->nullable();
+            $table->id('id_versement');
+            $table->foreignId('id_convention')->constrained('conventions', 'id_convention');
+            $table->unsignedBigInteger('versement_montant');
+            $table->date('versement_date_reception');
+            $table->string('versement_type')->default('tranche'); // avance | tranche
+            $table->text('versement_description')->nullable();
+            $table->string('versement_reference')->nullable();
             $table->timestamps();
 
-            $table->index('convention_id');
+            $table->index('id_convention');
         });
     }
 

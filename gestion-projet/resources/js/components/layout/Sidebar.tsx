@@ -44,10 +44,10 @@ interface NavItem {
     badge?: number | string;
 }
 
-function getNavItems(role: User['role'], notifs: number): NavItem[] {
+function getNavItems(role: User['utilisateur_role'], notifs: number): NavItem[] {
     const notifBadge = notifs > 0 ? notifs : undefined;
 
-    const navByRole: Record<User['role'], NavItem[]> = {
+    const navByRole: Record<User['utilisateur_role'], NavItem[]> = {
         admin: [
             { label: 'Tableau de bord', href: adminDashboard.url(), icon: HomeIcon },
             { label: 'Utilisateurs', href: usersIndex.url(), icon: UsersIcon },
@@ -98,7 +98,7 @@ interface SidebarProps {
 
 export function Sidebar({ user, collapsed = false }: SidebarProps) {
     const { url } = usePage();
-    const items = getNavItems(user.role, user.unread_notifications);
+    const items = getNavItems(user.utilisateur_role, user.unread_notifications);
 
     return (
         <aside

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['convention_id', 'rubrique_id', 'montant', 'objet_depense', 'description', 'date_paiement', 'enregistre_par'])]
+#[Fillable(['id_convention', 'id_rubrique', 'paiement_direct_montant', 'paiement_direct_objet', 'paiement_direct_description', 'paiement_direct_date', 'id_enregistreur_paiement_direct'])]
 class PaiementDirect extends Model
 {
     /** @use HasFactory<PaiementDirectFactory> */
@@ -16,26 +16,34 @@ class PaiementDirect extends Model
 
     protected $table = 'paiements_directs';
 
+    protected $primaryKey = 'id_paiement_direct';
+
     protected function casts(): array
     {
         return [
-            'montant' => 'integer',
-            'date_paiement' => 'date',
+            'paiement_direct_montant' => 'integer',
+            'paiement_direct_date' => 'date',
         ];
+    }
+
+    /** Transparent id accessor so $paiementDirect->id still works */
+    public function getIdAttribute(): mixed
+    {
+        return $this->getAttribute($this->getKeyName());
     }
 
     public function convention(): BelongsTo
     {
-        return $this->belongsTo(Convention::class);
+        return $this->belongsTo(Convention::class, 'id_convention');
     }
 
     public function rubrique(): BelongsTo
     {
-        return $this->belongsTo(Rubrique::class);
+        return $this->belongsTo(Rubrique::class, 'id_rubrique');
     }
 
     public function enregistrePar(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'enregistre_par');
+        return $this->belongsTo(User::class, 'id_enregistreur_paiement_direct');
     }
 }

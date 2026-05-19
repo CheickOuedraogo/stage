@@ -20,10 +20,10 @@ class DemandeDepenseService
      */
     public function assertPasDeDemandeActive(Convention $convention, ?int $excludeId = null): void
     {
-        $query = DemandeDepense::where('convention_id', $convention->id)->active();
+        $query = DemandeDepense::where('id_convention', $convention->id)->active();
 
         if ($excludeId) {
-            $query->where('id', '!=', $excludeId);
+            $query->where('id_demande', '!=', $excludeId);
         }
 
         if ($query->exists()) {
@@ -39,7 +39,7 @@ class DemandeDepenseService
     public function assertBudgetSuffisant(Rubrique $rubrique, int $montant, ?int $excludeDemande = null): void
     {
         $consomme = $rubrique->demandesDepenses()
-            ->whereIn('status', [
+            ->whereIn('demande_statut', [
                 DemandeStatus::Soumise->value,
                 DemandeStatus::ValidéeDaf->value,
                 DemandeStatus::ValidéeAc->value,
@@ -47,12 +47,12 @@ class DemandeDepenseService
                 DemandeStatus::RapportSoumis->value,
                 DemandeStatus::Terminee->value,
             ])
-            ->when($excludeDemande, fn ($q) => $q->where('id', '!=', $excludeDemande))
-            ->sum('montant');
+            ->when($excludeDemande, fn ($q) => $q->where('id_demande', '!=', $excludeDemande))
+            ->sum('demande_montant');
 
-        $consommePaiementsDirects = $rubrique->paiementsDirects()->sum('montant');
+        $consommePaiementsDirects = $rubrique->paiementsDirects()->sum('paiement_direct_montant');
         $totalConsomme = $consomme + $consommePaiementsDirects;
-        $solde = $rubrique->montant_prevu - $totalConsomme;
+        $solde = $rubrique->rubrique_montant_prevu - $totalConsomme;
 
         if ($montant > $solde) {
             throw ValidationException::withMessages([
@@ -66,14 +66,14 @@ class DemandeDepenseService
      */
     public function validerDaf(DemandeDepense $demande, User $daf): void
     {
-        abort_unless($demande->status === DemandeStatus::Soumise, 403);
-        abort_unless($daf->role === UserRole::Daf, 403);
+        abort_unless($demande->demande_statut === DemandeStatus::Soumise, 403);
+        abort_unless($daf->utilisateur_role === UserRole::Daf, 403);
 
         $demande->update([
-            'status' => DemandeStatus::ValidéeDaf,
-            'validee_daf_at' => now(),
-            'validee_daf_par' => $daf->id,
-            'motif_rejet' => null,
+            'demande_statut' => DemandeStatus::ValidéeDaf,
+            'demande_date_validation_daf' => now(),
+            'id_validateur_daf' => $daf->id,
+            'demande_motif_rejet' => null,
         ]);
 
         $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::ValidéeDaf));
@@ -86,12 +86,12 @@ class DemandeDepenseService
      */
     public function rejeterDaf(DemandeDepense $demande, User $daf, string $motif): void
     {
-        abort_unless($demande->status === DemandeStatus::Soumise, 403);
-        abort_unless($daf->role === UserRole::Daf, 403);
+        abort_unless($demande->demande_statut === DemandeStatus::Soumise, 403);
+        abort_unless($daf->utilisateur_role === UserRole::Daf, 403);
 
         $demande->update([
-            'status' => DemandeStatus::RejetéeDaf,
-            'motif_rejet' => $motif,
+            'demande_statut' => DemandeStatus::RejetéeDaf,
+            'demande_motif_rejet' => $motif,
         ]);
 
         $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::RejetéeDaf, $motif));
@@ -102,14 +102,14 @@ class DemandeDepenseService
      */
     public function validerAc(DemandeDepense $demande, User $ac): void
     {
-        abort_unless($demande->status === DemandeStatus::ValidéeDaf, 403);
-        abort_unless($ac->role === UserRole::Ac, 403);
+        abort_unless($demande->demande_statut === DemandeStatus::ValidéeDaf, 403);
+        abort_unless($ac->utilisateur_role === UserRole::Ac, 403);
 
         $demande->update([
-            'status' => DemandeStatus::ValidéeAc,
-            'validee_ac_at' => now(),
-            'validee_ac_par' => $ac->id,
-            'motif_rejet' => null,
+            'demande_statut' => DemandeStatus::ValidéeAc,
+            'demande_date_validation_ac' => now(),
+            'id_validateur_ac' => $ac->id,
+            'demande_motif_rejet' => null,
         ]);
 
         $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::ValidéeAc));
@@ -121,12 +121,12 @@ class DemandeDepenseService
      */
     public function rejeterAc(DemandeDepense $demande, User $ac, string $motif): void
     {
-        abort_unless($demande->status === DemandeStatus::ValidéeDaf, 403);
-        abort_unless($ac->role === UserRole::Ac, 403);
+        abort_unless($demande->demande_statut === DemandeStatus::ValidéeDaf, 403);
+        abort_unless($ac->utilisateur_role === UserRole::Ac, 403);
 
         $demande->update([
-            'status' => DemandeStatus::RejetéeAc,
-            'motif_rejet' => $motif,
+            'demande_statut' => DemandeStatus::RejetéeAc,
+            'demande_motif_rejet' => $motif,
         ]);
 
         $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::RejetéeAc, $motif));
@@ -138,19 +138,19 @@ class DemandeDepenseService
      */
     public function enregistrerPaiement(DemandeDepense $demande, User $ac, array $data): Paiement
     {
-        abort_unless($demande->status === DemandeStatus::ValidéeAc, 403);
-        abort_unless($ac->role === UserRole::Ac, 403);
+        abort_unless($demande->demande_statut === DemandeStatus::ValidéeAc, 403);
+        abort_unless($ac->utilisateur_role === UserRole::Ac, 403);
 
         $paiement = Paiement::create([
-            'demande_id' => $demande->id,
-            'montant' => $data['montant'],
-            'date_paiement' => $data['date_paiement'],
-            'mode_paiement' => $data['mode_paiement'],
-            'reference' => $data['reference'] ?? null,
-            'enregistre_par' => $ac->id,
+            'id_demande' => $demande->id,
+            'paiement_montant' => $data['montant'],
+            'paiement_date' => $data['date_paiement'],
+            'paiement_mode' => $data['mode_paiement'],
+            'paiement_reference' => $data['reference'] ?? null,
+            'id_enregistreur_paiement' => $ac->id,
         ]);
 
-        $demande->update(['status' => DemandeStatus::Payee]);
+        $demande->update(['demande_statut' => DemandeStatus::Payee]);
 
         $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::Payee));
 
@@ -162,14 +162,14 @@ class DemandeDepenseService
      */
     public function soumettreRapport(DemandeDepense $demande, User $porteur, string $rapportPath): void
     {
-        abort_unless($demande->status === DemandeStatus::Payee, 403);
-        abort_unless($demande->porteur_id === $porteur->id, 403);
+        abort_unless($demande->demande_statut === DemandeStatus::Payee, 403);
+        abort_unless($demande->id_porteur === $porteur->id, 403);
 
         $demande->update([
-            'status' => DemandeStatus::RapportSoumis,
-            'rapport_path' => $rapportPath,
-            'rapport_validee_daf' => false,
-            'rapport_validee_ac' => false,
+            'demande_statut' => DemandeStatus::RapportSoumis,
+            'demande_rapport' => $rapportPath,
+            'demande_rapport_valide_daf' => false,
+            'demande_rapport_valide_ac' => false,
         ]);
 
         $this->notifyDafAc($demande, DemandeStatus::RapportSoumis);
@@ -180,16 +180,16 @@ class DemandeDepenseService
      */
     public function validerRapportDaf(DemandeDepense $demande, User $daf): void
     {
-        abort_unless($demande->status === DemandeStatus::RapportSoumis, 403);
-        abort_unless($daf->role === UserRole::Daf, 403);
+        abort_unless($demande->demande_statut === DemandeStatus::RapportSoumis, 403);
+        abort_unless($daf->utilisateur_role === UserRole::Daf, 403);
 
         DB::transaction(function () use ($demande) {
-            $demande->newQuery()->where('id', $demande->id)->lockForUpdate()->sole();
-            $demande->update(['rapport_validee_daf' => true]);
+            $demande->newQuery()->where('id_demande', $demande->id)->lockForUpdate()->sole();
+            $demande->update(['demande_rapport_valide_daf' => true]);
             $demande->refresh();
 
-            if ($demande->rapport_validee_daf && $demande->rapport_validee_ac) {
-                $demande->update(['status' => DemandeStatus::Terminee]);
+            if ($demande->demande_rapport_valide_daf && $demande->demande_rapport_valide_ac) {
+                $demande->update(['demande_statut' => DemandeStatus::Terminee]);
                 $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::Terminee));
             }
         });
@@ -200,16 +200,16 @@ class DemandeDepenseService
      */
     public function validerRapportAc(DemandeDepense $demande, User $ac): void
     {
-        abort_unless($demande->status === DemandeStatus::RapportSoumis, 403);
-        abort_unless($ac->role === UserRole::Ac, 403);
+        abort_unless($demande->demande_statut === DemandeStatus::RapportSoumis, 403);
+        abort_unless($ac->utilisateur_role === UserRole::Ac, 403);
 
         DB::transaction(function () use ($demande) {
-            $demande->newQuery()->where('id', $demande->id)->lockForUpdate()->sole();
-            $demande->update(['rapport_validee_ac' => true]);
+            $demande->newQuery()->where('id_demande', $demande->id)->lockForUpdate()->sole();
+            $demande->update(['demande_rapport_valide_ac' => true]);
             $demande->refresh();
 
-            if ($demande->rapport_validee_daf && $demande->rapport_validee_ac) {
-                $demande->update(['status' => DemandeStatus::Terminee]);
+            if ($demande->demande_rapport_valide_daf && $demande->demande_rapport_valide_ac) {
+                $demande->update(['demande_statut' => DemandeStatus::Terminee]);
                 $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::Terminee));
             }
         });
@@ -220,17 +220,17 @@ class DemandeDepenseService
      */
     public function rejeterRapport(DemandeDepense $demande, User $user): void
     {
-        abort_unless($demande->status === DemandeStatus::RapportSoumis, 403);
+        abort_unless($demande->demande_statut === DemandeStatus::RapportSoumis, 403);
         abort_unless(
-            in_array($user->role, [UserRole::Daf, UserRole::Ac]),
+            in_array($user->utilisateur_role, [UserRole::Daf, UserRole::Ac]),
             403
         );
 
         $demande->update([
-            'status' => DemandeStatus::Payee,
-            'rapport_path' => null,
-            'rapport_validee_daf' => false,
-            'rapport_validee_ac' => false,
+            'demande_statut' => DemandeStatus::Payee,
+            'demande_rapport' => null,
+            'demande_rapport_valide_daf' => false,
+            'demande_rapport_valide_ac' => false,
         ]);
 
         $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::Payee, 'Rapport rejeté, veuillez soumettre un nouveau rapport.'));
@@ -238,21 +238,21 @@ class DemandeDepenseService
 
     private function notifyAc(DemandeDepense $demande, DemandeStatus $status): void
     {
-        User::where('role', UserRole::Ac->value)
+        User::where('utilisateur_role', UserRole::Ac->value)
             ->get()
             ->each(fn (User $u) => $u->notify(new DemandeStatusChanged($demande, $status)));
     }
 
     private function notifyDaf(DemandeDepense $demande, DemandeStatus $status): void
     {
-        User::where('role', UserRole::Daf->value)
+        User::where('utilisateur_role', UserRole::Daf->value)
             ->get()
             ->each(fn (User $u) => $u->notify(new DemandeStatusChanged($demande, $status)));
     }
 
     private function notifyDafAc(DemandeDepense $demande, DemandeStatus $status): void
     {
-        User::whereIn('role', [UserRole::Daf->value, UserRole::Ac->value])
+        User::whereIn('utilisateur_role', [UserRole::Daf->value, UserRole::Ac->value])
             ->get()
             ->each(fn (User $u) => $u->notify(new DemandeStatusChanged($demande, $status)));
     }

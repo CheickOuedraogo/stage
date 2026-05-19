@@ -20,12 +20,12 @@ class VersementFactory extends Factory
     public function definition(): array
     {
         return [
-            'convention_id' => Convention::factory(),
-            'montant' => $this->faker->numberBetween(5_000_000, 50_000_000),
-            'date_reception' => $this->faker->dateTimeBetween('-2 years', 'now'),
-            'type' => $this->faker->randomElement(VersementType::cases())->value,
-            'description' => $this->faker->optional()->sentence(),
-            'reference' => strtoupper($this->faker->lexify('VRS-????-####')),
+            'id_convention' => Convention::factory(),
+            'versement_montant' => $this->faker->numberBetween(5_000_000, 50_000_000),
+            'versement_date_reception' => $this->faker->dateTimeBetween('-2 years', 'now'),
+            'versement_type' => $this->faker->randomElement(VersementType::cases())->value,
+            'versement_description' => $this->faker->optional()->sentence(),
+            'versement_reference' => strtoupper($this->faker->lexify('VRS-????-####')),
         ];
     }
 }

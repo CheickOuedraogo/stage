@@ -17,13 +17,13 @@ class RapportController extends Controller
 {
     public function index(Request $request): Response
     {
-        $projets = Projet::orderBy('titre')
-            ->get(['id', 'titre', 'status'])
+        $projets = Projet::orderBy('projet_titre')
+            ->get(['id', 'projet_titre', 'projet_statut'])
             ->map(fn (Projet $p) => [
                 'id' => $p->id,
-                'titre' => $p->titre,
-                'status' => $p->status->value,
-                'status_label' => $p->status->label(),
+                'titre' => $p->projet_titre,
+                'status' => $p->projet_statut->value,
+                'status_label' => $p->projet_statut->label(),
             ]);
 
         return Inertia::render('daf/Rapports/Index', [
@@ -39,8 +39,8 @@ class RapportController extends Controller
         ]);
 
         $projet = Projet::with([
-            'conventions.bailleur:id,nom,sigle',
-            'conventions.rubriques.demandesDepenses' => fn ($q) => $q->whereIn('status', [
+            'conventions.bailleur:id_bailleur,bailleur_nom,bailleur_sigle',
+            'conventions.rubriques.demandesDepenses' => fn ($q) => $q->whereIn('demande_statut', [
                 DemandeStatus::Payee->value,
                 DemandeStatus::RapportSoumis->value,
                 DemandeStatus::Terminee->value,
@@ -49,19 +49,19 @@ class RapportController extends Controller
         ])->findOrFail($request->projet_id);
 
         $rubriques = $projet->conventions->flatMap(fn ($c) => $c->rubriques->map(fn ($r) => [
-            'libelle' => $r->libelle,
-            'convention' => "{$c->titre} / {$c->bailleur->sigle}",
-            'montant_prevu' => $r->montant_prevu,
-            'consomme' => $r->demandesDepenses->sum('montant'),
+            'libelle' => $r->rubrique_libelle,
+            'convention' => "{$c->convention_titre} / {$c->bailleur->bailleur_sigle}",
+            'montant_prevu' => $r->rubrique_montant_prevu,
+            'consomme' => $r->demandesDepenses->sum('demande_montant'),
         ]))->values()->toArray();
 
-        $totalVersions = $projet->conventions->flatMap->versements->sum('montant');
+        $totalVersions = $projet->conventions->flatMap->versements->sum('versement_montant');
         $totalDepenses = array_sum(array_column($rubriques, 'consomme'));
 
         $data = [
             'projets' => [[
-                'titre' => $projet->titre,
-                'budget_prevu' => $projet->conventions->sum('montant_fcfa'),
+                'titre' => $projet->projet_titre,
+                'budget_prevu' => $projet->conventions->sum('convention_montant_fcfa'),
                 'total_versements' => $totalVersions,
                 'total_depenses' => $totalDepenses,
                 'rubriques' => $rubriques,
@@ -75,7 +75,7 @@ class RapportController extends Controller
         }
 
         return Excel::download(
-            new ExecutionBudgetaireExport($rubriques, $projet->titre),
+            new ExecutionBudgetaireExport($rubriques, $projet->projet_titre),
             "execution_budgetaire_{$projet->id}.xlsx"
         );
     }
@@ -88,38 +88,38 @@ class RapportController extends Controller
         ]);
 
         $projet = Projet::with([
-            'porteur:id,name',
-            'conventions.bailleur:id,nom,sigle',
+            'porteur:id_utilisateur,name',
+            'conventions.bailleur:id_bailleur,bailleur_nom,bailleur_sigle',
             'conventions.versements',
-            'conventions.rubriques.demandesDepenses' => fn ($q) => $q->whereIn('status', [
+            'conventions.rubriques.demandesDepenses' => fn ($q) => $q->whereIn('demande_statut', [
                 DemandeStatus::Payee->value,
                 DemandeStatus::RapportSoumis->value,
                 DemandeStatus::Terminee->value,
             ]),
         ])->findOrFail($request->projet_id);
 
-        $totalVersions = $projet->conventions->flatMap->versements->sum('montant');
-        $totalDepenses = $projet->conventions->flatMap->rubriques->flatMap->demandesDepenses->sum('montant');
-        $budgetPrevu = $projet->conventions->sum('montant_fcfa');
+        $totalVersions = $projet->conventions->flatMap->versements->sum('versement_montant');
+        $totalDepenses = $projet->conventions->flatMap->rubriques->flatMap->demandesDepenses->sum('demande_montant');
+        $budgetPrevu = $projet->conventions->sum('convention_montant_fcfa');
         $ecartBudget = $budgetPrevu - $totalDepenses;
 
         $ecartTemps = null;
         $ecartTempsLabel = null;
-        if ($projet->date_fin_prevue) {
-            $dateRef = $projet->date_fin_reelle ?? now();
-            $ecartTemps = $projet->date_fin_prevue->diffInDays($dateRef, false);
+        if ($projet->projet_date_fin_prevue) {
+            $dateRef = $projet->projet_date_fin_reelle ?? now();
+            $ecartTemps = $projet->projet_date_fin_prevue->diffInDays($dateRef, false);
             $ecartTempsLabel = $ecartTemps > 0
                 ? "{$ecartTemps} jour(s) de retard"
                 : ($ecartTemps < 0 ? abs($ecartTemps).' jour(s) d\'avance' : 'Dans les délais');
         }
 
         $projetData = [
-            'titre' => $projet->titre,
+            'titre' => $projet->projet_titre,
             'porteur' => $projet->porteur->name,
-            'status_label' => $projet->status->label(),
-            'date_debut' => $projet->date_debut?->format('d/m/Y'),
-            'date_fin_prevue' => $projet->date_fin_prevue?->format('d/m/Y'),
-            'date_fin_reelle' => $projet->date_fin_reelle?->format('d/m/Y'),
+            'status_label' => $projet->projet_statut->label(),
+            'date_debut' => $projet->projet_date_debut?->format('d/m/Y'),
+            'date_fin_prevue' => $projet->projet_date_fin_prevue?->format('d/m/Y'),
+            'date_fin_reelle' => $projet->projet_date_fin_reelle?->format('d/m/Y'),
         ];
 
         $analyse = [
@@ -133,10 +133,10 @@ class RapportController extends Controller
         ];
 
         $conventions = $projet->conventions->map(fn ($c) => [
-            'bailleur' => $c->bailleur->nom,
-            'forme_label' => $c->forme->label(),
-            'montant_fcfa' => $c->montant_fcfa,
-            'total_versements' => $c->versements->sum('montant'),
+            'bailleur' => $c->bailleur->bailleur_nom,
+            'forme_label' => $c->convention_forme->label(),
+            'montant_fcfa' => $c->convention_montant_fcfa,
+            'total_versements' => $c->versements->sum('versement_montant'),
         ])->toArray();
 
         if ($request->format === 'pdf') {

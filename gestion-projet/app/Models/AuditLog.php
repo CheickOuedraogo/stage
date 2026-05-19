@@ -9,30 +9,38 @@ class AuditLog extends Model
 {
     public $timestamps = false;
 
+    protected $primaryKey = 'id_audit';
+
     protected $fillable = [
-        'user_id',
-        'action',
-        'auditable_type',
-        'auditable_id',
-        'old_values',
-        'new_values',
-        'ip_address',
-        'user_agent',
-        'description',
+        'id_utilisateur',
+        'audit_action',
+        'audit_entite_type',
+        'audit_entite_id',
+        'audit_anciennes_valeurs',
+        'audit_nouvelles_valeurs',
+        'audit_adresse_ip',
+        'audit_navigateur',
+        'audit_description',
     ];
 
     protected function casts(): array
     {
         return [
-            'old_values' => 'array',
-            'new_values' => 'array',
+            'audit_anciennes_valeurs' => 'array',
+            'audit_nouvelles_valeurs' => 'array',
             'created_at' => 'datetime',
         ];
     }
 
+    /** Transparent id accessor so $auditLog->id still works */
+    public function getIdAttribute(): mixed
+    {
+        return $this->getAttribute($this->getKeyName());
+    }
+
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'id_utilisateur');
     }
 
     /**
@@ -48,15 +56,15 @@ class AuditLog extends Model
         ?string $description = null,
     ): self {
         return self::create([
-            'user_id' => auth()->id(),
-            'action' => $action,
-            'auditable_type' => $auditable ? get_class($auditable) : null,
-            'auditable_id' => $auditable?->getKey(),
-            'old_values' => $oldValues,
-            'new_values' => $newValues,
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-            'description' => $description,
+            'id_utilisateur' => auth()->id(),
+            'audit_action' => $action,
+            'audit_entite_type' => $auditable ? get_class($auditable) : null,
+            'audit_entite_id' => $auditable?->getKey(),
+            'audit_anciennes_valeurs' => $oldValues,
+            'audit_nouvelles_valeurs' => $newValues,
+            'audit_adresse_ip' => request()->ip(),
+            'audit_navigateur' => request()->userAgent(),
+            'audit_description' => $description,
         ]);
     }
 }

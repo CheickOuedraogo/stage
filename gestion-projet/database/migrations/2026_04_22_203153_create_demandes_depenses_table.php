@@ -9,27 +9,27 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('demandes_depenses', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('rubrique_id')->constrained('rubriques')->cascadeOnDelete();
-            $table->foreignId('convention_id')->constrained('conventions')->cascadeOnDelete();
-            $table->foreignId('porteur_id')->constrained('users')->cascadeOnDelete();
-            $table->integer('montant');
-            $table->string('objet');
-            $table->text('description')->nullable();
-            $table->string('justificatif_path')->nullable();
-            $table->string('status')->default('soumise');
-            $table->text('motif_rejet')->nullable();
-            $table->string('rapport_path')->nullable();
-            $table->timestamp('validee_daf_at')->nullable();
-            $table->foreignId('validee_daf_par')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamp('validee_ac_at')->nullable();
-            $table->foreignId('validee_ac_par')->nullable()->constrained('users')->nullOnDelete();
-            $table->boolean('rapport_validee_daf')->default(false);
-            $table->boolean('rapport_validee_ac')->default(false);
+            $table->id('id_demande');
+            $table->foreignId('id_rubrique')->constrained('rubriques', 'id_rubrique')->cascadeOnDelete();
+            $table->foreignId('id_convention')->constrained('conventions', 'id_convention')->cascadeOnDelete();
+            $table->foreignId('id_porteur')->constrained('users', 'id_utilisateur')->cascadeOnDelete();
+            $table->integer('demande_montant');
+            $table->string('demande_objet');
+            $table->text('demande_description')->nullable();
+            $table->string('demande_justificatif')->nullable();
+            $table->string('demande_statut')->default('soumise');
+            $table->text('demande_motif_rejet')->nullable();
+            $table->string('demande_rapport')->nullable();
+            $table->timestamp('demande_date_validation_daf')->nullable();
+            $table->foreignId('id_validateur_daf')->nullable()->constrained('users', 'id_utilisateur')->nullOnDelete();
+            $table->timestamp('demande_date_validation_ac')->nullable();
+            $table->foreignId('id_validateur_ac')->nullable()->constrained('users', 'id_utilisateur')->nullOnDelete();
+            $table->boolean('demande_rapport_valide_daf')->default(false);
+            $table->boolean('demande_rapport_valide_ac')->default(false);
             $table->timestamps();
 
-            $table->index(['convention_id', 'status']);
-            $table->index(['porteur_id', 'status']);
+            $table->index(['id_convention', 'demande_statut']);
+            $table->index(['id_porteur', 'demande_statut']);
         });
     }
 

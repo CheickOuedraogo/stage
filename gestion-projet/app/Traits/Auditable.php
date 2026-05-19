@@ -80,7 +80,7 @@ trait Auditable
 
     private static function getModelIdentifier(mixed $model): string
     {
-        foreach (['nom', 'titre', 'objet', 'libelle', 'question', 'name'] as $field) {
+        foreach (['bailleur_nom', 'projet_titre', 'convention_titre', 'rubrique_libelle', 'faq_question', 'demande_objet', 'name'] as $field) {
             if (! empty($model->{$field})) {
                 $value = mb_strimwidth((string) $model->{$field}, 0, 60, '…');
 
@@ -99,21 +99,31 @@ trait Auditable
         $fieldLabels = [
             'name' => 'nom',
             'email' => 'e-mail',
-            'role' => 'rôle',
-            'is_active' => 'statut',
+            'utilisateur_role' => 'rôle',
+            'utilisateur_actif' => 'statut',
             'telephone' => 'téléphone',
-            'status' => 'statut',
-            'montant' => 'montant',
-            'montant_prevu' => 'montant prévu',
-            'montant_fcfa' => 'montant FCFA',
-            'date_fin_reelle' => 'date de clôture',
-            'date_reception' => 'date de réception',
-            'motif_rejet' => 'motif de rejet',
-            'titre' => 'titre',
-            'description' => 'description',
+            'demande_statut' => 'statut',
+            'convention_statut' => 'statut',
+            'projet_statut' => 'statut',
+            'versement_montant' => 'montant',
+            'paiement_montant' => 'montant',
+            'paiement_direct_montant' => 'montant',
+            'demande_montant' => 'montant',
+            'convention_montant' => 'montant',
+            'rubrique_montant_prevu' => 'montant prévu',
+            'convention_montant_fcfa' => 'montant FCFA',
+            'projet_date_fin_reelle' => 'date de clôture',
+            'versement_date_reception' => 'date de réception',
+            'demande_motif_rejet' => 'motif de rejet',
+            'projet_titre' => 'titre',
+            'convention_titre' => 'titre',
+            'demande_description' => 'description',
+            'rubrique_description' => 'description',
+            'convention_description' => 'description',
+            'faq_actif' => 'maintenance',
+            'faq_reponse' => 'réponse',
+            'faq_question' => 'question',
             'active' => 'maintenance',
-            'reponse' => 'réponse',
-            'question' => 'question',
         ];
 
         $fields = array_map(

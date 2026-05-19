@@ -18,10 +18,10 @@ class DemandeDepenseController extends Controller
     public function index(Request $request): Response
     {
         $enAttente = DemandeDepense::with([
-            'convention.projet:id,titre',
-            'convention:id,titre,projet_id',
-            'rubrique:id,libelle',
-            'porteur:id,name',
+            'convention.projet:id_projet,projet_titre',
+            'convention:id_convention,convention_titre,id_projet',
+            'rubrique:id_rubrique,rubrique_libelle',
+            'porteur:id_utilisateur,name',
         ])
             ->enAttenteDaf()
             ->latest()
@@ -29,13 +29,13 @@ class DemandeDepenseController extends Controller
             ->map(fn (DemandeDepense $d) => $this->formatDemande($d));
 
         $historique = DemandeDepense::with([
-            'convention.projet:id,titre',
-            'convention:id,titre,projet_id',
-            'rubrique:id,libelle',
-            'porteur:id,name',
+            'convention.projet:id_projet,projet_titre',
+            'convention:id_convention,convention_titre,id_projet',
+            'rubrique:id_rubrique,rubrique_libelle',
+            'porteur:id_utilisateur,name',
         ])
-            ->whereNotIn('status', [DemandeStatus::Soumise->value])
-            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
+            ->whereNotIn('demande_statut', [DemandeStatus::Soumise->value])
+            ->when($request->filled('status'), fn ($q) => $q->where('demande_statut', $request->status))
             ->latest()
             ->paginate(20)
             ->through(fn (DemandeDepense $d) => $this->formatDemande($d));
@@ -54,13 +54,13 @@ class DemandeDepenseController extends Controller
     public function show(DemandeDepense $demande): Response
     {
         $demande->load([
-            'convention.projet:id,titre',
-            'convention:id,titre,projet_id',
-            'rubrique:id,libelle,montant_prevu',
-            'porteur:id,name,email',
-            'paiement.enregistrePar:id,name',
-            'validateurDaf:id,name',
-            'validateurAc:id,name',
+            'convention.projet:id_projet,projet_titre',
+            'convention:id_convention,convention_titre,id_projet',
+            'rubrique:id_rubrique,rubrique_libelle,rubrique_montant_prevu',
+            'porteur:id_utilisateur,name,email',
+            'paiement.enregistrePar:id_utilisateur,name',
+            'validateurDaf:id_utilisateur,name',
+            'validateurAc:id_utilisateur,name',
         ]);
 
         return Inertia::render('daf/Demandes/Show', [
@@ -104,22 +104,22 @@ class DemandeDepenseController extends Controller
     {
         return [
             'id' => $d->id,
-            'objet' => $d->objet,
-            'montant' => $d->montant,
-            'status' => $d->status->value,
-            'status_label' => $d->status->label(),
-            'badge_class' => $d->status->badgeClass(),
+            'objet' => $d->demande_objet,
+            'montant' => $d->demande_montant,
+            'status' => $d->demande_statut->value,
+            'status_label' => $d->demande_statut->label(),
+            'badge_class' => $d->demande_statut->badgeClass(),
             'created_at' => $d->created_at->toDateString(),
             'porteur' => ['name' => $d->porteur->name],
             'convention' => [
                 'id' => $d->convention->id,
-                'titre' => $d->convention->titre,
+                'titre' => $d->convention->convention_titre,
             ],
             'projet' => [
                 'id' => $d->convention->projet->id,
-                'titre' => $d->convention->projet->titre,
+                'titre' => $d->convention->projet->projet_titre,
             ],
-            'rubrique' => ['libelle' => $d->rubrique->libelle],
+            'rubrique' => ['libelle' => $d->rubrique->rubrique_libelle],
         ];
     }
 
@@ -127,24 +127,24 @@ class DemandeDepenseController extends Controller
     {
         return [
             ...$this->formatDemande($d),
-            'description' => $d->description,
-            'motif_rejet' => $d->motif_rejet,
+            'description' => $d->demande_description,
+            'motif_rejet' => $d->demande_motif_rejet,
             'has_justificatif' => $d->has_justificatif,
             'has_rapport' => $d->has_rapport,
-            'rapport_validee_daf' => $d->rapport_validee_daf,
-            'rapport_validee_ac' => $d->rapport_validee_ac,
-            'validee_daf_at' => $d->validee_daf_at?->toDateTimeString(),
-            'validee_ac_at' => $d->validee_ac_at?->toDateTimeString(),
+            'rapport_validee_daf' => $d->demande_rapport_valide_daf,
+            'rapport_validee_ac' => $d->demande_rapport_valide_ac,
+            'validee_daf_at' => $d->demande_date_validation_daf?->toDateTimeString(),
+            'validee_ac_at' => $d->demande_date_validation_ac?->toDateTimeString(),
             'validateur_daf' => $d->validateurDaf?->name,
             'validateur_ac' => $d->validateurAc?->name,
             'porteur_email' => $d->porteur->email,
-            'rubrique_montant_prevu' => $d->rubrique->montant_prevu,
+            'rubrique_montant_prevu' => $d->rubrique->rubrique_montant_prevu,
             'paiement' => $d->paiement ? [
-                'montant' => $d->paiement->montant,
-                'date_paiement' => $d->paiement->date_paiement->toDateString(),
-                'mode_paiement' => $d->paiement->mode_paiement->value,
-                'mode_paiement_label' => $d->paiement->mode_paiement->label(),
-                'reference' => $d->paiement->reference,
+                'montant' => $d->paiement->paiement_montant,
+                'date_paiement' => $d->paiement->paiement_date->toDateString(),
+                'mode_paiement' => $d->paiement->paiement_mode->value,
+                'mode_paiement_label' => $d->paiement->paiement_mode->label(),
+                'reference' => $d->paiement->paiement_reference,
                 'enregistre_par' => $d->paiement->enregistrePar->name,
             ] : null,
         ];

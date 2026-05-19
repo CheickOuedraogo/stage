@@ -23,14 +23,14 @@ class ProjetService
      */
     public function getBlockersCloture(Projet $projet): ?string
     {
-        if ($projet->status !== ProjectStatus::EnCours) {
-            return "Statut actuel : {$projet->status->label()}. Seuls les projets en cours peuvent être clôturés.";
+        if ($projet->projet_statut !== ProjectStatus::EnCours) {
+            return "Statut actuel : {$projet->projet_statut->label()}. Seuls les projets en cours peuvent être clôturés.";
         }
 
-        $conventionIds = $projet->conventions->pluck('id');
+        $conventionIds = $projet->conventions->pluck('id_convention');
 
-        $demandesActives = DemandeDepense::whereIn('convention_id', $conventionIds)
-            ->whereNotIn('status', [
+        $demandesActives = DemandeDepense::whereIn('id_convention', $conventionIds)
+            ->whereNotIn('demande_statut', [
                 DemandeStatus::Terminee->value,
                 DemandeStatus::RejetéeDaf->value,
                 DemandeStatus::RejetéeAc->value,
@@ -42,7 +42,7 @@ class ProjetService
         }
 
         $conventionsActives = $projet->conventions->filter(
-            fn (Convention $c) => ! in_array($c->status, [
+            fn (Convention $c) => ! in_array($c->convention_statut, [
                 ConventionStatus::Terminee,
                 ConventionStatus::Annulee,
             ])
@@ -74,15 +74,15 @@ class ProjetService
     {
         DB::transaction(function () use ($projet, $daf, $dateFinReelle, $statutFinal): void {
             $projet->update([
-                'status' => ProjectStatus::Termine,
-                'date_fin_reelle' => $dateFinReelle,
+                'projet_statut' => ProjectStatus::Termine,
+                'projet_date_fin_reelle' => $dateFinReelle,
                 'statut_final' => $statutFinal,
             ]);
 
             AuditLog::log(
                 'projet_cloture',
                 $projet,
-                description: "Clôture du projet « {$projet->titre} » par {$daf->name}",
+                description: "Clôture du projet « {$projet->projet_titre} » par {$daf->name}",
             );
 
             $projet->loadMissing('porteur');
@@ -104,56 +104,56 @@ class ProjetService
     public function genererBilan(Projet $projet): array
     {
         $projet->loadMissing([
-            'porteur:id,name',
-            'conventions.bailleur:id,nom,sigle',
+            'porteur:id_utilisateur,name',
+            'conventions.bailleur:id_bailleur,bailleur_nom,bailleur_sigle',
             'conventions.versements',
             'conventions.rubriques.demandesDepenses' => fn ($q) => $q
-                ->where('status', DemandeStatus::Terminee->value)
+                ->where('demande_statut', DemandeStatus::Terminee->value)
                 ->with('paiement'),
-            'conventions.paiementsDirects.rubrique:id,libelle',
+            'conventions.paiementsDirects.rubrique:id_rubrique,rubrique_libelle',
         ]);
 
         $conventions = $projet->conventions->map(fn (Convention $c) => [
             'id' => $c->id,
-            'titre' => $c->titre,
-            'bailleur' => $c->bailleur->nom,
-            'bailleur_sigle' => $c->bailleur->sigle,
-            'montant_fcfa' => $c->montant_fcfa,
-            'total_versements' => $c->versements->sum('montant'),
-            'total_depenses' => $c->rubriques->flatMap->demandesDepenses->sum('montant'),
-            'total_paiements_directs' => $c->paiementsDirects->sum('montant'),
-            'solde' => $c->montant_fcfa - $c->versements->sum('montant'),
+            'titre' => $c->convention_titre,
+            'bailleur' => $c->bailleur->bailleur_nom,
+            'bailleur_sigle' => $c->bailleur->bailleur_sigle,
+            'montant_fcfa' => $c->convention_montant_fcfa,
+            'total_versements' => $c->versements->sum('versement_montant'),
+            'total_depenses' => $c->rubriques->flatMap->demandesDepenses->sum('demande_montant'),
+            'total_paiements_directs' => $c->paiementsDirects->sum('paiement_direct_montant'),
+            'solde' => $c->convention_montant_fcfa - $c->versements->sum('versement_montant'),
         ])->values();
 
         $demandes = $projet->conventions->flatMap(fn (Convention $c) => $c->rubriques->flatMap(fn ($r) => $r->demandesDepenses->map(fn (DemandeDepense $d) => [
-            'objet' => $d->objet,
-            'montant' => $d->montant,
-            'rubrique' => $r->libelle,
-            'convention' => $c->bailleur->sigle ?? $c->bailleur->nom,
-            'date_paiement' => $d->paiement?->date_paiement?->toDateString(),
+            'objet' => $d->demande_objet,
+            'montant' => $d->demande_montant,
+            'rubrique' => $r->rubrique_libelle,
+            'convention' => $c->bailleur->bailleur_sigle ?? $c->bailleur->bailleur_nom,
+            'date_paiement' => $d->paiement?->paiement_date?->toDateString(),
         ])
         )
         )->values();
 
         $paiementsDirects = $projet->conventions->flatMap(fn (Convention $c) => $c->paiementsDirects->map(fn ($p) => [
-            'objet' => $p->objet_depense,
-            'montant' => $p->montant,
-            'rubrique' => $p->rubrique?->libelle,
-            'convention' => $c->bailleur->sigle ?? $c->bailleur->nom,
-            'date_paiement' => $p->date_paiement?->toDateString(),
+            'objet' => $p->paiement_direct_objet,
+            'montant' => $p->paiement_direct_montant,
+            'rubrique' => $p->rubrique?->rubrique_libelle,
+            'convention' => $c->bailleur->bailleur_sigle ?? $c->bailleur->bailleur_nom,
+            'date_paiement' => $p->paiement_direct_date?->toDateString(),
         ])
         )->values();
 
-        $budgetPrevu = $projet->conventions->sum('montant_fcfa');
+        $budgetPrevu = $projet->conventions->sum('convention_montant_fcfa');
         $totalVersements = $conventions->sum('total_versements');
         $totalDepenses = $conventions->sum('total_depenses') + $conventions->sum('total_paiements_directs');
 
         $ecartTemps = null;
         $ecartTempsLabel = null;
 
-        if ($projet->date_fin_prevue) {
-            $dateRef = $projet->date_fin_reelle ?? now();
-            $ecartTemps = (int) $projet->date_fin_prevue->diffInDays($dateRef, false);
+        if ($projet->projet_date_fin_prevue) {
+            $dateRef = $projet->projet_date_fin_reelle ?? now();
+            $ecartTemps = (int) $projet->projet_date_fin_prevue->diffInDays($dateRef, false);
             $ecartTempsLabel = $ecartTemps > 0
                 ? "{$ecartTemps} jour(s) de retard"
                 : ($ecartTemps < 0 ? abs($ecartTemps).' jour(s) d\'avance' : 'Dans les délais');
@@ -162,27 +162,27 @@ class ProjetService
         return [
             'projet' => [
                 'id' => $projet->id,
-                'titre' => $projet->titre,
+                'titre' => $projet->projet_titre,
                 'porteur' => $projet->porteur->name,
-                'status' => $projet->status->value,
-                'status_label' => $projet->status->label(),
+                'status' => $projet->projet_statut->value,
+                'status_label' => $projet->projet_statut->label(),
                 'statut_final' => $projet->statut_final?->value,
                 'statut_final_label' => $projet->statut_final?->label(),
-                'date_debut' => $projet->date_debut?->toDateString(),
-                'date_fin_prevue' => $projet->date_fin_prevue?->toDateString(),
-                'date_fin_reelle' => $projet->date_fin_reelle?->toDateString(),
+                'date_debut' => $projet->projet_date_debut?->toDateString(),
+                'date_fin_prevue' => $projet->projet_date_fin_prevue?->toDateString(),
+                'date_fin_reelle' => $projet->projet_date_fin_reelle?->toDateString(),
             ],
             'conventions' => $conventions->all(),
             'demandes' => $demandes->all(),
             'paiements_directs' => $paiementsDirects->all(),
             'analyse_ecarts' => [
-                'budget_initial' => $projet->montant_estime,
+                'budget_initial' => $projet->projet_montant_estime,
                 'budget_prevu' => $budgetPrevu,
                 'total_versements' => $totalVersements,
                 'total_depenses' => $totalDepenses,
                 'ecart_budget' => $budgetPrevu - $totalDepenses,
                 'taux_execution' => $budgetPrevu > 0 ? round(($totalDepenses / $budgetPrevu) * 100, 1) : 0,
-                'conventions_depassent_budget_initial' => $budgetPrevu > $projet->montant_estime,
+                'conventions_depassent_budget_initial' => $budgetPrevu > $projet->projet_montant_estime,
                 'ecart_temps_jours' => $ecartTemps,
                 'ecart_temps_label' => $ecartTempsLabel,
             ],

@@ -174,10 +174,10 @@ function UserRow({ user }: { user: User & { created_at: string } }) {
                     </div>
                 </div>
             </td>
-            <td className="px-6 py-4"><Badge variant={user.role as any}>{user.role_label}</Badge></td>
+            <td className="px-6 py-4"><Badge variant={user.utilisateur_role as any}>{user.role_label}</Badge></td>
             <td className="px-6 py-4">
-                <Badge variant={user.is_active ? 'success' : 'muted'} dot>
-                    {user.is_active ? 'Actif' : 'Désactivé'}
+                <Badge variant={user.utilisateur_actif ? 'success' : 'muted'} dot>
+                    {user.utilisateur_actif ? 'Actif' : 'Désactivé'}
                 </Badge>
             </td>
             <td className="px-6 py-4 hidden md:table-cell text-gray-500 dark:text-slate-400 text-xs">
@@ -193,12 +193,12 @@ function UserRow({ user }: { user: User & { created_at: string } }) {
                     </Link>
                     {!isSelf && (
                         <Button
-                            variant={user.is_active ? 'outline' : 'secondary'}
+                            variant={user.utilisateur_actif ? 'outline' : 'secondary'}
                             size="sm"
                             onClick={handleToggle}
-                            aria-label={user.is_active ? `Désactiver ${user.name}` : `Activer ${user.name}`}
+                            aria-label={user.utilisateur_actif ? `Désactiver ${user.name}` : `Activer ${user.name}`}
                         >
-                            {user.is_active ? 'Désactiver' : 'Activer'}
+                            {user.utilisateur_actif ? 'Désactiver' : 'Activer'}
                         </Button>
                     )}
                 </div>

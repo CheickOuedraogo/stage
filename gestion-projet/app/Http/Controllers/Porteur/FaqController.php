@@ -17,8 +17,8 @@ class FaqController extends Controller
             ->filter(fn (FaqItem $f) => $f->isVisibleFor(UserRole::Porteur))
             ->map(fn (FaqItem $f) => [
                 'id' => $f->id,
-                'question' => $f->question,
-                'reponse' => $f->reponse,
+                'question' => $f->faq_question,
+                'reponse' => $f->faq_reponse,
             ])
             ->values();
 

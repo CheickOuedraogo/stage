@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('paiements', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('demande_id')->unique()->constrained('demandes_depenses')->cascadeOnDelete();
-            $table->integer('montant');
-            $table->date('date_paiement');
-            $table->string('mode_paiement');
-            $table->string('reference')->nullable();
-            $table->foreignId('enregistre_par')->constrained('users')->cascadeOnDelete();
+            $table->id('id_paiement');
+            $table->foreignId('id_demande')->unique()->constrained('demandes_depenses', 'id_demande')->cascadeOnDelete();
+            $table->integer('paiement_montant');
+            $table->date('paiement_date');
+            $table->string('paiement_mode');
+            $table->string('paiement_reference')->nullable();
+            $table->foreignId('id_enregistreur_paiement')->constrained('users', 'id_utilisateur')->cascadeOnDelete();
             $table->timestamps();
         });
     }

@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('faq_items', function (Blueprint $table) {
-            $table->id();
-            $table->string('question');
-            $table->text('reponse');
-            $table->unsignedSmallInteger('ordre')->default(0);
-            $table->boolean('is_active')->default(true);
+            $table->id('id_faq');
+            $table->string('faq_question');
+            $table->text('faq_reponse');
+            $table->unsignedSmallInteger('faq_ordre')->default(0);
+            $table->boolean('faq_actif')->default(true);
             $table->timestamps();
         });
     }

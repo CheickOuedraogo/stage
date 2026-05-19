@@ -9,20 +9,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('audit_logs', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
-            $table->string('action'); // created | updated | deleted | login | logout | custom
-            $table->string('auditable_type')->nullable();
-            $table->unsignedBigInteger('auditable_id')->nullable();
-            $table->json('old_values')->nullable();
-            $table->json('new_values')->nullable();
-            $table->string('ip_address', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->string('description')->nullable();
+            $table->id('id_audit');
+            $table->foreignId('id_utilisateur')->nullable()->constrained('users', 'id_utilisateur')->nullOnDelete();
+            $table->string('audit_action'); // created | updated | deleted | login | logout | custom
+            $table->string('audit_entite_type')->nullable();
+            $table->unsignedBigInteger('audit_entite_id')->nullable();
+            $table->json('audit_anciennes_valeurs')->nullable();
+            $table->json('audit_nouvelles_valeurs')->nullable();
+            $table->string('audit_adresse_ip', 45)->nullable();
+            $table->text('audit_navigateur')->nullable();
+            $table->string('audit_description')->nullable();
             $table->timestamp('created_at')->useCurrent();
 
-            $table->index(['auditable_type', 'auditable_id']);
-            $table->index('user_id');
+            $table->index(['audit_entite_type', 'audit_entite_id']);
+            $table->index('id_utilisateur');
             $table->index('created_at');
         });
     }
