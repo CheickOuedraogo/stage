@@ -33,7 +33,7 @@ describe('Connexion', function () {
     });
 
     it('redirige vers le bon dashboard selon le rôle', function (UserRole $role, string $dashboardRoute) {
-        $user = User::factory()->state(['role' => $role])->create([
+        $user = User::factory()->state(['utilisateur_role' => $role])->create([
             'password' => bcrypt('password'),
         ]);
 

@@ -23,7 +23,7 @@ class RoleMiddleware
 
         $user = Auth::user();
 
-        if (! in_array($user->role->value, $roles, true)) {
+        if (! in_array($user->utilisateur_role->value, $roles, true)) {
             abort(403, 'Accès non autorisé.');
         }
 

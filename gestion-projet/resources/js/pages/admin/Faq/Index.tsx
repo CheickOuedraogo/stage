@@ -26,10 +26,10 @@ const ROLE_OPTIONS = [
 
 interface FaqItem {
     id: number;
-    question: string;
-    reponse: string;
-    ordre: number;
-    is_active: boolean;
+    faq_question: string;
+    faq_reponse: string;
+    faq_ordre: number;
+    faq_actif: boolean;
     roles_cibles: string[] | null;
 }
 
@@ -138,10 +138,10 @@ function CreateForm({ onCancel }: { onCancel: () => void }) {
 
 function EditForm({ item, onCancel }: { item: FaqItem; onCancel: () => void }) {
     const form = useForm({
-        question: item.question,
-        reponse: item.reponse,
-        ordre: String(item.ordre),
-        is_active: item.is_active,
+        question: item.faq_question,
+        reponse: item.faq_reponse,
+        ordre: String(item.faq_ordre),
+        is_active: item.faq_actif,
         roles_cibles: item.roles_cibles ?? ['all'],
     });
 
@@ -234,7 +234,7 @@ function DeleteButton({ item }: { item: FaqItem }) {
             <ConfirmModal
                 open={open}
                 title="Supprimer la question"
-                message={`« ${item.question} » sera définitivement supprimée de la FAQ.`}
+                message={`« ${item.faq_question} » sera définitivement supprimée de la FAQ.`}
                 confirmLabel="Supprimer"
                 onConfirm={() => destroy(faqDestroy.url(item.id), { onSuccess: () => setOpen(false), onError: () => setOpen(false) })}
                 onCancel={() => setOpen(false)}
@@ -257,7 +257,7 @@ export default function AdminFaqIndex() {
                     <div>
                         <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Gestion de la FAQ</h2>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                            {items.length} question{items.length !== 1 ? 's' : ''} — visible{items.filter((i) => i.is_active).length !== 1 ? 's' : ''} : {items.filter((i) => i.is_active).length}
+                            {items.length} question{items.length !== 1 ? 's' : ''} — visible{items.filter((i) => i.faq_actif).length !== 1 ? 's' : ''} : {items.filter((i) => i.faq_actif).length}
                         </p>
                     </div>
                     <button
@@ -288,14 +288,14 @@ export default function AdminFaqIndex() {
                                         <EditForm item={item} onCancel={() => setEditingId(null)} />
                                     </div>
                                 ) : (
-                                    <div className={`px-5 py-4 flex items-center gap-4 group hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors ${!item.is_active ? 'opacity-60' : ''}`}>
+                                    <div className={`px-5 py-4 flex items-center gap-4 group hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors ${!item.faq_actif ? 'opacity-60' : ''}`}>
                                         <span className="shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 text-xs font-bold flex items-center justify-center">
                                             {idx + 1}
                                         </span>
                                         <div className="min-w-0 flex-1">
                                             <div className="flex items-center gap-2 flex-wrap">
-                                                <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{item.question}</p>
-                                                {!item.is_active && (
+                                                <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{item.faq_question}</p>
+                                                {!item.faq_actif && (
                                                     <span className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400">
                                                         Masquée
                                                     </span>
@@ -306,7 +306,7 @@ export default function AdminFaqIndex() {
                                                     </span>
                                                 ))}
                                             </div>
-                                            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 line-clamp-1">{item.reponse.replace(/[#*`]/g, '').slice(0, 90)}…</p>
+                                            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 line-clamp-1">{item.faq_reponse.replace(/[#*`]/g, '').slice(0, 90)}…</p>
                                         </div>
                                         <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button

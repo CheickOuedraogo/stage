@@ -31,7 +31,7 @@ describe('Profil utilisateur', function () {
             ->assertRedirect();
 
         $this->assertDatabaseHas('users', [
-            'id' => $this->user->id,
+            'id_utilisateur' => $this->user->id,
             'name' => 'Nouveau Nom',
             'telephone' => '+226 71 11 11 11',
         ]);

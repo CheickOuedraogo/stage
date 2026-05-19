@@ -18,13 +18,13 @@ class PaiementDirectFactory extends Factory
         $convention = Convention::factory()->create();
 
         return [
-            'convention_id' => $convention->id,
-            'rubrique_id' => Rubrique::factory()->for($convention),
-            'montant' => $this->faker->numberBetween(500_000, 10_000_000),
-            'objet_depense' => $this->faker->sentence(4),
-            'description' => $this->faker->optional()->paragraph(),
-            'date_paiement' => $this->faker->dateTimeBetween('-6 months', 'now'),
-            'enregistre_par' => User::factory()->porteur(),
+            'id_convention' => $convention->id,
+            'id_rubrique' => Rubrique::factory()->for($convention),
+            'paiement_direct_montant' => $this->faker->numberBetween(500_000, 10_000_000),
+            'paiement_direct_objet' => $this->faker->sentence(4),
+            'paiement_direct_description' => $this->faker->optional()->paragraph(),
+            'paiement_direct_date' => $this->faker->dateTimeBetween('-6 months', 'now'),
+            'id_enregistreur_paiement_direct' => User::factory()->porteur(),
         ];
     }
 }

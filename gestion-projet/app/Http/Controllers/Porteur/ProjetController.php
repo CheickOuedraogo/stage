@@ -22,23 +22,23 @@ class ProjetController extends Controller
 
         $projets = Projet::forPorteur($porteur->id)
             ->withCount('conventions')
-            ->with(['conventions:id,projet_id,montant_fcfa'])
-            ->when($request->filled('search'), fn ($q) => $q->where('titre', 'like', '%'.$request->search.'%'))
-            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
+            ->with(['conventions:id_convention,id_projet,convention_montant_fcfa'])
+            ->when($request->filled('search'), fn ($q) => $q->where('projet_titre', 'like', '%'.$request->search.'%'))
+            ->when($request->filled('status'), fn ($q) => $q->where('projet_statut', $request->status))
             ->latest()
             ->get()
             ->map(fn (Projet $p) => [
                 'id' => $p->id,
-                'titre' => $p->titre,
-                'status' => $p->status->value,
-                'status_label' => $p->status->label(),
-                'montant_estime' => $p->montant_estime,
-                'date_debut' => $p->date_debut?->toDateString(),
-                'date_fin_prevue' => $p->date_fin_prevue?->toDateString(),
+                'titre' => $p->projet_titre,
+                'status' => $p->projet_statut->value,
+                'status_label' => $p->projet_statut->label(),
+                'montant_estime' => $p->projet_montant_estime,
+                'date_debut' => $p->projet_date_debut?->toDateString(),
+                'date_fin_prevue' => $p->projet_date_fin_prevue?->toDateString(),
                 'conventions_count' => $p->conventions_count,
-                'montant_conventions' => $p->conventions->sum('montant_fcfa'),
-                'pourcentage_financement' => $p->montant_estime > 0
-                    ? (int) min(100, round(($p->conventions->sum('montant_fcfa') / $p->montant_estime) * 100))
+                'montant_conventions' => $p->conventions->sum('convention_montant_fcfa'),
+                'pourcentage_financement' => $p->projet_montant_estime > 0
+                    ? (int) min(100, round(($p->conventions->sum('convention_montant_fcfa') / $p->projet_montant_estime) * 100))
                     : 0,
             ]);
 
@@ -50,44 +50,44 @@ class ProjetController extends Controller
 
     public function show(Request $request, Projet $projet): Response
     {
-        abort_unless($projet->porteur_id === $request->user()->id, 403);
+        abort_unless($projet->id_porteur === $request->user()->id, 403);
 
         $projet->load([
-            'conventions' => fn ($q) => $q->with(['bailleur:id,nom,sigle', 'versements:id,convention_id,montant,date_reception,type']),
+            'conventions' => fn ($q) => $q->with(['bailleur:id_bailleur,bailleur_nom,bailleur_sigle', 'versements:id_versement,id_convention,versement_montant,versement_date_reception,versement_type']),
         ]);
 
-        $totalVersements = $projet->conventions->flatMap->versements->sum('montant');
-        $montantConventions = $projet->conventions->sum('montant_fcfa');
+        $totalVersements = $projet->conventions->flatMap->versements->sum('versement_montant');
+        $montantConventions = $projet->conventions->sum('convention_montant_fcfa');
 
         return Inertia::render('porteur/Projets/Show', [
             'projet' => [
                 'id' => $projet->id,
-                'titre' => $projet->titre,
-                'description' => $projet->description,
-                'objectifs' => $projet->objectifs,
-                'activites' => $projet->activites,
-                'status' => $projet->status->value,
-                'status_label' => $projet->status->label(),
-                'montant_estime' => $projet->montant_estime,
+                'titre' => $projet->projet_titre,
+                'description' => $projet->projet_description,
+                'objectifs' => $projet->projet_objectifs,
+                'activites' => $projet->projet_activites,
+                'status' => $projet->projet_statut->value,
+                'status_label' => $projet->projet_statut->label(),
+                'montant_estime' => $projet->projet_montant_estime,
                 'montant_conventions' => $montantConventions,
                 'total_versements' => $totalVersements,
-                'pourcentage_financement' => $projet->montant_estime > 0
-                    ? (int) min(100, round(($montantConventions / $projet->montant_estime) * 100))
+                'pourcentage_financement' => $projet->projet_montant_estime > 0
+                    ? (int) min(100, round(($montantConventions / $projet->projet_montant_estime) * 100))
                     : 0,
-                'date_debut' => $projet->date_debut?->toDateString(),
-                'date_fin_prevue' => $projet->date_fin_prevue?->toDateString(),
-                'date_fin_reelle' => $projet->date_fin_reelle?->toDateString(),
+                'date_debut' => $projet->projet_date_debut?->toDateString(),
+                'date_fin_prevue' => $projet->projet_date_fin_prevue?->toDateString(),
+                'date_fin_reelle' => $projet->projet_date_fin_reelle?->toDateString(),
                 'conventions' => $projet->conventions->map(fn (Convention $c) => [
                     'id' => $c->id,
-                    'titre' => $c->titre,
-                    'bailleur' => ['nom' => $c->bailleur->nom, 'sigle' => $c->bailleur->sigle],
-                    'montant_fcfa' => $c->montant_fcfa,
-                    'forme' => $c->forme->value,
-                    'forme_label' => $c->forme->label(),
-                    'status' => $c->status->value,
-                    'status_label' => $c->status->label(),
-                    'date_fin' => $c->date_fin?->toDateString(),
-                    'total_versements' => $c->versements->sum('montant'),
+                    'titre' => $c->convention_titre,
+                    'bailleur' => ['nom' => $c->bailleur->bailleur_nom, 'sigle' => $c->bailleur->bailleur_sigle],
+                    'montant_fcfa' => $c->convention_montant_fcfa,
+                    'forme' => $c->convention_forme->value,
+                    'forme_label' => $c->convention_forme->label(),
+                    'status' => $c->convention_statut->value,
+                    'status_label' => $c->convention_statut->label(),
+                    'date_fin' => $c->convention_date_fin?->toDateString(),
+                    'total_versements' => $c->versements->sum('versement_montant'),
                     'versements_count' => $c->versements->count(),
                 ]),
             ],
@@ -96,57 +96,57 @@ class ProjetController extends Controller
 
     public function showConvention(Request $request, Projet $projet, Convention $convention): Response
     {
-        abort_unless($projet->porteur_id === $request->user()->id, 403);
-        abort_unless($convention->projet_id === $projet->id, 404);
+        abort_unless($projet->id_porteur === $request->user()->id, 403);
+        abort_unless($convention->id_projet === $projet->id, 404);
 
-        $convention->load(['bailleur:id,nom,sigle,type,pays', 'rubriques', 'versements']);
+        $convention->load(['bailleur:id_bailleur,bailleur_nom,bailleur_sigle,bailleur_type,bailleur_pays', 'rubriques', 'versements']);
 
         $hasDemandeActive = $convention->demandesDepenses()->active()->exists();
 
         return Inertia::render('porteur/Projets/Convention', [
             'projet' => [
                 'id' => $projet->id,
-                'titre' => $projet->titre,
+                'titre' => $projet->projet_titre,
             ],
             'has_demande_active' => $hasDemandeActive,
             'convention' => [
                 'id' => $convention->id,
-                'titre' => $convention->titre,
-                'description' => $convention->description,
-                'montant' => $convention->montant,
-                'montant_fcfa' => $convention->montant_fcfa,
-                'devise_origine' => $convention->devise_origine,
-                'taux_conversion' => $convention->taux_conversion,
-                'forme' => $convention->forme->value,
-                'forme_label' => $convention->forme->label(),
-                'status' => $convention->status->value,
-                'status_label' => $convention->status->label(),
-                'date_signature' => $convention->date_signature?->toDateString(),
-                'date_debut' => $convention->date_debut?->toDateString(),
-                'date_fin' => $convention->date_fin?->toDateString(),
+                'titre' => $convention->convention_titre,
+                'description' => $convention->convention_description,
+                'montant' => $convention->convention_montant,
+                'montant_fcfa' => $convention->convention_montant_fcfa,
+                'devise_origine' => $convention->convention_devise,
+                'taux_conversion' => $convention->convention_taux_conversion,
+                'forme' => $convention->convention_forme->value,
+                'forme_label' => $convention->convention_forme->label(),
+                'status' => $convention->convention_statut->value,
+                'status_label' => $convention->convention_statut->label(),
+                'date_signature' => $convention->convention_date_signature?->toDateString(),
+                'date_debut' => $convention->convention_date_debut?->toDateString(),
+                'date_fin' => $convention->convention_date_fin?->toDateString(),
                 'bailleur' => [
-                    'nom' => $convention->bailleur->nom,
-                    'sigle' => $convention->bailleur->sigle,
-                    'type' => $convention->bailleur->type,
-                    'pays' => $convention->bailleur->pays,
+                    'nom' => $convention->bailleur->bailleur_nom,
+                    'sigle' => $convention->bailleur->bailleur_sigle,
+                    'type' => $convention->bailleur->bailleur_type,
+                    'pays' => $convention->bailleur->bailleur_pays,
                 ],
-                'total_rubriques' => $convention->rubriques->sum('montant_prevu'),
-                'total_versements' => $convention->versements->sum('montant'),
+                'total_rubriques' => $convention->rubriques->sum('rubrique_montant_prevu'),
+                'total_versements' => $convention->versements->sum('versement_montant'),
                 'rubriques' => $convention->rubriques->map(fn ($r) => [
                     'id' => $r->id,
-                    'libelle' => $r->libelle,
-                    'montant_prevu' => $r->montant_prevu,
+                    'libelle' => $r->rubrique_libelle,
+                    'montant_prevu' => $r->rubrique_montant_prevu,
                     'montant_depense' => 0,
-                    'description' => $r->description,
+                    'description' => $r->rubrique_description,
                 ])->values(),
-                'versements' => $convention->versements->sortByDesc('date_reception')->map(fn ($v) => [
+                'versements' => $convention->versements->sortByDesc('versement_date_reception')->map(fn ($v) => [
                     'id' => $v->id,
-                    'montant' => $v->montant,
-                    'date_reception' => $v->date_reception->toDateString(),
-                    'type' => $v->type->value,
-                    'type_label' => $v->type->label(),
-                    'reference' => $v->reference,
-                    'description' => $v->description,
+                    'montant' => $v->versement_montant,
+                    'date_reception' => $v->versement_date_reception->toDateString(),
+                    'type' => $v->versement_type->value,
+                    'type_label' => $v->versement_type->label(),
+                    'reference' => $v->versement_reference,
+                    'description' => $v->versement_description,
                 ])->values(),
             ],
         ]);
@@ -154,7 +154,7 @@ class ProjetController extends Controller
 
     public function bilan(Request $request, Projet $projet): Response
     {
-        abort_unless($projet->porteur_id === $request->user()->id, 403);
+        abort_unless($projet->id_porteur === $request->user()->id, 403);
         $this->authorize('voirBilan', $projet);
 
         $bilan = $this->projetService->genererBilan($projet);
@@ -167,7 +167,7 @@ class ProjetController extends Controller
 
     public function exporterBilanPdf(Request $request, Projet $projet): HttpResponse
     {
-        abort_unless($projet->porteur_id === $request->user()->id, 403);
+        abort_unless($projet->id_porteur === $request->user()->id, 403);
         $this->authorize('voirBilan', $projet);
 
         $bilan = $this->projetService->genererBilan($projet);

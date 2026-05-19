@@ -34,14 +34,14 @@ describe('Gestion des utilisateurs (Admin)', function () {
                 'name' => 'Nouveau Utilisateur',
                 'email' => 'nouveau@ujkz.bf',
                 'password' => 'Password123',
-                'role' => UserRole::Porteur->value,
+                'utilisateur_role' => UserRole::Porteur->value,
                 'telephone' => '+226 70 00 00 00',
             ])
             ->assertRedirect(route('admin.users.index'));
 
         $this->assertDatabaseHas('users', [
             'email' => 'nouveau@ujkz.bf',
-            'role' => UserRole::Porteur->value,
+            'utilisateur_role' => UserRole::Porteur->value,
         ]);
     });
 
@@ -50,9 +50,9 @@ describe('Gestion des utilisateurs (Admin)', function () {
             ->post(route('admin.users.store'), [
                 'name' => '',
                 'email' => 'pas-un-email',
-                'role' => 'role-invalide',
+                'utilisateur_role' => 'role-invalide',
             ])
-            ->assertSessionHasErrors(['name', 'email', 'role', 'password']);
+            ->assertSessionHasErrors(['name', 'email', 'utilisateur_role', 'password']);
     });
 
     it('rejette un email déjà utilisé', function () {
@@ -75,27 +75,27 @@ describe('Gestion des utilisateurs (Admin)', function () {
             ->patch(route('admin.users.update', $user), [
                 'name' => 'Nouveau Nom',
                 'email' => $user->email,
-                'role' => UserRole::Porteur->value,
+                'utilisateur_role' => UserRole::Porteur->value,
             ])
             ->assertRedirect(route('admin.users.index'));
 
-        $this->assertDatabaseHas('users', ['id' => $user->id, 'name' => 'Nouveau Nom']);
+        $this->assertDatabaseHas('users', ['id_utilisateur' => $user->id, 'name' => 'Nouveau Nom']);
     });
 
     it('active et désactive un utilisateur', function () {
-        $user = User::factory()->porteur()->create(['is_active' => true]);
+        $user = User::factory()->porteur()->create(['utilisateur_actif' => true]);
 
         $this->actingAs($this->admin)
             ->patch(route('admin.users.toggle-active', $user))
             ->assertRedirect();
 
-        expect($user->fresh()->is_active)->toBeFalse();
+        expect($user->fresh()->utilisateur_actif)->toBeFalse();
 
         $this->actingAs($this->admin)
             ->patch(route('admin.users.toggle-active', $user))
             ->assertRedirect();
 
-        expect($user->fresh()->is_active)->toBeTrue();
+        expect($user->fresh()->utilisateur_actif)->toBeTrue();
     });
 
     it('l\'admin ne peut pas se désactiver lui-même', function () {
@@ -103,6 +103,6 @@ describe('Gestion des utilisateurs (Admin)', function () {
             ->patch(route('admin.users.toggle-active', $this->admin))
             ->assertSessionHasErrors('error');
 
-        expect($this->admin->fresh()->is_active)->toBeTrue();
+        expect($this->admin->fresh()->utilisateur_actif)->toBeTrue();
     });
 });

@@ -23,7 +23,7 @@ function makeProjetClotureable(): array
     $projet = Projet::factory()->enCours()->for($porteur, 'porteur')->create();
 
     $convention = Convention::factory()->for($projet)->create([
-        'status' => ConventionStatus::Terminee,
+        'convention_statut' => ConventionStatus::Terminee,
     ]);
 
     $rubrique = Rubrique::factory()->for($convention)->create();
@@ -46,8 +46,8 @@ describe('Clôture de projet', function () {
 
         $projet->refresh();
 
-        expect($projet->status)->toBe(ProjectStatus::Termine)
-            ->and($projet->date_fin_reelle->toDateString())->toBe('2025-12-31');
+        expect($projet->projet_statut)->toBe(ProjectStatus::Termine)
+            ->and($projet->projet_date_fin_reelle->toDateString())->toBe('2025-12-31');
     });
 
     it('notifie le porteur à la clôture', function () {
@@ -68,8 +68,8 @@ describe('Clôture de projet', function () {
         ['daf' => $daf, 'porteur' => $porteur, 'projet' => $projet, 'convention' => $convention, 'rubrique' => $rubrique] = makeProjetClotureable();
 
         DemandeDepense::factory()->for($convention)->for($rubrique)->create([
-            'porteur_id' => $porteur->id,
-            'status' => DemandeStatus::Soumise,
+            'id_porteur' => $porteur->id,
+            'demande_statut' => DemandeStatus::Soumise,
         ]);
 
         $this->actingAs($daf)
@@ -79,13 +79,13 @@ describe('Clôture de projet', function () {
             ])
             ->assertSessionHasErrors('projet');
 
-        expect($projet->fresh()->status)->toBe(ProjectStatus::EnCours);
+        expect($projet->fresh()->projet_statut)->toBe(ProjectStatus::EnCours);
     });
 
     it('refuse si une convention est encore active', function () {
         ['daf' => $daf, 'projet' => $projet, 'convention' => $convention] = makeProjetClotureable();
 
-        $convention->update(['status' => ConventionStatus::Active]);
+        $convention->update(['convention_statut' => ConventionStatus::Active]);
 
         $this->actingAs($daf)
             ->post(route('daf.projets.cloturer', $projet), [
@@ -94,16 +94,16 @@ describe('Clôture de projet', function () {
             ])
             ->assertSessionHasErrors('projet');
 
-        expect($projet->fresh()->status)->toBe(ProjectStatus::EnCours);
+        expect($projet->fresh()->projet_statut)->toBe(ProjectStatus::EnCours);
     });
 
     it('refuse si le projet n\'est pas en cours', function () {
         ['daf' => $daf, 'porteur' => $porteur] = makeProjetClotureable();
 
         $projet = Projet::factory()->for($porteur, 'porteur')->create([
-            'status' => ProjectStatus::Suspendu,
+            'projet_statut' => ProjectStatus::Suspendu,
         ]);
-        Convention::factory()->for($projet)->create(['status' => ConventionStatus::Terminee]);
+        Convention::factory()->for($projet)->create(['convention_statut' => ConventionStatus::Terminee]);
 
         $this->actingAs($daf)
             ->post(route('daf.projets.cloturer', $projet), [
@@ -160,7 +160,7 @@ describe('Bilan de clôture', function () {
         ['daf' => $daf, 'porteur' => $porteur] = makeProjetClotureable();
 
         $projet = Projet::factory()->termine()->for($porteur, 'porteur')->create();
-        Convention::factory()->for($projet)->create(['status' => ConventionStatus::Terminee]);
+        Convention::factory()->for($projet)->create(['convention_statut' => ConventionStatus::Terminee]);
 
         $this->actingAs($daf)
             ->get(route('daf.projets.bilan', $projet))
@@ -175,7 +175,7 @@ describe('Bilan de clôture', function () {
     it('le porteur peut consulter le bilan de son propre projet', function () {
         $porteur = User::factory()->porteur()->create();
         $projet = Projet::factory()->termine()->for($porteur, 'porteur')->create();
-        Convention::factory()->for($projet)->create(['status' => ConventionStatus::Terminee]);
+        Convention::factory()->for($projet)->create(['convention_statut' => ConventionStatus::Terminee]);
 
         $this->actingAs($porteur)
             ->get(route('porteur.projets.bilan', $projet))
@@ -197,7 +197,7 @@ describe('Bilan de clôture', function () {
         ['daf' => $daf, 'porteur' => $porteur] = makeProjetClotureable();
 
         $projet = Projet::factory()->termine()->for($porteur, 'porteur')->create();
-        Convention::factory()->for($projet)->create(['status' => ConventionStatus::Terminee]);
+        Convention::factory()->for($projet)->create(['convention_statut' => ConventionStatus::Terminee]);
 
         $this->actingAs($daf)
             ->get(route('daf.projets.bilan.pdf', $projet))

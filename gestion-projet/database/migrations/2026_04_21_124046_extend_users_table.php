@@ -9,9 +9,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('role')->default('porteur')->after('email');
-            $table->boolean('is_active')->default(true)->after('role');
-            $table->string('avatar_path')->nullable()->after('is_active');
+            $table->string('utilisateur_role')->default('porteur')->after('email');
+            $table->boolean('utilisateur_actif')->default(true)->after('utilisateur_role');
+            $table->string('avatar_path')->nullable()->after('utilisateur_actif');
             $table->string('telephone', 20)->nullable()->after('avatar_path');
         });
     }
@@ -19,7 +19,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['role', 'is_active', 'avatar_path', 'telephone']);
+            $table->dropColumn(['utilisateur_role', 'utilisateur_actif', 'avatar_path', 'telephone']);
         });
     }
 };

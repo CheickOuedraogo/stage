@@ -18,10 +18,10 @@ class BailleurFactory extends Factory
     public function definition(): array
     {
         return [
-            'nom' => $this->faker->company(),
-            'sigle' => strtoupper($this->faker->lexify('???')),
-            'type' => $this->faker->randomElement(['bilatéral', 'multilatéral']),
-            'pays' => $this->faker->country(),
+            'bailleur_nom' => $this->faker->company(),
+            'bailleur_sigle' => strtoupper($this->faker->lexify('???')),
+            'bailleur_type' => $this->faker->randomElement(['bilatéral', 'multilatéral']),
+            'bailleur_pays' => $this->faker->country(),
             'contact' => $this->faker->name(),
             'email' => $this->faker->companyEmail(),
             'telephone' => $this->faker->phoneNumber(),

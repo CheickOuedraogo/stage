@@ -20,85 +20,85 @@ class DemandeDepenseFactory extends Factory
         $rubrique = Rubrique::factory()->for($convention)->create();
 
         return [
-            'rubrique_id' => $rubrique->id,
-            'convention_id' => $convention->id,
-            'porteur_id' => User::factory()->porteur(),
-            'montant' => $this->faker->numberBetween(500_000, 5_000_000),
-            'objet' => $this->faker->sentence(5),
-            'description' => $this->faker->paragraph(),
-            'justificatif_path' => null,
-            'status' => DemandeStatus::Soumise,
-            'motif_rejet' => null,
-            'rapport_path' => null,
-            'validee_daf_at' => null,
-            'validee_daf_par' => null,
-            'validee_ac_at' => null,
-            'validee_ac_par' => null,
-            'rapport_validee_daf' => false,
-            'rapport_validee_ac' => false,
+            'id_rubrique' => $rubrique->id,
+            'id_convention' => $convention->id,
+            'id_porteur' => User::factory()->porteur(),
+            'demande_montant' => $this->faker->numberBetween(500_000, 5_000_000),
+            'demande_objet' => $this->faker->sentence(5),
+            'demande_description' => $this->faker->paragraph(),
+            'demande_justificatif' => null,
+            'demande_statut' => DemandeStatus::Soumise,
+            'demande_motif_rejet' => null,
+            'demande_rapport' => null,
+            'demande_date_validation_daf' => null,
+            'id_validateur_daf' => null,
+            'demande_date_validation_ac' => null,
+            'id_validateur_ac' => null,
+            'demande_rapport_valide_daf' => false,
+            'demande_rapport_valide_ac' => false,
         ];
     }
 
     public function soumise(): static
     {
-        return $this->state(['status' => DemandeStatus::Soumise]);
+        return $this->state(['demande_statut' => DemandeStatus::Soumise]);
     }
 
     public function valideeDaf(): static
     {
         return $this->state(fn () => [
-            'status' => DemandeStatus::ValidéeDaf,
-            'validee_daf_at' => now(),
-            'validee_daf_par' => User::factory()->daf()->create()->id,
+            'demande_statut' => DemandeStatus::ValidéeDaf,
+            'demande_date_validation_daf' => now(),
+            'id_validateur_daf' => User::factory()->daf()->create()->id,
         ]);
     }
 
     public function valideAc(): static
     {
         return $this->state(fn () => [
-            'status' => DemandeStatus::ValidéeAc,
-            'validee_daf_at' => now()->subDay(),
-            'validee_daf_par' => User::factory()->daf()->create()->id,
-            'validee_ac_at' => now(),
-            'validee_ac_par' => User::factory()->ac()->create()->id,
+            'demande_statut' => DemandeStatus::ValidéeAc,
+            'demande_date_validation_daf' => now()->subDay(),
+            'id_validateur_daf' => User::factory()->daf()->create()->id,
+            'demande_date_validation_ac' => now(),
+            'id_validateur_ac' => User::factory()->ac()->create()->id,
         ]);
     }
 
     public function payee(): static
     {
         return $this->state(fn () => [
-            'status' => DemandeStatus::Payee,
-            'validee_daf_at' => now()->subDays(3),
-            'validee_daf_par' => User::factory()->daf()->create()->id,
-            'validee_ac_at' => now()->subDays(2),
-            'validee_ac_par' => User::factory()->ac()->create()->id,
+            'demande_statut' => DemandeStatus::Payee,
+            'demande_date_validation_daf' => now()->subDays(3),
+            'id_validateur_daf' => User::factory()->daf()->create()->id,
+            'demande_date_validation_ac' => now()->subDays(2),
+            'id_validateur_ac' => User::factory()->ac()->create()->id,
         ]);
     }
 
     public function rapportSoumis(): static
     {
         return $this->payee()->state([
-            'status' => DemandeStatus::RapportSoumis,
-            'rapport_path' => 'rapports/test.pdf',
-            'rapport_validee_daf' => false,
-            'rapport_validee_ac' => false,
+            'demande_statut' => DemandeStatus::RapportSoumis,
+            'demande_rapport' => 'rapports/test.pdf',
+            'demande_rapport_valide_daf' => false,
+            'demande_rapport_valide_ac' => false,
         ]);
     }
 
     public function rejetee(): static
     {
         return $this->state([
-            'status' => DemandeStatus::RejetéeDaf,
-            'motif_rejet' => 'Justificatif insuffisant.',
+            'demande_statut' => DemandeStatus::RejetéeDaf,
+            'demande_motif_rejet' => 'Justificatif insuffisant.',
         ]);
     }
 
     public function terminee(): static
     {
         return $this->rapportSoumis()->state([
-            'status' => DemandeStatus::Terminee,
-            'rapport_validee_daf' => true,
-            'rapport_validee_ac' => true,
+            'demande_statut' => DemandeStatus::Terminee,
+            'demande_rapport_valide_daf' => true,
+            'demande_rapport_valide_ac' => true,
         ]);
     }
 }

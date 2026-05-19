@@ -18,7 +18,7 @@ class MaintenanceService
         Setting::set('maintenance_until', $until ?? '');
 
         // Invalidate all sessions except admin
-        $adminIds = User::where('role', 'admin')->pluck('id');
+        $adminIds = User::where('utilisateur_role', 'admin')->pluck('id_utilisateur');
 
         DB::table('sessions')
             ->whereNotIn('user_id', $adminIds)

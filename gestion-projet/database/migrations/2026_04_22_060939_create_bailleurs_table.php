@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('bailleurs', function (Blueprint $table) {
-            $table->id();
-            $table->string('nom');
-            $table->string('sigle')->nullable();
-            $table->string('type')->nullable();
-            $table->string('pays')->nullable();
+            $table->id('id_bailleur');
+            $table->string('bailleur_nom');
+            $table->string('bailleur_sigle')->nullable();
+            $table->string('bailleur_type')->nullable();
+            $table->string('bailleur_pays')->nullable();
             $table->string('contact')->nullable();
             $table->string('email')->nullable();
             $table->string('telephone')->nullable();

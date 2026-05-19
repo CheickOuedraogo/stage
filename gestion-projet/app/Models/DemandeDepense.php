@@ -13,10 +13,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
-    'rubrique_id', 'convention_id', 'porteur_id', 'montant', 'objet', 'description',
-    'justificatif_path', 'status', 'motif_rejet', 'rapport_path',
-    'validee_daf_at', 'validee_daf_par', 'validee_ac_at', 'validee_ac_par',
-    'rapport_validee_daf', 'rapport_validee_ac',
+    'id_rubrique', 'id_convention', 'id_porteur', 'demande_montant', 'demande_objet', 'demande_description',
+    'demande_justificatif', 'demande_statut', 'demande_motif_rejet', 'demande_rapport',
+    'demande_date_validation_daf', 'id_validateur_daf', 'demande_date_validation_ac', 'id_validateur_ac',
+    'demande_rapport_valide_daf', 'demande_rapport_valide_ac',
 ])]
 class DemandeDepense extends Model
 {
@@ -25,51 +25,59 @@ class DemandeDepense extends Model
 
     protected $table = 'demandes_depenses';
 
+    protected $primaryKey = 'id_demande';
+
     protected function casts(): array
     {
         return [
-            'status' => DemandeStatus::class,
-            'montant' => 'integer',
-            'validee_daf_at' => 'datetime',
-            'validee_ac_at' => 'datetime',
-            'rapport_validee_daf' => 'boolean',
-            'rapport_validee_ac' => 'boolean',
+            'demande_statut' => DemandeStatus::class,
+            'demande_montant' => 'integer',
+            'demande_date_validation_daf' => 'datetime',
+            'demande_date_validation_ac' => 'datetime',
+            'demande_rapport_valide_daf' => 'boolean',
+            'demande_rapport_valide_ac' => 'boolean',
         ];
+    }
+
+    /** Transparent id accessor so $demande->id still works */
+    public function getIdAttribute(): mixed
+    {
+        return $this->getAttribute($this->getKeyName());
     }
 
     public function rubrique(): BelongsTo
     {
-        return $this->belongsTo(Rubrique::class);
+        return $this->belongsTo(Rubrique::class, 'id_rubrique');
     }
 
     public function convention(): BelongsTo
     {
-        return $this->belongsTo(Convention::class);
+        return $this->belongsTo(Convention::class, 'id_convention');
     }
 
     public function porteur(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'porteur_id');
+        return $this->belongsTo(User::class, 'id_porteur');
     }
 
     public function validateurDaf(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'validee_daf_par');
+        return $this->belongsTo(User::class, 'id_validateur_daf');
     }
 
     public function validateurAc(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'validee_ac_par');
+        return $this->belongsTo(User::class, 'id_validateur_ac');
     }
 
     public function paiement(): HasOne
     {
-        return $this->hasOne(Paiement::class, 'demande_id');
+        return $this->hasOne(Paiement::class, 'id_demande');
     }
 
     public function scopeActive(Builder $query): Builder
     {
-        return $query->whereNotIn('status', [
+        return $query->whereNotIn('demande_statut', [
             DemandeStatus::RejetéeDaf->value,
             DemandeStatus::RejetéeAc->value,
             DemandeStatus::Terminee->value,
@@ -78,23 +86,23 @@ class DemandeDepense extends Model
 
     public function scopeEnAttenteDaf(Builder $query): Builder
     {
-        return $query->where('status', DemandeStatus::Soumise);
+        return $query->where('demande_statut', DemandeStatus::Soumise);
     }
 
     public function scopeEnAttenteAc(Builder $query): Builder
     {
-        return $query->where('status', DemandeStatus::ValidéeDaf);
+        return $query->where('demande_statut', DemandeStatus::ValidéeDaf);
     }
 
     public function getHasJustificatifAttribute(): bool
     {
-        return (bool) $this->justificatif_path
-            && Storage::disk('private')->exists($this->justificatif_path);
+        return (bool) $this->demande_justificatif
+            && Storage::disk('private')->exists($this->demande_justificatif);
     }
 
     public function getHasRapportAttribute(): bool
     {
-        return (bool) $this->rapport_path
-            && Storage::disk('private')->exists($this->rapport_path);
+        return (bool) $this->demande_rapport
+            && Storage::disk('private')->exists($this->demande_rapport);
     }
 }

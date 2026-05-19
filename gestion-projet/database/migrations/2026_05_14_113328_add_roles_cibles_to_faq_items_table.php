@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('faq_items', function (Blueprint $table): void {
-            $table->json('roles_cibles')->nullable()->after('is_active');
+            $table->json('roles_cibles')->nullable()->after('faq_actif');
         });
     }
 

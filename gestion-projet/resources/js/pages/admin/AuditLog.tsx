@@ -9,19 +9,19 @@ import { useState as useLocalState } from 'react';
 
 interface AuditEntry {
     id: number;
-    action: string;
-    description: string | null;
-    ip_address: string | null;
-    auditable_type: string | null;
-    auditable_id: number | null;
-    old_values: Record<string, unknown> | null;
-    new_values: Record<string, unknown> | null;
+    audit_action: string;
+    audit_description: string | null;
+    audit_adresse_ip: string | null;
+    audit_entite_type: string | null;
+    audit_entite_id: number | null;
+    audit_anciennes_valeurs: Record<string, unknown> | null;
+    audit_nouvelles_valeurs: Record<string, unknown> | null;
     created_at: string;
     user: {
         id: number;
         name: string;
         email: string;
-        role: string | null;
+        utilisateur_role: string | null;
     } | null;
 }
 
@@ -29,7 +29,7 @@ interface UserOption {
     id: number;
     name: string;
     email: string;
-    role: string | null;
+    utilisateur_role: string | null;
     role_label: string | null;
 }
 
@@ -72,23 +72,30 @@ const actionColors: Record<string, string> = {
 const FIELD_LABELS: Record<string, string> = {
     name: 'Nom',
     email: 'E-mail',
-    role: 'Rôle',
-    is_active: 'Actif',
+    utilisateur_role: 'Rôle',
+    utilisateur_actif: 'Actif',
     telephone: 'Téléphone',
-    status: 'Statut',
-    montant: 'Montant',
-    montant_prevu: 'Montant prévu',
-    montant_fcfa: 'Montant FCFA',
-    titre: 'Titre',
-    objet: 'Objet',
-    description: 'Description',
-    motif_rejet: 'Motif rejet',
-    date_fin_reelle: 'Date clôture',
-    date_reception: 'Date réception',
-    reponse: 'Réponse',
-    question: 'Question',
-    ordre: 'Ordre',
-    libelle: 'Libellé',
+    projet_statut: 'Statut',
+    demande_statut: 'Statut',
+    convention_statut: 'Statut',
+    demande_montant: 'Montant',
+    versement_montant: 'Montant',
+    paiement_montant: 'Montant',
+    paiement_direct_montant: 'Montant',
+    rubrique_montant_prevu: 'Montant prévu',
+    convention_montant_fcfa: 'Montant FCFA',
+    projet_titre: 'Titre',
+    convention_titre: 'Titre',
+    demande_objet: 'Objet',
+    demande_description: 'Description',
+    rubrique_description: 'Description',
+    demande_motif_rejet: 'Motif rejet',
+    projet_date_fin_reelle: 'Date clôture',
+    versement_date_reception: 'Date réception',
+    faq_reponse: 'Réponse',
+    faq_question: 'Question',
+    faq_ordre: 'Ordre',
+    rubrique_libelle: 'Libellé',
 };
 
 function formatValue(value: unknown): string {
@@ -98,7 +105,7 @@ function formatValue(value: unknown): string {
     return String(value);
 }
 
-function ValueDiff({ oldValues, newValues }: { oldValues: Record<string, unknown> | null; newValues: Record<string, unknown> | null }) {
+function ValueDiff({ oldValues, newValues }: { oldValues: Record<string, unknown> | null; newValues: Record<string, unknown> | null; }) {
     const [expanded, setExpanded] = useLocalState(false);
     if (!oldValues && !newValues) return null;
 
@@ -282,24 +289,24 @@ export default function AuditLog({ logs, users, selectedUserId }: AuditLogProps)
                                                             {log.user?.name ?? 'Système'}
                                                         </span>
                                                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                                                            actionColors[log.action] ?? 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-400'
+                                                            actionColors[log.audit_action] ?? 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-400'
                                                         }`}>
-                                                            {actionLabels[log.action] ?? log.action}
+                                                            {actionLabels[log.audit_action] ?? log.audit_action}
                                                         </span>
-                                                        {log.user?.role && (
+                                                        {log.user?.utilisateur_role && (
                                                             <span className="text-xs text-gray-400 dark:text-slate-500 bg-gray-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
-                                                                {log.user.role}
+                                                                {log.user.utilisateur_role}
                                                             </span>
                                                         )}
                                                     </div>
-                                                    {log.description && (
-                                                        <p className="text-xs text-gray-600 dark:text-slate-300">{log.description}</p>
+                                                    {log.audit_description && (
+                                                        <p className="text-xs text-gray-600 dark:text-slate-300">{log.audit_description}</p>
                                                     )}
-                                                    <ValueDiff oldValues={log.old_values} newValues={log.new_values} />
+                                                    <ValueDiff oldValues={log.audit_anciennes_valeurs} newValues={log.audit_nouvelles_valeurs} />
                                                     <div className="flex items-center gap-3 mt-1">
                                                         <span className="text-xs text-gray-400 dark:text-slate-500">{formatDateTime(log.created_at)}</span>
-                                                        {log.ip_address && (
-                                                            <span className="text-xs text-gray-300 dark:text-slate-600 font-mono">{log.ip_address}</span>
+                                                        {log.audit_adresse_ip && (
+                                                            <span className="text-xs text-gray-300 dark:text-slate-600 font-mono">{log.audit_adresse_ip}</span>
                                                         )}
                                                     </div>
                                                 </div>

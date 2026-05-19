@@ -12,14 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('rubriques', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('convention_id')->constrained('conventions');
-            $table->string('libelle');
-            $table->unsignedBigInteger('montant_prevu');
-            $table->text('description')->nullable();
+            $table->id('id_rubrique');
+            $table->foreignId('id_convention')->constrained('conventions', 'id_convention');
+            $table->string('rubrique_libelle');
+            $table->unsignedBigInteger('rubrique_montant_prevu');
+            $table->text('rubrique_description')->nullable();
             $table->timestamps();
 
-            $table->index('convention_id');
+            $table->index('id_convention');
         });
     }
 

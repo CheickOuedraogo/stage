@@ -39,7 +39,7 @@ class LoginController extends Controller
         $user = Auth::user();
 
         // Block inactive users immediately
-        if (! $user->is_active) {
+        if (! $user->utilisateur_actif) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();

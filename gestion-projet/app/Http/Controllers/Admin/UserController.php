@@ -24,7 +24,7 @@ class UserController extends Controller
             ->when($request->input('role'), fn ($q, $role) => $q->byRole(UserRole::from($role)))
             ->when($request->input('search'), fn ($q, $search) => $q->where('name', 'like', "%{$search}%")
                 ->orWhere('email', 'like', "%{$search}%"))
-            ->when($request->input('active') !== null, fn ($q) => $q->where('is_active', $request->boolean('active')))
+            ->when($request->input('active') !== null, fn ($q) => $q->where('utilisateur_actif', $request->boolean('active')))
             ->orderByDesc('created_at')
             ->paginate(20)
             ->withQueryString();
@@ -58,14 +58,14 @@ class UserController extends Controller
         $user = User::create([
             ...$request->validated(),
             'password' => Hash::make($request->validated('password')),
-            'is_active' => true,
+            'utilisateur_actif' => true,
         ]);
 
         AuditLog::log(
             'created',
             $user,
-            newValues: ['name' => $user->name, 'email' => $user->email, 'role' => $user->role->value],
-            description: "Création de l'utilisateur « {$user->name} » ({$user->role->shortLabel()})",
+            newValues: ['name' => $user->name, 'email' => $user->email, 'utilisateur_role' => $user->utilisateur_role->value],
+            description: "Création de l'utilisateur « {$user->name} » ({$user->utilisateur_role->shortLabel()})",
         );
 
         return redirect()->route('admin.users.index')
@@ -77,7 +77,7 @@ class UserController extends Controller
         $this->authorize('update', $user);
 
         return Inertia::render('admin/Users/Form', [
-            'user' => $user->only(['id', 'name', 'email', 'role', 'telephone', 'is_active']),
+            'user' => $user->only(['id', 'name', 'email', 'utilisateur_role', 'telephone', 'utilisateur_actif']),
             'roles' => collect(UserRole::cases())->map(fn ($r) => [
                 'value' => $r->value,
                 'label' => $r->label(),
@@ -95,9 +95,9 @@ class UserController extends Controller
             $data['password'] = Hash::make($request->validated('password'));
         }
 
-        $oldValues = $user->only(['name', 'email', 'role', 'telephone', 'is_active']);
+        $oldValues = $user->only(['name', 'email', 'utilisateur_role', 'telephone', 'utilisateur_actif']);
         $user->update($data);
-        $newValues = array_intersect_key($user->fresh()->only(['name', 'email', 'role', 'telephone', 'is_active']), $oldValues);
+        $newValues = array_intersect_key($user->fresh()->only(['name', 'email', 'utilisateur_role', 'telephone', 'utilisateur_actif']), $oldValues);
         $changed = array_filter(
             $newValues,
             fn ($v, $k) => $oldValues[$k] !== $v,
@@ -127,9 +127,9 @@ class UserController extends Controller
             return back()->withErrors(['error' => 'Vous ne pouvez pas désactiver votre propre compte.']);
         }
 
-        $user->update(['is_active' => ! $user->is_active]);
+        $user->update(['utilisateur_actif' => ! $user->utilisateur_actif]);
 
-        $status = $user->is_active ? 'activé' : 'désactivé';
+        $status = $user->utilisateur_actif ? 'activé' : 'désactivé';
 
         AuditLog::log(
             'user_status_change',

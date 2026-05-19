@@ -23,9 +23,9 @@ class UpdateUserRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId, 'id_utilisateur')],
             'password' => ['nullable', Password::min(8)],
-            'role' => ['required', Rule::enum(UserRole::class)],
+            'utilisateur_role' => ['required', Rule::enum(UserRole::class)],
             'telephone' => ['nullable', 'string', 'max:20'],
         ];
     }
@@ -39,7 +39,7 @@ class UpdateUserRequest extends FormRequest
             'name.required' => 'Le nom est obligatoire.',
             'email.required' => "L'adresse e-mail est obligatoire.",
             'email.unique' => 'Cette adresse e-mail est déjà utilisée.',
-            'role.required' => 'Le rôle est obligatoire.',
+            'utilisateur_role.required' => 'Le rôle est obligatoire.',
         ];
     }
 }
