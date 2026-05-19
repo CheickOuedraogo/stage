@@ -1,7 +1,7 @@
 import AppLayout from '@/components/layout/AppLayout';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { Head } from '@inertiajs/react';
-import { ArrowLeftIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, DocumentArrowDownIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 interface Convention {
     id: number;
@@ -32,11 +32,13 @@ interface PaiementDirect {
 }
 
 interface AnalyseEcarts {
+    budget_initial: number;
     budget_prevu: number;
     total_versements: number;
     total_depenses: number;
     ecart_budget: number;
     taux_execution: number;
+    conventions_depassent_budget_initial: boolean;
     ecart_temps_jours: number | null;
     ecart_temps_label: string | null;
 }
@@ -48,6 +50,8 @@ interface Bilan {
         porteur: string;
         status: string;
         status_label: string;
+        statut_final: string | null;
+        statut_final_label: string | null;
         date_debut: string | null;
         date_fin_prevue: string | null;
         date_fin_reelle: string | null;
@@ -84,7 +88,18 @@ export default function BilanProjet({ bilan, pdf_url }: Props) {
                         <ArrowLeftIcon className="w-4 h-4" />
                     </button>
                     <div>
-                        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Bilan de clôture</h2>
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Bilan de clôture</h2>
+                            {projet.statut_final && (
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                    projet.statut_final === 'succes'
+                                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                        : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                }`}>
+                                    {projet.statut_final_label}
+                                </span>
+                            )}
+                        </div>
                         <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">{projet.titre}</p>
                     </div>
                 </div>
@@ -121,6 +136,20 @@ export default function BilanProjet({ bilan, pdf_url }: Props) {
                     </div>
                 </div>
             </div>
+
+            {/* Alerte dépassement budget initial */}
+            {analyse_ecarts.conventions_depassent_budget_initial && (
+                <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
+                    <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+                    <div className="text-sm">
+                        <p className="font-semibold text-amber-800 dark:text-amber-300">Financement supérieur au budget initial</p>
+                        <p className="mt-0.5 text-amber-700 dark:text-amber-400">
+                            Le total des conventions ({formatCurrency(analyse_ecarts.budget_prevu)}) dépasse le budget initial estimé du projet ({formatCurrency(analyse_ecarts.budget_initial)}).
+                            Écart : +{formatCurrency(analyse_ecarts.budget_prevu - analyse_ecarts.budget_initial)}.
+                        </p>
+                    </div>
+                </div>
+            )}
 
             {/* Synthèse financière */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

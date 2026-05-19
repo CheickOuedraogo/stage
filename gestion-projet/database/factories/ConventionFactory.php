@@ -32,19 +32,19 @@ class ConventionFactory extends Factory
         $fin = $this->faker->dateTimeBetween($debut, '+2 years');
 
         return [
-            'projet_id' => Projet::factory(),
-            'bailleur_id' => Bailleur::factory(),
-            'titre' => 'Convention de financement — '.$this->faker->sentence(3),
-            'description' => $this->faker->paragraphs(2, true),
-            'montant' => $montant,
-            'forme' => $this->faker->randomElement(ConventionForme::cases())->value,
-            'devise_origine' => $devise,
-            'taux_conversion' => $taux,
-            'montant_fcfa' => $montantFcfa,
-            'status' => ConventionStatus::Active->value,
-            'date_signature' => $signature,
-            'date_debut' => $debut,
-            'date_fin' => $fin,
+            'id_projet' => Projet::factory(),
+            'id_bailleur' => Bailleur::factory(),
+            'convention_titre' => 'Convention de financement — '.$this->faker->sentence(3),
+            'convention_description' => $this->faker->paragraphs(2, true),
+            'convention_montant' => $montant,
+            'convention_forme' => $this->faker->randomElement(ConventionForme::cases())->value,
+            'convention_devise' => $devise,
+            'convention_taux_conversion' => $taux,
+            'convention_montant_fcfa' => $montantFcfa,
+            'convention_statut' => ConventionStatus::Active->value,
+            'convention_date_signature' => $signature,
+            'convention_date_debut' => $debut,
+            'convention_date_fin' => $fin,
         ];
     }
 }

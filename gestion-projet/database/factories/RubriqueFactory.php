@@ -30,10 +30,10 @@ class RubriqueFactory extends Factory
         ];
 
         return [
-            'convention_id' => Convention::factory(),
-            'libelle' => $this->faker->randomElement($libelles),
-            'montant_prevu' => $this->faker->numberBetween(2_000_000, 40_000_000),
-            'description' => $this->faker->sentence(),
+            'id_convention' => Convention::factory(),
+            'rubrique_libelle' => $this->faker->randomElement($libelles),
+            'rubrique_montant_prevu' => $this->faker->numberBetween(2_000_000, 40_000_000),
+            'rubrique_description' => $this->faker->sentence(),
         ];
     }
 }

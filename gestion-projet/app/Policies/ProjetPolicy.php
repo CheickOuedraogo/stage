@@ -18,6 +18,6 @@ class ProjetPolicy
             return true;
         }
 
-        return $user->isPorteur() && $projet->porteur_id === $user->id;
+        return $user->isPorteur() && $projet->id_porteur === $user->id;
     }
 }

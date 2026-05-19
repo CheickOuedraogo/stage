@@ -23,7 +23,7 @@ class StoreUserRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', Password::min(8)],
-            'role' => ['required', Rule::enum(UserRole::class)],
+            'utilisateur_role' => ['required', Rule::enum(UserRole::class)],
             'telephone' => ['nullable', 'string', 'max:20'],
         ];
     }
@@ -38,7 +38,7 @@ class StoreUserRequest extends FormRequest
             'email.required' => "L'adresse e-mail est obligatoire.",
             'email.unique' => 'Cette adresse e-mail est déjà utilisée.',
             'password.required' => 'Le mot de passe est obligatoire.',
-            'role.required' => 'Le rôle est obligatoire.',
+            'utilisateur_role.required' => 'Le rôle est obligatoire.',
         ];
     }
 }

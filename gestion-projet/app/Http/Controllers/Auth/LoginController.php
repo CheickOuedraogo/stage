@@ -27,7 +27,6 @@ class LoginController extends Controller
             'maintenanceActive' => $maintenanceActive,
             'maintenanceReason' => $maintenanceReason,
             'maintenanceUntil' => $maintenanceUntil,
-            'googleClientId' => config('services.google.client_id'),
         ]);
     }
 
@@ -40,7 +39,7 @@ class LoginController extends Controller
         $user = Auth::user();
 
         // Block inactive users immediately
-        if (! $user->is_active) {
+        if (! $user->utilisateur_actif) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();

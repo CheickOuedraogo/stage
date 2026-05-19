@@ -16,26 +16,26 @@ class ChatController extends Controller
 {
     public function index(): Response
     {
-        $conversations = User::whereIn('role', [UserRole::Daf, UserRole::Ac])
+        $conversations = User::whereIn('utilisateur_role', [UserRole::Daf, UserRole::Ac])
             ->get()
             ->map(function (User $u) {
                 $lastMsg = ChatMessage::where(fn ($q) => $q
-                    ->where('sender_id', $u->id)
-                    ->orWhere('receiver_id', $u->id)
+                    ->where('id_expediteur', $u->id)
+                    ->orWhere('id_destinataire', $u->id)
                 )
                     ->latest()
                     ->first();
 
-                $unread = ChatMessage::where('sender_id', $u->id)
-                    ->where('is_read', false)
+                $unread = ChatMessage::where('id_expediteur', $u->id)
+                    ->where('message_lu', false)
                     ->count();
 
                 return [
                     'user_id' => $u->id,
                     'name' => $u->name,
-                    'role' => $u->role->label(),
+                    'role' => $u->utilisateur_role->label(),
                     'unread' => $unread,
-                    'last_message' => $lastMsg?->message,
+                    'last_message' => $lastMsg?->message_contenu,
                     'last_at' => $lastMsg?->created_at->diffForHumans(),
                 ];
             });
@@ -50,8 +50,8 @@ class ChatController extends Controller
         $admin = auth()->user();
 
         $messages = ChatMessage::where(fn ($q) => $q
-            ->where('sender_id', $user->id)->where('receiver_id', $admin->id)
-            ->orWhere('sender_id', $admin->id)->where('receiver_id', $user->id)
+            ->where('id_expediteur', $user->id)->where('id_destinataire', $admin->id)
+            ->orWhere('id_expediteur', $admin->id)->where('id_destinataire', $user->id)
         )
             ->latest()
             ->limit(50)
@@ -60,23 +60,23 @@ class ChatController extends Controller
             ->values()
             ->map(fn (ChatMessage $m) => [
                 'id' => $m->id,
-                'message' => $m->message,
-                'is_mine' => $m->sender_id === $admin->id,
-                'sender_name' => $m->sender_id === $admin->id ? 'Moi (Admin)' : $user->name,
+                'message' => $m->message_contenu,
+                'is_mine' => $m->id_expediteur === $admin->id,
+                'sender_name' => $m->id_expediteur === $admin->id ? 'Moi (Admin)' : $user->name,
                 'created_at' => $m->created_at->toIso8601String(),
             ]);
 
         // Mark user's messages as read
-        ChatMessage::where('sender_id', $user->id)
-            ->where('receiver_id', $admin->id)
-            ->where('is_read', false)
-            ->update(['is_read' => true]);
+        ChatMessage::where('id_expediteur', $user->id)
+            ->where('id_destinataire', $admin->id)
+            ->where('message_lu', false)
+            ->update(['message_lu' => true]);
 
         return Inertia::render('admin/Chat/Show', [
             'contact' => [
                 'id' => $user->id,
                 'name' => $user->name,
-                'role' => $user->role->label(),
+                'role' => $user->utilisateur_role->label(),
             ],
             'messages' => $messages,
         ]);
@@ -87,9 +87,9 @@ class ChatController extends Controller
         $request->validate(['message' => ['required', 'string', 'max:2000']]);
 
         ChatMessage::create([
-            'sender_id' => auth()->id(),
-            'receiver_id' => $user->id,
-            'message' => $request->message,
+            'id_expediteur' => auth()->id(),
+            'id_destinataire' => $user->id,
+            'message_contenu' => $request->message,
         ]);
 
         return back();
@@ -100,23 +100,23 @@ class ChatController extends Controller
         $admin = auth()->user();
         $since = (int) $request->query('since', 0);
 
-        $messages = ChatMessage::where('sender_id', $user->id)
-            ->where('receiver_id', $admin->id)
+        $messages = ChatMessage::where('id_expediteur', $user->id)
+            ->where('id_destinataire', $admin->id)
             ->where('id', '>', $since)
             ->get()
             ->map(fn (ChatMessage $m) => [
                 'id' => $m->id,
-                'message' => $m->message,
+                'message' => $m->message_contenu,
                 'is_mine' => false,
                 'sender_name' => $user->name,
                 'created_at' => $m->created_at->toIso8601String(),
             ]);
 
         if ($messages->isNotEmpty()) {
-            ChatMessage::where('sender_id', $user->id)
-                ->where('receiver_id', $admin->id)
+            ChatMessage::where('id_expediteur', $user->id)
+                ->where('id_destinataire', $admin->id)
                 ->where('id', '>', $since)
-                ->update(['is_read' => true]);
+                ->update(['message_lu' => true]);
         }
 
         return response()->json(['messages' => $messages]);

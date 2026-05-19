@@ -17,12 +17,14 @@ use Illuminate\Notifications\Notifiable;
  * @method static Builder active()
  * @method static Builder byRole(UserRole $role)
  */
-#[Fillable(['name', 'email', 'password', 'role', 'is_active', 'avatar_path', 'telephone'])]
+#[Fillable(['name', 'email', 'password', 'utilisateur_role', 'utilisateur_actif', 'avatar_path', 'telephone'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use Auditable, HasFactory, Notifiable;
+
+    protected $primaryKey = 'id_utilisateur';
 
     /**
      * Get the attributes that should be cast.
@@ -34,27 +36,27 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'role' => UserRole::class,
-            'is_active' => 'boolean',
+            'utilisateur_role' => UserRole::class,
+            'utilisateur_actif' => 'boolean',
         ];
     }
 
     /** Scope: only active users */
     public function scopeActive(Builder $query): void
     {
-        $query->where('is_active', true);
+        $query->where('utilisateur_actif', true);
     }
 
     /** Scope: filter by role */
     public function scopeByRole(Builder $query, UserRole $role): void
     {
-        $query->where('role', $role->value);
+        $query->where('utilisateur_role', $role->value);
     }
 
     /** Check if user has a given role */
     public function hasRole(UserRole $role): bool
     {
-        return $this->role === $role;
+        return $this->utilisateur_role === $role;
     }
 
     public function isAdmin(): bool
@@ -80,7 +82,7 @@ class User extends Authenticatable
     /** Named route for this user's dashboard — used after login/OAuth redirect. */
     public function dashboardRoute(): string
     {
-        return match ($this->role) {
+        return match ($this->utilisateur_role) {
             UserRole::Admin => route('admin.dashboard'),
             UserRole::Daf => route('daf.dashboard'),
             UserRole::Ac => route('ac.dashboard'),
@@ -91,7 +93,7 @@ class User extends Authenticatable
     /** Audit logs authored by this user */
     public function auditLogs(): HasMany
     {
-        return $this->hasMany(AuditLog::class);
+        return $this->hasMany(AuditLog::class, 'id_utilisateur');
     }
 
     /** @var list<string> */
@@ -100,7 +102,7 @@ class User extends Authenticatable
     /** Short label for the role (Admin, DAF, AC, Porteur) */
     public function getRoleLabelAttribute(): ?string
     {
-        return $this->role?->shortLabel();
+        return $this->utilisateur_role?->shortLabel();
     }
 
     /** Avatar URL — returns null if no avatar */
@@ -109,5 +111,11 @@ class User extends Authenticatable
         return $this->avatar_path
             ? asset("storage/{$this->avatar_path}")
             : null;
+    }
+
+    /** Transparent id accessor so $user->id still works */
+    public function getIdAttribute(): mixed
+    {
+        return $this->getAttribute($this->getKeyName());
     }
 }

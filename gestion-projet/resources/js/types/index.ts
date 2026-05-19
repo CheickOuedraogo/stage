@@ -2,9 +2,9 @@ export interface User {
     id: number;
     name: string;
     email: string;
-    role: 'admin' | 'daf' | 'ac' | 'porteur';
+    utilisateur_role: 'admin' | 'daf' | 'ac' | 'porteur';
     role_label: string;
-    is_active: boolean;
+    utilisateur_actif: boolean;
     avatar_url: string | null;
     telephone: string | null;
     unread_notifications: number;

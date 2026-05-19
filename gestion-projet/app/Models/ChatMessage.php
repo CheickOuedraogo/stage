@@ -6,21 +6,29 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['sender_id', 'receiver_id', 'message', 'is_read'])]
+#[Fillable(['id_expediteur', 'id_destinataire', 'message_contenu', 'message_lu'])]
 class ChatMessage extends Model
 {
+    protected $primaryKey = 'id_message';
+
     protected function casts(): array
     {
-        return ['is_read' => 'boolean'];
+        return ['message_lu' => 'boolean'];
+    }
+
+    /** Transparent id accessor so $chatMessage->id still works */
+    public function getIdAttribute(): mixed
+    {
+        return $this->getAttribute($this->getKeyName());
     }
 
     public function sender(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'sender_id');
+        return $this->belongsTo(User::class, 'id_expediteur');
     }
 
     public function receiver(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'receiver_id');
+        return $this->belongsTo(User::class, 'id_destinataire');
     }
 }

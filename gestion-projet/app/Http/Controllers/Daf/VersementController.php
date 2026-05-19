@@ -13,34 +13,34 @@ class VersementController extends Controller
     public function index(Request $request): Response
     {
         $versements = Versement::with([
-            'convention:id,titre,projet_id,bailleur_id',
-            'convention.projet:id,titre',
-            'convention.bailleur:id,nom,sigle',
+            'convention:id_convention,convention_titre,id_projet,id_bailleur',
+            'convention.projet:id_projet,projet_titre',
+            'convention.bailleur:id_bailleur,bailleur_nom,bailleur_sigle',
         ])
-            ->when($request->filled('type'), fn ($q) => $q->where('type', $request->type))
+            ->when($request->filled('type'), fn ($q) => $q->where('versement_type', $request->type))
             ->when($request->filled('search'), fn ($q) => $q->where(
-                fn ($q2) => $q2->where('reference', 'like', "%{$request->search}%")
-                    ->orWhereHas('convention', fn ($q3) => $q3->where('titre', 'like', "%{$request->search}%"))
+                fn ($q2) => $q2->where('versement_reference', 'like', "%{$request->search}%")
+                    ->orWhereHas('convention', fn ($q3) => $q3->where('convention_titre', 'like', "%{$request->search}%"))
             ))
-            ->latest('date_reception')
+            ->latest('versement_date_reception')
             ->paginate(25)
             ->withQueryString()
             ->through(fn (Versement $v) => [
                 'id' => $v->id,
-                'montant' => $v->montant,
-                'date_reception' => $v->date_reception->toDateString(),
-                'type' => $v->type->value,
-                'type_label' => $v->type->label(),
-                'reference' => $v->reference,
-                'description' => $v->description,
-                'convention' => $v->convention->titre,
-                'projet' => $v->convention->projet->titre,
-                'bailleur' => $v->convention->bailleur->sigle ?? $v->convention->bailleur->nom,
-                'convention_id' => $v->convention_id,
-                'projet_id' => $v->convention->projet_id,
+                'montant' => $v->versement_montant,
+                'date_reception' => $v->versement_date_reception->toDateString(),
+                'type' => $v->versement_type->value,
+                'type_label' => $v->versement_type->label(),
+                'reference' => $v->versement_reference,
+                'description' => $v->versement_description,
+                'convention' => $v->convention->convention_titre,
+                'projet' => $v->convention->projet->projet_titre,
+                'bailleur' => $v->convention->bailleur->bailleur_sigle ?? $v->convention->bailleur->bailleur_nom,
+                'convention_id' => $v->id_convention,
+                'projet_id' => $v->convention->id_projet,
             ]);
 
-        $totalMontant = Versement::when($request->filled('type'), fn ($q) => $q->where('type', $request->type))->sum('montant');
+        $totalMontant = Versement::when($request->filled('type'), fn ($q) => $q->where('versement_type', $request->type))->sum('versement_montant');
 
         return Inertia::render('daf/Versements/Index', [
             'versements' => $versements,

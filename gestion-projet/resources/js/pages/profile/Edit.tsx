@@ -120,7 +120,7 @@ export default function ProfileEdit() {
                         <div>
                             <p className="text-lg font-semibold text-gray-900 dark:text-white">{user.name}</p>
                             <p className="text-sm text-gray-500 dark:text-slate-400">{user.email}</p>
-                            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{roleLabels[user.role] ?? user.role_label}</p>
+                            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{roleLabels[user.utilisateur_role] ?? user.role_label}</p>
                             {previewUrl && (
                                 <p className="text-xs text-blue-600 mt-1 font-medium">
                                     Nouvelle photo sélectionnée — enregistrez pour appliquer

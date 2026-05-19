@@ -12,17 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('paiements_directs', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('convention_id')->constrained('conventions')->cascadeOnDelete();
-            $table->foreignId('rubrique_id')->nullable()->constrained('rubriques')->nullOnDelete();
-            $table->integer('montant');
-            $table->string('objet_depense');
-            $table->text('description')->nullable();
-            $table->date('date_paiement');
-            $table->foreignId('enregistre_par')->constrained('users')->cascadeOnDelete();
+            $table->id('id_paiement_direct');
+            $table->foreignId('id_convention')->constrained('conventions', 'id_convention')->cascadeOnDelete();
+            $table->foreignId('id_rubrique')->nullable()->constrained('rubriques', 'id_rubrique')->nullOnDelete();
+            $table->integer('paiement_direct_montant');
+            $table->string('paiement_direct_objet');
+            $table->text('paiement_direct_description')->nullable();
+            $table->date('paiement_direct_date');
+            $table->foreignId('id_enregistreur_paiement_direct')->constrained('users', 'id_utilisateur')->cascadeOnDelete();
             $table->timestamps();
 
-            $table->index('convention_id');
+            $table->index('id_convention');
         });
     }
 

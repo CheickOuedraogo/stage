@@ -7,6 +7,7 @@ import { update as maintenanceUpdate } from '@/routes/admin/maintenance';
 import type { PageProps } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
+    ClipboardDocumentCheckIcon,
     ClipboardDocumentListIcon,
     FolderIcon,
     ShieldCheckIcon,

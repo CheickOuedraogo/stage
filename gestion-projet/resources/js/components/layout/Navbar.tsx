@@ -50,10 +50,10 @@ interface NavItem {
     badge?: number;
 }
 
-function getNavItems(role: User['role'], notifs: number): NavItem[] {
+function getNavItems(role: User['utilisateur_role'], notifs: number): NavItem[] {
     const notifBadge = notifs > 0 ? notifs : undefined;
 
-    const navByRole: Record<User['role'], NavItem[]> = {
+    const navByRole: Record<User['utilisateur_role'], NavItem[]> = {
         admin: [
             { label: 'Tableau de bord', href: adminDashboard.url(), icon: HomeIcon },
             { label: 'Utilisateurs', href: usersIndex.url(), icon: UsersIcon },
@@ -100,7 +100,7 @@ export function Navbar({ user }: NavbarProps) {
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const { isDark, toggle: toggleDark } = useDarkMode();
 
-    const items = getNavItems(user.role, user.unread_notifications);
+    const items = getNavItems(user.utilisateur_role, user.unread_notifications);
 
     const handleLogout = () => {
         router.post(logout.url());

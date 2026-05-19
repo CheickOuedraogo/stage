@@ -12,21 +12,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('projets', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('porteur_id')->constrained('users');
-            $table->string('titre');
-            $table->text('description')->nullable();
-            $table->text('objectifs')->nullable();
-            $table->text('activites')->nullable();
-            $table->unsignedBigInteger('montant_estime');
-            $table->string('status')->default('en_attente_financement');
-            $table->date('date_debut')->nullable();
-            $table->date('date_fin_prevue')->nullable();
-            $table->date('date_fin_reelle')->nullable();
+            $table->id('id_projet');
+            $table->foreignId('id_porteur')->constrained('users', 'id_utilisateur');
+            $table->string('projet_titre');
+            $table->text('projet_description')->nullable();
+            $table->text('projet_objectifs')->nullable();
+            $table->text('projet_activites')->nullable();
+            $table->unsignedBigInteger('projet_montant_estime');
+            $table->string('projet_statut')->default('en_attente_financement');
+            $table->date('projet_date_debut')->nullable();
+            $table->date('projet_date_fin_prevue')->nullable();
+            $table->date('projet_date_fin_reelle')->nullable();
             $table->timestamps();
 
-            $table->index('porteur_id');
-            $table->index('status');
+            $table->index('id_porteur');
+            $table->index('projet_statut');
         });
     }
 

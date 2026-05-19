@@ -95,8 +95,8 @@ export default function ProjetsIndex({ projets, filters }: Props) {
 
 function ProjetCard({ projet }: { projet: Projet }) {
     return (
-        <Link href={projetsShow.url(projet.id)} className="block group">
-            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-5 hover:border-gray-300 dark:hover:border-slate-600 hover:shadow-sm transition-all">
+        <Link href={projetsShow.url(projet.id)} className="block group h-full">
+            <div className="h-full flex flex-col bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-5 hover:border-gray-300 dark:hover:border-slate-600 hover:shadow-sm transition-all">
                 <div className="flex items-start justify-between gap-3 mb-4">
                     <h3 className="text-sm font-semibold text-gray-900 dark:text-white leading-snug group-hover:text-gray-700 dark:group-hover:text-slate-200 line-clamp-2">
                         {projet.titre}
@@ -135,7 +135,7 @@ function ProjetCard({ projet }: { projet: Projet }) {
                 </div>
 
                 {projet.date_fin_prevue && (
-                    <p className="mt-3 text-xs text-gray-400 dark:text-slate-500">
+                    <p className="mt-auto pt-3 text-xs text-gray-400 dark:text-slate-500">
                         Fin prévue : {new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(projet.date_fin_prevue))}
                     </p>
                 )}

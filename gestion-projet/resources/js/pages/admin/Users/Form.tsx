@@ -25,7 +25,7 @@ export default function UserForm({ user, roles }: UserFormProps) {
         name: user?.name ?? '',
         email: user?.email ?? '',
         password: '',
-        role: user?.role ?? 'porteur',
+        utilisateur_role: user?.utilisateur_role ?? 'porteur',
         telephone: user?.telephone ?? '',
     });
 
@@ -84,22 +84,22 @@ export default function UserForm({ user, roles }: UserFormProps) {
                             />
 
                             <div className="space-y-1">
-                                <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
+                                <label htmlFor="utilisateur_role" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
                                     Rôle <span className="text-red-500" aria-hidden="true">*</span>
                                 </label>
                                 <select
-                                    id="role"
-                                    value={data.role}
-                                    onChange={(e) => setData('role', e.target.value as User['role'])}
+                                    id="utilisateur_role"
+                                    value={data.utilisateur_role}
+                                    onChange={(e) => setData('utilisateur_role', e.target.value as User['utilisateur_role'])}
                                     aria-label="Sélectionner le rôle"
-                                    aria-invalid={!!errors.role}
+                                    aria-invalid={!!errors.utilisateur_role}
                                     className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                                 >
                                     {roles.map((r) => (
                                         <option key={r.value} value={r.value}>{r.label}</option>
                                     ))}
                                 </select>
-                                {errors.role && <p className="text-xs text-red-600">{errors.role}</p>}
+                                {errors.utilisateur_role && <p className="text-xs text-red-600">{errors.utilisateur_role}</p>}
                             </div>
 
                             <Input

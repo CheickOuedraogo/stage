@@ -19,18 +19,18 @@ class ProjetSeeder extends Seeder
 {
     public function run(): void
     {
-        $porteurs = User::where('role', 'porteur')
-            ->where('is_active', true)
+        $porteurs = User::where('utilisateur_role', 'porteur')
+            ->where('utilisateur_actif', true)
             ->orderBy('id')
             ->get()
             ->keyBy('email');
 
         // ── Bailleurs ─────────────────────────────────────────────────────────
         $bm = Bailleur::create([
-            'nom' => 'Banque Mondiale',
-            'sigle' => 'BM',
-            'type' => 'multilatéral',
-            'pays' => 'International',
+            'bailleur_nom' => 'Banque Mondiale',
+            'bailleur_sigle' => 'BM',
+            'bailleur_type' => 'multilatéral',
+            'bailleur_pays' => 'International',
             'contact' => 'Département Éducation Afrique',
             'email' => 'education-africa@worldbank.org',
             'telephone' => '+1 202 473 1000',
@@ -39,10 +39,10 @@ class ProjetSeeder extends Seeder
         ]);
 
         $afd = Bailleur::create([
-            'nom' => 'Agence Française de Développement',
-            'sigle' => 'AFD',
-            'type' => 'bilatéral',
-            'pays' => 'France',
+            'bailleur_nom' => 'Agence Française de Développement',
+            'bailleur_sigle' => 'AFD',
+            'bailleur_type' => 'bilatéral',
+            'bailleur_pays' => 'France',
             'contact' => 'Bureau Ouagadougou',
             'email' => 'ouagadougou@afd.fr',
             'telephone' => '+226 25 30 60 60',
@@ -51,10 +51,10 @@ class ProjetSeeder extends Seeder
         ]);
 
         $uemoa = Bailleur::create([
-            'nom' => 'Union Économique et Monétaire Ouest-Africaine',
-            'sigle' => 'UEMOA',
-            'type' => 'multilatéral',
-            'pays' => 'Régional',
+            'bailleur_nom' => 'Union Économique et Monétaire Ouest-Africaine',
+            'bailleur_sigle' => 'UEMOA',
+            'bailleur_type' => 'multilatéral',
+            'bailleur_pays' => 'Régional',
             'contact' => 'Commission UEMOA',
             'email' => 'commission@uemoa.int',
             'telephone' => '+226 25 32 24 35',
@@ -63,10 +63,10 @@ class ProjetSeeder extends Seeder
         ]);
 
         $bad = Bailleur::create([
-            'nom' => 'Banque Africaine de Développement',
-            'sigle' => 'BAD',
-            'type' => 'multilatéral',
-            'pays' => 'Continental',
+            'bailleur_nom' => 'Banque Africaine de Développement',
+            'bailleur_sigle' => 'BAD',
+            'bailleur_type' => 'multilatéral',
+            'bailleur_pays' => 'Continental',
             'contact' => 'Bureau Burkina Faso',
             'email' => 'bf-contact@afdb.org',
             'telephone' => '+226 25 37 62 00',
@@ -75,10 +75,10 @@ class ProjetSeeder extends Seeder
         ]);
 
         $ddc = Bailleur::create([
-            'nom' => 'Direction du Développement et de la Coopération',
-            'sigle' => 'DDC',
-            'type' => 'bilatéral',
-            'pays' => 'Suisse',
+            'bailleur_nom' => 'Direction du Développement et de la Coopération',
+            'bailleur_sigle' => 'DDC',
+            'bailleur_type' => 'bilatéral',
+            'bailleur_pays' => 'Suisse',
             'contact' => 'Ambassade de Suisse',
             'email' => 'ouagadougou@ddc.admin.ch',
             'telephone' => '+226 25 49 85 00',
@@ -87,10 +87,10 @@ class ProjetSeeder extends Seeder
         ]);
 
         $ue = Bailleur::create([
-            'nom' => 'Union Européenne',
-            'sigle' => 'UE',
-            'type' => 'multilatéral',
-            'pays' => 'International',
+            'bailleur_nom' => 'Union Européenne',
+            'bailleur_sigle' => 'UE',
+            'bailleur_type' => 'multilatéral',
+            'bailleur_pays' => 'International',
             'contact' => 'Délégation UE Burkina Faso',
             'email' => 'delegation-burkina-faso@eeas.europa.eu',
             'telephone' => '+226 25 49 85 00',
@@ -255,16 +255,16 @@ class ProjetSeeder extends Seeder
             }
 
             $projets[$d['sigle']] = Projet::create([
-                'porteur_id' => $porteur->id,
-                'titre' => $d['titre'],
-                'description' => $d['description'],
-                'objectifs' => $d['objectifs'],
-                'activites' => $d['activites'],
-                'montant_estime' => $d['montant_estime'],
-                'status' => $d['status']->value,
-                'date_debut' => $d['date_debut'] ?? null,
-                'date_fin_prevue' => $d['date_fin_prevue'] ?? null,
-                'date_fin_reelle' => $d['date_fin_reelle'] ?? null,
+                'id_porteur' => $porteur->id,
+                'projet_titre' => $d['titre'],
+                'projet_description' => $d['description'],
+                'projet_objectifs' => $d['objectifs'],
+                'projet_activites' => $d['activites'],
+                'projet_montant_estime' => $d['montant_estime'],
+                'projet_statut' => $d['status']->value,
+                'projet_date_debut' => $d['date_debut'] ?? null,
+                'projet_date_fin_prevue' => $d['date_fin_prevue'] ?? null,
+                'projet_date_fin_reelle' => $d['date_fin_reelle'] ?? null,
             ]);
         }
 
@@ -536,38 +536,38 @@ class ProjetSeeder extends Seeder
             }
 
             $convention = Convention::create([
-                'projet_id' => $projet->id,
-                'bailleur_id' => $bailleur->id,
-                'titre' => $c['titre'],
-                'description' => $c['description'],
-                'montant' => $c['montant_fcfa'],
-                'forme' => $c['forme']->value,
-                'devise_origine' => 'XOF',
-                'taux_conversion' => 1.0,
-                'montant_fcfa' => $c['montant_fcfa'],
-                'status' => $c['status']->value,
-                'date_signature' => $c['date_signature'],
-                'date_debut' => $c['date_debut'],
-                'date_fin' => $c['date_fin'],
+                'id_projet' => $projet->id,
+                'id_bailleur' => $bailleur->id,
+                'convention_titre' => $c['titre'],
+                'convention_description' => $c['description'],
+                'convention_montant' => $c['montant_fcfa'],
+                'convention_forme' => $c['forme']->value,
+                'convention_devise' => 'XOF',
+                'convention_taux_conversion' => 1.0,
+                'convention_montant_fcfa' => $c['montant_fcfa'],
+                'convention_statut' => $c['status']->value,
+                'convention_date_signature' => $c['date_signature'],
+                'convention_date_debut' => $c['date_debut'],
+                'convention_date_fin' => $c['date_fin'],
             ]);
 
             foreach ($c['rubriques'] as $r) {
                 Rubrique::create([
-                    'convention_id' => $convention->id,
-                    'libelle' => $r['libelle'],
-                    'montant_prevu' => $r['montant_prevu'],
-                    'description' => null,
+                    'id_convention' => $convention->id,
+                    'rubrique_libelle' => $r['libelle'],
+                    'rubrique_montant_prevu' => $r['montant_prevu'],
+                    'rubrique_description' => null,
                 ]);
             }
 
             foreach ($c['versements'] as $v) {
                 Versement::create([
-                    'convention_id' => $convention->id,
-                    'montant' => $v['montant'],
-                    'date_reception' => $v['date'],
-                    'type' => $v['type']->value,
-                    'reference' => $v['ref'],
-                    'description' => null,
+                    'id_convention' => $convention->id,
+                    'versement_montant' => $v['montant'],
+                    'versement_date_reception' => $v['date'],
+                    'versement_type' => $v['type']->value,
+                    'versement_reference' => $v['ref'],
+                    'versement_description' => null,
                 ]);
             }
         }

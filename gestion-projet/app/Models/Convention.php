@@ -11,65 +11,73 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['projet_id', 'bailleur_id', 'titre', 'description', 'montant', 'forme', 'devise_origine', 'taux_conversion', 'montant_fcfa', 'status', 'date_signature', 'date_debut', 'date_fin'])]
+#[Fillable(['id_projet', 'id_bailleur', 'convention_titre', 'convention_description', 'convention_montant', 'convention_forme', 'convention_devise', 'convention_taux_conversion', 'convention_montant_fcfa', 'convention_statut', 'convention_date_signature', 'convention_date_debut', 'convention_date_fin'])]
 class Convention extends Model
 {
     /** @use HasFactory<ConventionFactory> */
     use HasFactory;
 
+    protected $primaryKey = 'id_convention';
+
     protected function casts(): array
     {
         return [
-            'forme' => ConventionForme::class,
-            'status' => ConventionStatus::class,
-            'montant' => 'integer',
-            'montant_fcfa' => 'integer',
-            'taux_conversion' => 'decimal:6',
-            'date_signature' => 'date',
-            'date_debut' => 'date',
-            'date_fin' => 'date',
+            'convention_forme' => ConventionForme::class,
+            'convention_statut' => ConventionStatus::class,
+            'convention_montant' => 'integer',
+            'convention_montant_fcfa' => 'integer',
+            'convention_taux_conversion' => 'decimal:6',
+            'convention_date_signature' => 'date',
+            'convention_date_debut' => 'date',
+            'convention_date_fin' => 'date',
         ];
+    }
+
+    /** Transparent id accessor so $convention->id still works */
+    public function getIdAttribute(): mixed
+    {
+        return $this->getAttribute($this->getKeyName());
     }
 
     public function projet(): BelongsTo
     {
-        return $this->belongsTo(Projet::class);
+        return $this->belongsTo(Projet::class, 'id_projet');
     }
 
     public function bailleur(): BelongsTo
     {
-        return $this->belongsTo(Bailleur::class);
+        return $this->belongsTo(Bailleur::class, 'id_bailleur');
     }
 
     public function rubriques(): HasMany
     {
-        return $this->hasMany(Rubrique::class);
+        return $this->hasMany(Rubrique::class, 'id_convention');
     }
 
     public function versements(): HasMany
     {
-        return $this->hasMany(Versement::class);
+        return $this->hasMany(Versement::class, 'id_convention');
     }
 
     public function demandesDepenses(): HasMany
     {
-        return $this->hasMany(DemandeDepense::class);
+        return $this->hasMany(DemandeDepense::class, 'id_convention');
     }
 
     public function paiementsDirects(): HasMany
     {
-        return $this->hasMany(PaiementDirect::class);
+        return $this->hasMany(PaiementDirect::class, 'id_convention');
     }
 
     /** Somme des rubriques budgétaires */
     public function getTotalRubriquesAttribute(): int
     {
-        return $this->rubriques()->sum('montant_prevu');
+        return $this->rubriques()->sum('rubrique_montant_prevu');
     }
 
     /** Somme des versements reçus */
     public function getTotalVersementsAttribute(): int
     {
-        return $this->versements()->sum('montant');
+        return $this->versements()->sum('versement_montant');
     }
 }

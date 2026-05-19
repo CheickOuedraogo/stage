@@ -26,8 +26,8 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
-            'role' => UserRole::Porteur,
-            'is_active' => true,
+            'utilisateur_role' => UserRole::Porteur,
+            'utilisateur_actif' => true,
             'avatar_path' => null,
             'telephone' => null,
         ];
@@ -35,27 +35,27 @@ class UserFactory extends Factory
 
     public function admin(): static
     {
-        return $this->state(['role' => UserRole::Admin]);
+        return $this->state(['utilisateur_role' => UserRole::Admin]);
     }
 
     public function daf(): static
     {
-        return $this->state(['role' => UserRole::Daf]);
+        return $this->state(['utilisateur_role' => UserRole::Daf]);
     }
 
     public function ac(): static
     {
-        return $this->state(['role' => UserRole::Ac]);
+        return $this->state(['utilisateur_role' => UserRole::Ac]);
     }
 
     public function porteur(): static
     {
-        return $this->state(['role' => UserRole::Porteur]);
+        return $this->state(['utilisateur_role' => UserRole::Porteur]);
     }
 
     public function inactive(): static
     {
-        return $this->state(['is_active' => false]);
+        return $this->state(['utilisateur_actif' => false]);
     }
 
     public function unverified(): static

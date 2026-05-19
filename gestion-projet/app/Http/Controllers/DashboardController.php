@@ -21,16 +21,16 @@ class DashboardController extends Controller
 {
     public function admin(): Response
     {
-        $recentAuditLogs = AuditLog::with('user:id,name,role')
+        $recentAuditLogs = AuditLog::with('user:id_utilisateur,name,utilisateur_role')
             ->latest('created_at')
             ->limit(8)
             ->get()
             ->map(fn (AuditLog $log) => [
                 'id' => $log->id,
-                'action' => $log->action,
-                'description' => $log->description,
+                'action' => $log->audit_action,
+                'description' => $log->audit_description,
                 'user' => $log->user?->name ?? 'Système',
-                'user_role' => $log->user?->role?->shortLabel(),
+                'user_role' => $log->user?->utilisateur_role?->shortLabel(),
                 'created_at' => $log->created_at?->diffForHumans() ?? '—',
             ]);
 
@@ -44,9 +44,9 @@ class DashboardController extends Controller
                     'count' => User::byRole($r)->count(),
                 ])->all(),
                 'total_projets' => Projet::count(),
-                'projets_actifs' => Projet::where('status', ProjectStatus::EnCours)->count(),
+                'projets_actifs' => Projet::where('projet_statut', ProjectStatus::EnCours)->count(),
                 'total_conventions' => Convention::count(),
-                'demandes_en_cours' => DemandeDepense::whereNotIn('status', [
+                'demandes_en_cours' => DemandeDepense::whereNotIn('demande_statut', [
                     DemandeStatus::RejetéeDaf->value,
                     DemandeStatus::RejetéeAc->value,
                     DemandeStatus::Terminee->value,
@@ -58,37 +58,37 @@ class DashboardController extends Controller
 
     public function daf(): Response
     {
-        $projetsActifs = Projet::where('status', ProjectStatus::EnCours)->count();
-        $conventionsActives = Convention::where('status', ConventionStatus::Active)->count();
+        $projetsActifs = Projet::where('projet_statut', ProjectStatus::EnCours)->count();
+        $conventionsActives = Convention::where('convention_statut', ConventionStatus::Active)->count();
 
-        $demandesEnAttente = DemandeDepense::where('status', DemandeStatus::Soumise)->count();
-        $demandesEnAttenteAc = DemandeDepense::where('status', DemandeStatus::ValidéeDaf)->count();
-        $rapportsSoumis = DemandeDepense::where('status', DemandeStatus::RapportSoumis)->count();
+        $demandesEnAttente = DemandeDepense::where('demande_statut', DemandeStatus::Soumise)->count();
+        $demandesEnAttenteAc = DemandeDepense::where('demande_statut', DemandeStatus::ValidéeDaf)->count();
+        $rapportsSoumis = DemandeDepense::where('demande_statut', DemandeStatus::RapportSoumis)->count();
 
-        $budgetTotal = Convention::where('status', ConventionStatus::Active)->sum('montant_fcfa');
-        $versementsTotal = Convention::where('status', ConventionStatus::Active)
+        $budgetTotal = Convention::where('convention_statut', ConventionStatus::Active)->sum('convention_montant_fcfa');
+        $versementsTotal = Convention::where('convention_statut', ConventionStatus::Active)
             ->with('versements')
             ->get()
             ->flatMap->versements
-            ->sum('montant');
+            ->sum('versement_montant');
 
         $demandesRecentes = DemandeDepense::with([
-            'convention:id,titre',
-            'porteur:id,name',
+            'convention:id_convention,convention_titre',
+            'porteur:id_utilisateur,name',
         ])
-            ->whereIn('status', [DemandeStatus::Soumise, DemandeStatus::ValidéeDaf, DemandeStatus::RapportSoumis])
+            ->whereIn('demande_statut', [DemandeStatus::Soumise, DemandeStatus::ValidéeDaf, DemandeStatus::RapportSoumis])
             ->latest()
             ->limit(5)
             ->get()
             ->map(fn (DemandeDepense $d) => [
                 'id' => $d->id,
-                'objet' => $d->objet,
-                'montant' => $d->montant,
-                'status' => $d->status->value,
-                'status_label' => $d->status->label(),
-                'badge_class' => $d->status->badgeClass(),
+                'objet' => $d->demande_objet,
+                'montant' => $d->demande_montant,
+                'status' => $d->demande_statut->value,
+                'status_label' => $d->demande_statut->label(),
+                'badge_class' => $d->demande_statut->badgeClass(),
                 'porteur' => $d->porteur->name,
-                'convention' => $d->convention->titre,
+                'convention' => $d->convention->convention_titre,
                 'created_at' => $d->created_at->toDateString(),
             ]);
 
@@ -97,8 +97,8 @@ class DashboardController extends Controller
         $versementsParProjet = Projet::with(['conventions.versements'])
             ->get()
             ->map(fn (Projet $p) => [
-                'name' => mb_strimwidth($p->titre, 0, 20, '…'),
-                'value' => $p->conventions->flatMap->versements->sum('montant'),
+                'name' => mb_strimwidth($p->projet_titre, 0, 20, '…'),
+                'value' => $p->conventions->flatMap->versements->sum('versement_montant'),
             ])
             ->filter(fn ($item) => $item['value'] > 0)
             ->sortByDesc('value')
@@ -106,9 +106,9 @@ class DashboardController extends Controller
             ->values();
 
         // Line chart — paiements effectués par mois (12 derniers mois)
-        // SUBSTR(date_paiement, 1, 7) works on both SQLite and MySQL (gives YYYY-MM)
-        $paiementsParMois = Paiement::selectRaw('SUBSTR(date_paiement, 1, 7) as mois, SUM(montant) as total')
-            ->where('date_paiement', '>=', now()->subYear()->startOfMonth())
+        // SUBSTR(paiement_date, 1, 7) works on both SQLite and MySQL (gives YYYY-MM)
+        $paiementsParMois = Paiement::selectRaw('SUBSTR(paiement_date, 1, 7) as mois, SUM(paiement_montant) as total')
+            ->where('paiement_date', '>=', now()->subYear()->startOfMonth())
             ->groupBy('mois')
             ->orderBy('mois')
             ->get()
@@ -118,16 +118,16 @@ class DashboardController extends Controller
             ]);
 
         // Bar chart — top 5 rubriques les plus consommées
-        $topRubriques = Rubrique::with(['demandesDepenses' => fn ($q) => $q->whereIn('status', [
+        $topRubriques = Rubrique::with(['demandesDepenses' => fn ($q) => $q->whereIn('demande_statut', [
             DemandeStatus::Payee->value,
             DemandeStatus::RapportSoumis->value,
             DemandeStatus::Terminee->value,
         ])])
             ->get()
             ->map(fn (Rubrique $r) => [
-                'libelle' => mb_strimwidth($r->libelle, 0, 22, '…'),
-                'consomme' => $r->demandesDepenses->sum('montant'),
-                'prevu' => $r->montant_prevu,
+                'libelle' => mb_strimwidth($r->rubrique_libelle, 0, 22, '…'),
+                'consomme' => $r->demandesDepenses->sum('demande_montant'),
+                'prevu' => $r->rubrique_montant_prevu,
             ])
             ->filter(fn ($item) => $item['consomme'] > 0)
             ->sortByDesc('consomme')
@@ -153,52 +153,52 @@ class DashboardController extends Controller
 
     public function ac(): Response
     {
-        $demandesEnAttente = DemandeDepense::where('status', DemandeStatus::ValidéeDaf)->count();
-        $rapportsSoumis = DemandeDepense::where('status', DemandeStatus::RapportSoumis)->count();
-        $paiementsEffectues = DemandeDepense::where('status', DemandeStatus::Payee)
-            ->orWhere('status', DemandeStatus::RapportSoumis)
-            ->orWhere('status', DemandeStatus::Terminee)
+        $demandesEnAttente = DemandeDepense::where('demande_statut', DemandeStatus::ValidéeDaf)->count();
+        $rapportsSoumis = DemandeDepense::where('demande_statut', DemandeStatus::RapportSoumis)->count();
+        $paiementsEffectues = DemandeDepense::where('demande_statut', DemandeStatus::Payee)
+            ->orWhere('demande_statut', DemandeStatus::RapportSoumis)
+            ->orWhere('demande_statut', DemandeStatus::Terminee)
             ->count();
 
-        $montantPaye = Paiement::sum('montant');
+        $montantPaye = Paiement::sum('paiement_montant');
 
         $demandesRecentes = DemandeDepense::with([
-            'convention:id,titre',
-            'porteur:id,name',
+            'convention:id_convention,convention_titre',
+            'porteur:id_utilisateur,name',
         ])
-            ->whereIn('status', [DemandeStatus::ValidéeDaf, DemandeStatus::RapportSoumis])
+            ->whereIn('demande_statut', [DemandeStatus::ValidéeDaf, DemandeStatus::RapportSoumis])
             ->latest()
             ->limit(5)
             ->get()
             ->map(fn (DemandeDepense $d) => [
                 'id' => $d->id,
-                'objet' => $d->objet,
-                'montant' => $d->montant,
-                'status' => $d->status->value,
-                'status_label' => $d->status->label(),
-                'badge_class' => $d->status->badgeClass(),
+                'objet' => $d->demande_objet,
+                'montant' => $d->demande_montant,
+                'status' => $d->demande_statut->value,
+                'status_label' => $d->demande_statut->label(),
+                'badge_class' => $d->demande_statut->badgeClass(),
                 'porteur' => $d->porteur->name,
-                'convention' => $d->convention->titre,
+                'convention' => $d->convention->convention_titre,
                 'created_at' => $d->created_at->toDateString(),
             ]);
 
         $paiementsRecents = Paiement::with([
-            'demande:id,objet,porteur_id,convention_id',
-            'demande.porteur:id,name',
-            'demande.convention:id,titre',
+            'demande:id_demande,demande_objet,id_porteur,id_convention',
+            'demande.porteur:id_utilisateur,name',
+            'demande.convention:id_convention,convention_titre',
         ])
-            ->latest('date_paiement')
+            ->latest('paiement_date')
             ->limit(5)
             ->get()
             ->map(fn (Paiement $p) => [
                 'id' => $p->id,
-                'montant' => $p->montant,
-                'date_paiement' => $p->date_paiement->toDateString(),
-                'mode_paiement' => $p->mode_paiement->label(),
-                'reference' => $p->reference,
-                'objet' => $p->demande->objet,
+                'montant' => $p->paiement_montant,
+                'date_paiement' => $p->paiement_date->toDateString(),
+                'mode_paiement' => $p->paiement_mode->label(),
+                'reference' => $p->paiement_reference,
+                'objet' => $p->demande->demande_objet,
                 'porteur' => $p->demande->porteur->name,
-                'convention' => $p->demande->convention->titre,
+                'convention' => $p->demande->convention->convention_titre,
             ]);
 
         return Inertia::render('ac/Dashboard', [
@@ -218,31 +218,31 @@ class DashboardController extends Controller
         $porteur = $request->user();
 
         $projetsCount = Projet::forPorteur($porteur->id)->count();
-        $projetsActifsCount = Projet::forPorteur($porteur->id)->where('status', ProjectStatus::EnCours)->count();
+        $projetsActifsCount = Projet::forPorteur($porteur->id)->where('projet_statut', ProjectStatus::EnCours)->count();
 
-        $demandesActives = DemandeDepense::where('porteur_id', $porteur->id)
-            ->whereNotIn('status', [DemandeStatus::RejetéeDaf, DemandeStatus::RejetéeAc, DemandeStatus::Terminee])
+        $demandesActives = DemandeDepense::where('id_porteur', $porteur->id)
+            ->whereNotIn('demande_statut', [DemandeStatus::RejetéeDaf, DemandeStatus::RejetéeAc, DemandeStatus::Terminee])
             ->count();
-        $demandesTotal = DemandeDepense::where('porteur_id', $porteur->id)->count();
+        $demandesTotal = DemandeDepense::where('id_porteur', $porteur->id)->count();
 
         $demandesRecentes = DemandeDepense::with([
-            'convention:id,titre,projet_id',
-            'convention.projet:id,titre',
-            'rubrique:id,libelle',
+            'convention:id_convention,convention_titre,id_projet',
+            'convention.projet:id_projet,projet_titre',
+            'rubrique:id_rubrique,rubrique_libelle',
         ])
-            ->where('porteur_id', $porteur->id)
+            ->where('id_porteur', $porteur->id)
             ->latest()
             ->limit(5)
             ->get()
             ->map(fn (DemandeDepense $d) => [
                 'id' => $d->id,
-                'objet' => $d->objet,
-                'montant' => $d->montant,
-                'status' => $d->status->value,
-                'status_label' => $d->status->label(),
-                'badge_class' => $d->status->badgeClass(),
-                'convention' => $d->convention->titre,
-                'projet' => $d->convention->projet->titre,
+                'objet' => $d->demande_objet,
+                'montant' => $d->demande_montant,
+                'status' => $d->demande_statut->value,
+                'status_label' => $d->demande_statut->label(),
+                'badge_class' => $d->demande_statut->badgeClass(),
+                'convention' => $d->convention->convention_titre,
+                'projet' => $d->convention->projet->projet_titre,
                 'created_at' => $d->created_at->toDateString(),
             ]);
 
@@ -253,18 +253,18 @@ class DashboardController extends Controller
             ->limit(4)
             ->get()
             ->map(function (Projet $p) {
-                $versements = $p->conventions->flatMap->versements->sum('montant');
+                $versements = $p->conventions->flatMap->versements->sum('versement_montant');
                 $depenses = $p->conventions->flatMap->rubriques->flatMap->demandesDepenses
-                    ->whereIn('status', [
+                    ->whereIn('demande_statut', [
                         DemandeStatus::Payee->value,
                         DemandeStatus::RapportSoumis->value,
                         DemandeStatus::Terminee->value,
-                    ])->sum('montant');
+                    ])->sum('demande_montant');
 
                 return [
-                    'titre' => mb_strimwidth($p->titre, 0, 24, '…'),
-                    'status' => $p->status->value,
-                    'montant_estime' => $p->montant_estime,
+                    'titre' => mb_strimwidth($p->projet_titre, 0, 24, '…'),
+                    'status' => $p->projet_statut->value,
+                    'montant_estime' => $p->projet_montant_estime,
                     'versements' => $versements,
                     'depenses' => $depenses,
                     'disponible' => max(0, $versements - $depenses),

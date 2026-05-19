@@ -16,12 +16,12 @@ class PaiementFactory extends Factory
     public function definition(): array
     {
         return [
-            'demande_id' => DemandeDepense::factory()->valideAc(),
-            'montant' => $this->faker->numberBetween(500_000, 5_000_000),
-            'date_paiement' => $this->faker->dateTimeBetween('-3 months', 'now'),
-            'mode_paiement' => $this->faker->randomElement(ModePaiement::cases())->value,
-            'reference' => $this->faker->optional(0.7)->numerify('REF-####'),
-            'enregistre_par' => User::factory()->ac(),
+            'id_demande' => DemandeDepense::factory()->valideAc(),
+            'paiement_montant' => $this->faker->numberBetween(500_000, 5_000_000),
+            'paiement_date' => $this->faker->dateTimeBetween('-3 months', 'now'),
+            'paiement_mode' => $this->faker->randomElement(ModePaiement::cases())->value,
+            'paiement_reference' => $this->faker->optional(0.7)->numerify('REF-####'),
+            'id_enregistreur_paiement' => User::factory()->ac(),
         ];
     }
 }

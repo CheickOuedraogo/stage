@@ -14,10 +14,10 @@ class PaiementDirectController extends Controller
 {
     public function store(Request $request, Projet $projet, Convention $convention): RedirectResponse
     {
-        abort_unless($convention->projet_id === $projet->id, 404);
+        abort_unless($convention->id_projet === $projet->id, 404);
 
         $validated = $request->validate([
-            'rubrique_id' => ['nullable', 'integer', Rule::exists('rubriques', 'id')->where('convention_id', $convention->id)],
+            'rubrique_id' => ['nullable', 'integer', Rule::exists('rubriques', 'id_rubrique')->where('id_convention', $convention->id)],
             'montant' => ['required', 'integer', 'min:1'],
             'objet_depense' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
@@ -25,9 +25,13 @@ class PaiementDirectController extends Controller
         ]);
 
         PaiementDirect::create([
-            ...$validated,
-            'convention_id' => $convention->id,
-            'enregistre_par' => $request->user()->id,
+            'id_convention' => $convention->id,
+            'id_rubrique' => $validated['rubrique_id'] ?? null,
+            'paiement_direct_montant' => $validated['montant'],
+            'paiement_direct_objet' => $validated['objet_depense'],
+            'paiement_direct_description' => $validated['description'] ?? null,
+            'paiement_direct_date' => $validated['date_paiement'],
+            'id_enregistreur_paiement_direct' => $request->user()->id,
         ]);
 
         return back()->with('success', 'Paiement direct enregistré avec succès.');
@@ -35,8 +39,8 @@ class PaiementDirectController extends Controller
 
     public function destroy(Projet $projet, Convention $convention, PaiementDirect $paiementDirect): RedirectResponse
     {
-        abort_unless($convention->projet_id === $projet->id, 404);
-        abort_unless($paiementDirect->convention_id === $convention->id, 404);
+        abort_unless($convention->id_projet === $projet->id, 404);
+        abort_unless($paiementDirect->id_convention === $convention->id, 404);
 
         $paiementDirect->delete();
 

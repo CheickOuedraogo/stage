@@ -99,38 +99,26 @@ export default function ProjetShow({ projet }: Props) {
                 />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 space-y-5">
-                    {projet.description && (
-                        <Section title="Description">
-                            <MarkdownRenderer content={projet.description} />
-                        </Section>
-                    )}
-                    {projet.objectifs && (
-                        <Section title="Objectifs">
-                            <MarkdownRenderer content={projet.objectifs} />
-                        </Section>
-                    )}
-                    {projet.activites && (
-                        <Section title="Activités">
-                            <MarkdownRenderer content={projet.activites} />
-                        </Section>
-                    )}
-                </div>
-
-                <div>
-                    <Section title={`Conventions (${projet.conventions.length})`}>
+            <div className="space-y-6">
+                {/* Conventions — pleine largeur, grille sur PC */}
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                    <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                            Conventions ({projet.conventions.length})
+                        </h3>
+                    </div>
+                    <div className="p-5">
                         {projet.conventions.length === 0 ? (
                             <p className="text-sm text-gray-400 dark:text-slate-500 text-center py-6">Aucune convention</p>
                         ) : (
-                            <div className="space-y-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                 {projet.conventions.map((c) => (
                                     <Link
                                         key={c.id}
                                         href={projetsConventionsShow.url({ projet: projet.id, convention: c.id })}
-                                        className="block group"
+                                        className="block group h-full"
                                     >
-                                        <div className="border border-gray-200 dark:border-slate-700 rounded-lg p-3 hover:border-gray-300 dark:hover:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all">
+                                        <div className="h-full flex flex-col border border-gray-200 dark:border-slate-700 rounded-lg p-3 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 transition-all">
                                             <div className="flex items-start justify-between gap-2 mb-2">
                                                 <p className="text-xs font-semibold text-gray-900 dark:text-white leading-tight">
                                                     {c.bailleur.sigle ?? c.bailleur.nom}
@@ -139,9 +127,9 @@ export default function ProjetShow({ projet }: Props) {
                                                     {c.status_label}
                                                 </span>
                                             </div>
-                                            <p className="text-xs text-gray-500 dark:text-slate-400 mb-2 line-clamp-1">{c.titre}</p>
-                                            <div className="flex items-center justify-between text-xs">
-                                                <span className="font-mono text-gray-900 dark:text-white">{formatCurrency(c.montant_fcfa)}</span>
+                                            <p className="text-xs text-gray-500 dark:text-slate-400 mb-3 line-clamp-2 flex-1">{c.titre}</p>
+                                            <div className="flex items-center justify-between text-xs mt-auto">
+                                                <span className="font-mono font-medium text-gray-900 dark:text-white">{formatCurrency(c.montant_fcfa)}</span>
                                                 <span className="text-gray-400 dark:text-slate-500">{c.forme_label}</span>
                                             </div>
                                             <div className="mt-1.5 text-xs text-gray-400 dark:text-slate-500">
@@ -152,8 +140,25 @@ export default function ProjetShow({ projet }: Props) {
                                 ))}
                             </div>
                         )}
-                    </Section>
+                    </div>
                 </div>
+
+                {/* Textes — pleine largeur empilés */}
+                {projet.description && (
+                    <Section title="Description">
+                        <MarkdownRenderer content={projet.description} />
+                    </Section>
+                )}
+                {projet.objectifs && (
+                    <Section title="Objectifs">
+                        <MarkdownRenderer content={projet.objectifs} />
+                    </Section>
+                )}
+                {projet.activites && (
+                    <Section title="Activités">
+                        <MarkdownRenderer content={projet.activites} />
+                    </Section>
+                )}
             </div>
         </AppLayout>
     );
