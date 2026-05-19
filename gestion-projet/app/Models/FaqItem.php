@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['faq_question', 'faq_reponse', 'faq_ordre', 'faq_actif', 'roles_cibles'])]
+#[Fillable(['faq_question', 'faq_reponse', 'faq_actif', 'visible_porteur', 'visible_daf', 'visible_ac'])]
 class FaqItem extends Model
 {
     protected $primaryKey = 'id_faq';
@@ -16,8 +16,9 @@ class FaqItem extends Model
     {
         return [
             'faq_actif' => 'boolean',
-            'faq_ordre' => 'integer',
-            'roles_cibles' => 'array',
+            'visible_porteur' => 'boolean',
+            'visible_daf' => 'boolean',
+            'visible_ac' => 'boolean',
         ];
     }
 
@@ -29,13 +30,16 @@ class FaqItem extends Model
 
     public function scopeActive(Builder $query): void
     {
-        $query->where('faq_actif', true)->orderBy('faq_ordre');
+        $query->where('faq_actif', true)->orderBy('id_faq');
     }
 
     public function isVisibleFor(UserRole $role): bool
     {
-        $targets = $this->roles_cibles ?? ['all'];
-
-        return in_array('all', $targets) || in_array($role->value, $targets);
+        return match ($role) {
+            UserRole::Porteur => $this->visible_porteur,
+            UserRole::Daf => $this->visible_daf,
+            UserRole::Ac => $this->visible_ac,
+            default => false,
+        };
     }
 }
