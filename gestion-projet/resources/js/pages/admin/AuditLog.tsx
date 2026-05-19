@@ -94,7 +94,6 @@ const FIELD_LABELS: Record<string, string> = {
     versement_date_reception: 'Date réception',
     faq_reponse: 'Réponse',
     faq_question: 'Question',
-    faq_ordre: 'Ordre',
     rubrique_libelle: 'Libellé',
 };
 

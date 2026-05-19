@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id('id_faq');
             $table->string('faq_question');
             $table->text('faq_reponse');
-            $table->unsignedSmallInteger('faq_ordre')->default(0);
             $table->boolean('faq_actif')->default(true);
             $table->timestamps();
         });
