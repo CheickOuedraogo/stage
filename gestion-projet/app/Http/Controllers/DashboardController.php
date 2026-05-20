@@ -65,7 +65,7 @@ class DashboardController extends Controller
         $demandesEnAttenteAc = DemandeDepense::where('demande_statut', DemandeStatus::ValidéeDaf)->count();
         $rapportsSoumis = DemandeDepense::where('demande_statut', DemandeStatus::RapportSoumis)->count();
 
-        $budgetTotal = Convention::where('convention_statut', ConventionStatus::Active)->sum('convention_montant_fcfa');
+        $budgetTotal = Convention::where('convention_statut', ConventionStatus::Active)->sum(\DB::raw('convention_montant * convention_taux_conversion'));
         $versementsTotal = Convention::where('convention_statut', ConventionStatus::Active)
             ->with('versements')
             ->get()

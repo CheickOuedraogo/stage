@@ -544,7 +544,6 @@ class ProjetSeeder extends Seeder
                 'convention_forme' => $c['forme']->value,
                 'convention_devise' => 'XOF',
                 'convention_taux_conversion' => 1.0,
-                'convention_montant_fcfa' => $c['montant_fcfa'],
                 'convention_statut' => $c['status']->value,
                 'convention_date_signature' => $c['date_signature'],
                 'convention_date_debut' => $c['date_debut'],

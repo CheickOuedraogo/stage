@@ -83,7 +83,7 @@ class DemandeDepenseController extends Controller
             'convention' => [
                 'id' => $convention->id,
                 'titre' => $convention->convention_titre,
-                'montant_fcfa' => $convention->convention_montant_fcfa,
+                'montant_fcfa' => $convention->montant_fcfa,
             ],
             'rubriques' => $rubriques,
         ]);

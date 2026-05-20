@@ -61,7 +61,7 @@ class RapportController extends Controller
         $data = [
             'projets' => [[
                 'titre' => $projet->projet_titre,
-                'budget_prevu' => $projet->conventions->sum('convention_montant_fcfa'),
+                'budget_prevu' => $projet->conventions->sum('montant_fcfa'),
                 'total_versements' => $totalVersions,
                 'total_depenses' => $totalDepenses,
                 'rubriques' => $rubriques,
@@ -100,7 +100,7 @@ class RapportController extends Controller
 
         $totalVersions = $projet->conventions->flatMap->versements->sum('versement_montant');
         $totalDepenses = $projet->conventions->flatMap->rubriques->flatMap->demandesDepenses->sum('demande_montant');
-        $budgetPrevu = $projet->conventions->sum('convention_montant_fcfa');
+        $budgetPrevu = $projet->conventions->sum('montant_fcfa');
         $ecartBudget = $budgetPrevu - $totalDepenses;
 
         $ecartTemps = null;
@@ -135,7 +135,7 @@ class RapportController extends Controller
         $conventions = $projet->conventions->map(fn ($c) => [
             'bailleur' => $c->bailleur->bailleur_nom,
             'forme_label' => $c->convention_forme->label(),
-            'montant_fcfa' => $c->convention_montant_fcfa,
+            'montant_fcfa' => $c->montant_fcfa,
             'total_versements' => $c->versements->sum('versement_montant'),
         ])->toArray();
 

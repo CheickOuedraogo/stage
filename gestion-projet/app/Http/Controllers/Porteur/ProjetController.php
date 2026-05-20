@@ -22,7 +22,7 @@ class ProjetController extends Controller
 
         $projets = Projet::forPorteur($porteur->id)
             ->withCount('conventions')
-            ->with(['conventions:id_convention,id_projet,convention_montant_fcfa'])
+            ->with(['conventions:id_convention,id_projet,convention_montant,convention_taux_conversion'])
             ->when($request->filled('search'), fn ($q) => $q->where('projet_titre', 'like', '%'.$request->search.'%'))
             ->when($request->filled('status'), fn ($q) => $q->where('projet_statut', $request->status))
             ->latest()
@@ -36,9 +36,9 @@ class ProjetController extends Controller
                 'date_debut' => $p->projet_date_debut?->toDateString(),
                 'date_fin_prevue' => $p->projet_date_fin_prevue?->toDateString(),
                 'conventions_count' => $p->conventions_count,
-                'montant_conventions' => $p->conventions->sum('convention_montant_fcfa'),
+                'montant_conventions' => $p->conventions->sum('montant_fcfa'),
                 'pourcentage_financement' => $p->projet_montant_estime > 0
-                    ? (int) min(100, round(($p->conventions->sum('convention_montant_fcfa') / $p->projet_montant_estime) * 100))
+                    ? (int) min(100, round(($p->conventions->sum('montant_fcfa') / $p->projet_montant_estime) * 100))
                     : 0,
             ]);
 
@@ -57,7 +57,7 @@ class ProjetController extends Controller
         ]);
 
         $totalVersements = $projet->conventions->flatMap->versements->sum('versement_montant');
-        $montantConventions = $projet->conventions->sum('convention_montant_fcfa');
+        $montantConventions = $projet->conventions->sum('montant_fcfa');
 
         return Inertia::render('porteur/Projets/Show', [
             'projet' => [
@@ -81,7 +81,7 @@ class ProjetController extends Controller
                     'id' => $c->id,
                     'titre' => $c->convention_titre,
                     'bailleur' => ['nom' => $c->bailleur->bailleur_nom, 'sigle' => $c->bailleur->bailleur_sigle],
-                    'montant_fcfa' => $c->convention_montant_fcfa,
+                    'montant_fcfa' => $c->montant_fcfa,
                     'forme' => $c->convention_forme->value,
                     'forme_label' => $c->convention_forme->label(),
                     'status' => $c->convention_statut->value,
@@ -114,7 +114,7 @@ class ProjetController extends Controller
                 'titre' => $convention->convention_titre,
                 'description' => $convention->convention_description,
                 'montant' => $convention->convention_montant,
-                'montant_fcfa' => $convention->convention_montant_fcfa,
+                'montant_fcfa' => $convention->montant_fcfa,
                 'devise_origine' => $convention->convention_devise,
                 'taux_conversion' => $convention->convention_taux_conversion,
                 'forme' => $convention->convention_forme->value,

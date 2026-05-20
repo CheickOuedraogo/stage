@@ -40,7 +40,6 @@ class ConventionFactory extends Factory
             'convention_forme' => $this->faker->randomElement(ConventionForme::cases())->value,
             'convention_devise' => $devise,
             'convention_taux_conversion' => $taux,
-            'convention_montant_fcfa' => $montantFcfa,
             'convention_statut' => ConventionStatus::Active->value,
             'convention_date_signature' => $signature,
             'convention_date_debut' => $debut,

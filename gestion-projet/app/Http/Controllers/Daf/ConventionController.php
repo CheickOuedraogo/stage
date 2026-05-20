@@ -185,7 +185,7 @@ class ConventionController extends Controller
      */
     private function assertBudgetOk(Projet $projet, Convention $convention, int $montant, ?int $excludeRubriqueId = null): void
     {
-        $totalConventions = $projet->conventions()->sum('convention_montant_fcfa');
+        $totalConventions = $projet->conventions()->sum(\DB::raw('convention_montant * convention_taux_conversion'));
         $financement_depasse_budget_initial = $totalConventions > $projet->projet_montant_estime;
 
         if ($financement_depasse_budget_initial) {
@@ -196,12 +196,12 @@ class ConventionController extends Controller
             ->when($excludeRubriqueId, fn ($q) => $q->where('id_rubrique', '!=', $excludeRubriqueId))
             ->sum('rubrique_montant_prevu') + $montant;
 
-        if ($total > $convention->convention_montant_fcfa) {
+        if ($total > $convention->montant_fcfa) {
             throw ValidationException::withMessages([
                 'montant_prevu' => sprintf(
                     'Le total des rubriques (%s FCFA) dépasserait le montant de la convention (%s FCFA). Pour lever cette contrainte, le total des conventions doit dépasser le budget initial du projet (%s FCFA).',
                     number_format($total, 0, ',', ' '),
-                    number_format($convention->convention_montant_fcfa, 0, ',', ' '),
+                    number_format($convention->montant_fcfa, 0, ',', ' '),
                     number_format($projet->projet_montant_estime, 0, ',', ' ')
                 ),
             ]);
@@ -215,7 +215,7 @@ class ConventionController extends Controller
             'titre' => $convention->convention_titre,
             'description' => $convention->convention_description,
             'montant' => $convention->convention_montant,
-            'montant_fcfa' => $convention->convention_montant_fcfa,
+            'montant_fcfa' => $convention->montant_fcfa,
             'devise_origine' => $convention->convention_devise,
             'taux_conversion' => $convention->convention_taux_conversion,
             'forme' => $convention->convention_forme->value,

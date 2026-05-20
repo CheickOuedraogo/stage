@@ -118,11 +118,11 @@ class ProjetService
             'titre' => $c->convention_titre,
             'bailleur' => $c->bailleur->bailleur_nom,
             'bailleur_sigle' => $c->bailleur->bailleur_sigle,
-            'montant_fcfa' => $c->convention_montant_fcfa,
+            'montant_fcfa' => $c->montant_fcfa,
             'total_versements' => $c->versements->sum('versement_montant'),
             'total_depenses' => $c->rubriques->flatMap->demandesDepenses->sum('demande_montant'),
             'total_paiements_directs' => $c->paiementsDirects->sum('paiement_direct_montant'),
-            'solde' => $c->convention_montant_fcfa - $c->versements->sum('versement_montant'),
+            'solde' => $c->montant_fcfa - $c->versements->sum('versement_montant'),
         ])->values();
 
         $demandes = $projet->conventions->flatMap(fn (Convention $c) => $c->rubriques->flatMap(fn ($r) => $r->demandesDepenses->map(fn (DemandeDepense $d) => [
@@ -144,7 +144,7 @@ class ProjetService
         ])
         )->values();
 
-        $budgetPrevu = $projet->conventions->sum('convention_montant_fcfa');
+        $budgetPrevu = $projet->conventions->sum('montant_fcfa');
         $totalVersements = $conventions->sum('total_versements');
         $totalDepenses = $conventions->sum('total_depenses') + $conventions->sum('total_paiements_directs');
 

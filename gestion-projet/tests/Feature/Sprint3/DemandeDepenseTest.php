@@ -22,7 +22,7 @@ function makeConventionWithRubrique(int $montantRubrique = 10_000_000): array
 {
     $porteur = User::factory()->porteur()->create();
     $projet = Projet::factory()->enCours()->for($porteur, 'porteur')->create();
-    $convention = Convention::factory()->for($projet)->create(['convention_montant_fcfa' => 20_000_000]);
+    $convention = Convention::factory()->for($projet)->create(['convention_montant' => 20_000_000, 'convention_taux_conversion' => 1.0]);
     $rubrique = Rubrique::factory()->for($convention)->create(['rubrique_montant_prevu' => $montantRubrique]);
 
     return compact('porteur', 'projet', 'convention', 'rubrique');
