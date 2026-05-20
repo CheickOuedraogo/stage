@@ -22,7 +22,7 @@ class ProjetController extends Controller
 
     public function index(): Response
     {
-        $projets = Projet::with(['porteur:id_utilisateur,name', 'conventions:id_convention,id_projet,convention_montant_fcfa'])
+        $projets = Projet::with(['porteur:id_utilisateur,name', 'conventions:id_convention,id_projet,convention_montant,convention_taux_conversion'])
             ->withCount('conventions')
             ->latest()
             ->get()
@@ -33,7 +33,7 @@ class ProjetController extends Controller
                 'status' => $p->projet_statut->value,
                 'status_label' => $p->projet_statut->label(),
                 'montant_estime' => $p->projet_montant_estime,
-                'montant_conventions' => $p->conventions->sum('convention_montant_fcfa'),
+                'montant_conventions' => $p->conventions->sum('montant_fcfa'),
                 'conventions_count' => $p->conventions_count,
                 'date_debut' => $p->projet_date_debut?->toDateString(),
                 'date_fin_prevue' => $p->projet_date_fin_prevue?->toDateString(),
@@ -45,7 +45,7 @@ class ProjetController extends Controller
                 'total' => Projet::count(),
                 'en_cours' => Projet::where('projet_statut', 'en_cours')->count(),
                 'total_budget' => Projet::sum('projet_montant_estime'),
-                'total_conventions' => Convention::sum('convention_montant_fcfa'),
+                'total_conventions' => Convention::sum(\DB::raw('convention_montant * convention_taux_conversion')),
             ],
         ]);
     }
@@ -58,7 +58,7 @@ class ProjetController extends Controller
         ]);
 
         $totalVersements = $projet->conventions->flatMap->versements->sum('versement_montant');
-        $montantConventions = $projet->conventions->sum('convention_montant_fcfa');
+        $montantConventions = $projet->conventions->sum('montant_fcfa');
 
         $canCloturer = false;
         $clotureBlockers = null;
@@ -93,7 +93,7 @@ class ProjetController extends Controller
                     'id' => $c->id,
                     'titre' => $c->convention_titre,
                     'bailleur' => ['nom' => $c->bailleur->bailleur_nom, 'sigle' => $c->bailleur->bailleur_sigle],
-                    'montant_fcfa' => $c->convention_montant_fcfa,
+                    'montant_fcfa' => $c->montant_fcfa,
                     'forme' => $c->convention_forme->value,
                     'forme_label' => $c->convention_forme->label(),
                     'status' => $c->convention_statut->value,
@@ -164,7 +164,7 @@ class ProjetController extends Controller
                 DemandeStatus::Terminee->value,
             ])->sum('demande_montant');
 
-        $budgetPrevu = $projet->conventions->sum('convention_montant_fcfa');
+        $budgetPrevu = $projet->conventions->sum('montant_fcfa');
         $ecartBudget = $budgetPrevu - $totalDepenses;
 
         $ecartTemps = null;

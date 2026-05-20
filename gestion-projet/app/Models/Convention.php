@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['id_projet', 'id_bailleur', 'convention_titre', 'convention_description', 'convention_montant', 'convention_forme', 'convention_devise', 'convention_taux_conversion', 'convention_montant_fcfa', 'convention_statut', 'convention_date_signature', 'convention_date_debut', 'convention_date_fin'])]
+#[Fillable(['id_projet', 'id_bailleur', 'convention_titre', 'convention_description', 'convention_montant', 'convention_forme', 'convention_devise', 'convention_taux_conversion', 'convention_statut', 'convention_date_signature', 'convention_date_debut', 'convention_date_fin'])]
 class Convention extends Model
 {
     /** @use HasFactory<ConventionFactory> */
@@ -25,12 +25,17 @@ class Convention extends Model
             'convention_forme' => ConventionForme::class,
             'convention_statut' => ConventionStatus::class,
             'convention_montant' => 'integer',
-            'convention_montant_fcfa' => 'integer',
             'convention_taux_conversion' => 'decimal:6',
             'convention_date_signature' => 'date',
             'convention_date_debut' => 'date',
             'convention_date_fin' => 'date',
         ];
+    }
+
+    /** Montant converti en FCFA (montant × taux_conversion) */
+    public function getMontantFcfaAttribute(): int
+    {
+        return (int) round($this->convention_montant * (float) $this->convention_taux_conversion);
     }
 
     /** Transparent id accessor so $convention->id still works */
