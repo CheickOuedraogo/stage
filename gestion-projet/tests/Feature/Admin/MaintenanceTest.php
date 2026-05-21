@@ -1,15 +1,15 @@
 <?php
 
-use App\Models\Setting;
-use App\Models\User;
+use App\Models\Parametre;
+use App\Models\Utilisateur;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 
 uses(LazilyRefreshDatabase::class);
 
 describe('Mode maintenance', function () {
     beforeEach(function () {
-        $this->admin = User::factory()->admin()->create();
-        Setting::set('maintenance_mode', 'false');
+        $this->admin = Utilisateur::factory()->admin()->create();
+        Parametre::set('maintenance_mode', 'false');
     });
 
     it('active le mode maintenance', function () {
@@ -21,12 +21,12 @@ describe('Mode maintenance', function () {
             ])
             ->assertRedirect();
 
-        expect(Setting::isMaintenanceActive())->toBeTrue();
-        expect(Setting::get('maintenance_reason'))->toBe('Mise à jour du système');
+        expect(Parametre::isMaintenanceActive())->toBeTrue();
+        expect(Parametre::get('maintenance_reason'))->toBe('Mise à jour du système');
     });
 
     it('désactive le mode maintenance', function () {
-        Setting::set('maintenance_mode', 'true');
+        Parametre::set('maintenance_mode', 'true');
 
         $this->actingAs($this->admin)
             ->patch(route('admin.maintenance.update'), [
@@ -35,14 +35,14 @@ describe('Mode maintenance', function () {
             ])
             ->assertRedirect();
 
-        expect(Setting::isMaintenanceActive())->toBeFalse();
+        expect(Parametre::isMaintenanceActive())->toBeFalse();
     });
 
     it('redirige les non-admin vers la maintenance', function () {
-        Setting::set('maintenance_mode', 'true');
-        Setting::set('maintenance_reason', 'Maintenance test');
+        Parametre::set('maintenance_mode', 'true');
+        Parametre::set('maintenance_reason', 'Maintenance test');
 
-        $porteur = User::factory()->porteur()->create();
+        $porteur = Utilisateur::factory()->porteur()->create();
 
         $this->actingAs($porteur)
             ->get(route('porteur.dashboard'))
@@ -50,7 +50,7 @@ describe('Mode maintenance', function () {
     });
 
     it('laisse passer l\'admin en maintenance', function () {
-        Setting::set('maintenance_mode', 'true');
+        Parametre::set('maintenance_mode', 'true');
 
         $this->actingAs($this->admin)
             ->get(route('admin.dashboard'))

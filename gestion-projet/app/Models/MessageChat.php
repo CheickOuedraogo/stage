@@ -7,28 +7,28 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable(['id_expediteur', 'id_destinataire', 'message_contenu', 'message_lu'])]
-class ChatMessage extends Model
+class MessageChat extends Model
 {
+    protected $table = 'messages_chat';
+
     protected $primaryKey = 'id_message';
+
+    const CREATED_AT = 'cree_le';
+
+    const UPDATED_AT = 'mis_a_jour_le';
 
     protected function casts(): array
     {
         return ['message_lu' => 'boolean'];
     }
 
-    /** Transparent id accessor so $chatMessage->id still works */
-    public function getIdAttribute(): mixed
+    public function expediteur(): BelongsTo
     {
-        return $this->getAttribute($this->getKeyName());
+        return $this->belongsTo(Utilisateur::class, 'id_expediteur');
     }
 
-    public function sender(): BelongsTo
+    public function destinataire(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'id_expediteur');
-    }
-
-    public function receiver(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'id_destinataire');
+        return $this->belongsTo(Utilisateur::class, 'id_destinataire');
     }
 }

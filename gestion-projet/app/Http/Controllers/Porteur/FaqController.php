@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Porteur;
 
-use App\Enums\UserRole;
+use App\Enums\RoleUtilisateur;
 use App\Http\Controllers\Controller;
-use App\Models\FaqItem;
+use App\Models\Faq;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -12,11 +12,11 @@ class FaqController extends Controller
 {
     public function index(): Response
     {
-        $items = FaqItem::active()
+        $items = Faq::active()
             ->get()
-            ->filter(fn (FaqItem $f) => $f->isVisibleFor(UserRole::Porteur))
-            ->map(fn (FaqItem $f) => [
-                'id' => $f->id,
+            ->filter(fn (Faq $f) => $f->isVisibleFor(RoleUtilisateur::Porteur))
+            ->map(fn (Faq $f) => [
+                'id' => $f->id_utilisateur_faq,
                 'question' => $f->faq_question,
                 'reponse' => $f->faq_reponse,
             ])

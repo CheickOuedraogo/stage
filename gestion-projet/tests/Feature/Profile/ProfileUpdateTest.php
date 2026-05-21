@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\User;
+use App\Models\Utilisateur;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -9,9 +9,9 @@ uses(LazilyRefreshDatabase::class);
 
 describe('Profil utilisateur', function () {
     beforeEach(function () {
-        $this->user = User::factory()->porteur()->create([
-            'name' => 'Test User',
-            'telephone' => '+226 70 00 00 00',
+        $this->user = Utilisateur::factory()->porteur()->create([
+            'utilisateur_nom' => 'Test Utilisateur',
+            'utilisateur_telephone' => '+226 70 00 00 00',
         ]);
     });
 
@@ -25,28 +25,28 @@ describe('Profil utilisateur', function () {
     it('met à jour le nom et le téléphone', function () {
         $this->actingAs($this->user)
             ->patch(route('profile.update'), [
-                'name' => 'Nouveau Nom',
-                'telephone' => '+226 71 11 11 11',
+                'utilisateur_nom' => 'Nouveau Nom',
+                'utilisateur_telephone' => '+226 71 11 11 11',
             ])
             ->assertRedirect();
 
         $this->assertDatabaseHas('users', [
-            'id_utilisateur' => $this->user->id,
-            'name' => 'Nouveau Nom',
-            'telephone' => '+226 71 11 11 11',
+            'id_utilisateur' => $this->user->id_utilisateur,
+            'utilisateur_nom' => 'Nouveau Nom',
+            'utilisateur_telephone' => '+226 71 11 11 11',
         ]);
     });
 
-    it('ne peut pas modifier l\'email', function () {
-        $originalEmail = $this->user->email;
+    it('ne peut pas modifier l\'utilisateur_email', function () {
+        $originalEmail = $this->user->utilisateur_email;
 
         $this->actingAs($this->user)
             ->patch(route('profile.update'), [
-                'name' => $this->user->name,
-                'email' => 'nouveau@email.bf', // Should be ignored
+                'utilisateur_nom' => $this->user->utilisateur_nom,
+                'utilisateur_email' => 'nouveau@email.bf', // Should be ignored
             ]);
 
-        expect($this->user->fresh()->email)->toBe($originalEmail);
+        expect($this->user->fresh()->utilisateur_email)->toBe($originalEmail);
     });
 
     it('uploade un avatar', function () {
@@ -54,7 +54,7 @@ describe('Profil utilisateur', function () {
 
         $this->actingAs($this->user)
             ->patch(route('profile.update'), [
-                'name' => $this->user->name,
+                'utilisateur_nom' => $this->user->utilisateur_nom,
                 'avatar' => UploadedFile::fake()->image('avatar.jpg'),
             ]);
 
@@ -65,8 +65,8 @@ describe('Profil utilisateur', function () {
     it('change le mot de passe', function () {
         $this->actingAs($this->user)
             ->patch(route('profile.password'), [
-                'current_password' => 'password',
-                'password' => 'NouveauMdp123',
+                'current_password' => 'utilisateur_mot_de_passe',
+                'utilisateur_mot_de_passe' => 'NouveauMdp123',
                 'password_confirmation' => 'NouveauMdp123',
             ])
             ->assertRedirect();
@@ -76,7 +76,7 @@ describe('Profil utilisateur', function () {
         $this->actingAs($this->user)
             ->patch(route('profile.password'), [
                 'current_password' => 'mauvais-mdp',
-                'password' => 'NouveauMdp123',
+                'utilisateur_mot_de_passe' => 'NouveauMdp123',
                 'password_confirmation' => 'NouveauMdp123',
             ])
             ->assertSessionHasErrors('current_password');

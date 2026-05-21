@@ -2,11 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Enums\DemandeStatus;
-use App\Models\Convention;
+use App\Enums\StatutDemande;
 use App\Models\DemandeDepense;
 use App\Models\Rubrique;
-use App\Models\User;
+use App\Models\Utilisateur;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -14,89 +13,55 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class DemandeDepenseFactory extends Factory
 {
+    protected $model = DemandeDepense::class;
+
+    /**
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
-        $convention = Convention::factory()->create();
-        $rubrique = Rubrique::factory()->for($convention)->create();
-
         return [
-            'id_rubrique' => $rubrique->id,
-            'id_convention' => $convention->id,
-            'id_porteur' => User::factory()->porteur(),
-            'demande_montant' => $this->faker->numberBetween(500_000, 5_000_000),
-            'demande_objet' => $this->faker->sentence(5),
-            'demande_description' => $this->faker->paragraph(),
+            'id_rubrique' => Rubrique::factory(),
+            'id_convention' => fn (array $attributes) => Rubrique::find($attributes['id_rubrique'])->id_convention,
+            'id_porteur' => Utilisateur::factory()->porteur(),
+            'demande_montant' => fake()->numberBetween(100000, 5000000),
+            'demande_objet' => fake()->sentence(4),
+            'demande_description' => fake()->paragraph(),
             'demande_justificatif' => null,
-            'demande_statut' => DemandeStatus::Soumise,
-            'demande_motif_rejet' => null,
-            'demande_rapport' => null,
-            'demande_date_validation_daf' => null,
-            'id_validateur_daf' => null,
-            'demande_date_validation_ac' => null,
-            'id_validateur_ac' => null,
-            'demande_rapport_valide_daf' => false,
-            'demande_rapport_valide_ac' => false,
+            'demande_statut' => StatutDemande::Soumise,
+            'cree_le' => now(),
+            'mis_a_jour_le' => now(),
         ];
-    }
-
-    public function soumise(): static
-    {
-        return $this->state(['demande_statut' => DemandeStatus::Soumise]);
     }
 
     public function valideeDaf(): static
     {
-        return $this->state(fn () => [
-            'demande_statut' => DemandeStatus::ValidéeDaf,
+        return $this->state(fn (array $attributes) => [
+            'demande_statut' => StatutDemande::ValideeDaf,
             'demande_date_validation_daf' => now(),
-            'id_validateur_daf' => User::factory()->daf()->create()->id,
+            'id_validateur_daf' => Utilisateur::factory()->daf()->create()->id_utilisateur,
         ]);
     }
 
-    public function valideAc(): static
+    public function valideeAc(): static
     {
-        return $this->state(fn () => [
-            'demande_statut' => DemandeStatus::ValidéeAc,
-            'demande_date_validation_daf' => now()->subDay(),
-            'id_validateur_daf' => User::factory()->daf()->create()->id,
+        return $this->state(fn (array $attributes) => [
+            'demande_statut' => StatutDemande::ValideeAgentComptable,
+            'demande_date_validation_daf' => now(),
+            'id_validateur_daf' => Utilisateur::factory()->daf()->create()->id_utilisateur,
             'demande_date_validation_ac' => now(),
-            'id_validateur_ac' => User::factory()->ac()->create()->id,
-        ]);
-    }
-
-    public function payee(): static
-    {
-        return $this->state(fn () => [
-            'demande_statut' => DemandeStatus::Payee,
-            'demande_date_validation_daf' => now()->subDays(3),
-            'id_validateur_daf' => User::factory()->daf()->create()->id,
-            'demande_date_validation_ac' => now()->subDays(2),
-            'id_validateur_ac' => User::factory()->ac()->create()->id,
-        ]);
-    }
-
-    public function rapportSoumis(): static
-    {
-        return $this->payee()->state([
-            'demande_statut' => DemandeStatus::RapportSoumis,
-            'demande_rapport' => 'rapports/test.pdf',
-            'demande_rapport_valide_daf' => false,
-            'demande_rapport_valide_ac' => false,
-        ]);
-    }
-
-    public function rejetee(): static
-    {
-        return $this->state([
-            'demande_statut' => DemandeStatus::RejetéeDaf,
-            'demande_motif_rejet' => 'Justificatif insuffisant.',
+            'id_validateur_ac' => Utilisateur::factory()->ac()->create()->id_utilisateur,
         ]);
     }
 
     public function terminee(): static
     {
-        return $this->rapportSoumis()->state([
-            'demande_statut' => DemandeStatus::Terminee,
+        return $this->state(fn (array $attributes) => [
+            'demande_statut' => StatutDemande::Terminee,
+            'demande_date_validation_daf' => now(),
+            'id_validateur_daf' => Utilisateur::factory()->daf()->create()->id_utilisateur,
+            'demande_date_validation_ac' => now(),
+            'id_validateur_ac' => Utilisateur::factory()->ac()->create()->id_utilisateur,
             'demande_rapport_valide_daf' => true,
             'demande_rapport_valide_ac' => true,
         ]);

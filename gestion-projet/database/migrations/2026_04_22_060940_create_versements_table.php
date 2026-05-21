@@ -14,12 +14,13 @@ return new class extends Migration
         Schema::create('versements', function (Blueprint $table) {
             $table->id('id_versement');
             $table->foreignId('id_convention')->constrained('conventions', 'id_convention');
-            $table->unsignedBigInteger('versement_montant');
+            $table->bigInteger('versement_montant');
             $table->date('versement_date_reception');
-            $table->string('versement_type')->default('tranche'); // avance | tranche
+            $table->string('versement_type')->default('tranche'); // avance, tranche, solde
             $table->text('versement_description')->nullable();
             $table->string('versement_reference')->nullable();
-            $table->timestamps();
+            $table->timestamp('cree_le')->useCurrent();
+            $table->timestamp('mis_a_jour_le')->useCurrent();
 
             $table->index('id_convention');
         });

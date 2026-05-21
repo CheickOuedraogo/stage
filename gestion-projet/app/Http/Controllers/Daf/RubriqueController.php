@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Daf;
 
-use App\Enums\DemandeStatus;
+use App\Enums\StatutDemande;
 use App\Http\Controllers\Controller;
 use App\Models\Rubrique;
 use Illuminate\Http\Request;
@@ -18,9 +18,9 @@ class RubriqueController extends Controller
             'convention.projet:id_projet,projet_titre',
             'convention.bailleur:id_bailleur,bailleur_nom,bailleur_sigle',
             'demandesDepenses' => fn ($q) => $q->whereIn('demande_statut', [
-                DemandeStatus::Payee->value,
-                DemandeStatus::RapportSoumis->value,
-                DemandeStatus::Terminee->value,
+                StatutDemande::Payee->value,
+                StatutDemande::RapportSoumis->value,
+                StatutDemande::Terminee->value,
             ]),
         ])
             ->when($request->filled('search'), fn ($q) => $q->where(
@@ -31,7 +31,7 @@ class RubriqueController extends Controller
             ->paginate(30)
             ->withQueryString()
             ->through(fn (Rubrique $r) => [
-                'id' => $r->id,
+                'id' => $r->id_utilisateur,
                 'libelle' => $r->rubrique_libelle,
                 'montant_prevu' => $r->rubrique_montant_prevu,
                 'consomme' => $r->demandesDepenses->sum('demande_montant'),
@@ -42,8 +42,8 @@ class RubriqueController extends Controller
                 'convention' => $r->convention->convention_titre,
                 'projet' => $r->convention->projet->projet_titre,
                 'bailleur' => $r->convention->bailleur->bailleur_sigle ?? $r->convention->bailleur->bailleur_nom,
-                'convention_id' => $r->id_convention,
-                'projet_id' => $r->convention->id_projet,
+                'convention_id' => $r->id_utilisateur_convention,
+                'projet_id' => $r->convention->id_utilisateur_projet,
                 'description' => $r->rubrique_description,
             ]);
 

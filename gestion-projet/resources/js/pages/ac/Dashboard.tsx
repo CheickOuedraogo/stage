@@ -24,12 +24,12 @@ interface Demande {
     id: number;
     objet: string;
     montant: number;
-    status: string;
-    status_label: string;
+    statut: string;
+    libelle_statut: string;
     badge_class: string;
     porteur: string;
     convention: string;
-    created_at: string;
+    cree_le: string;
 }
 
 interface PaiementRecent {
@@ -51,7 +51,7 @@ interface Props extends PageProps {
 
 export default function AcDashboard() {
     const { auth, stats, demandes_recentes, paiements_recents } = usePage<Props>().props;
-    const firstName = auth.user?.name.split(' ').find((p) => !p.includes('.')) ?? auth.user?.name;
+    const firstName = auth.user?.utilisateur_nom.split(' ').find((p) => !p.includes('.')) ?? auth.user?.utilisateur_nom;
 
     return (
         <AppLayout title="Tableau de bord">
@@ -124,7 +124,7 @@ export default function AcDashboard() {
                                     <div className="shrink-0 text-right">
                                         <p className="text-sm font-mono font-semibold text-slate-900 dark:text-white">{formatCurrency(d.montant)}</p>
                                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-0.5 ${d.badge_class}`}>
-                                            {d.status_label}
+                                            {d.libelle_statut}
                                         </span>
                                     </div>
                                 </Link>

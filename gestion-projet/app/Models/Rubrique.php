@@ -15,19 +15,19 @@ class Rubrique extends Model
     /** @use HasFactory<RubriqueFactory> */
     use HasFactory;
 
+    protected $table = 'rubriques';
+
     protected $primaryKey = 'id_rubrique';
+
+    const CREATED_AT = 'cree_le';
+
+    const UPDATED_AT = 'mis_a_jour_le';
 
     protected function casts(): array
     {
         return [
             'rubrique_montant_prevu' => 'integer',
         ];
-    }
-
-    /** Transparent id accessor so $rubrique->id still works */
-    public function getIdAttribute(): mixed
-    {
-        return $this->getAttribute($this->getKeyName());
     }
 
     public function convention(): BelongsTo

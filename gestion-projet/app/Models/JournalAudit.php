@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class AuditLog extends Model
+class JournalAudit extends Model
 {
     public $timestamps = false;
+
+    protected $table = 'journaux_audit';
 
     protected $primaryKey = 'id_audit';
 
@@ -21,6 +23,7 @@ class AuditLog extends Model
         'audit_adresse_ip',
         'audit_navigateur',
         'audit_description',
+        'cree_le',
     ];
 
     protected function casts(): array
@@ -28,25 +31,17 @@ class AuditLog extends Model
         return [
             'audit_anciennes_valeurs' => 'array',
             'audit_nouvelles_valeurs' => 'array',
-            'created_at' => 'datetime',
+            'cree_le' => 'datetime',
         ];
     }
 
-    /** Transparent id accessor so $auditLog->id still works */
-    public function getIdAttribute(): mixed
+    public function utilisateur(): BelongsTo
     {
-        return $this->getAttribute($this->getKeyName());
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'id_utilisateur');
+        return $this->belongsTo(Utilisateur::class, 'id_utilisateur');
     }
 
     /**
-     * Create an audit log entry.
-     *
-     * @param  array<string, mixed>  $data
+     * Créer une entrée dans le journal d'audit.
      */
     public static function log(
         string $action,
@@ -65,6 +60,7 @@ class AuditLog extends Model
             'audit_adresse_ip' => request()->ip(),
             'audit_navigateur' => request()->userAgent(),
             'audit_description' => $description,
+            'cree_le' => now(),
         ]);
     }
 }

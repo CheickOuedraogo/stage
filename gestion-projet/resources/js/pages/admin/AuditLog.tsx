@@ -4,7 +4,7 @@ import { auditLog as adminAuditLog } from '@/routes/admin';
 import { formatDateTime, getInitials } from '@/lib/utils';
 import type { PaginatedData } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { ChevronDownIcon, FunnelIcon, UserIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon, FunnelIcon, UtilisateurIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useState as useLocalState } from 'react';
 
 interface AuditEntry {
@@ -16,27 +16,27 @@ interface AuditEntry {
     audit_entite_id: number | null;
     audit_anciennes_valeurs: Record<string, unknown> | null;
     audit_nouvelles_valeurs: Record<string, unknown> | null;
-    created_at: string;
-    user: {
+    cree_le: string;
+    utilisateur: {
         id: number;
-        name: string;
-        email: string;
+        utilisateur_nom: string;
+        utilisateur_email: string;
         utilisateur_role: string | null;
     } | null;
 }
 
-interface UserOption {
+interface UtilisateurOption {
     id: number;
-    name: string;
-    email: string;
+    utilisateur_nom: string;
+    utilisateur_email: string;
     utilisateur_role: string | null;
-    role_label: string | null;
+    label_role: string | null;
 }
 
 interface AuditLogProps {
     logs: PaginatedData<AuditEntry>;
-    users: UserOption[];
-    selectedUserId: number | null;
+    users: UtilisateurOption[];
+    selectedUtilisateurId: number | null;
 }
 
 const actionLabels: Record<string, string> = {
@@ -161,11 +161,11 @@ function ValueDiff({ oldValues, newValues }: { oldValues: Record<string, unknown
     );
 }
 
-export default function AuditLog({ logs, users, selectedUserId }: AuditLogProps) {
-    const selectedUser = selectedUserId ? users.find((u) => u.id === selectedUserId) : null;
+export default function AuditLog({ logs, users, selectedUtilisateurId }: AuditLogProps) {
+    const selectedUtilisateur = selectedUtilisateurId ? users.find((u) => u.id === selectedUtilisateurId) : null;
 
-    const filterByUser = (userId: number | null) => {
-        router.get(adminAuditLog.url(), userId ? { user_id: userId } : {}, { preserveState: false });
+    const filterByUtilisateur = (userId: number | null) => {
+        router.get(adminAuditLog.url(), userId ? { id_utilisateur: userId } : {}, { preserveState: false });
     };
 
     return (
@@ -180,7 +180,7 @@ export default function AuditLog({ logs, users, selectedUserId }: AuditLogProps)
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                {/* User filter sidebar */}
+                {/* Utilisateur filter sidebar */}
                 <div className="lg:col-span-1">
                     <Card>
                         <CardContent>
@@ -191,35 +191,35 @@ export default function AuditLog({ logs, users, selectedUserId }: AuditLogProps)
 
                             <div className="space-y-1">
                                 <button
-                                    onClick={() => filterByUser(null)}
+                                    onClick={() => filterByUtilisateur(null)}
                                     className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors text-left ${
-                                        !selectedUserId
+                                        !selectedUtilisateurId
                                             ? 'bg-slate-800 dark:bg-slate-700 text-white'
                                             : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
                                     }`}
                                 >
-                                    <UserIcon className="w-4 h-4 shrink-0" />
+                                    <UtilisateurIcon className="w-4 h-4 shrink-0" />
                                     <span>Tous les utilisateurs</span>
                                 </button>
 
                                 {users.map((user) => (
                                     <button
                                         key={user.id}
-                                        onClick={() => filterByUser(user.id)}
+                                        onClick={() => filterByUtilisateur(user.id)}
                                         className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors text-left ${
-                                            selectedUserId === user.id
+                                            selectedUtilisateurId === user.id
                                                 ? 'bg-slate-800 dark:bg-slate-700 text-white'
                                                 : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
                                         }`}
                                     >
                                         <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
-                                            selectedUserId === user.id
+                                            selectedUtilisateurId === user.id
                                                 ? 'bg-white/20 text-white'
                                                 : 'bg-gray-200 dark:bg-slate-700 text-gray-600 dark:text-slate-300'
                                         }`}>
-                                            {getInitials(user.name)}
+                                            {getInitials(user.utilisateur_nom)}
                                         </div>
-                                        <span className="truncate">{user.name.split(' ')[0]}</span>
+                                        <span className="truncate">{user.utilisateur_nom.split(' ')[0]}</span>
                                     </button>
                                 ))}
                             </div>
@@ -230,16 +230,16 @@ export default function AuditLog({ logs, users, selectedUserId }: AuditLogProps)
                 {/* Logs list */}
                 <div className="lg:col-span-3 space-y-4">
                     {/* Filter indicator */}
-                    {selectedUser && (
+                    {selectedUtilisateur && (
                         <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-slate-800 rounded-lg">
                             <div className="w-6 h-6 rounded-full bg-slate-700 dark:bg-slate-600 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
-                                {getInitials(selectedUser.name)}
+                                {getInitials(selectedUtilisateur.utilisateur_nom)}
                             </div>
                             <span className="text-sm text-gray-700 dark:text-slate-300 font-medium flex-1">
-                                Actions de {selectedUser.name}
+                                Actions de {selectedUtilisateur.utilisateur_nom}
                             </span>
                             <button
-                                onClick={() => filterByUser(null)}
+                                onClick={() => filterByUtilisateur(null)}
                                 className="p-1 rounded hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
                                 aria-label="Effacer le filtre"
                             >
@@ -268,33 +268,33 @@ export default function AuditLog({ logs, users, selectedUserId }: AuditLogProps)
                                     {logs.data.map((log) => (
                                         <div key={log.id} className="py-3 first:pt-0 last:pb-0">
                                             <div className="flex items-start gap-3">
-                                                {log.user ? (
+                                                {log.utilisateur ? (
                                                     <button
-                                                        onClick={() => filterByUser(log.user!.id)}
+                                                        onClick={() => filterByUtilisateur(log.utilisateur!.id)}
                                                         className="w-8 h-8 rounded-full bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-slate-300 text-xs font-bold flex items-center justify-center shrink-0 hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors mt-0.5"
-                                                        title={`Filtrer par ${log.user.name}`}
+                                                        title={`Filtrer par ${log.utilisateur.utilisateur_nom}`}
                                                     >
-                                                        {getInitials(log.user.name)}
+                                                        {getInitials(log.utilisateur.utilisateur_nom)}
                                                     </button>
                                                 ) : (
                                                     <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-500 flex items-center justify-center shrink-0 mt-0.5">
-                                                        <UserIcon className="w-4 h-4" />
+                                                        <UtilisateurIcon className="w-4 h-4" />
                                                     </div>
                                                 )}
 
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex flex-wrap items-center gap-2 mb-0.5">
                                                         <span className="text-sm font-medium text-gray-900 dark:text-white">
-                                                            {log.user?.name ?? 'Système'}
+                                                            {log.utilisateur?.utilisateur_nom ?? 'Système'}
                                                         </span>
                                                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                                                             actionColors[log.audit_action] ?? 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-400'
                                                         }`}>
                                                             {actionLabels[log.audit_action] ?? log.audit_action}
                                                         </span>
-                                                        {log.user?.utilisateur_role && (
+                                                        {log.utilisateur?.utilisateur_role && (
                                                             <span className="text-xs text-gray-400 dark:text-slate-500 bg-gray-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
-                                                                {log.user.utilisateur_role}
+                                                                {log.utilisateur.utilisateur_role}
                                                             </span>
                                                         )}
                                                     </div>
@@ -303,7 +303,7 @@ export default function AuditLog({ logs, users, selectedUserId }: AuditLogProps)
                                                     )}
                                                     <ValueDiff oldValues={log.audit_anciennes_valeurs} newValues={log.audit_nouvelles_valeurs} />
                                                     <div className="flex items-center gap-3 mt-1">
-                                                        <span className="text-xs text-gray-400 dark:text-slate-500">{formatDateTime(log.created_at)}</span>
+                                                        <span className="text-xs text-gray-400 dark:text-slate-500">{formatDateTime(log.cree_le)}</span>
                                                         {log.audit_adresse_ip && (
                                                             <span className="text-xs text-gray-300 dark:text-slate-600 font-mono">{log.audit_adresse_ip}</span>
                                                         )}

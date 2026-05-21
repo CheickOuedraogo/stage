@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Enums\ProjectStatus;
-use App\Enums\ProjetStatutFinal;
+use App\Enums\StatutFinalProjet;
+use App\Enums\StatutProjet;
 use Database\Factories\ProjetFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,13 +19,19 @@ class Projet extends Model
     /** @use HasFactory<ProjetFactory> */
     use HasFactory;
 
+    protected $table = 'projets';
+
     protected $primaryKey = 'id_projet';
+
+    const CREATED_AT = 'cree_le';
+
+    const UPDATED_AT = 'mis_a_jour_le';
 
     protected function casts(): array
     {
         return [
-            'projet_statut' => ProjectStatus::class,
-            'statut_final' => ProjetStatutFinal::class,
+            'projet_statut' => StatutProjet::class,
+            'statut_final' => StatutFinalProjet::class,
             'projet_montant_estime' => 'integer',
             'projet_date_debut' => 'date',
             'projet_date_fin_prevue' => 'date',
@@ -35,7 +41,7 @@ class Projet extends Model
 
     public function porteur(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'id_porteur');
+        return $this->belongsTo(Utilisateur::class, 'id_porteur');
     }
 
     public function conventions(): HasMany
@@ -48,19 +54,13 @@ class Projet extends Model
         return $this->hasManyThrough(Versement::class, Convention::class, 'id_projet', 'id_convention');
     }
 
-    /** Transparent id accessor so $projet->id still works */
-    public function getIdAttribute(): mixed
+    public function scopePourPorteur(Builder $query, int $idPorteur): void
     {
-        return $this->getAttribute($this->getKeyName());
-    }
-
-    public function scopeForPorteur(Builder $query, int $porteurId): void
-    {
-        $query->where('id_porteur', $porteurId);
+        $query->where('id_porteur', $idPorteur);
     }
 
     /** Montant total des versements reçus pour ce projet */
-    public function getTotalVersementsAttribute(): int
+    public function getMontantTotalVersementsAttribute(): int
     {
         return $this->versements()->sum('versement_montant');
     }

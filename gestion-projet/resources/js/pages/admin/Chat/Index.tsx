@@ -5,8 +5,8 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { ChatBubbleLeftRightIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 
 interface Conversation {
-    user_id: number;
-    name: string;
+    id_utilisateur: number;
+    utilisateur_nom: string;
     role: string;
     unread: number;
     last_message: string | null;
@@ -38,8 +38,8 @@ export default function AdminChatIndex() {
                 ) : (
                     conversations.map((conv) => (
                         <Link
-                            key={conv.user_id}
-                            href={chatShow.url(conv.user_id)}
+                            key={conv.id_utilisateur}
+                            href={chatShow.url(conv.id_utilisateur)}
                             className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl hover:border-blue-300 hover:shadow-sm transition-all"
                         >
                             <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
@@ -47,7 +47,7 @@ export default function AdminChatIndex() {
                             </div>
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between gap-2">
-                                    <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{conv.name}</p>
+                                    <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{conv.utilisateur_nom}</p>
                                     {conv.last_at && <p className="text-xs text-slate-400 shrink-0">{conv.last_at}</p>}
                                 </div>
                                 <div className="flex items-center justify-between gap-2 mt-0.5">

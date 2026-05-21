@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\DemandeStatus;
+use App\Enums\StatutDemande;
 use Database\Factories\DemandeDepenseFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -23,26 +23,24 @@ class DemandeDepense extends Model
     /** @use HasFactory<DemandeDepenseFactory> */
     use HasFactory;
 
-    protected $table = 'demandes_depenses';
+    protected $table = 'demandes_depense';
 
     protected $primaryKey = 'id_demande';
+
+    const CREATED_AT = 'cree_le';
+
+    const UPDATED_AT = 'mis_a_jour_le';
 
     protected function casts(): array
     {
         return [
-            'demande_statut' => DemandeStatus::class,
+            'demande_statut' => StatutDemande::class,
             'demande_montant' => 'integer',
             'demande_date_validation_daf' => 'datetime',
             'demande_date_validation_ac' => 'datetime',
             'demande_rapport_valide_daf' => 'boolean',
             'demande_rapport_valide_ac' => 'boolean',
         ];
-    }
-
-    /** Transparent id accessor so $demande->id still works */
-    public function getIdAttribute(): mixed
-    {
-        return $this->getAttribute($this->getKeyName());
     }
 
     public function rubrique(): BelongsTo
@@ -57,17 +55,17 @@ class DemandeDepense extends Model
 
     public function porteur(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'id_porteur');
+        return $this->belongsTo(Utilisateur::class, 'id_porteur');
     }
 
     public function validateurDaf(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'id_validateur_daf');
+        return $this->belongsTo(Utilisateur::class, 'id_validateur_daf');
     }
 
-    public function validateurAc(): BelongsTo
+    public function validateurAgentComptable(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'id_validateur_ac');
+        return $this->belongsTo(Utilisateur::class, 'id_validateur_ac');
     }
 
     public function paiement(): HasOne
@@ -78,29 +76,29 @@ class DemandeDepense extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->whereNotIn('demande_statut', [
-            DemandeStatus::RejetéeDaf->value,
-            DemandeStatus::RejetéeAc->value,
-            DemandeStatus::Terminee->value,
+            StatutDemande::RejeteeDaf->value,
+            StatutDemande::RejeteeAgentComptable->value,
+            StatutDemande::Terminee->value,
         ]);
     }
 
     public function scopeEnAttenteDaf(Builder $query): Builder
     {
-        return $query->where('demande_statut', DemandeStatus::Soumise);
+        return $query->where('demande_statut', StatutDemande::Soumise);
     }
 
-    public function scopeEnAttenteAc(Builder $query): Builder
+    public function scopeEnAttenteAgentComptable(Builder $query): Builder
     {
-        return $query->where('demande_statut', DemandeStatus::ValidéeDaf);
+        return $query->where('demande_statut', StatutDemande::ValideeDaf);
     }
 
-    public function getHasJustificatifAttribute(): bool
+    public function getPossedeJustificatifAttribute(): bool
     {
         return (bool) $this->demande_justificatif
             && Storage::disk('private')->exists($this->demande_justificatif);
     }
 
-    public function getHasRapportAttribute(): bool
+    public function getPossedeRapportAttribute(): bool
     {
         return (bool) $this->demande_rapport
             && Storage::disk('private')->exists($this->demande_rapport);

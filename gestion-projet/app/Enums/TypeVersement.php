@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum VersementType: string
+enum TypeVersement: string
 {
     case Avance = 'avance';
     case Tranche = 'tranche';

@@ -1,13 +1,13 @@
 export interface User {
     id: number;
-    name: string;
-    email: string;
+    utilisateur_nom: string;
+    utilisateur_email: string;
     utilisateur_role: 'admin' | 'daf' | 'ac' | 'porteur';
-    role_label: string;
+    label_role: string;
     utilisateur_actif: boolean;
-    avatar_url: string | null;
-    telephone: string | null;
-    unread_notifications: number;
+    url_avatar: string | null;
+    utilisateur_telephone: string | null;
+    notifications_non_lues: number;
 }
 
 export interface PageProps {
@@ -25,6 +25,16 @@ export interface PageProps {
         reason: string | null;
     };
     [key: string]: unknown;
+}
+
+export interface Utilisateur {
+    id?: number;
+    id_utilisateur?: number;
+    utilisateur_nom?: string;
+    utilisateur_email?: string;
+    utilisateur_role?: 'admin' | 'daf' | 'ac' | 'porteur';
+    utilisateur_telephone?: string | null;
+    utilisateur_actif?: boolean;
 }
 
 export interface PaginatedData<T> {

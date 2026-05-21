@@ -16,8 +16,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { FormEvent, useState } from 'react';
 
-interface FaqItem {
-    id: number;
+interface Faq {
+    id_faq: number;
     faq_question: string;
     faq_reponse: string;
     faq_actif: boolean;
@@ -27,7 +27,7 @@ interface FaqItem {
 }
 
 interface Props extends PageProps {
-    items: FaqItem[];
+    items: Faq[];
 }
 
 function RoleCheckboxes({
@@ -133,7 +133,7 @@ function CreateForm({ onCancel }: { onCancel: () => void }) {
     );
 }
 
-function EditForm({ item, onCancel }: { item: FaqItem; onCancel: () => void }) {
+function EditForm({ item, onCancel }: { item: Faq; onCancel: () => void }) {
     const form = useForm({
         question: item.faq_question,
         reponse: item.faq_reponse,
@@ -145,7 +145,7 @@ function EditForm({ item, onCancel }: { item: FaqItem; onCancel: () => void }) {
 
     const submit = (e: FormEvent) => {
         e.preventDefault();
-        form.patch(faqUpdate.url(item.id), { onSuccess: onCancel });
+        form.patch(faqUpdate.url(item.id_faq), { onSuccess: onCancel });
     };
 
     return (
@@ -206,7 +206,7 @@ function EditForm({ item, onCancel }: { item: FaqItem; onCancel: () => void }) {
     );
 }
 
-function DeleteButton({ item }: { item: FaqItem }) {
+function DeleteButton({ item }: { item: Faq }) {
     const { delete: destroy, processing } = useForm({});
     const [open, setOpen] = useState(false);
 
@@ -227,7 +227,7 @@ function DeleteButton({ item }: { item: FaqItem }) {
                 title="Supprimer la question"
                 message={`« ${item.faq_question} » sera définitivement supprimée de la FAQ.`}
                 confirmLabel="Supprimer"
-                onConfirm={() => destroy(faqDestroy.url(item.id), { onSuccess: () => setOpen(false), onError: () => setOpen(false) })}
+                onConfirm={() => destroy(faqDestroy.url(item.id_faq), { onSuccess: () => setOpen(false), onError: () => setOpen(false) })}
                 onCancel={() => setOpen(false)}
             />
         </>
@@ -273,8 +273,8 @@ export default function AdminFaqIndex() {
                 ) : (
                     <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl divide-y divide-gray-100 dark:divide-slate-800 overflow-hidden">
                         {items.map((item, idx) => (
-                            <div key={item.id}>
-                                {editingId === item.id ? (
+                            <div key={item.id_faq}>
+                                {editingId === item.id_faq ? (
                                     <div className="p-4 bg-amber-50/50 dark:bg-amber-900/10">
                                         <EditForm item={item} onCancel={() => setEditingId(null)} />
                                     </div>
@@ -305,7 +305,7 @@ export default function AdminFaqIndex() {
                                         </div>
                                         <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button
-                                                onClick={() => { setEditingId(item.id); setShowCreate(false); }}
+                                                onClick={() => { setEditingId(item.id_faq); setShowCreate(false); }}
                                                 className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                                                 title="Modifier"
                                             >

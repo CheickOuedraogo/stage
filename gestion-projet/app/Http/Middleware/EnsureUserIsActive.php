@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureUserIsActive
+class EnsureUtilisateurIsActive
 {
     /**
      * Handle an incoming request.
@@ -23,7 +23,7 @@ class EnsureUserIsActive
             $request->session()->regenerateToken();
 
             return redirect()->route('login')->withErrors([
-                'email' => 'Votre compte a été désactivé. Contactez l\'administrateur.',
+                'utilisateur_email' => 'Votre compte a été désactivé. Contactez l\'administrateur.',
             ]);
         }
 

@@ -8,19 +8,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['bailleur_nom', 'bailleur_sigle', 'bailleur_type', 'bailleur_pays', 'contact', 'email', 'telephone', 'adresse', 'description'])]
+#[Fillable(['bailleur_nom', 'bailleur_sigle', 'bailleur_type', 'bailleur_pays', 'bailleur_contact', 'bailleur_email', 'bailleur_telephone', 'bailleur_adresse', 'bailleur_description'])]
 class Bailleur extends Model
 {
     /** @use HasFactory<BailleurFactory> */
     use HasFactory;
 
+    protected $table = 'bailleurs';
+
     protected $primaryKey = 'id_bailleur';
 
-    /** Transparent id accessor so $bailleur->id still works */
-    public function getIdAttribute(): mixed
-    {
-        return $this->getAttribute($this->getKeyName());
-    }
+    const CREATED_AT = 'cree_le';
+
+    const UPDATED_AT = 'mis_a_jour_le';
 
     public function conventions(): HasMany
     {

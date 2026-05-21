@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Daf;
 
-use App\Enums\DemandeStatus;
+use App\Enums\StatutDemande;
 use App\Http\Controllers\Controller;
 use App\Models\DemandeDepense;
 use App\Services\DemandeDepenseService;
@@ -21,7 +21,7 @@ class DemandeDepenseController extends Controller
             'convention.projet:id_projet,projet_titre',
             'convention:id_convention,convention_titre,id_projet',
             'rubrique:id_rubrique,rubrique_libelle',
-            'porteur:id_utilisateur,name',
+            'porteur:id_utilisateur,utilisateur_nom',
         ])
             ->enAttenteDaf()
             ->latest()
@@ -32,10 +32,10 @@ class DemandeDepenseController extends Controller
             'convention.projet:id_projet,projet_titre',
             'convention:id_convention,convention_titre,id_projet',
             'rubrique:id_rubrique,rubrique_libelle',
-            'porteur:id_utilisateur,name',
+            'porteur:id_utilisateur,utilisateur_nom',
         ])
-            ->whereNotIn('demande_statut', [DemandeStatus::Soumise->value])
-            ->when($request->filled('status'), fn ($q) => $q->where('demande_statut', $request->status))
+            ->whereNotIn('demande_statut', [StatutDemande::Soumise->value])
+            ->when($request->filled('statut'), fn ($q) => $q->where('demande_statut', $request->statut))
             ->latest()
             ->paginate(20)
             ->through(fn (DemandeDepense $d) => $this->formatDemande($d));
@@ -43,8 +43,8 @@ class DemandeDepenseController extends Controller
         return Inertia::render('daf/Demandes/Index', [
             'en_attente' => $enAttente,
             'historique' => $historique,
-            'filters' => $request->only(['status']),
-            'statuses' => collect(DemandeStatus::cases())->map(fn ($s) => [
+            'filters' => $request->only(['statut']),
+            'statuses' => collect(StatutDemande::cases())->map(fn ($s) => [
                 'value' => $s->value,
                 'label' => $s->label(),
             ]),
@@ -57,10 +57,10 @@ class DemandeDepenseController extends Controller
             'convention.projet:id_projet,projet_titre',
             'convention:id_convention,convention_titre,id_projet',
             'rubrique:id_rubrique,rubrique_libelle,rubrique_montant_prevu',
-            'porteur:id_utilisateur,name,email',
-            'paiement.enregistrePar:id_utilisateur,name',
-            'validateurDaf:id_utilisateur,name',
-            'validateurAc:id_utilisateur,name',
+            'porteur:id_utilisateur,utilisateur_nom,utilisateur_email',
+            'paiement.enregistrePar:id_utilisateur,utilisateur_nom',
+            'validateurDaf:id_utilisateur,utilisateur_nom',
+            'validateurAgentComptable:id_utilisateur,utilisateur_nom',
         ]);
 
         return Inertia::render('daf/Demandes/Show', [
@@ -103,20 +103,20 @@ class DemandeDepenseController extends Controller
     private function formatDemande(DemandeDepense $d): array
     {
         return [
-            'id' => $d->id,
+            'id' => $d->id_utilisateur,
             'objet' => $d->demande_objet,
             'montant' => $d->demande_montant,
-            'status' => $d->demande_statut->value,
-            'status_label' => $d->demande_statut->label(),
+            'statut' => $d->demande_statut->value,
+            'libelle_statut' => $d->demande_statut->label(),
             'badge_class' => $d->demande_statut->badgeClass(),
-            'created_at' => $d->created_at->toDateString(),
-            'porteur' => ['name' => $d->porteur->name],
+            'cree_le' => $d->created_at->toDateString(),
+            'porteur' => ['utilisateur_nom' => $d->porteur->utilisateur_nom],
             'convention' => [
-                'id' => $d->convention->id,
+                'id' => $d->convention->id_utilisateur,
                 'titre' => $d->convention->convention_titre,
             ],
             'projet' => [
-                'id' => $d->convention->projet->id,
+                'id' => $d->convention->projet->id_utilisateur,
                 'titre' => $d->convention->projet->projet_titre,
             ],
             'rubrique' => ['libelle' => $d->rubrique->rubrique_libelle],
@@ -129,15 +129,15 @@ class DemandeDepenseController extends Controller
             ...$this->formatDemande($d),
             'description' => $d->demande_description,
             'motif_rejet' => $d->demande_motif_rejet,
-            'has_justificatif' => $d->has_justificatif,
-            'has_rapport' => $d->has_rapport,
+            'possede_justificatif' => $d->possede_justificatif,
+            'possede_rapport' => $d->possede_rapport,
             'rapport_validee_daf' => $d->demande_rapport_valide_daf,
             'rapport_validee_ac' => $d->demande_rapport_valide_ac,
             'validee_daf_at' => $d->demande_date_validation_daf?->toDateTimeString(),
             'validee_ac_at' => $d->demande_date_validation_ac?->toDateTimeString(),
-            'validateur_daf' => $d->validateurDaf?->name,
-            'validateur_ac' => $d->validateurAc?->name,
-            'porteur_email' => $d->porteur->email,
+            'validateur_daf' => $d->validateurDaf?->utilisateur_nom,
+            'validateur_ac' => $d->validateurAgentComptable?->utilisateur_nom,
+            'porteur_email' => $d->porteur->utilisateur_email,
             'rubrique_montant_prevu' => $d->rubrique->rubrique_montant_prevu,
             'paiement' => $d->paiement ? [
                 'montant' => $d->paiement->paiement_montant,
@@ -145,7 +145,7 @@ class DemandeDepenseController extends Controller
                 'mode_paiement' => $d->paiement->paiement_mode->value,
                 'mode_paiement_label' => $d->paiement->paiement_mode->label(),
                 'reference' => $d->paiement->paiement_reference,
-                'enregistre_par' => $d->paiement->enregistrePar->name,
+                'enregistre_par' => $d->paiement->enregistrePar->utilisateur_nom,
             ] : null,
         ];
     }

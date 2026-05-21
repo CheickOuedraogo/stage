@@ -1,14 +1,14 @@
 <?php
 
-use App\Enums\DemandeStatus;
 use App\Enums\ModePaiement;
+use App\Enums\StatutDemande;
 use App\Models\Convention;
 use App\Models\DemandeDepense;
 use App\Models\Paiement;
 use App\Models\PaiementDirect;
 use App\Models\Projet;
 use App\Models\Rubrique;
-use App\Models\User;
+use App\Models\Utilisateur;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
@@ -20,7 +20,7 @@ uses(LazilyRefreshDatabase::class);
 
 function makeConventionWithRubrique(int $montantRubrique = 10_000_000): array
 {
-    $porteur = User::factory()->porteur()->create();
+    $porteur = Utilisateur::factory()->porteur()->create();
     $projet = Projet::factory()->enCours()->for($porteur, 'porteur')->create();
     $convention = Convention::factory()->for($projet)->create(['convention_montant' => 20_000_000, 'convention_taux_conversion' => 1.0]);
     $rubrique = Rubrique::factory()->for($convention)->create(['rubrique_montant_prevu' => $montantRubrique]);
@@ -35,9 +35,9 @@ describe('Porteur – liste des demandes', function () {
         ['porteur' => $porteur, 'convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         $demande = DemandeDepense::factory()->create([
-            'id_porteur' => $porteur->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+            'id_porteur' => $porteur->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
         ]);
 
         $this->actingAs($porteur)
@@ -50,13 +50,13 @@ describe('Porteur – liste des demandes', function () {
     });
 
     it('ne voit pas les demandes des autres porteurs', function () {
-        $autrePorteur = User::factory()->porteur()->create();
+        $autrePorteur = Utilisateur::factory()->porteur()->create();
         ['porteur' => $porteur, 'convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         DemandeDepense::factory()->create([
-            'id_porteur' => $autrePorteur->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+            'id_porteur' => $autrePorteur->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
         ]);
 
         $this->actingAs($porteur)
@@ -79,7 +79,7 @@ describe('Porteur – créer une demande', function () {
     });
 
     it('refuse l\'accès si le porteur ne possède pas le projet', function () {
-        $autrePorteur = User::factory()->porteur()->create();
+        $autrePorteur = Utilisateur::factory()->porteur()->create();
         ['projet' => $projet, 'convention' => $convention] = makeConventionWithRubrique();
 
         $this->actingAs($autrePorteur)
@@ -95,19 +95,19 @@ describe('Porteur – créer une demande', function () {
 
         $this->actingAs($porteur)
             ->post(route('porteur.projets.conventions.demandes.store', [$projet, $convention]), [
-                'rubrique_id' => $rubrique->id,
+                'rubrique_id' => $rubrique->id_utilisateur,
                 'montant' => 2_000_000,
-                'objet' => 'Achat de matériel',
+                'objet' => 'AgentComptablehat de matériel',
                 'description' => 'Description détaillée',
                 'justificatif' => UploadedFile::fake()->create('justif.pdf', 100, 'application/pdf'),
             ])
             ->assertRedirect(route('porteur.demandes.index'));
 
         $this->assertDatabaseHas('demandes_depenses', [
-            'id_convention' => $convention->id,
-            'id_porteur' => $porteur->id,
+            'id_convention' => $convention->id_utilisateur,
+            'id_porteur' => $porteur->id_utilisateur,
             'demande_montant' => 2_000_000,
-            'demande_statut' => DemandeStatus::Soumise->value,
+            'demande_statut' => StatutDemande::Soumise->value,
         ]);
     });
 
@@ -118,7 +118,7 @@ describe('Porteur – créer une demande', function () {
 
         $this->actingAs($porteur)
             ->post(route('porteur.projets.conventions.demandes.store', [$projet, $convention]), [
-                'rubrique_id' => $rubrique->id,
+                'rubrique_id' => $rubrique->id_utilisateur,
                 'montant' => 5_000_000,
                 'objet' => 'Dépassement',
                 'justificatif' => UploadedFile::fake()->create('justif.pdf', 100, 'application/pdf'),
@@ -132,15 +132,15 @@ describe('Porteur – créer une demande', function () {
         ['porteur' => $porteur, 'projet' => $projet, 'convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         DemandeDepense::factory()->create([
-            'id_porteur' => $porteur->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
-            'demande_statut' => DemandeStatus::Soumise,
+            'id_porteur' => $porteur->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
+            'demande_statut' => StatutDemande::Soumise,
         ]);
 
         $this->actingAs($porteur)
             ->post(route('porteur.projets.conventions.demandes.store', [$projet, $convention]), [
-                'rubrique_id' => $rubrique->id,
+                'rubrique_id' => $rubrique->id_utilisateur,
                 'montant' => 500_000,
                 'objet' => 'Doublon',
                 'justificatif' => UploadedFile::fake()->create('justif.pdf', 100, 'application/pdf'),
@@ -155,7 +155,7 @@ describe('Porteur – créer une demande', function () {
 
         $this->actingAs($porteur)
             ->post(route('porteur.projets.conventions.demandes.store', [$projet, $convention]), [
-                'rubrique_id' => $rubrique->id,
+                'rubrique_id' => $rubrique->id_utilisateur,
                 'montant' => 500_000,
                 'objet' => 'Test',
                 'justificatif' => UploadedFile::fake()->create('image.jpg', 100, 'image/jpeg'),
@@ -171,9 +171,9 @@ describe('Porteur – voir une demande', function () {
         ['porteur' => $porteur, 'convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         $demande = DemandeDepense::factory()->create([
-            'id_porteur' => $porteur->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+            'id_porteur' => $porteur->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
         ]);
 
         $this->actingAs($porteur)
@@ -183,13 +183,13 @@ describe('Porteur – voir une demande', function () {
     });
 
     it('interdit l\'accès à la demande d\'un autre porteur', function () {
-        $autrePorteur = User::factory()->porteur()->create();
+        $autrePorteur = Utilisateur::factory()->porteur()->create();
         ['porteur' => $porteur, 'convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         $demande = DemandeDepense::factory()->create([
-            'id_porteur' => $autrePorteur->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+            'id_porteur' => $autrePorteur->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
         ]);
 
         $this->actingAs($porteur)
@@ -208,9 +208,9 @@ describe('Porteur – soumettre un rapport', function () {
         ['porteur' => $porteur, 'convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         $demande = DemandeDepense::factory()->payee()->create([
-            'id_porteur' => $porteur->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+            'id_porteur' => $porteur->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
         ]);
 
         $this->actingAs($porteur)
@@ -220,7 +220,7 @@ describe('Porteur – soumettre un rapport', function () {
             ->assertRedirect();
 
         $demande->refresh();
-        expect($demande->demande_statut)->toBe(DemandeStatus::RapportSoumis);
+        expect($demande->demande_statut)->toBe(StatutDemande::RapportSoumis);
         expect($demande->demande_rapport)->not->toBeNull();
     });
 
@@ -230,9 +230,9 @@ describe('Porteur – soumettre un rapport', function () {
         ['porteur' => $porteur, 'convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         $demande = DemandeDepense::factory()->soumise()->create([
-            'id_porteur' => $porteur->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+            'id_porteur' => $porteur->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
         ]);
 
         $this->actingAs($porteur)
@@ -247,13 +247,13 @@ describe('Porteur – soumettre un rapport', function () {
 
 describe('DAF – liste et détail', function () {
     it('affiche la liste des demandes', function () {
-        $daf = User::factory()->daf()->create();
+        $daf = Utilisateur::factory()->daf()->create();
         ['convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         DemandeDepense::factory()->soumise()->create([
-            'id_porteur' => User::factory()->porteur()->create()->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+            'id_porteur' => Utilisateur::factory()->porteur()->create()->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
         ]);
 
         $this->actingAs($daf)
@@ -266,13 +266,13 @@ describe('DAF – liste et détail', function () {
     });
 
     it('affiche le détail d\'une demande', function () {
-        $daf = User::factory()->daf()->create();
+        $daf = Utilisateur::factory()->daf()->create();
         ['convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         $demande = DemandeDepense::factory()->soumise()->create([
-            'id_porteur' => User::factory()->porteur()->create()->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+            'id_porteur' => Utilisateur::factory()->porteur()->create()->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
         ]);
 
         $this->actingAs($daf)
@@ -288,13 +288,13 @@ describe('DAF – valider une demande', function () {
     it('valide une demande soumise', function () {
         Notification::fake();
 
-        $daf = User::factory()->daf()->create();
+        $daf = Utilisateur::factory()->daf()->create();
         ['convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         $demande = DemandeDepense::factory()->soumise()->create([
-            'id_porteur' => User::factory()->porteur()->create()->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+            'id_porteur' => Utilisateur::factory()->porteur()->create()->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
         ]);
 
         $this->actingAs($daf)
@@ -302,20 +302,20 @@ describe('DAF – valider une demande', function () {
             ->assertRedirect();
 
         $demande->refresh();
-        expect($demande->demande_statut)->toBe(DemandeStatus::ValidéeDaf);
-        expect($demande->id_validateur_daf)->toBe($daf->id);
+        expect($demande->demande_statut)->toBe(StatutDemande::ValidéeDaf);
+        expect($demande->id_utilisateur_validateur_daf)->toBe($daf->id_utilisateur);
     });
 
     it('rejette une demande avec un motif', function () {
         Notification::fake();
 
-        $daf = User::factory()->daf()->create();
+        $daf = Utilisateur::factory()->daf()->create();
         ['convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         $demande = DemandeDepense::factory()->soumise()->create([
-            'id_porteur' => User::factory()->porteur()->create()->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+            'id_porteur' => Utilisateur::factory()->porteur()->create()->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
         ]);
 
         $this->actingAs($daf)
@@ -323,18 +323,18 @@ describe('DAF – valider une demande', function () {
             ->assertRedirect();
 
         $demande->refresh();
-        expect($demande->demande_statut)->toBe(DemandeStatus::RejetéeDaf);
+        expect($demande->demande_statut)->toBe(StatutDemande::RejetéeDaf);
         expect($demande->demande_motif_rejet)->toBe('Justificatif manquant');
     });
 
     it('refuse le rejet sans motif', function () {
-        $daf = User::factory()->daf()->create();
+        $daf = Utilisateur::factory()->daf()->create();
         ['convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         $demande = DemandeDepense::factory()->soumise()->create([
-            'id_porteur' => User::factory()->porteur()->create()->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+            'id_porteur' => Utilisateur::factory()->porteur()->create()->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
         ]);
 
         $this->actingAs($daf)
@@ -343,13 +343,13 @@ describe('DAF – valider une demande', function () {
     });
 
     it('refuse la validation d\'une demande déjà validée par DAF', function () {
-        $daf = User::factory()->daf()->create();
+        $daf = Utilisateur::factory()->daf()->create();
         ['convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         $demande = DemandeDepense::factory()->valideeDaf()->create([
-            'id_porteur' => User::factory()->porteur()->create()->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+            'id_porteur' => Utilisateur::factory()->porteur()->create()->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
         ]);
 
         $this->actingAs($daf)
@@ -364,14 +364,14 @@ describe('DAF – valider un rapport', function () {
     it('valide un rapport soumis', function () {
         Notification::fake();
 
-        $daf = User::factory()->daf()->create();
-        $ac = User::factory()->ac()->create();
+        $daf = Utilisateur::factory()->daf()->create();
+        $ac = Utilisateur::factory()->ac()->create();
         ['convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         $demande = DemandeDepense::factory()->rapportSoumis()->create([
-            'id_porteur' => User::factory()->porteur()->create()->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+            'id_porteur' => Utilisateur::factory()->porteur()->create()->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
             'demande_rapport_valide_ac' => true,
         ]);
 
@@ -380,19 +380,19 @@ describe('DAF – valider un rapport', function () {
             ->assertRedirect();
 
         $demande->refresh();
-        expect($demande->demande_statut)->toBe(DemandeStatus::Terminee);
+        expect($demande->demande_statut)->toBe(StatutDemande::Terminee);
     });
 
     it('passe en terminée seulement quand DAF et AC ont tous les deux validé', function () {
         Notification::fake();
 
-        $daf = User::factory()->daf()->create();
+        $daf = Utilisateur::factory()->daf()->create();
         ['convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         $demande = DemandeDepense::factory()->rapportSoumis()->create([
-            'id_porteur' => User::factory()->porteur()->create()->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+            'id_porteur' => Utilisateur::factory()->porteur()->create()->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
             'demande_rapport_valide_ac' => false,
         ]);
 
@@ -401,7 +401,7 @@ describe('DAF – valider un rapport', function () {
             ->assertRedirect();
 
         $demande->refresh();
-        expect($demande->demande_statut)->toBe(DemandeStatus::RapportSoumis);
+        expect($demande->demande_statut)->toBe(StatutDemande::RapportSoumis);
         expect($demande->demande_rapport_valide_daf)->toBeTrue();
     });
 });
@@ -412,13 +412,13 @@ describe('AC – valider une demande', function () {
     it('valide une demande après DAF', function () {
         Notification::fake();
 
-        $ac = User::factory()->ac()->create();
+        $ac = Utilisateur::factory()->ac()->create();
         ['convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         $demande = DemandeDepense::factory()->valideeDaf()->create([
-            'id_porteur' => User::factory()->porteur()->create()->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+            'id_porteur' => Utilisateur::factory()->porteur()->create()->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
         ]);
 
         $this->actingAs($ac)
@@ -426,18 +426,18 @@ describe('AC – valider une demande', function () {
             ->assertRedirect();
 
         $demande->refresh();
-        expect($demande->demande_statut)->toBe(DemandeStatus::ValidéeAc);
-        expect($demande->id_validateur_ac)->toBe($ac->id);
+        expect($demande->demande_statut)->toBe(StatutDemande::ValidéeAgentComptable);
+        expect($demande->id_utilisateur_validateur_ac)->toBe($ac->id_utilisateur);
     });
 
     it('refuse la validation si la demande n\'est pas au statut validee_daf', function () {
-        $ac = User::factory()->ac()->create();
+        $ac = Utilisateur::factory()->ac()->create();
         ['convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         $demande = DemandeDepense::factory()->soumise()->create([
-            'id_porteur' => User::factory()->porteur()->create()->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+            'id_porteur' => Utilisateur::factory()->porteur()->create()->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
         ]);
 
         $this->actingAs($ac)
@@ -448,13 +448,13 @@ describe('AC – valider une demande', function () {
     it('rejette une demande avec un motif', function () {
         Notification::fake();
 
-        $ac = User::factory()->ac()->create();
+        $ac = Utilisateur::factory()->ac()->create();
         ['convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         $demande = DemandeDepense::factory()->valideeDaf()->create([
-            'id_porteur' => User::factory()->porteur()->create()->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+            'id_porteur' => Utilisateur::factory()->porteur()->create()->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
         ]);
 
         $this->actingAs($ac)
@@ -462,7 +462,7 @@ describe('AC – valider une demande', function () {
             ->assertRedirect();
 
         $demande->refresh();
-        expect($demande->demande_statut)->toBe(DemandeStatus::RejetéeAc);
+        expect($demande->demande_statut)->toBe(StatutDemande::RejetéeAgentComptable);
     });
 });
 
@@ -470,13 +470,13 @@ describe('AC – enregistrer un paiement', function () {
     it('enregistre un paiement après validation AC', function () {
         Notification::fake();
 
-        $ac = User::factory()->ac()->create();
+        $ac = Utilisateur::factory()->ac()->create();
         ['convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
-        $demande = DemandeDepense::factory()->valideAc()->create([
-            'id_porteur' => User::factory()->porteur()->create()->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+        $demande = DemandeDepense::factory()->valideAgentComptable()->create([
+            'id_porteur' => Utilisateur::factory()->porteur()->create()->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
             'demande_montant' => 2_000_000,
         ]);
 
@@ -490,22 +490,22 @@ describe('AC – enregistrer un paiement', function () {
             ->assertRedirect();
 
         $demande->refresh();
-        expect($demande->demande_statut)->toBe(DemandeStatus::Payee);
+        expect($demande->demande_statut)->toBe(StatutDemande::Payee);
         $this->assertDatabaseHas('paiements', [
-            'id_demande' => $demande->id,
+            'id_demande' => $demande->id_utilisateur,
             'paiement_montant' => 2_000_000,
             'paiement_mode' => ModePaiement::Virement->value,
         ]);
     });
 
     it('refuse le paiement si la demande n\'est pas validée par AC', function () {
-        $ac = User::factory()->ac()->create();
+        $ac = Utilisateur::factory()->ac()->create();
         ['convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         $demande = DemandeDepense::factory()->valideeDaf()->create([
-            'id_porteur' => User::factory()->porteur()->create()->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+            'id_porteur' => Utilisateur::factory()->porteur()->create()->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
         ]);
 
         $this->actingAs($ac)
@@ -518,13 +518,13 @@ describe('AC – enregistrer un paiement', function () {
     });
 
     it('refuse une date de paiement dans le futur', function () {
-        $ac = User::factory()->ac()->create();
+        $ac = Utilisateur::factory()->ac()->create();
         ['convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
-        $demande = DemandeDepense::factory()->valideAc()->create([
-            'id_porteur' => User::factory()->porteur()->create()->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+        $demande = DemandeDepense::factory()->valideAgentComptable()->create([
+            'id_porteur' => Utilisateur::factory()->porteur()->create()->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
         ]);
 
         $this->actingAs($ac)
@@ -541,13 +541,13 @@ describe('AC – valider un rapport', function () {
     it('valide un rapport soumis et termine la demande si DAF a aussi validé', function () {
         Notification::fake();
 
-        $ac = User::factory()->ac()->create();
+        $ac = Utilisateur::factory()->ac()->create();
         ['convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         $demande = DemandeDepense::factory()->rapportSoumis()->create([
-            'id_porteur' => User::factory()->porteur()->create()->id,
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+            'id_porteur' => Utilisateur::factory()->porteur()->create()->id_utilisateur,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
             'demande_rapport_valide_daf' => true,
         ]);
 
@@ -556,7 +556,7 @@ describe('AC – valider un rapport', function () {
             ->assertRedirect();
 
         $demande->refresh();
-        expect($demande->demande_statut)->toBe(DemandeStatus::Terminee);
+        expect($demande->demande_statut)->toBe(StatutDemande::Terminee);
     });
 });
 
@@ -564,29 +564,29 @@ describe('AC – valider un rapport', function () {
 
 describe('DAF – paiements directs', function () {
     it('enregistre un paiement direct', function () {
-        $daf = User::factory()->daf()->create();
+        $daf = Utilisateur::factory()->daf()->create();
         ['projet' => $projet, 'convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         $this->actingAs($daf)
             ->post(route('daf.projets.conventions.paiements-directs.store', [$projet, $convention]), [
-                'rubrique_id' => $rubrique->id,
+                'rubrique_id' => $rubrique->id_utilisateur,
                 'montant' => 1_000_000,
-                'objet_depense' => 'Achat direct',
+                'objet_depense' => 'AgentComptablehat direct',
                 'description' => 'Paiement effectué par le bailleur',
                 'date_paiement' => today()->toDateString(),
             ])
             ->assertRedirect();
 
         $this->assertDatabaseHas('paiements_directs', [
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
             'paiement_direct_montant' => 1_000_000,
-            'id_enregistreur_paiement_direct' => $daf->id,
+            'id_enregistreur_paiement_direct' => $daf->id_utilisateur,
         ]);
     });
 
     it('enregistre un paiement direct sans rubrique', function () {
-        $daf = User::factory()->daf()->create();
+        $daf = Utilisateur::factory()->daf()->create();
         ['projet' => $projet, 'convention' => $convention] = makeConventionWithRubrique();
 
         $this->actingAs($daf)
@@ -599,20 +599,20 @@ describe('DAF – paiements directs', function () {
             ->assertRedirect();
 
         $this->assertDatabaseHas('paiements_directs', [
-            'id_convention' => $convention->id,
+            'id_convention' => $convention->id_utilisateur,
             'id_rubrique' => null,
             'paiement_direct_montant' => 2_000_000,
         ]);
     });
 
     it('supprime un paiement direct', function () {
-        $daf = User::factory()->daf()->create();
+        $daf = Utilisateur::factory()->daf()->create();
         ['projet' => $projet, 'convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique();
 
         $paiementDirect = PaiementDirect::factory()->create([
-            'id_convention' => $convention->id,
-            'id_rubrique' => $rubrique->id,
-            'id_enregistreur_paiement_direct' => $daf->id,
+            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_utilisateur,
+            'id_enregistreur_paiement_direct' => $daf->id_utilisateur,
         ]);
 
         $this->actingAs($daf)
@@ -623,7 +623,7 @@ describe('DAF – paiements directs', function () {
     });
 
     it('refuse une date de paiement dans le futur', function () {
-        $daf = User::factory()->daf()->create();
+        $daf = Utilisateur::factory()->daf()->create();
         ['projet' => $projet, 'convention' => $convention] = makeConventionWithRubrique();
 
         $this->actingAs($daf)
@@ -643,14 +643,14 @@ describe('Circuit complet Porteur → DAF → AC → Paiement → Rapport → Te
         Storage::fake('private');
         Notification::fake();
 
-        $daf = User::factory()->daf()->create();
-        $ac = User::factory()->ac()->create();
+        $daf = Utilisateur::factory()->daf()->create();
+        $ac = Utilisateur::factory()->ac()->create();
         ['porteur' => $porteur, 'projet' => $projet, 'convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique(10_000_000);
 
         // 1. Porteur soumet une demande
         $this->actingAs($porteur)
             ->post(route('porteur.projets.conventions.demandes.store', [$projet, $convention]), [
-                'rubrique_id' => $rubrique->id,
+                'rubrique_id' => $rubrique->id_utilisateur,
                 'montant' => 3_000_000,
                 'objet' => 'Mission terrain',
                 'justificatif' => UploadedFile::fake()->create('justif.pdf', 100, 'application/pdf'),
@@ -658,7 +658,7 @@ describe('Circuit complet Porteur → DAF → AC → Paiement → Rapport → Te
             ->assertRedirect();
 
         $demande = DemandeDepense::latest()->first();
-        expect($demande->demande_statut)->toBe(DemandeStatus::Soumise);
+        expect($demande->demande_statut)->toBe(StatutDemande::Soumise);
 
         // 2. DAF valide
         $this->actingAs($daf)
@@ -666,7 +666,7 @@ describe('Circuit complet Porteur → DAF → AC → Paiement → Rapport → Te
             ->assertRedirect();
 
         $demande->refresh();
-        expect($demande->demande_statut)->toBe(DemandeStatus::ValidéeDaf);
+        expect($demande->demande_statut)->toBe(StatutDemande::ValidéeDaf);
 
         // 3. AC valide
         $this->actingAs($ac)
@@ -674,7 +674,7 @@ describe('Circuit complet Porteur → DAF → AC → Paiement → Rapport → Te
             ->assertRedirect();
 
         $demande->refresh();
-        expect($demande->demande_statut)->toBe(DemandeStatus::ValidéeAc);
+        expect($demande->demande_statut)->toBe(StatutDemande::ValidéeAgentComptable);
 
         // 4. AC enregistre le paiement
         $this->actingAs($ac)
@@ -687,7 +687,7 @@ describe('Circuit complet Porteur → DAF → AC → Paiement → Rapport → Te
             ->assertRedirect();
 
         $demande->refresh();
-        expect($demande->demande_statut)->toBe(DemandeStatus::Payee);
+        expect($demande->demande_statut)->toBe(StatutDemande::Payee);
 
         // 5. Porteur soumet le rapport
         $this->actingAs($porteur)
@@ -697,7 +697,7 @@ describe('Circuit complet Porteur → DAF → AC → Paiement → Rapport → Te
             ->assertRedirect();
 
         $demande->refresh();
-        expect($demande->demande_statut)->toBe(DemandeStatus::RapportSoumis);
+        expect($demande->demande_statut)->toBe(StatutDemande::RapportSoumis);
 
         // 6. DAF valide le rapport
         $this->actingAs($daf)
@@ -705,7 +705,7 @@ describe('Circuit complet Porteur → DAF → AC → Paiement → Rapport → Te
             ->assertRedirect();
 
         $demande->refresh();
-        expect($demande->demande_statut)->toBe(DemandeStatus::RapportSoumis);
+        expect($demande->demande_statut)->toBe(StatutDemande::RapportSoumis);
 
         // 7. AC valide le rapport → terminée
         $this->actingAs($ac)
@@ -713,11 +713,11 @@ describe('Circuit complet Porteur → DAF → AC → Paiement → Rapport → Te
             ->assertRedirect();
 
         $demande->refresh();
-        expect($demande->demande_statut)->toBe(DemandeStatus::Terminee);
+        expect($demande->demande_statut)->toBe(StatutDemande::Terminee);
     });
 });
 
-// ── Accès refusé pour mauvais rôle ───────────────────────────────────────────
+// ── AgentComptablecès refusé pour mauvais rôle ───────────────────────────────────────────
 
 describe('Contrôle d\'accès par rôle', function () {
     it('interdit à un porteur d\'accéder aux routes DAF', function () {
@@ -737,7 +737,7 @@ describe('Contrôle d\'accès par rôle', function () {
     });
 
     it('interdit à un DAF d\'accéder aux routes AC', function () {
-        $daf = User::factory()->daf()->create();
+        $daf = Utilisateur::factory()->daf()->create();
 
         $this->actingAs($daf)
             ->get(route('ac.demandes.index'))

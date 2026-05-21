@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum ConventionForme: string
+enum FormeConvention: string
 {
     case Pret = 'pret';
     case Don = 'don';

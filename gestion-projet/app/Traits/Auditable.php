@@ -2,14 +2,14 @@
 
 namespace App\Traits;
 
-use App\Models\AuditLog;
+use App\Models\JournalAudit;
 
 trait Auditable
 {
     public static function bootAuditable(): void
     {
         static::created(function ($model) {
-            AuditLog::log(
+            JournalAudit::log(
                 action: 'created',
                 auditable: $model,
                 newValues: self::getAuditableAttributes($model),
@@ -23,7 +23,7 @@ trait Auditable
                 return;
             }
 
-            AuditLog::log(
+            JournalAudit::log(
                 action: 'updated',
                 auditable: $model,
                 oldValues: self::getAuditableAttributes($model, 'original'),
@@ -33,7 +33,7 @@ trait Auditable
         });
 
         static::deleted(function ($model) {
-            AuditLog::log(
+            JournalAudit::log(
                 action: 'deleted',
                 auditable: $model,
                 oldValues: self::getAuditableAttributes($model),
@@ -49,7 +49,7 @@ trait Auditable
      */
     private static function getAuditableAttributes(mixed $model, string $type = 'current'): array
     {
-        $excluded = ['password', 'remember_token', 'updated_at', 'created_at'];
+        $excluded = ['utilisateur_mot_de_passe', 'remember_token', 'updated_at', 'created_at'];
 
         $attributes = match ($type) {
             'original' => $model->getOriginal(),
@@ -80,7 +80,7 @@ trait Auditable
 
     private static function getModelIdentifier(mixed $model): string
     {
-        foreach (['bailleur_nom', 'projet_titre', 'convention_titre', 'rubrique_libelle', 'faq_question', 'demande_objet', 'name'] as $field) {
+        foreach (['bailleur_nom', 'projet_titre', 'convention_titre', 'rubrique_libelle', 'faq_question', 'demande_objet', 'utilisateur_nom'] as $field) {
             if (! empty($model->{$field})) {
                 $value = mb_strimwidth((string) $model->{$field}, 0, 60, '…');
 
@@ -97,11 +97,11 @@ trait Auditable
     private static function buildUpdateDescription(string $className, string $identifier, array $changed): string
     {
         $fieldLabels = [
-            'name' => 'nom',
-            'email' => 'e-mail',
+            'utilisateur_nom' => 'nom',
+            'utilisateur_email' => 'e-mail',
             'utilisateur_role' => 'rôle',
             'utilisateur_actif' => 'statut',
-            'telephone' => 'téléphone',
+            'utilisateur_telephone' => 'téléphone',
             'demande_statut' => 'statut',
             'convention_statut' => 'statut',
             'projet_statut' => 'statut',

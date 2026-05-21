@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Setting;
+use App\Models\Parametre;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,21 +18,21 @@ class MaintenanceMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         // Auto-disable maintenance if scheduled end time has passed
-        $until = Setting::getMaintenanceUntil();
+        $until = Parametre::getMaintenanceUntil();
 
-        if ($until && $until->isPast() && Setting::isMaintenanceActive()) {
-            Setting::set('maintenance_mode', 'false');
-            Setting::set('maintenance_reason', '');
-            Setting::set('maintenance_until', '');
+        if ($until && $until->isPast() && Parametre::isMaintenanceActive()) {
+            Parametre::set('maintenance_mode', 'false');
+            Parametre::set('maintenance_reason', '');
+            Parametre::set('maintenance_until', '');
         }
 
         // Check if maintenance is still active after potential auto-disable
-        if (! Setting::isMaintenanceActive()) {
+        if (! Parametre::isMaintenanceActive()) {
             return $next($request);
         }
 
-        // Admin is always allowed through
-        if (Auth::check() && Auth::user()->isAdmin()) {
+        // Administrateur is always allowed through
+        if (Auth::check() && Auth::user()->estAdministrateur()) {
             return $next($request);
         }
 
@@ -41,8 +41,8 @@ class MaintenanceMiddleware
             return $next($request);
         }
 
-        $reason = Setting::get('maintenance_reason', 'Maintenance en cours.');
-        $maintenanceUntil = Setting::get('maintenance_until');
+        $reason = Parametre::get('maintenance_reason', 'Maintenance en cours.');
+        $maintenanceUntil = Parametre::get('maintenance_until');
 
         return inertia('auth/Maintenance', [
             'reason' => $reason,

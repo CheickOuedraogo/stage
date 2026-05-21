@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Enums\VersementType;
+use App\Enums\TypeVersement;
 use App\Models\Convention;
 use App\Models\Versement;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -12,20 +12,22 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class VersementFactory extends Factory
 {
+    protected $model = Versement::class;
+
     /**
-     * Define the model's default state.
-     *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
         return [
             'id_convention' => Convention::factory(),
-            'versement_montant' => $this->faker->numberBetween(5_000_000, 50_000_000),
-            'versement_date_reception' => $this->faker->dateTimeBetween('-2 years', 'now'),
-            'versement_type' => $this->faker->randomElement(VersementType::cases())->value,
-            'versement_description' => $this->faker->optional()->sentence(),
-            'versement_reference' => strtoupper($this->faker->lexify('VRS-????-####')),
+            'versement_montant' => fake()->numberBetween(1000000, 50000000),
+            'versement_date_reception' => fake()->dateTimeBetween('-6 months', 'now'),
+            'versement_type' => TypeVersement::Tranche,
+            'versement_description' => fake()->sentence(),
+            'versement_reference' => strtoupper(fake()->bothify('V-####-????')),
+            'cree_le' => now(),
+            'mis_a_jour_le' => now(),
         ];
     }
 }

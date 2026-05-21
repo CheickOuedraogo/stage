@@ -13,8 +13,8 @@ interface Convention {
     montant_fcfa: number;
     forme: string;
     forme_label: string;
-    status: string;
-    status_label: string;
+    statut: string;
+    libelle_statut: string;
     date_fin: string | null;
     total_versements: number;
     versements_count: number;
@@ -26,8 +26,8 @@ interface Projet {
     description: string | null;
     objectifs: string | null;
     activites: string | null;
-    status: string;
-    status_label: string;
+    statut: string;
+    libelle_statut: string;
     montant_estime: number;
     montant_conventions: number;
     total_versements: number;
@@ -62,8 +62,8 @@ export default function ProjetShow({ projet }: Props) {
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 flex-wrap">
                         <h2 className="text-2xl font-bold text-gray-900 dark:text-white truncate">{projet.titre}</h2>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${projectStatusClass(projet.status)}`}>
-                            {projet.status_label}
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${projectStatusClass(projet.statut)}`}>
+                            {projet.libelle_statut}
                         </span>
                     </div>
                     {projet.date_debut && (
@@ -123,8 +123,8 @@ export default function ProjetShow({ projet }: Props) {
                                                 <p className="text-xs font-semibold text-gray-900 dark:text-white leading-tight">
                                                     {c.bailleur.sigle ?? c.bailleur.nom}
                                                 </p>
-                                                <span className={`shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${conventionStatusClass(c.status)}`}>
-                                                    {c.status_label}
+                                                <span className={`shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${conventionStatusClass(c.statut)}`}>
+                                                    {c.libelle_statut}
                                                 </span>
                                             </div>
                                             <p className="text-xs text-gray-500 dark:text-slate-400 mb-3 line-clamp-2 flex-1">{c.titre}</p>

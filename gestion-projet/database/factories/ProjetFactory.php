@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Enums\ProjectStatus;
+use App\Enums\StatutProjet;
 use App\Models\Projet;
-use App\Models\User;
+use App\Models\Utilisateur;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -12,40 +12,25 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ProjetFactory extends Factory
 {
+    protected $model = Projet::class;
+
+    /**
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
-        $debut = $this->faker->dateTimeBetween('-3 years', '-6 months');
-        $finPrevue = $this->faker->dateTimeBetween($debut, '+2 years');
-
         return [
-            'id_porteur' => User::factory(),
-            'projet_titre' => $this->faker->sentence(4),
-            'projet_description' => $this->faker->paragraphs(3, true),
-            'projet_objectifs' => $this->faker->paragraphs(2, true),
-            'projet_activites' => $this->faker->paragraphs(2, true),
-            'projet_montant_estime' => $this->faker->numberBetween(50_000_000, 500_000_000),
-            'projet_statut' => $this->faker->randomElement(ProjectStatus::cases())->value,
-            'projet_date_debut' => $debut,
-            'projet_date_fin_prevue' => $finPrevue,
-            'projet_date_fin_reelle' => null,
+            'id_porteur' => Utilisateur::factory()->porteur(),
+            'projet_titre' => fake()->sentence(5),
+            'projet_description' => fake()->paragraph(),
+            'projet_objectifs' => fake()->paragraph(),
+            'projet_activites' => fake()->paragraph(),
+            'projet_montant_estime' => fake()->numberBetween(10000000, 500000000),
+            'projet_statut' => StatutProjet::EnAttenteFinancement,
+            'projet_date_debut' => fake()->dateTimeBetween('-1 year', 'now'),
+            'projet_date_fin_prevue' => fake()->dateTimeBetween('now', '+2 years'),
+            'cree_le' => now(),
+            'mis_a_jour_le' => now(),
         ];
-    }
-
-    public function enCours(): static
-    {
-        return $this->state(['projet_statut' => ProjectStatus::EnCours->value]);
-    }
-
-    public function termine(): static
-    {
-        return $this->state(fn (array $attrs) => [
-            'projet_statut' => ProjectStatus::Termine->value,
-            'projet_date_fin_reelle' => $this->faker->dateTimeBetween($attrs['projet_date_debut'], 'now'),
-        ]);
-    }
-
-    public function enAttenteFinancement(): static
-    {
-        return $this->state(['projet_statut' => ProjectStatus::EnAttenteFinancement->value]);
     }
 }

@@ -29,12 +29,12 @@ interface Demande {
     id: number;
     objet: string;
     montant: number;
-    status: string;
-    status_label: string;
+    statut: string;
+    libelle_statut: string;
     badge_class: string;
     porteur: string;
     convention: string;
-    created_at: string;
+    cree_le: string;
 }
 
 interface Props extends PageProps {
@@ -44,7 +44,7 @@ interface Props extends PageProps {
 
 export default function DafDashboard() {
     const { auth, stats, demandes_recentes } = usePage<Props>().props;
-    const firstName = auth.user?.name.split(' ').find((p) => !p.includes('.')) ?? auth.user?.name;
+    const firstName = auth.user?.utilisateur_nom.split(' ').find((p) => !p.includes('.')) ?? auth.user?.utilisateur_nom;
     const tauxMobilisation = stats.budget_total > 0
         ? Math.min(100, Math.round((stats.versements_total / stats.budget_total) * 100))
         : 0;
@@ -158,7 +158,7 @@ export default function DafDashboard() {
                                 <div className="shrink-0 text-right">
                                     <p className="text-sm font-mono font-semibold text-slate-900 dark:text-white">{formatCurrency(d.montant)}</p>
                                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-0.5 ${d.badge_class}`}>
-                                        {d.status_label}
+                                        {d.libelle_statut}
                                     </span>
                                 </div>
                             </Link>

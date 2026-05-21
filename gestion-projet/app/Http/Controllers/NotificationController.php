@@ -17,7 +17,7 @@ class NotificationController extends Controller
             ->latest()
             ->paginate(20)
             ->through(fn (DatabaseNotification $n) => [
-                'id' => $n->id,
+                'id' => $n->id_utilisateur,
                 'data' => $n->data,
                 'read_at' => $n->read_at?->toIso8601String(),
                 'created_at' => $n->created_at->diffForHumans(),
@@ -34,7 +34,7 @@ class NotificationController extends Controller
 
     public function markRead(Request $request, DatabaseNotification $notification): RedirectResponse
     {
-        abort_unless($notification->notifiable_id === $request->user()->id, 403);
+        abort_unless($notification->notifiable_id === $request->user()->id_utilisateur, 403);
         $notification->markAsRead();
 
         return back();

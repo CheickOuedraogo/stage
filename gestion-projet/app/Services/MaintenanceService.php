@@ -2,23 +2,24 @@
 
 namespace App\Services;
 
-use App\Models\Setting;
-use App\Models\User;
+use App\Enums\RoleUtilisateur;
+use App\Models\Parametre;
+use App\Models\Utilisateur;
 use Illuminate\Support\Facades\DB;
 
 class MaintenanceService
 {
     /**
-     * Enable maintenance mode and invalidate all non-admin sessions.
+     * Activer le mode maintenance et invalider toutes les sessions non-admin.
      */
-    public function enable(string $reason, ?string $until = null): void
+    public function activer(string $raison, ?string $jusqua = null): void
     {
-        Setting::set('maintenance_mode', 'true');
-        Setting::set('maintenance_reason', $reason);
-        Setting::set('maintenance_until', $until ?? '');
+        Parametre::set('maintenance_mode', 'true');
+        Parametre::set('maintenance_reason', $raison);
+        Parametre::set('maintenance_until', $jusqua ?? '');
 
-        // Invalidate all sessions except admin
-        $adminIds = User::where('utilisateur_role', 'admin')->pluck('id_utilisateur');
+        // Invalider toutes les sessions sauf admin
+        $adminIds = Utilisateur::parRole(RoleUtilisateur::Administrateur)->pluck('id_utilisateur');
 
         DB::table('sessions')
             ->whereNotIn('user_id', $adminIds)
@@ -26,24 +27,24 @@ class MaintenanceService
     }
 
     /**
-     * Disable maintenance mode.
+     * Désactiver le mode maintenance.
      */
-    public function disable(): void
+    public function desactiver(): void
     {
-        Setting::set('maintenance_mode', 'false');
-        Setting::set('maintenance_reason', '');
-        Setting::set('maintenance_until', '');
+        Parametre::set('maintenance_mode', 'false');
+        Parametre::set('maintenance_reason', '');
+        Parametre::set('maintenance_until', '');
     }
 
     /**
-     * @return array{active: bool, reason: string|null, until: string|null}
+     * @return array{active: bool, raison: string|null, jusqua: string|null}
      */
-    public function getStatus(): array
+    public function getStatut(): array
     {
         return [
-            'active' => Setting::isMaintenanceActive(),
-            'reason' => Setting::get('maintenance_reason'),
-            'until' => Setting::get('maintenance_until'),
+            'active' => Parametre::estMaintenanceActive(),
+            'raison' => Parametre::get('maintenance_reason'),
+            'jusqua' => Parametre::get('maintenance_until'),
         ];
     }
 }
