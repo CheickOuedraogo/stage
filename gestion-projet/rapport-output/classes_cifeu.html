@@ -63,7 +63,7 @@
 <body>
 
 <h1>📚 Dictionnaire des classes — CIFEU</h1>
-<p class="subtitle">Propriétés · Types · Méthodes · Associations UML — Laravel 13 · Merise snake_case · Timestamps : cree_le / mis_a_jour_le</p>
+<p class="subtitle">Propriétés · Types · Méthodes · Associations UML — Laravel 13 · Merise snake_case</p>
 
 <div class="nav">
   <a href="#utilisateur">Utilisateur</a>
@@ -99,7 +99,6 @@
     <tr><td><code>utilisateur_telephone</code></td><td><span class="badge b-str">String(20)</span></td><td><span class="vis-pub">+</span></td><td>Téléphone (nullable)</td></tr>
     <tr><td><code>email_verifie_le</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatage de vérification e-mail (nullable)</td></tr>
     <tr><td><code>jeton_souvenir</code></td><td><span class="badge b-str">String(100)</span></td><td><span class="vis-pri">—</span></td><td>Jeton « Se souvenir de moi » (nullable)</td></tr>
-    <tr><td><code>cree_le / mis_a_jour_le</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatages personnalisés</td></tr>
   </table>
   <div class="section-title">Méthodes</div>
   <table>
@@ -135,7 +134,6 @@
     <tr><td><code>projet_date_debut</code></td><td><span class="badge b-date">Date</span></td><td><span class="vis-pub">+</span></td><td>Date de démarrage (nullable)</td></tr>
     <tr><td><code>projet_date_fin_prevue</code></td><td><span class="badge b-date">Date</span></td><td><span class="vis-pub">+</span></td><td>Date de fin planifiée (nullable)</td></tr>
     <tr><td><code>projet_date_fin_reelle</code></td><td><span class="badge b-date">Date</span></td><td><span class="vis-pub">+</span></td><td>Date de clôture effective (nullable)</td></tr>
-    <tr><td><code>cree_le / mis_a_jour_le</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatages</td></tr>
   </table>
   <div class="section-title">Méthodes</div>
   <table>
@@ -165,7 +163,6 @@
     <tr><td><code>bailleur_telephone</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Téléphone (nullable)</td></tr>
     <tr><td><code>bailleur_adresse</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Adresse postale (nullable)</td></tr>
     <tr><td><code>bailleur_description</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Description libre (nullable)</td></tr>
-    <tr><td><code>cree_le / mis_a_jour_le</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatages</td></tr>
   </table>
   <div class="section-title">Méthodes</div>
   <table>
@@ -192,7 +189,6 @@
     <tr><td><code>convention_date_signature</code></td><td><span class="badge b-date">Date</span></td><td><span class="vis-pub">+</span></td><td>Date de signature (nullable)</td></tr>
     <tr><td><code>convention_date_debut</code></td><td><span class="badge b-date">Date</span></td><td><span class="vis-pub">+</span></td><td>Date de début (nullable)</td></tr>
     <tr><td><code>convention_date_fin</code></td><td><span class="badge b-date">Date</span></td><td><span class="vis-pub">+</span></td><td>Date d'expiration (nullable)</td></tr>
-    <tr><td><code>cree_le / mis_a_jour_le</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatages</td></tr>
   </table>
   <div class="section-title">Méthodes</div>
   <table>
@@ -219,7 +215,6 @@
     <tr><td><code>rubrique_libelle</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Intitulé de la ligne budgétaire</td></tr>
     <tr><td><code>rubrique_montant_prevu</code></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pub">+</span></td><td>Budget alloué en FCFA</td></tr>
     <tr><td><code>rubrique_description</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Description (nullable)</td></tr>
-    <tr><td><code>cree_le / mis_a_jour_le</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatages</td></tr>
   </table>
   <div class="section-title">Méthodes</div>
   <table>
@@ -242,7 +237,6 @@
     <tr><td><code>versement_reference</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Référence bancaire (nullable)</td></tr>
     <tr><td><code>versement_description</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Observations (nullable)</td></tr>
     <tr><td><code>versement_date_reception</code></td><td><span class="badge b-date">Date</span></td><td><span class="vis-pub">+</span></td><td>Date effective de réception (nullable)</td></tr>
-    <tr><td><code>cree_le / mis_a_jour_le</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatages</td></tr>
   </table>
   <div class="section-title">Méthodes</div>
   <table>
@@ -271,7 +265,6 @@
     <tr><td><code>demande_date_validation_ac</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatage validation AC (nullable)</td></tr>
     <tr><td><code>demande_rapport_valide_daf</code></td><td><span class="badge b-bool">Boolean</span></td><td><span class="vis-pub">+</span></td><td>Rapport validé par la DAF (défaut : false)</td></tr>
     <tr><td><code>demande_rapport_valide_ac</code></td><td><span class="badge b-bool">Boolean</span></td><td><span class="vis-pub">+</span></td><td>Rapport validé par l'AC (défaut : false)</td></tr>
-    <tr><td><code>cree_le / mis_a_jour_le</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatages</td></tr>
   </table>
   <div class="section-title">Méthodes</div>
   <table>
@@ -302,7 +295,6 @@
     <tr><td><code>paiement_mode</code></td><td><span class="badge b-enum">Enum</span> <code>ModePaiement</code></td><td><span class="vis-pub">+</span></td><td>virement / cheque / especes</td></tr>
     <tr><td><code>paiement_reference</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Référence bancaire (nullable)</td></tr>
     <tr><td><code>paiement_date</code></td><td><span class="badge b-date">Date</span></td><td><span class="vis-pub">+</span></td><td>Date effective du paiement (nullable)</td></tr>
-    <tr><td><code>cree_le / mis_a_jour_le</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatages</td></tr>
   </table>
   <div class="section-title">Méthodes</div>
   <table>
@@ -325,7 +317,6 @@
     <tr><td><code>paiement_direct_objet</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Objet du paiement</td></tr>
     <tr><td><code>paiement_direct_description</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Description complémentaire (nullable)</td></tr>
     <tr><td><code>paiement_direct_date</code></td><td><span class="badge b-date">Date</span></td><td><span class="vis-pub">+</span></td><td>Date d'exécution (nullable)</td></tr>
-    <tr><td><code>cree_le / mis_a_jour_le</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatages</td></tr>
   </table>
   <div class="section-title">Méthodes</div>
   <table>
@@ -349,7 +340,6 @@
     <tr><td><code>visible_porteur</code></td><td><span class="badge b-bool">Boolean</span></td><td><span class="vis-pub">+</span></td><td>Visible pour les porteurs de projet (défaut : true)</td></tr>
     <tr><td><code>visible_daf</code></td><td><span class="badge b-bool">Boolean</span></td><td><span class="vis-pub">+</span></td><td>Visible pour les agents DAF (défaut : true)</td></tr>
     <tr><td><code>visible_ac</code></td><td><span class="badge b-bool">Boolean</span></td><td><span class="vis-pub">+</span></td><td>Visible pour les Agents Comptables (défaut : true)</td></tr>
-    <tr><td><code>cree_le / mis_a_jour_le</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatages</td></tr>
   </table>
   <div class="section-title">Méthodes</div>
   <table>
@@ -369,7 +359,6 @@
 
     <tr><td><code>message_contenu</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Texte du message</td></tr>
     <tr><td><code>message_lu</code></td><td><span class="badge b-bool">Boolean</span></td><td><span class="vis-pub">+</span></td><td>Message lu par le destinataire (défaut : false)</td></tr>
-    <tr><td><code>cree_le / mis_a_jour_le</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatages</td></tr>
   </table>
   <div class="section-title">Méthodes</div>
   <table>
@@ -381,7 +370,7 @@
 
 <!-- JOURNALAUDIT -->
 <div class="cls" id="audit">
-  <div class="cls-header audit"><span class="cls-name">JournalAudit</span><span class="cls-table">table : <code>journaux_audit</code> &nbsp;·&nbsp; sans <code>mis_a_jour_le</code></span></div>
+  <div class="cls-header audit"><span class="cls-name">JournalAudit</span><span class="cls-table">table : <code>journaux_audit</code></span></div>
   <div class="section-title">Propriétés</div>
   <table>
     <tr><th>Propriété</th><th>Type UML</th><th>Vis.</th><th>Description</th></tr>
@@ -394,7 +383,6 @@
     <tr><td><code>audit_adresse_ip</code></td><td><span class="badge b-str">String(45)</span></td><td><span class="vis-pub">+</span></td><td>Adresse IP (nullable)</td></tr>
     <tr><td><code>audit_navigateur</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>User-Agent (nullable)</td></tr>
     <tr><td><code>audit_description</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Description lisible (nullable)</td></tr>
-    <tr><td><code>cree_le</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatage immuable de l'événement</td></tr>
   </table>
   <div class="section-title">Méthodes</div>
   <table>
@@ -406,7 +394,7 @@
 
 <!-- NOTIFICATION -->
 <div class="cls" id="notification">
-  <div class="cls-header notif"><span class="cls-name">Notification</span><span class="cls-table">table : <code>notifications</code> &nbsp;·&nbsp; sans <code>mis_a_jour_le</code></span></div>
+  <div class="cls-header notif"><span class="cls-name">Notification</span><span class="cls-table">table : <code>notifications</code></span></div>
   <div class="section-title">Propriétés</div>
   <table>
     <tr><th>Propriété</th><th>Type UML</th><th>Vis.</th><th>Description</th></tr>
@@ -416,7 +404,6 @@
     <tr><td><code>notification_libelle_statut</code></td><td><span class="badge b-str">String(100)</span></td><td><span class="vis-pub">+</span></td><td>Libellé du nouveau statut de la demande (nullable)</td></tr>
     <tr><td><code>notification_motif</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Motif de rejet (nullable, uniquement sur rejet)</td></tr>
     <tr><td><code>lu_le</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatage de lecture (null = non lue)</td></tr>
-    <tr><td><code>cree_le</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatage de création de la notification</td></tr>
   </table>
   <div class="section-title">Méthodes</div>
   <table>
