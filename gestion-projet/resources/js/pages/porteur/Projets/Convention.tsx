@@ -34,8 +34,8 @@ interface Convention {
     taux_conversion: number;
     forme: string;
     forme_label: string;
-    status: string;
-    status_label: string;
+    statut: string;
+    libelle_statut: string;
     date_signature: string | null;
     date_debut: string | null;
     date_fin: string | null;
@@ -80,8 +80,8 @@ export default function ConventionShow({ projet, convention, has_demande_active 
                     <div>
                         <div className="flex items-center gap-2 mb-1">
                             <h2 className="text-xl font-bold text-gray-900 dark:text-white">{convention.titre}</h2>
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${conventionStatusClass(convention.status)}`}>
-                                {convention.status_label}
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${conventionStatusClass(convention.statut)}`}>
+                                {convention.libelle_statut}
                             </span>
                         </div>
                         <p className="text-sm text-gray-600 dark:text-slate-400">

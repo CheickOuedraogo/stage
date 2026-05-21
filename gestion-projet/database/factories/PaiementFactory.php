@@ -5,7 +5,7 @@ namespace Database\Factories;
 use App\Enums\ModePaiement;
 use App\Models\DemandeDepense;
 use App\Models\Paiement;
-use App\Models\User;
+use App\Models\Utilisateur;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -13,15 +13,22 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class PaiementFactory extends Factory
 {
+    protected $model = Paiement::class;
+
+    /**
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
         return [
-            'id_demande' => DemandeDepense::factory()->valideAc(),
-            'paiement_montant' => $this->faker->numberBetween(500_000, 5_000_000),
-            'paiement_date' => $this->faker->dateTimeBetween('-3 months', 'now'),
-            'paiement_mode' => $this->faker->randomElement(ModePaiement::cases())->value,
-            'paiement_reference' => $this->faker->optional(0.7)->numerify('REF-####'),
-            'id_enregistreur_paiement' => User::factory()->ac(),
+            'id_demande' => DemandeDepense::factory()->valideeAc(),
+            'paiement_montant' => fn (array $attributes) => DemandeDepense::find($attributes['id_demande'])->demande_montant,
+            'paiement_date' => now(),
+            'paiement_mode' => ModePaiement::Virement,
+            'paiement_reference' => strtoupper(fake()->bothify('PAY-####-????')),
+            'id_enregistreur_paiement' => Utilisateur::factory()->ac(),
+            'cree_le' => now(),
+            'mis_a_jour_le' => now(),
         ];
     }
 }

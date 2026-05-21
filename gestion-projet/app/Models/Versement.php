@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\VersementType;
+use App\Enums\TypeVersement;
 use Database\Factories\VersementFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,21 +15,21 @@ class Versement extends Model
     /** @use HasFactory<VersementFactory> */
     use HasFactory;
 
+    protected $table = 'versements';
+
     protected $primaryKey = 'id_versement';
+
+    const CREATED_AT = 'cree_le';
+
+    const UPDATED_AT = 'mis_a_jour_le';
 
     protected function casts(): array
     {
         return [
-            'versement_type' => VersementType::class,
+            'versement_type' => TypeVersement::class,
             'versement_montant' => 'integer',
             'versement_date_reception' => 'date',
         ];
-    }
-
-    /** Transparent id accessor so $versement->id still works */
-    public function getIdAttribute(): mixed
-    {
-        return $this->getAttribute($this->getKeyName());
     }
 
     public function convention(): BelongsTo

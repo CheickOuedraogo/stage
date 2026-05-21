@@ -5,7 +5,7 @@ namespace Database\Factories;
 use App\Models\Convention;
 use App\Models\PaiementDirect;
 use App\Models\Rubrique;
-use App\Models\User;
+use App\Models\Utilisateur;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -13,18 +13,23 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class PaiementDirectFactory extends Factory
 {
+    protected $model = PaiementDirect::class;
+
+    /**
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
-        $convention = Convention::factory()->create();
-
         return [
-            'id_convention' => $convention->id,
-            'id_rubrique' => Rubrique::factory()->for($convention),
-            'paiement_direct_montant' => $this->faker->numberBetween(500_000, 10_000_000),
-            'paiement_direct_objet' => $this->faker->sentence(4),
-            'paiement_direct_description' => $this->faker->optional()->paragraph(),
-            'paiement_direct_date' => $this->faker->dateTimeBetween('-6 months', 'now'),
-            'id_enregistreur_paiement_direct' => User::factory()->porteur(),
+            'id_convention' => Convention::factory(),
+            'id_rubrique' => fn (array $attributes) => Rubrique::factory(['id_convention' => $attributes['id_convention']]),
+            'paiement_direct_montant' => fake()->numberBetween(100000, 5000000),
+            'paiement_direct_objet' => fake()->sentence(4),
+            'paiement_direct_description' => fake()->paragraph(),
+            'paiement_direct_date' => now(),
+            'id_enregistreur_paiement_direct' => Utilisateur::factory()->porteur(),
+            'cree_le' => now(),
+            'mis_a_jour_le' => now(),
         ];
     }
 }

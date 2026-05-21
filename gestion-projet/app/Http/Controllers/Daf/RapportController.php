@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Daf;
 
-use App\Enums\DemandeStatus;
+use App\Enums\StatutDemande;
 use App\Exports\ClotureProjetExport;
 use App\Exports\ExecutionBudgetaireExport;
 use App\Http\Controllers\Controller;
@@ -20,10 +20,10 @@ class RapportController extends Controller
         $projets = Projet::orderBy('projet_titre')
             ->get(['id', 'projet_titre', 'projet_statut'])
             ->map(fn (Projet $p) => [
-                'id' => $p->id,
+                'id' => $p->id_utilisateur,
                 'titre' => $p->projet_titre,
-                'status' => $p->projet_statut->value,
-                'status_label' => $p->projet_statut->label(),
+                'statut' => $p->projet_statut->value,
+                'libelle_statut' => $p->projet_statut->label(),
             ]);
 
         return Inertia::render('daf/Rapports/Index', [
@@ -41,9 +41,9 @@ class RapportController extends Controller
         $projet = Projet::with([
             'conventions.bailleur:id_bailleur,bailleur_nom,bailleur_sigle',
             'conventions.rubriques.demandesDepenses' => fn ($q) => $q->whereIn('demande_statut', [
-                DemandeStatus::Payee->value,
-                DemandeStatus::RapportSoumis->value,
-                DemandeStatus::Terminee->value,
+                StatutDemande::Payee->value,
+                StatutDemande::RapportSoumis->value,
+                StatutDemande::Terminee->value,
             ]),
             'conventions.versements',
         ])->findOrFail($request->projet_id);
@@ -71,12 +71,12 @@ class RapportController extends Controller
         if ($request->format === 'pdf') {
             $pdf = Pdf::loadView('rapports.execution_budgetaire', $data)->setPaper('a4');
 
-            return $pdf->download("execution_budgetaire_{$projet->id}.pdf");
+            return $pdf->download("execution_budgetaire_{$projet->id_utilisateur}.pdf");
         }
 
         return Excel::download(
             new ExecutionBudgetaireExport($rubriques, $projet->projet_titre),
-            "execution_budgetaire_{$projet->id}.xlsx"
+            "execution_budgetaire_{$projet->id_utilisateur}.xlsx"
         );
     }
 
@@ -88,13 +88,13 @@ class RapportController extends Controller
         ]);
 
         $projet = Projet::with([
-            'porteur:id_utilisateur,name',
+            'porteur:id_utilisateur,utilisateur_nom',
             'conventions.bailleur:id_bailleur,bailleur_nom,bailleur_sigle',
             'conventions.versements',
             'conventions.rubriques.demandesDepenses' => fn ($q) => $q->whereIn('demande_statut', [
-                DemandeStatus::Payee->value,
-                DemandeStatus::RapportSoumis->value,
-                DemandeStatus::Terminee->value,
+                StatutDemande::Payee->value,
+                StatutDemande::RapportSoumis->value,
+                StatutDemande::Terminee->value,
             ]),
         ])->findOrFail($request->projet_id);
 
@@ -115,8 +115,8 @@ class RapportController extends Controller
 
         $projetData = [
             'titre' => $projet->projet_titre,
-            'porteur' => $projet->porteur->name,
-            'status_label' => $projet->projet_statut->label(),
+            'porteur' => $projet->porteur->utilisateur_nom,
+            'libelle_statut' => $projet->projet_statut->label(),
             'date_debut' => $projet->projet_date_debut?->format('d/m/Y'),
             'date_fin_prevue' => $projet->projet_date_fin_prevue?->format('d/m/Y'),
             'date_fin_reelle' => $projet->projet_date_fin_reelle?->format('d/m/Y'),
@@ -143,12 +143,12 @@ class RapportController extends Controller
             $pdf = Pdf::loadView('rapports.cloture_projet', compact('projet', 'analyse', 'conventions'))
                 ->setPaper('a4');
 
-            return $pdf->download("cloture_{$projet->id}.pdf");
+            return $pdf->download("cloture_{$projet->id_utilisateur}.pdf");
         }
 
         return Excel::download(
             new ClotureProjetExport($projetData, $analyse, $conventions),
-            "cloture_{$projet->id}.xlsx"
+            "cloture_{$projet->id_utilisateur}.xlsx"
         );
     }
 }

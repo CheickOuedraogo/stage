@@ -10,8 +10,8 @@ interface Projet {
     id: number;
     titre: string;
     porteur: string;
-    status: string;
-    status_label: string;
+    statut: string;
+    libelle_statut: string;
     montant_estime: number;
     montant_conventions: number;
     conventions_count: number;
@@ -44,10 +44,10 @@ const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#e
 function statusDistribution(projets: Projet[]) {
     const map: Record<string, { label: string; count: number; color: string }> = {};
     for (const p of projets) {
-        if (!map[p.status]) {
-            map[p.status] = { label: p.status_label, count: 0, color: STATUS_COLORS[p.status] ?? '#6b7280' };
+        if (!map[p.statut]) {
+            map[p.statut] = { label: p.libelle_statut, count: 0, color: STATUS_COLORS[p.statut] ?? '#6b7280' };
         }
-        map[p.status].count++;
+        map[p.statut].count++;
     }
     return Object.values(map).filter((v) => v.count > 0);
 }
@@ -174,8 +174,8 @@ export default function DafProjetsIndex({ projets, stats }: Props) {
                                         </td>
                                         <td className="px-6 py-4 text-gray-600 dark:text-slate-400 text-xs">{projet.porteur}</td>
                                         <td className="px-6 py-4">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${projectStatusClass(projet.status)}`}>
-                                                {projet.status_label}
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${projectStatusClass(projet.statut)}`}>
+                                                {projet.libelle_statut}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right font-mono text-gray-900 dark:text-white text-xs">{formatCurrency(projet.montant_estime)}</td>

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { index as usersIndex, store as usersStore, update as usersUpdate } from '@/routes/admin/users';
-import type { User } from '@/types';
+import type { Utilisateur } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { FormEvent } from 'react';
@@ -13,26 +13,26 @@ interface Role {
     label: string;
 }
 
-interface UserFormProps {
-    user?: Partial<User> & { id?: number };
+interface UtilisateurFormProps {
+    user?: Partial<Utilisateur> & { id?: number };
     roles: Role[];
 }
 
-export default function UserForm({ user, roles }: UserFormProps) {
+export default function UtilisateurForm({ user, roles }: UtilisateurFormProps) {
     const isEditing = !!user?.id;
 
     const { data, setData, post, patch, processing, errors } = useForm({
-        name: user?.name ?? '',
-        email: user?.email ?? '',
-        password: '',
+        utilisateur_nom: user?.utilisateur_nom ?? '',
+        utilisateur_email: user?.utilisateur_email ?? '',
+        utilisateur_mot_de_passe: '',
         utilisateur_role: user?.utilisateur_role ?? 'porteur',
-        telephone: user?.telephone ?? '',
+        utilisateur_telephone: user?.utilisateur_telephone ?? '',
     });
 
     const submit = (e: FormEvent) => {
         e.preventDefault();
         if (isEditing && user?.id != null) {
-            patch(usersUpdate.url(user.id), { preserveScroll: true });
+            patch(usersUpdate.url(user.id_utilisateur), { preserveScroll: true });
         } else {
             post(usersStore.url());
         }
@@ -50,7 +50,7 @@ export default function UserForm({ user, roles }: UserFormProps) {
                     </Button>
                 </Link>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {isEditing ? `Modifier ${user?.name}` : 'Nouvel utilisateur'}
+                    {isEditing ? `Modifier ${user?.utilisateur_nom}` : 'Nouvel utilisateur'}
                 </h2>
             </div>
 
@@ -64,9 +64,9 @@ export default function UserForm({ user, roles }: UserFormProps) {
                             <Input
                                 label="Nom complet"
                                 type="text"
-                                value={data.name}
-                                onChange={(e) => setData('name', e.target.value)}
-                                error={errors.name}
+                                value={data.utilisateur_nom}
+                                onChange={(e) => setData('utilisateur_nom', e.target.value)}
+                                error={errors.utilisateur_nom}
                                 required
                                 placeholder="Ex : Pr. Jean-Baptiste OUÉDRAOGO"
                                 autoComplete="name"
@@ -75,9 +75,9 @@ export default function UserForm({ user, roles }: UserFormProps) {
                             <Input
                                 label="Adresse e-mail"
                                 type="email"
-                                value={data.email}
-                                onChange={(e) => setData('email', e.target.value)}
-                                error={errors.email}
+                                value={data.utilisateur_email}
+                                onChange={(e) => setData('utilisateur_email', e.target.value)}
+                                error={errors.utilisateur_email}
                                 required
                                 placeholder="utilisateur@cifeu.bf"
                                 autoComplete="email"
@@ -90,7 +90,7 @@ export default function UserForm({ user, roles }: UserFormProps) {
                                 <select
                                     id="utilisateur_role"
                                     value={data.utilisateur_role}
-                                    onChange={(e) => setData('utilisateur_role', e.target.value as User['utilisateur_role'])}
+                                    onChange={(e) => setData('utilisateur_role', e.target.value as Utilisateur['utilisateur_role'])}
                                     aria-label="Sélectionner le rôle"
                                     aria-invalid={!!errors.utilisateur_role}
                                     className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
@@ -105,9 +105,9 @@ export default function UserForm({ user, roles }: UserFormProps) {
                             <Input
                                 label="Téléphone"
                                 type="tel"
-                                value={data.telephone}
-                                onChange={(e) => setData('telephone', e.target.value)}
-                                error={errors.telephone}
+                                value={data.utilisateur_telephone}
+                                onChange={(e) => setData('utilisateur_telephone', e.target.value)}
+                                error={errors.utilisateur_telephone}
                                 placeholder="+226 70 00 00 00"
                                 autoComplete="tel"
                             />
@@ -115,9 +115,9 @@ export default function UserForm({ user, roles }: UserFormProps) {
                             <Input
                                 label={isEditing ? 'Nouveau mot de passe (laisser vide pour ne pas changer)' : 'Mot de passe'}
                                 type="password"
-                                value={data.password}
-                                onChange={(e) => setData('password', e.target.value)}
-                                error={errors.password}
+                                value={data.utilisateur_mot_de_passe}
+                                onChange={(e) => setData('utilisateur_mot_de_passe', e.target.value)}
+                                error={errors.utilisateur_mot_de_passe}
                                 required={!isEditing}
                                 placeholder="••••••••"
                                 hint={isEditing ? 'Laissez vide pour conserver le mot de passe actuel.' : undefined}

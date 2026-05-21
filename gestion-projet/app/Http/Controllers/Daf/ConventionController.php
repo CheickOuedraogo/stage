@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Daf;
 
-use App\Enums\ConventionStatus;
-use App\Enums\VersementType;
+use App\Enums\StatutConvention;
+use App\Enums\TypeVersement;
 use App\Http\Controllers\Controller;
 use App\Models\Convention;
 use App\Models\Projet;
@@ -20,7 +20,7 @@ class ConventionController extends Controller
 {
     public function show(Projet $projet, Convention $convention): Response
     {
-        abort_unless($convention->id_projet === $projet->id, 404);
+        abort_unless($convention->id_utilisateur_projet === $projet->id_utilisateur, 404);
 
         $convention->load([
             'bailleur:id_bailleur,bailleur_nom,bailleur_sigle,bailleur_type,bailleur_pays',
@@ -30,14 +30,14 @@ class ConventionController extends Controller
         ]);
 
         return Inertia::render('daf/Projets/Convention', [
-            'projet' => ['id' => $projet->id, 'titre' => $projet->projet_titre],
+            'projet' => ['id' => $projet->id_utilisateur, 'titre' => $projet->projet_titre],
             'convention' => $this->formatConvention($convention),
         ]);
     }
 
     public function storeRubrique(Request $request, Projet $projet, Convention $convention): RedirectResponse
     {
-        abort_unless($convention->id_projet === $projet->id, 404);
+        abort_unless($convention->id_utilisateur_projet === $projet->id_utilisateur, 404);
 
         $validated = $request->validate($this->rubriqueRules());
 
@@ -54,12 +54,12 @@ class ConventionController extends Controller
 
     public function updateRubrique(Request $request, Projet $projet, Convention $convention, Rubrique $rubrique): RedirectResponse
     {
-        abort_unless($convention->id_projet === $projet->id, 404);
-        abort_unless($rubrique->id_convention === $convention->id, 404);
+        abort_unless($convention->id_utilisateur_projet === $projet->id_utilisateur, 404);
+        abort_unless($rubrique->id_utilisateur_convention === $convention->id_utilisateur, 404);
 
         $validated = $request->validate($this->rubriqueRules());
 
-        $this->assertBudgetOk($projet, $convention, $validated['montant_prevu'], $rubrique->id);
+        $this->assertBudgetOk($projet, $convention, $validated['montant_prevu'], $rubrique->id_utilisateur);
 
         $rubrique->update([
             'rubrique_libelle' => $validated['libelle'],
@@ -72,38 +72,38 @@ class ConventionController extends Controller
 
     public function terminer(Projet $projet, Convention $convention): RedirectResponse
     {
-        abort_unless($convention->id_projet === $projet->id, 404);
+        abort_unless($convention->id_utilisateur_projet === $projet->id_utilisateur, 404);
 
-        if (! in_array($convention->convention_statut, [ConventionStatus::Active, ConventionStatus::Suspendue])) {
+        if (! in_array($convention->convention_statut, [StatutConvention::Active, StatutConvention::Suspendue])) {
             throw ValidationException::withMessages([
                 'status' => 'Seule une convention active ou suspendue peut être terminée.',
             ]);
         }
 
-        $convention->update(['convention_statut' => ConventionStatus::Terminee]);
+        $convention->update(['convention_statut' => StatutConvention::Terminee]);
 
         return back()->with('success', "La convention « {$convention->convention_titre} » est marquée comme terminée.");
     }
 
     public function annuler(Projet $projet, Convention $convention): RedirectResponse
     {
-        abort_unless($convention->id_projet === $projet->id, 404);
+        abort_unless($convention->id_utilisateur_projet === $projet->id_utilisateur, 404);
 
-        if (! in_array($convention->convention_statut, [ConventionStatus::Active, ConventionStatus::Suspendue])) {
+        if (! in_array($convention->convention_statut, [StatutConvention::Active, StatutConvention::Suspendue])) {
             throw ValidationException::withMessages([
                 'status' => 'Seule une convention active ou suspendue peut être annulée.',
             ]);
         }
 
-        $convention->update(['convention_statut' => ConventionStatus::Annulee]);
+        $convention->update(['convention_statut' => StatutConvention::Annulee]);
 
         return back()->with('success', "La convention « {$convention->convention_titre} » a été annulée.");
     }
 
     public function destroyRubrique(Projet $projet, Convention $convention, Rubrique $rubrique): RedirectResponse
     {
-        abort_unless($convention->id_projet === $projet->id, 404);
-        abort_unless($rubrique->id_convention === $convention->id, 404);
+        abort_unless($convention->id_utilisateur_projet === $projet->id_utilisateur, 404);
+        abort_unless($rubrique->id_utilisateur_convention === $convention->id_utilisateur, 404);
 
         $rubrique->delete();
 
@@ -112,12 +112,12 @@ class ConventionController extends Controller
 
     public function storeVersement(Request $request, Projet $projet, Convention $convention): RedirectResponse
     {
-        abort_unless($convention->id_projet === $projet->id, 404);
+        abort_unless($convention->id_utilisateur_projet === $projet->id_utilisateur, 404);
 
         $validated = $request->validate([
             'montant' => ['required', 'integer', 'min:1'],
             'date_reception' => ['required', 'date', 'before_or_equal:today'],
-            'type' => ['required', Rule::enum(VersementType::class)],
+            'type' => ['required', Rule::enum(TypeVersement::class)],
             'reference' => ['nullable', 'string', 'max:100'],
             'description' => ['nullable', 'string', 'max:1000'],
         ]);
@@ -135,13 +135,13 @@ class ConventionController extends Controller
 
     public function updateVersement(Request $request, Projet $projet, Convention $convention, Versement $versement): RedirectResponse
     {
-        abort_unless($convention->id_projet === $projet->id, 404);
-        abort_unless($versement->id_convention === $convention->id, 404);
+        abort_unless($convention->id_utilisateur_projet === $projet->id_utilisateur, 404);
+        abort_unless($versement->id_utilisateur_convention === $convention->id_utilisateur, 404);
 
         $validated = $request->validate([
             'montant' => ['required', 'integer', 'min:1'],
             'date_reception' => ['required', 'date', 'before_or_equal:today'],
-            'type' => ['required', Rule::enum(VersementType::class)],
+            'type' => ['required', Rule::enum(TypeVersement::class)],
             'reference' => ['nullable', 'string', 'max:100'],
             'description' => ['nullable', 'string', 'max:1000'],
         ]);
@@ -159,8 +159,8 @@ class ConventionController extends Controller
 
     public function destroyVersement(Projet $projet, Convention $convention, Versement $versement): RedirectResponse
     {
-        abort_unless($convention->id_projet === $projet->id, 404);
-        abort_unless($versement->id_convention === $convention->id, 404);
+        abort_unless($convention->id_utilisateur_projet === $projet->id_utilisateur, 404);
+        abort_unless($versement->id_utilisateur_convention === $convention->id_utilisateur, 404);
 
         $versement->delete();
 
@@ -211,7 +211,7 @@ class ConventionController extends Controller
     private function formatConvention(Convention $convention): array
     {
         return [
-            'id' => $convention->id,
+            'id' => $convention->id_utilisateur,
             'titre' => $convention->convention_titre,
             'description' => $convention->convention_description,
             'montant' => $convention->convention_montant,
@@ -220,8 +220,8 @@ class ConventionController extends Controller
             'taux_conversion' => $convention->convention_taux_conversion,
             'forme' => $convention->convention_forme->value,
             'forme_label' => $convention->convention_forme->label(),
-            'status' => $convention->convention_statut->value,
-            'status_label' => $convention->convention_statut->label(),
+            'statut' => $convention->convention_statut->value,
+            'libelle_statut' => $convention->convention_statut->label(),
             'date_signature' => $convention->convention_date_signature?->toDateString(),
             'date_debut' => $convention->convention_date_debut?->toDateString(),
             'date_fin' => $convention->convention_date_fin?->toDateString(),
@@ -234,14 +234,14 @@ class ConventionController extends Controller
             'total_rubriques' => $convention->rubriques->sum('rubrique_montant_prevu'),
             'total_versements' => $convention->versements->sum('versement_montant'),
             'rubriques' => $convention->rubriques->map(fn ($r) => [
-                'id' => $r->id,
+                'id' => $r->id_utilisateur,
                 'libelle' => $r->rubrique_libelle,
                 'montant_prevu' => $r->rubrique_montant_prevu,
                 'montant_depense' => 0,
                 'description' => $r->rubrique_description,
             ])->values(),
             'versements' => $convention->versements->map(fn ($v) => [
-                'id' => $v->id,
+                'id' => $v->id_utilisateur,
                 'montant' => $v->versement_montant,
                 'date_reception' => $v->versement_date_reception->toDateString(),
                 'type' => $v->versement_type->value,
@@ -250,7 +250,7 @@ class ConventionController extends Controller
                 'description' => $v->versement_description,
             ])->values(),
             'paiements_directs' => $convention->paiementsDirects->map(fn ($p) => [
-                'id' => $p->id,
+                'id' => $p->id_utilisateur,
                 'montant' => $p->paiement_direct_montant,
                 'objet_depense' => $p->paiement_direct_objet,
                 'date_paiement' => $p->paiement_direct_date->toDateString(),

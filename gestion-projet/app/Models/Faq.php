@@ -2,15 +2,26 @@
 
 namespace App\Models;
 
-use App\Enums\UserRole;
+use App\Enums\RoleUtilisateur;
+use Database\Factories\FaqFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 #[Fillable(['faq_question', 'faq_reponse', 'faq_actif', 'visible_porteur', 'visible_daf', 'visible_ac'])]
-class FaqItem extends Model
+class Faq extends Model
 {
+    /** @use HasFactory<FaqFactory> */
+    use HasFactory;
+
+    protected $table = 'faq';
+
     protected $primaryKey = 'id_faq';
+
+    const CREATED_AT = 'cree_le';
+
+    const UPDATED_AT = 'mis_a_jour_le';
 
     protected function casts(): array
     {
@@ -22,23 +33,17 @@ class FaqItem extends Model
         ];
     }
 
-    /** Transparent id accessor so $faqItem->id still works */
-    public function getIdAttribute(): mixed
-    {
-        return $this->getAttribute($this->getKeyName());
-    }
-
     public function scopeActive(Builder $query): void
     {
         $query->where('faq_actif', true)->orderBy('id_faq');
     }
 
-    public function isVisibleFor(UserRole $role): bool
+    public function isVisibleFor(RoleUtilisateur $role): bool
     {
         return match ($role) {
-            UserRole::Porteur => $this->visible_porteur,
-            UserRole::Daf => $this->visible_daf,
-            UserRole::Ac => $this->visible_ac,
+            RoleUtilisateur::Porteur => $this->visible_porteur,
+            RoleUtilisateur::Daf => $this->visible_daf,
+            RoleUtilisateur::AgentComptable => $this->visible_ac,
             default => false,
         };
     }

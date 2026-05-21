@@ -48,8 +48,8 @@ interface Bilan {
         id: number;
         titre: string;
         porteur: string;
-        status: string;
-        status_label: string;
+        statut: string;
+        libelle_statut: string;
         statut_final: string | null;
         statut_final_label: string | null;
         date_debut: string | null;

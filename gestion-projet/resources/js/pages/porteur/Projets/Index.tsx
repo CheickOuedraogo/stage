@@ -8,8 +8,8 @@ import { useState } from 'react';
 interface Projet {
     id: number;
     titre: string;
-    status: string;
-    status_label: string;
+    statut: string;
+    libelle_statut: string;
     montant_estime: number;
     date_debut: string | null;
     date_fin_prevue: string | null;
@@ -20,7 +20,7 @@ interface Projet {
 
 interface Props {
     projets: Projet[];
-    filters: { search?: string; status?: string };
+    filters: { search?: string; statut?: string };
 }
 
 const STATUS_OPTIONS = [
@@ -65,8 +65,8 @@ export default function ProjetsIndex({ projets, filters }: Props) {
                     />
                 </div>
                 <select
-                    value={filters.status ?? ''}
-                    onChange={(e) => applyFilter({ status: e.target.value || undefined })}
+                    value={filters.statut ?? ''}
+                    onChange={(e) => applyFilter({ statut: e.target.value || undefined })}
                     aria-label="Filtrer par statut"
                     className="px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                 >
@@ -101,8 +101,8 @@ function ProjetCard({ projet }: { projet: Projet }) {
                     <h3 className="text-sm font-semibold text-gray-900 dark:text-white leading-snug group-hover:text-gray-700 dark:group-hover:text-slate-200 line-clamp-2">
                         {projet.titre}
                     </h3>
-                    <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${projectStatusClass(projet.status)}`}>
-                        {projet.status_label}
+                    <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${projectStatusClass(projet.statut)}`}>
+                        {projet.libelle_statut}
                     </span>
                 </div>
 

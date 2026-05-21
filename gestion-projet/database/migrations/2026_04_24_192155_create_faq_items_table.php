@@ -11,12 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('faq_items', function (Blueprint $table) {
+        Schema::create('faq', function (Blueprint $table) {
             $table->id('id_faq');
             $table->string('faq_question');
             $table->text('faq_reponse');
             $table->boolean('faq_actif')->default(true);
-            $table->timestamps();
+            $table->boolean('visible_porteur')->default(true);
+            $table->boolean('visible_daf')->default(true);
+            $table->boolean('visible_ac')->default(true);
+            $table->timestamp('cree_le')->useCurrent();
+            $table->timestamp('mis_a_jour_le')->useCurrent();
         });
     }
 
@@ -25,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('faq_items');
+        Schema::dropIfExists('faq');
     }
 };

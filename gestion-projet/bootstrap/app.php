@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Middleware\EnsureUserIsActive;
+use App\Http\Middleware\EnsureUtilisateurIsActive;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\MaintenanceMiddleware;
 use App\Http\Middleware\RoleMiddleware;
@@ -22,7 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
-            EnsureUserIsActive::class,
+            EnsureUtilisateurIsActive::class,
             MaintenanceMiddleware::class,
         ]);
 

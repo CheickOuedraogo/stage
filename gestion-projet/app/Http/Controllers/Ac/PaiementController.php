@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Ac;
+namespace App\Http\Controllers\AgentComptable;
 
 use App\Http\Controllers\Controller;
 use App\Models\Paiement;
@@ -14,11 +14,11 @@ class PaiementController extends Controller
     {
         $paiements = Paiement::with([
             'demande:id_demande,demande_objet,id_porteur,id_convention,id_rubrique',
-            'demande.porteur:id_utilisateur,name',
+            'demande.porteur:id_utilisateur,utilisateur_nom',
             'demande.convention:id_convention,convention_titre,id_projet',
             'demande.convention.projet:id_projet,projet_titre',
             'demande.rubrique:id_rubrique,rubrique_libelle',
-            'enregistrePar:id_utilisateur,name',
+            'enregistrePar:id_utilisateur,utilisateur_nom',
         ])
             ->when($request->filled('projet_id'), fn ($q) => $q->whereHas(
                 'demande.convention',
@@ -33,18 +33,18 @@ class PaiementController extends Controller
             ->paginate(20)
             ->withQueryString()
             ->through(fn (Paiement $p) => [
-                'id' => $p->id,
+                'id' => $p->id_utilisateur,
                 'montant' => $p->paiement_montant,
                 'date_paiement' => $p->paiement_date->toDateString(),
                 'mode_paiement' => $p->paiement_mode->value,
                 'mode_paiement_label' => $p->paiement_mode->label(),
                 'reference' => $p->paiement_reference,
                 'objet' => $p->demande->demande_objet,
-                'porteur' => $p->demande->porteur->name,
+                'porteur' => $p->demande->porteur->utilisateur_nom,
                 'convention' => $p->demande->convention->convention_titre,
                 'projet' => $p->demande->convention->projet->projet_titre,
                 'rubrique' => $p->demande->rubrique->rubrique_libelle,
-                'enregistre_par' => $p->enregistrePar->name,
+                'enregistre_par' => $p->enregistrePar->utilisateur_nom,
             ]);
 
         $totalMontant = Paiement::when($request->filled('projet_id'), fn ($q) => $q->whereHas(

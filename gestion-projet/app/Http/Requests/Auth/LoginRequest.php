@@ -30,8 +30,8 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
+            'utilisateur_email' => ['required', 'string', 'utilisateur_email'],
+            'utilisateur_mot_de_passe' => ['required', 'string'],
         ];
     }
 
@@ -51,19 +51,19 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotLocked();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        if (! Auth::attempt($this->only('utilisateur_email', 'utilisateur_mot_de_passe'), $this->boolean('remember'))) {
             $this->recordFailedAttempt();
 
             $remaining = self::MAX_ATTEMPTS - $this->currentAttempts();
 
             if ($remaining > 0) {
                 throw ValidationException::withMessages([
-                    'email' => "Identifiants incorrects. Il vous reste {$remaining} tentative(s) avant blocage temporaire.",
+                    'utilisateur_email' => "Identifiants incorrects. Il vous reste {$remaining} tentative(s) avant blocage temporaire.",
                 ]);
             }
 
             throw ValidationException::withMessages([
-                'email' => 'Identifiants incorrects.',
+                'utilisateur_email' => 'Identifiants incorrects.',
             ]);
         }
 
@@ -83,7 +83,7 @@ class LoginRequest extends FormRequest
         $minutes = ceil($seconds / 60);
 
         throw ValidationException::withMessages([
-            'email' => "Trop de tentatives de connexion. Réessayez dans {$minutes} minute(s).",
+            'utilisateur_email' => "Trop de tentatives de connexion. Réessayez dans {$minutes} minute(s).",
         ]);
     }
 
@@ -129,6 +129,6 @@ class LoginRequest extends FormRequest
 
     private function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        return Str::transliterate(Str::lower($this->string('utilisateur_email')).'|'.$this->ip());
     }
 }

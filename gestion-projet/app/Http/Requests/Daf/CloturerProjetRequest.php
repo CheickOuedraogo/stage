@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Daf;
 
-use App\Enums\ProjetStatutFinal;
+use App\Enums\StatutFinalProjet;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 
@@ -18,7 +18,7 @@ class CloturerProjetRequest extends FormRequest
     {
         return [
             'date_fin_reelle' => ['required', 'date', 'before_or_equal:today'],
-            'statut_final' => ['required', new Enum(ProjetStatutFinal::class)],
+            'statut_final' => ['required', new Enum(StatutFinalProjet::class)],
         ];
     }
 

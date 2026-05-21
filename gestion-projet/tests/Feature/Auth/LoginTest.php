@@ -1,8 +1,8 @@
 <?php
 
-use App\Enums\UserRole;
-use App\Models\Setting;
-use App\Models\User;
+use App\Enums\RoleUtilisateur;
+use App\Models\Parametre;
+use App\Models\Utilisateur;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -18,89 +18,89 @@ describe('Connexion', function () {
     });
 
     it('connecte un utilisateur avec les bonnes informations', function () {
-        $user = User::factory()->porteur()->create([
-            'email' => 'porteur@test.bf',
-            'password' => bcrypt('password'),
+        $user = Utilisateur::factory()->porteur()->create([
+            'utilisateur_email' => 'porteur@test.bf',
+            'utilisateur_mot_de_passe' => bcrypt('utilisateur_mot_de_passe'),
         ]);
 
         $response = $this->post(route('login'), [
-            'email' => 'porteur@test.bf',
-            'password' => 'password',
+            'utilisateur_email' => 'porteur@test.bf',
+            'utilisateur_mot_de_passe' => 'utilisateur_mot_de_passe',
         ]);
 
         $response->assertRedirect(route('porteur.dashboard'));
         $this->assertAuthenticatedAs($user);
     });
 
-    it('redirige vers le bon dashboard selon le rôle', function (UserRole $role, string $dashboardRoute) {
-        $user = User::factory()->state(['utilisateur_role' => $role])->create([
-            'password' => bcrypt('password'),
+    it('redirige vers le bon dashboard selon le rôle', function (RoleUtilisateur $role, string $routeTableauBord) {
+        $user = Utilisateur::factory()->state(['utilisateur_role' => $role])->create([
+            'utilisateur_mot_de_passe' => bcrypt('utilisateur_mot_de_passe'),
         ]);
 
         $this->post(route('login'), [
-            'email' => $user->email,
-            'password' => 'password',
-        ])->assertRedirect(route($dashboardRoute));
+            'utilisateur_email' => $user->utilisateur_email,
+            'utilisateur_mot_de_passe' => 'utilisateur_mot_de_passe',
+        ])->assertRedirect(route($routeTableauBord));
     })->with([
-        'admin' => [UserRole::Admin, 'admin.dashboard'],
-        'daf' => [UserRole::Daf, 'daf.dashboard'],
-        'ac' => [UserRole::Ac, 'ac.dashboard'],
-        'porteur' => [UserRole::Porteur, 'porteur.dashboard'],
+        'admin' => [RoleUtilisateur::Administrateur, 'admin.dashboard'],
+        'daf' => [RoleUtilisateur::Daf, 'daf.dashboard'],
+        'ac' => [RoleUtilisateur::AgentComptable, 'ac.dashboard'],
+        'porteur' => [RoleUtilisateur::Porteur, 'porteur.dashboard'],
     ]);
 
     it('rejette les mauvaises informations de connexion', function () {
-        User::factory()->create(['email' => 'test@bf', 'password' => bcrypt('password')]);
+        Utilisateur::factory()->create(['utilisateur_email' => 'test@bf', 'utilisateur_mot_de_passe' => bcrypt('utilisateur_mot_de_passe')]);
 
         $this->post(route('login'), [
-            'email' => 'test@bf',
-            'password' => 'mauvais-mot-de-passe',
-        ])->assertSessionHasErrors('email');
+            'utilisateur_email' => 'test@bf',
+            'utilisateur_mot_de_passe' => 'mauvais-mot-de-passe',
+        ])->assertSessionHasErrors('utilisateur_email');
 
         $this->assertGuest();
     });
 
     it('bloque un utilisateur inactif', function () {
-        $user = User::factory()->inactive()->create([
-            'password' => bcrypt('password'),
+        $user = Utilisateur::factory()->inactive()->create([
+            'utilisateur_mot_de_passe' => bcrypt('utilisateur_mot_de_passe'),
         ]);
 
         $this->post(route('login'), [
-            'email' => $user->email,
-            'password' => 'password',
-        ])->assertSessionHasErrors('email');
+            'utilisateur_email' => $user->utilisateur_email,
+            'utilisateur_mot_de_passe' => 'utilisateur_mot_de_passe',
+        ])->assertSessionHasErrors('utilisateur_email');
 
         $this->assertGuest();
     });
 
     it('bloque les non-admin pendant la maintenance', function () {
-        Setting::set('maintenance_mode', 'true');
-        Setting::set('maintenance_reason', 'Test maintenance');
+        Parametre::set('maintenance_mode', 'true');
+        Parametre::set('maintenance_reason', 'Test maintenance');
 
-        $porteur = User::factory()->porteur()->create(['password' => bcrypt('password')]);
+        $porteur = Utilisateur::factory()->porteur()->create(['utilisateur_mot_de_passe' => bcrypt('utilisateur_mot_de_passe')]);
 
         $this->post(route('login'), [
-            'email' => $porteur->email,
-            'password' => 'password',
+            'utilisateur_email' => $porteur->utilisateur_email,
+            'utilisateur_mot_de_passe' => 'utilisateur_mot_de_passe',
         ]);
 
         $this->assertGuest();
     });
 
     it('autorise l\'admin à se connecter pendant la maintenance', function () {
-        Setting::set('maintenance_mode', 'true');
+        Parametre::set('maintenance_mode', 'true');
 
-        $admin = User::factory()->admin()->create(['password' => bcrypt('password')]);
+        $admin = Utilisateur::factory()->admin()->create(['utilisateur_mot_de_passe' => bcrypt('utilisateur_mot_de_passe')]);
 
         $this->post(route('login'), [
-            'email' => $admin->email,
-            'password' => 'password',
+            'utilisateur_email' => $admin->utilisateur_email,
+            'utilisateur_mot_de_passe' => 'utilisateur_mot_de_passe',
         ])->assertRedirect(route('admin.dashboard'));
 
         $this->assertAuthenticatedAs($admin);
     });
 
     it('déconnecte l\'utilisateur', function () {
-        $user = User::factory()->create();
+        $user = Utilisateur::factory()->create();
         $this->actingAs($user)
             ->post(route('logout'))
             ->assertRedirect(route('login'));
@@ -115,42 +115,42 @@ describe('Blocage par tentatives (backoff exponentiel)', function () {
     });
 
     it('affiche le nombre de tentatives restantes après un échec', function () {
-        $user = User::factory()->create(['password' => bcrypt('password')]);
+        $user = Utilisateur::factory()->create(['utilisateur_mot_de_passe' => bcrypt('utilisateur_mot_de_passe')]);
 
         $response = $this->post(route('login'), [
-            'email' => $user->email,
-            'password' => 'mauvais',
+            'utilisateur_email' => $user->utilisateur_email,
+            'utilisateur_mot_de_passe' => 'mauvais',
         ]);
 
-        $response->assertSessionHasErrors('email');
-        expect(session('errors')->first('email'))->toContain('2 tentative(s)');
+        $response->assertSessionHasErrors('utilisateur_email');
+        expect(session('errors')->first('utilisateur_email'))->toContain('2 tentative(s)');
     });
 
     it('bloque après 3 échecs avec message de temps d\'attente', function () {
-        $user = User::factory()->create(['password' => bcrypt('password')]);
+        $user = Utilisateur::factory()->create(['utilisateur_mot_de_passe' => bcrypt('utilisateur_mot_de_passe')]);
 
         // 3 tentatives échouées
         for ($i = 0; $i < 3; $i++) {
             $this->post(route('login'), [
-                'email' => $user->email,
-                'password' => 'mauvais',
+                'utilisateur_email' => $user->utilisateur_email,
+                'utilisateur_mot_de_passe' => 'mauvais',
             ]);
         }
 
         // 4e tentative — doit être bloquée
         $response = $this->post(route('login'), [
-            'email' => $user->email,
-            'password' => 'password',
+            'utilisateur_email' => $user->utilisateur_email,
+            'utilisateur_mot_de_passe' => 'utilisateur_mot_de_passe',
         ]);
 
-        $response->assertSessionHasErrors('email');
-        expect(session('errors')->first('email'))->toContain('minute');
+        $response->assertSessionHasErrors('utilisateur_email');
+        expect(session('errors')->first('utilisateur_email'))->toContain('minute');
         $this->assertGuest();
     });
 
     it('double la durée de blocage à chaque nouveau lockout', function () {
-        $user = User::factory()->create(['password' => bcrypt('password')]);
-        $key = strtolower($user->email).'|127.0.0.1';
+        $user = Utilisateur::factory()->create(['utilisateur_mot_de_passe' => bcrypt('utilisateur_mot_de_passe')]);
+        $key = strtolower($user->utilisateur_email).'|127.0.0.1';
         $key = Str::transliterate($key);
 
         // Premier lockout (300s)
@@ -170,28 +170,28 @@ describe('Blocage par tentatives (backoff exponentiel)', function () {
     });
 
     it('autorise la connexion quand le lockout expire', function () {
-        $user = User::factory()->create(['password' => bcrypt('password')]);
+        $user = Utilisateur::factory()->create(['utilisateur_mot_de_passe' => bcrypt('utilisateur_mot_de_passe')]);
 
         $response = $this->post(route('login'), [
-            'email' => $user->email,
-            'password' => 'password',
+            'utilisateur_email' => $user->utilisateur_email,
+            'utilisateur_mot_de_passe' => 'utilisateur_mot_de_passe',
         ]);
 
-        $response->assertRedirect($user->dashboardRoute());
+        $response->assertRedirect($user->routeTableauBord());
         $this->assertAuthenticatedAs($user);
     });
 
     it('efface l\'état de rate limiting après connexion réussie', function () {
-        $user = User::factory()->create(['password' => bcrypt('password')]);
-        $key = strtolower($user->email).'|127.0.0.1';
+        $user = Utilisateur::factory()->create(['utilisateur_mot_de_passe' => bcrypt('utilisateur_mot_de_passe')]);
+        $key = strtolower($user->utilisateur_email).'|127.0.0.1';
         $key = Str::transliterate($key);
 
         // Simule 2 échecs
         Cache::put('login_attempts:'.$key, 2, now()->addMinutes(15));
 
         $this->post(route('login'), [
-            'email' => $user->email,
-            'password' => 'password',
+            'utilisateur_email' => $user->utilisateur_email,
+            'utilisateur_mot_de_passe' => 'utilisateur_mot_de_passe',
         ]);
 
         expect(Cache::has('login_attempts:'.$key))->toBeFalse();

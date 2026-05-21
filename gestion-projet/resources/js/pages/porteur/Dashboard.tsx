@@ -23,17 +23,17 @@ interface Demande {
     id: number;
     objet: string;
     montant: number;
-    status: string;
-    status_label: string;
+    statut: string;
+    libelle_statut: string;
     badge_class: string;
     convention: string;
     projet: string;
-    created_at: string;
+    cree_le: string;
 }
 
 interface ProjetBudget {
     titre: string;
-    status: string;
+    statut: string;
     montant_estime: number;
     versements: number;
     depenses: number;
@@ -64,7 +64,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 export default function PorteurDashboard() {
     const { auth, stats, demandes_recentes, projets_budget } = usePage<Props>().props;
-    const firstName = auth.user?.name.split(' ').find((p) => !p.includes('.')) ?? auth.user?.name;
+    const firstName = auth.user?.utilisateur_nom.split(' ').find((p) => !p.includes('.')) ?? auth.user?.utilisateur_nom;
 
     return (
         <AppLayout title="Tableau de bord">
@@ -124,8 +124,8 @@ export default function PorteurDashboard() {
                                     <div className="flex items-center justify-between mb-2">
                                         <div className="flex items-center gap-2 min-w-0">
                                             <span className="text-sm font-medium text-slate-900 dark:text-white truncate">{p.titre}</span>
-                                            <span className={`shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[p.status] ?? ''}`}>
-                                                {STATUS_LABELS[p.status] ?? p.status}
+                                            <span className={`shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[p.statut] ?? ''}`}>
+                                                {STATUS_LABELS[p.statut] ?? p.statut}
                                             </span>
                                         </div>
                                         <span className="text-xs font-mono text-emerald-600 font-semibold shrink-0 ml-2">{formatCurrency(p.disponible)} dispo.</span>
@@ -179,7 +179,7 @@ export default function PorteurDashboard() {
                                 <div className="shrink-0 text-right">
                                     <p className="text-sm font-mono font-semibold text-slate-900 dark:text-white">{formatCurrency(d.montant)}</p>
                                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-0.5 ${d.badge_class}`}>
-                                        {d.status_label}
+                                        {d.libelle_statut}
                                     </span>
                                 </div>
                             </Link>

@@ -5,7 +5,7 @@ namespace App\Notifications;
 use App\Models\Projet;
 use Illuminate\Notifications\Notification;
 
-class ProjetCloture extends Notification
+class ProjetClotureNotification extends Notification
 {
     public function __construct(public readonly Projet $projet) {}
 
@@ -17,7 +17,7 @@ class ProjetCloture extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'projet_id' => $this->projet->id,
+            'projet_id' => $this->projet->id_utilisateur,
             'titre' => $this->projet->titre,
             'date_cloture' => $this->projet->date_fin_reelle?->toDateString(),
             'message' => "Le projet « {$this->projet->titre} » a été clôturé.",

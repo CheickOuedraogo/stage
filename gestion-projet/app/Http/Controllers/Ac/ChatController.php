@@ -1,55 +1,55 @@
 <?php
 
-namespace App\Http\Controllers\Ac;
+namespace App\Http\Controllers\AgentComptable;
 
-use App\Enums\UserRole;
+use App\Enums\RoleUtilisateur;
 use App\Http\Controllers\Controller;
-use App\Models\ChatMessage;
-use App\Models\FaqItem;
-use App\Models\User;
+use App\Models\Faq;
+use App\Models\MessageChat;
+use App\Models\Utilisateur;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class ChatController extends Controller
+class MessageChatControleur extends Controller
 {
     public function index(Request $request): Response
     {
         $user = $request->user();
-        $admin = User::byRole(UserRole::Admin)->first();
+        $admin = Utilisateur::parRole(RoleUtilisateur::Administrateur)->first();
 
         $messages = $admin
-            ? ChatMessage::where(fn ($q) => $q
-                ->where('id_expediteur', $user->id)->where('id_destinataire', $admin->id)
-                ->orWhere('id_expediteur', $admin->id)->where('id_destinataire', $user->id)
+            ? MessageChat::where(fn ($q) => $q
+                ->where('id_expediteur', $user->id_utilisateur_utilisateur)->where('id_destinataire', $admin->id_utilisateur_utilisateur)
+                ->orWhere('id_expediteur', $admin->id_utilisateur_utilisateur)->where('id_destinataire', $user->id_utilisateur_utilisateur)
             )
                 ->latest()
                 ->limit(50)
                 ->get()
                 ->reverse()
                 ->values()
-                ->map(fn (ChatMessage $m) => [
-                    'id' => $m->id,
+                ->map(fn (MessageChat $m) => [
+                    'id' => $m->id_utilisateur_message,
                     'message' => $m->message_contenu,
-                    'is_mine' => $m->id_expediteur === $user->id,
-                    'sender_name' => $m->id_expediteur === $user->id ? 'Moi' : 'Admin',
+                    'is_mine' => $m->id_utilisateur_expediteur === $user->id_utilisateur_utilisateur,
+                    'sender_name' => $m->id_utilisateur_expediteur === $user->id_utilisateur_utilisateur ? 'Moi' : 'Administrateur',
                     'created_at' => $m->created_at->toIso8601String(),
                 ])
             : collect();
 
         if ($admin) {
-            ChatMessage::where('id_expediteur', $admin->id)
-                ->where('id_destinataire', $user->id)
+            MessageChat::where('id_expediteur', $admin->id_utilisateur_utilisateur)
+                ->where('id_destinataire', $user->id_utilisateur_utilisateur)
                 ->where('message_lu', false)
                 ->update(['message_lu' => true]);
         }
 
-        $faqItems = FaqItem::active()
+        $faqItems = Faq::active()
             ->get()
-            ->filter(fn (FaqItem $f) => $f->isVisibleFor(UserRole::Ac))
-            ->map(fn (FaqItem $f) => ['id' => $f->id, 'question' => $f->faq_question, 'reponse' => $f->faq_reponse])
+            ->filter(fn (Faq $f) => $f->isVisibleFor(RoleUtilisateur::AgentComptable))
+            ->map(fn (Faq $f) => ['id' => $f->id_utilisateur_faq, 'question' => $f->faq_question, 'reponse' => $f->faq_reponse])
             ->values();
 
         return Inertia::render('ac/Chat', [
@@ -63,11 +63,11 @@ class ChatController extends Controller
     {
         $request->validate(['message' => ['required', 'string', 'max:2000']]);
 
-        $admin = User::byRole(UserRole::Admin)->firstOrFail();
+        $admin = Utilisateur::parRole(RoleUtilisateur::Administrateur)->firstOrFail();
 
-        ChatMessage::create([
-            'id_expediteur' => $request->user()->id,
-            'id_destinataire' => $admin->id,
+        MessageChat::create([
+            'id_expediteur' => $request->user()->id_utilisateur_utilisateur,
+            'id_destinataire' => $admin->id_utilisateur_utilisateur,
             'message_contenu' => $request->message,
         ]);
 
@@ -77,27 +77,27 @@ class ChatController extends Controller
     public function poll(Request $request): JsonResponse
     {
         $user = $request->user();
-        $admin = User::byRole(UserRole::Admin)->first();
+        $admin = Utilisateur::parRole(RoleUtilisateur::Administrateur)->first();
         $since = (int) $request->query('since', 0);
 
         $messages = $admin
-            ? ChatMessage::where('id_expediteur', $admin->id)
-                ->where('id_destinataire', $user->id)
-                ->where('id', '>', $since)
+            ? MessageChat::where('id_expediteur', $admin->id_utilisateur_utilisateur)
+                ->where('id_destinataire', $user->id_utilisateur_utilisateur)
+                ->where('id_message', '>', $since)
                 ->get()
-                ->map(fn (ChatMessage $m) => [
-                    'id' => $m->id,
+                ->map(fn (MessageChat $m) => [
+                    'id' => $m->id_utilisateur_message,
                     'message' => $m->message_contenu,
                     'is_mine' => false,
-                    'sender_name' => 'Admin',
+                    'sender_name' => 'Administrateur',
                     'created_at' => $m->created_at->toIso8601String(),
                 ])
             : collect();
 
         if ($admin && $messages->isNotEmpty()) {
-            ChatMessage::where('id_expediteur', $admin->id)
-                ->where('id_destinataire', $user->id)
-                ->where('id', '>', $since)
+            MessageChat::where('id_expediteur', $admin->id_utilisateur_utilisateur)
+                ->where('id_destinataire', $user->id_utilisateur_utilisateur)
+                ->where('id_message', '>', $since)
                 ->update(['message_lu' => true]);
         }
 

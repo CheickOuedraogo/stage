@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum ProjectStatus: string
+enum StatutProjet: string
 {
     case EnAttenteFinancement = 'en_attente_financement';
     case EnCours = 'en_cours';

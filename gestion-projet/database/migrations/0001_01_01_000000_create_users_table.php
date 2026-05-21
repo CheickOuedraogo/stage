@@ -11,14 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('utilisateurs', function (Blueprint $table) {
             $table->id('id_utilisateur');
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
-            $table->timestamps();
+            $table->string('utilisateur_nom');
+            $table->string('utilisateur_email')->unique();
+            $table->timestamp('email_verifie_le')->nullable();
+            $table->string('utilisateur_mot_de_passe');
+            $table->rememberToken()->comment('jeton_souvenir'); // Laravel expects remember_token name for some internal logic, but we map it in model
+            $table->timestamp('cree_le')->useCurrent();
+            $table->timestamp('mis_a_jour_le')->useCurrent();
+
+            // From extend migration
+            $table->string('utilisateur_role')->default('porteur');
+            $table->boolean('utilisateur_actif')->default(true);
+            $table->string('utilisateur_avatar_chemin')->nullable();
+            $table->string('utilisateur_telephone', 20)->nullable();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
@@ -42,7 +49,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('utilisateurs');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
     }

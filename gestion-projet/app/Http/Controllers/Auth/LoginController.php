@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Models\AuditLog;
-use App\Models\Setting;
+use App\Models\JournalAudit;
+use App\Models\Parametre;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -16,12 +16,12 @@ class LoginController extends Controller
     public function showLoginForm(): Response|RedirectResponse
     {
         if (Auth::check()) {
-            return redirect(Auth::user()->dashboardRoute());
+            return redirect(Auth::user()->routeTableauBord());
         }
 
-        $maintenanceActive = Setting::isMaintenanceActive();
-        $maintenanceReason = Setting::get('maintenance_reason');
-        $maintenanceUntil = Setting::get('maintenance_until');
+        $maintenanceActive = Parametre::isMaintenanceActive();
+        $maintenanceReason = Parametre::get('maintenance_reason');
+        $maintenanceUntil = Parametre::get('maintenance_until');
 
         return Inertia::render('auth/Login', [
             'maintenanceActive' => $maintenanceActive,
@@ -45,12 +45,12 @@ class LoginController extends Controller
             $request->session()->regenerateToken();
 
             return back()->withErrors([
-                'email' => 'Votre compte a été désactivé. Contactez l\'administrateur.',
+                'utilisateur_email' => 'Votre compte a été désactivé. Contactez l\'administrateur.',
             ]);
         }
 
         // Block non-admin users during maintenance
-        if (Setting::isMaintenanceActive() && ! $user->isAdmin()) {
+        if (Parametre::isMaintenanceActive() && ! $user->estAdministrateur()) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
@@ -58,9 +58,9 @@ class LoginController extends Controller
             return redirect()->route('login')->with('maintenance', true);
         }
 
-        AuditLog::log('login', $user, description: "Connexion de {$user->name}");
+        JournalAudit::log('login', $user, description: "Connexion de {$user->utilisateur_nom}");
 
-        return redirect($user->dashboardRoute());
+        return redirect($user->routeTableauBord());
     }
 
     public function logout(): RedirectResponse
@@ -68,7 +68,7 @@ class LoginController extends Controller
         $user = Auth::user();
 
         if ($user) {
-            AuditLog::log('logout', $user, description: "Déconnexion de {$user->name}");
+            JournalAudit::log('logout', $user, description: "Déconnexion de {$user->utilisateur_nom}");
         }
 
         Auth::logout();

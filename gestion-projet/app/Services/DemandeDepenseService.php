@@ -2,14 +2,14 @@
 
 namespace App\Services;
 
-use App\Enums\DemandeStatus;
-use App\Enums\UserRole;
+use App\Enums\RoleUtilisateur;
+use App\Enums\StatutDemande;
 use App\Models\Convention;
 use App\Models\DemandeDepense;
 use App\Models\Paiement;
 use App\Models\Rubrique;
-use App\Models\User;
-use App\Notifications\DemandeStatusChanged;
+use App\Models\Utilisateur;
+use App\Notifications\StatutDemandeChange;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -20,7 +20,7 @@ class DemandeDepenseService
      */
     public function assertPasDeDemandeActive(Convention $convention, ?int $excludeId = null): void
     {
-        $query = DemandeDepense::where('id_convention', $convention->id)->active();
+        $query = DemandeDepense::where('id_convention', $convention->id_utilisateur)->actif();
 
         if ($excludeId) {
             $query->where('id_demande', '!=', $excludeId);
@@ -40,12 +40,12 @@ class DemandeDepenseService
     {
         $consomme = $rubrique->demandesDepenses()
             ->whereIn('demande_statut', [
-                DemandeStatus::Soumise->value,
-                DemandeStatus::ValidéeDaf->value,
-                DemandeStatus::ValidéeAc->value,
-                DemandeStatus::Payee->value,
-                DemandeStatus::RapportSoumis->value,
-                DemandeStatus::Terminee->value,
+                StatutDemande::Soumise->value,
+                StatutDemande::ValidéeDaf->value,
+                StatutDemande::ValidéeAgentComptable->value,
+                StatutDemande::Payee->value,
+                StatutDemande::RapportSoumis->value,
+                StatutDemande::Terminee->value,
             ])
             ->when($excludeDemande, fn ($q) => $q->where('id_demande', '!=', $excludeDemande))
             ->sum('demande_montant');
@@ -64,95 +64,95 @@ class DemandeDepenseService
     /**
      * DAF valide une demande.
      */
-    public function validerDaf(DemandeDepense $demande, User $daf): void
+    public function validerDaf(DemandeDepense $demande, Utilisateur $daf): void
     {
-        abort_unless($demande->demande_statut === DemandeStatus::Soumise, 403);
-        abort_unless($daf->utilisateur_role === UserRole::Daf, 403);
+        abort_unless($demande->demande_statut === StatutDemande::Soumise, 403);
+        abort_unless($daf->utilisateur_role === RoleUtilisateur::Daf, 403);
 
         $demande->update([
-            'demande_statut' => DemandeStatus::ValidéeDaf,
+            'demande_statut' => StatutDemande::ValidéeDaf,
             'demande_date_validation_daf' => now(),
-            'id_validateur_daf' => $daf->id,
+            'id_validateur_daf' => $daf->id_utilisateur,
             'demande_motif_rejet' => null,
         ]);
 
-        $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::ValidéeDaf));
+        $demande->porteur->notify(new StatutDemandeChange($demande, StatutDemande::ValidéeDaf));
 
-        $this->notifyAc($demande, DemandeStatus::ValidéeDaf);
+        $this->notifyAgentComptable($demande, StatutDemande::ValidéeDaf);
     }
 
     /**
      * DAF rejette une demande.
      */
-    public function rejeterDaf(DemandeDepense $demande, User $daf, string $motif): void
+    public function rejeterDaf(DemandeDepense $demande, Utilisateur $daf, string $motif): void
     {
-        abort_unless($demande->demande_statut === DemandeStatus::Soumise, 403);
-        abort_unless($daf->utilisateur_role === UserRole::Daf, 403);
+        abort_unless($demande->demande_statut === StatutDemande::Soumise, 403);
+        abort_unless($daf->utilisateur_role === RoleUtilisateur::Daf, 403);
 
         $demande->update([
-            'demande_statut' => DemandeStatus::RejetéeDaf,
+            'demande_statut' => StatutDemande::RejetéeDaf,
             'demande_motif_rejet' => $motif,
         ]);
 
-        $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::RejetéeDaf, $motif));
+        $demande->porteur->notify(new StatutDemandeChange($demande, StatutDemande::RejetéeDaf, $motif));
     }
 
     /**
      * AC valide une demande.
      */
-    public function validerAc(DemandeDepense $demande, User $ac): void
+    public function validerAgentComptable(DemandeDepense $demande, Utilisateur $ac): void
     {
-        abort_unless($demande->demande_statut === DemandeStatus::ValidéeDaf, 403);
-        abort_unless($ac->utilisateur_role === UserRole::Ac, 403);
+        abort_unless($demande->demande_statut === StatutDemande::ValidéeDaf, 403);
+        abort_unless($ac->utilisateur_role === RoleUtilisateur::AgentComptable, 403);
 
         $demande->update([
-            'demande_statut' => DemandeStatus::ValidéeAc,
+            'demande_statut' => StatutDemande::ValidéeAgentComptable,
             'demande_date_validation_ac' => now(),
-            'id_validateur_ac' => $ac->id,
+            'id_validateur_ac' => $ac->id_utilisateur,
             'demande_motif_rejet' => null,
         ]);
 
-        $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::ValidéeAc));
-        $this->notifyDaf($demande, DemandeStatus::ValidéeAc);
+        $demande->porteur->notify(new StatutDemandeChange($demande, StatutDemande::ValidéeAgentComptable));
+        $this->notifyDaf($demande, StatutDemande::ValidéeAgentComptable);
     }
 
     /**
      * AC rejette une demande.
      */
-    public function rejeterAc(DemandeDepense $demande, User $ac, string $motif): void
+    public function rejeterAgentComptable(DemandeDepense $demande, Utilisateur $ac, string $motif): void
     {
-        abort_unless($demande->demande_statut === DemandeStatus::ValidéeDaf, 403);
-        abort_unless($ac->utilisateur_role === UserRole::Ac, 403);
+        abort_unless($demande->demande_statut === StatutDemande::ValidéeDaf, 403);
+        abort_unless($ac->utilisateur_role === RoleUtilisateur::AgentComptable, 403);
 
         $demande->update([
-            'demande_statut' => DemandeStatus::RejetéeAc,
+            'demande_statut' => StatutDemande::RejetéeAgentComptable,
             'demande_motif_rejet' => $motif,
         ]);
 
-        $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::RejetéeAc, $motif));
-        $this->notifyDaf($demande, DemandeStatus::RejetéeAc);
+        $demande->porteur->notify(new StatutDemandeChange($demande, StatutDemande::RejetéeAgentComptable, $motif));
+        $this->notifyDaf($demande, StatutDemande::RejetéeAgentComptable);
     }
 
     /**
      * AC enregistre le paiement après validation AC.
      */
-    public function enregistrerPaiement(DemandeDepense $demande, User $ac, array $data): Paiement
+    public function enregistrerPaiement(DemandeDepense $demande, Utilisateur $ac, array $data): Paiement
     {
-        abort_unless($demande->demande_statut === DemandeStatus::ValidéeAc, 403);
-        abort_unless($ac->utilisateur_role === UserRole::Ac, 403);
+        abort_unless($demande->demande_statut === StatutDemande::ValidéeAgentComptable, 403);
+        abort_unless($ac->utilisateur_role === RoleUtilisateur::AgentComptable, 403);
 
         $paiement = Paiement::create([
-            'id_demande' => $demande->id,
+            'id_demande' => $demande->id_utilisateur,
             'paiement_montant' => $data['montant'],
             'paiement_date' => $data['date_paiement'],
             'paiement_mode' => $data['mode_paiement'],
             'paiement_reference' => $data['reference'] ?? null,
-            'id_enregistreur_paiement' => $ac->id,
+            'id_enregistreur_paiement' => $ac->id_utilisateur,
         ]);
 
-        $demande->update(['demande_statut' => DemandeStatus::Payee]);
+        $demande->update(['demande_statut' => StatutDemande::Payee]);
 
-        $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::Payee));
+        $demande->porteur->notify(new StatutDemandeChange($demande, StatutDemande::Payee));
 
         return $paiement;
     }
@@ -160,37 +160,37 @@ class DemandeDepenseService
     /**
      * Porteur uploade le rapport d'exécution après paiement.
      */
-    public function soumettreRapport(DemandeDepense $demande, User $porteur, string $rapportPath): void
+    public function soumettreRapport(DemandeDepense $demande, Utilisateur $porteur, string $rapportPath): void
     {
-        abort_unless($demande->demande_statut === DemandeStatus::Payee, 403);
-        abort_unless($demande->id_porteur === $porteur->id, 403);
+        abort_unless($demande->demande_statut === StatutDemande::Payee, 403);
+        abort_unless($demande->id_utilisateur_porteur === $porteur->id_utilisateur, 403);
 
         $demande->update([
-            'demande_statut' => DemandeStatus::RapportSoumis,
+            'demande_statut' => StatutDemande::RapportSoumis,
             'demande_rapport' => $rapportPath,
             'demande_rapport_valide_daf' => false,
             'demande_rapport_valide_ac' => false,
         ]);
 
-        $this->notifyDafAc($demande, DemandeStatus::RapportSoumis);
+        $this->notifyDafAgentComptable($demande, StatutDemande::RapportSoumis);
     }
 
     /**
      * DAF valide le rapport — la demande est terminée si AC a aussi validé.
      */
-    public function validerRapportDaf(DemandeDepense $demande, User $daf): void
+    public function validerRapportDaf(DemandeDepense $demande, Utilisateur $daf): void
     {
-        abort_unless($demande->demande_statut === DemandeStatus::RapportSoumis, 403);
-        abort_unless($daf->utilisateur_role === UserRole::Daf, 403);
+        abort_unless($demande->demande_statut === StatutDemande::RapportSoumis, 403);
+        abort_unless($daf->utilisateur_role === RoleUtilisateur::Daf, 403);
 
         DB::transaction(function () use ($demande) {
-            $demande->newQuery()->where('id_demande', $demande->id)->lockForUpdate()->sole();
+            $demande->newQuery()->where('id_demande', $demande->id_utilisateur)->lockForUpdate()->sole();
             $demande->update(['demande_rapport_valide_daf' => true]);
             $demande->refresh();
 
             if ($demande->demande_rapport_valide_daf && $demande->demande_rapport_valide_ac) {
-                $demande->update(['demande_statut' => DemandeStatus::Terminee]);
-                $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::Terminee));
+                $demande->update(['demande_statut' => StatutDemande::Terminee]);
+                $demande->porteur->notify(new StatutDemandeChange($demande, StatutDemande::Terminee));
             }
         });
     }
@@ -198,19 +198,19 @@ class DemandeDepenseService
     /**
      * AC valide le rapport — la demande est terminée si DAF a aussi validé.
      */
-    public function validerRapportAc(DemandeDepense $demande, User $ac): void
+    public function validerRapportAgentComptable(DemandeDepense $demande, Utilisateur $ac): void
     {
-        abort_unless($demande->demande_statut === DemandeStatus::RapportSoumis, 403);
-        abort_unless($ac->utilisateur_role === UserRole::Ac, 403);
+        abort_unless($demande->demande_statut === StatutDemande::RapportSoumis, 403);
+        abort_unless($ac->utilisateur_role === RoleUtilisateur::AgentComptable, 403);
 
         DB::transaction(function () use ($demande) {
-            $demande->newQuery()->where('id_demande', $demande->id)->lockForUpdate()->sole();
+            $demande->newQuery()->where('id_demande', $demande->id_utilisateur)->lockForUpdate()->sole();
             $demande->update(['demande_rapport_valide_ac' => true]);
             $demande->refresh();
 
             if ($demande->demande_rapport_valide_daf && $demande->demande_rapport_valide_ac) {
-                $demande->update(['demande_statut' => DemandeStatus::Terminee]);
-                $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::Terminee));
+                $demande->update(['demande_statut' => StatutDemande::Terminee]);
+                $demande->porteur->notify(new StatutDemandeChange($demande, StatutDemande::Terminee));
             }
         });
     }
@@ -218,42 +218,42 @@ class DemandeDepenseService
     /**
      * Rejette le rapport uploadé — le porteur doit re-soumettre.
      */
-    public function rejeterRapport(DemandeDepense $demande, User $user): void
+    public function rejeterRapport(DemandeDepense $demande, Utilisateur $user): void
     {
-        abort_unless($demande->demande_statut === DemandeStatus::RapportSoumis, 403);
+        abort_unless($demande->demande_statut === StatutDemande::RapportSoumis, 403);
         abort_unless(
-            in_array($user->utilisateur_role, [UserRole::Daf, UserRole::Ac]),
+            in_array($user->utilisateur_role, [RoleUtilisateur::Daf, RoleUtilisateur::AgentComptable]),
             403
         );
 
         $demande->update([
-            'demande_statut' => DemandeStatus::Payee,
+            'demande_statut' => StatutDemande::Payee,
             'demande_rapport' => null,
             'demande_rapport_valide_daf' => false,
             'demande_rapport_valide_ac' => false,
         ]);
 
-        $demande->porteur->notify(new DemandeStatusChanged($demande, DemandeStatus::Payee, 'Rapport rejeté, veuillez soumettre un nouveau rapport.'));
+        $demande->porteur->notify(new StatutDemandeChange($demande, StatutDemande::Payee, 'Rapport rejeté, veuillez soumettre un nouveau rapport.'));
     }
 
-    private function notifyAc(DemandeDepense $demande, DemandeStatus $status): void
+    private function notifyAgentComptable(DemandeDepense $demande, StatutDemande $status): void
     {
-        User::where('utilisateur_role', UserRole::Ac->value)
+        Utilisateur::where('utilisateur_role', RoleUtilisateur::AgentComptable->value)
             ->get()
-            ->each(fn (User $u) => $u->notify(new DemandeStatusChanged($demande, $status)));
+            ->each(fn (Utilisateur $u) => $u->notify(new StatutDemandeChange($demande, $status)));
     }
 
-    private function notifyDaf(DemandeDepense $demande, DemandeStatus $status): void
+    private function notifyDaf(DemandeDepense $demande, StatutDemande $status): void
     {
-        User::where('utilisateur_role', UserRole::Daf->value)
+        Utilisateur::where('utilisateur_role', RoleUtilisateur::Daf->value)
             ->get()
-            ->each(fn (User $u) => $u->notify(new DemandeStatusChanged($demande, $status)));
+            ->each(fn (Utilisateur $u) => $u->notify(new StatutDemandeChange($demande, $status)));
     }
 
-    private function notifyDafAc(DemandeDepense $demande, DemandeStatus $status): void
+    private function notifyDafAgentComptable(DemandeDepense $demande, StatutDemande $status): void
     {
-        User::whereIn('utilisateur_role', [UserRole::Daf->value, UserRole::Ac->value])
+        Utilisateur::whereIn('utilisateur_role', [RoleUtilisateur::Daf->value, RoleUtilisateur::AgentComptable->value])
             ->get()
-            ->each(fn (User $u) => $u->notify(new DemandeStatusChanged($demande, $status)));
+            ->each(fn (Utilisateur $u) => $u->notify(new StatutDemandeChange($demande, $status)));
     }
 }

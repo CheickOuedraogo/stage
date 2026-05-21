@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('paiements', function (Blueprint $table) {
             $table->id('id_paiement');
-            $table->foreignId('id_demande')->unique()->constrained('demandes_depenses', 'id_demande')->cascadeOnDelete();
+            $table->foreignId('id_demande')->unique()->constrained('demandes_depense', 'id_demande')->onDelete('cascade');
             $table->integer('paiement_montant');
             $table->date('paiement_date');
-            $table->string('paiement_mode');
+            $table->string('paiement_mode'); // virement, chèque, espèces
             $table->string('paiement_reference')->nullable();
-            $table->foreignId('id_enregistreur_paiement')->constrained('users', 'id_utilisateur')->cascadeOnDelete();
-            $table->timestamps();
+            $table->foreignId('id_enregistreur_paiement')->constrained('utilisateurs', 'id_utilisateur')->onDelete('cascade');
+            $table->timestamp('cree_le')->useCurrent();
+            $table->timestamp('mis_a_jour_le')->useCurrent();
         });
     }
 
