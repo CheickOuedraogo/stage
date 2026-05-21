@@ -53,7 +53,7 @@ class ProjetController extends Controller
         abort_unless($projet->id_utilisateur_porteur === $request->user()->id_utilisateur, 403);
 
         $projet->load([
-            'conventions' => fn ($q) => $q->with(['bailleur:id_bailleur,bailleur_nom,bailleur_sigle', 'versements:id_versement,id_convention,versement_montant,versement_date_reception,versement_type']),
+            'conventions' => fn ($q) => $q->with(['bailleur:id_bailleur,bailleur_nom,bailleur_sigle', 'versements:id_versement,id_convention,versement_montant,versement_date_reception']),
         ]);
 
         $totalVersements = $projet->conventions->flatMap->versements->sum('versement_montant');
@@ -143,8 +143,6 @@ class ProjetController extends Controller
                     'id' => $v->id_utilisateur,
                     'montant' => $v->versement_montant,
                     'date_reception' => $v->versement_date_reception->toDateString(),
-                    'type' => $v->versement_type->value,
-                    'type_label' => $v->versement_type->label(),
                     'reference' => $v->versement_reference,
                     'description' => $v->versement_description,
                 ])->values(),

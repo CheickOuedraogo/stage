@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Daf;
 
 use App\Enums\StatutConvention;
-use App\Enums\TypeVersement;
 use App\Http\Controllers\Controller;
 use App\Models\Convention;
 use App\Models\Projet;
@@ -11,7 +10,6 @@ use App\Models\Rubrique;
 use App\Models\Versement;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -117,7 +115,6 @@ class ConventionController extends Controller
         $validated = $request->validate([
             'montant' => ['required', 'integer', 'min:1'],
             'date_reception' => ['required', 'date', 'before_or_equal:today'],
-            'type' => ['required', Rule::enum(TypeVersement::class)],
             'reference' => ['nullable', 'string', 'max:100'],
             'description' => ['nullable', 'string', 'max:1000'],
         ]);
@@ -125,7 +122,6 @@ class ConventionController extends Controller
         $convention->versements()->create([
             'versement_montant' => $validated['montant'],
             'versement_date_reception' => $validated['date_reception'],
-            'versement_type' => $validated['type'],
             'versement_reference' => $validated['reference'] ?? null,
             'versement_description' => $validated['description'] ?? null,
         ]);
@@ -141,7 +137,6 @@ class ConventionController extends Controller
         $validated = $request->validate([
             'montant' => ['required', 'integer', 'min:1'],
             'date_reception' => ['required', 'date', 'before_or_equal:today'],
-            'type' => ['required', Rule::enum(TypeVersement::class)],
             'reference' => ['nullable', 'string', 'max:100'],
             'description' => ['nullable', 'string', 'max:1000'],
         ]);
@@ -149,7 +144,6 @@ class ConventionController extends Controller
         $versement->update([
             'versement_montant' => $validated['montant'],
             'versement_date_reception' => $validated['date_reception'],
-            'versement_type' => $validated['type'],
             'versement_reference' => $validated['reference'] ?? null,
             'versement_description' => $validated['description'] ?? null,
         ]);
@@ -244,8 +238,6 @@ class ConventionController extends Controller
                 'id' => $v->id_utilisateur,
                 'montant' => $v->versement_montant,
                 'date_reception' => $v->versement_date_reception->toDateString(),
-                'type' => $v->versement_type->value,
-                'type_label' => $v->versement_type->label(),
                 'reference' => $v->versement_reference,
                 'description' => $v->versement_description,
             ])->values(),

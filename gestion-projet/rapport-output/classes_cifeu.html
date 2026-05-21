@@ -233,7 +233,6 @@
     <tr><th>Propriété</th><th>Type UML</th><th>Vis.</th><th>Description</th></tr>
     <tr><td><code>id_versement</code> <span class="badge b-pk">PK</span></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pri">—</span></td><td>Identifiant unique</td></tr>
     <tr><td><code>versement_montant</code></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pub">+</span></td><td>Montant versé en FCFA</td></tr>
-    <tr><td><code>versement_type</code></td><td><span class="badge b-enum">Enum</span> <code>TypeVersement</code></td><td><span class="vis-pub">+</span></td><td>avance / tranche</td></tr>
     <tr><td><code>versement_reference</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Référence bancaire (nullable)</td></tr>
     <tr><td><code>versement_description</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Observations (nullable)</td></tr>
     <tr><td><code>versement_date_reception</code></td><td><span class="badge b-date">Date</span></td><td><span class="vis-pub">+</span></td><td>Date effective de réception (nullable)</td></tr>
@@ -496,13 +495,6 @@
       <td><code>convention_forme</code></td>
       <td><code>Don = 'don'</code><br><code>Pret = 'pret'</code></td>
       <td>Nature juridique du financement accordé par le bailleur</td>
-    </tr>
-    <tr>
-      <td><code>TypeVersement</code></td>
-      <td><code>versements</code></td>
-      <td><code>versement_type</code></td>
-      <td><code>Avance = 'avance'</code><br><code>Tranche = 'tranche'</code></td>
-      <td>Modalité de décaissement du versement</td>
     </tr>
     <tr style="background:#f6f0ff">
       <td><code>StatutDemande</code></td>

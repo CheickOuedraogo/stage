@@ -2,14 +2,13 @@
 
 namespace App\Models;
 
-use App\Enums\TypeVersement;
 use Database\Factories\VersementFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['id_convention', 'versement_montant', 'versement_date_reception', 'versement_type', 'versement_description', 'versement_reference'])]
+#[Fillable(['id_convention', 'versement_montant', 'versement_date_reception', 'versement_description', 'versement_reference'])]
 class Versement extends Model
 {
     /** @use HasFactory<VersementFactory> */
@@ -26,7 +25,6 @@ class Versement extends Model
     protected function casts(): array
     {
         return [
-            'versement_type' => TypeVersement::class,
             'versement_montant' => 'integer',
             'versement_date_reception' => 'date',
         ];

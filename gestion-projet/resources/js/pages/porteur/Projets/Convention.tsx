@@ -1,6 +1,6 @@
 import AppLayout from '@/components/layout/AppLayout';
 import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer';
-import { clampPercent, conventionStatusClass, formatCurrency, formatDate, versementTypeClass } from '@/lib/utils';
+import { clampPercent, conventionStatusClass, formatCurrency, formatDate } from '@/lib/utils';
 import { create as createDemande } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
 import { show as projetsShow } from '@/routes/porteur/projets';
 import { Head, Link } from '@inertiajs/react';
@@ -18,8 +18,6 @@ interface Versement {
     id: number;
     montant: number;
     date_reception: string;
-    type: string;
-    type_label: string;
     reference: string | null;
     description: string | null;
 }
@@ -255,7 +253,6 @@ export default function ConventionShow({ projet, convention, has_demande_active 
                                 <thead>
                                     <tr className="border-b border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800">
                                         <th className="text-left px-5 py-3 text-xs font-semibold text-gray-600 dark:text-slate-400">Date</th>
-                                        <th className="text-left px-5 py-3 text-xs font-semibold text-gray-600 dark:text-slate-400">Type</th>
                                         <th className="text-left px-5 py-3 text-xs font-semibold text-gray-600 dark:text-slate-400">Référence</th>
                                         <th className="text-right px-5 py-3 text-xs font-semibold text-gray-600 dark:text-slate-400">Montant</th>
                                     </tr>
@@ -264,11 +261,6 @@ export default function ConventionShow({ projet, convention, has_demande_active 
                                     {convention.versements.map((v) => (
                                         <tr key={v.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
                                             <td className="px-5 py-3 text-gray-900 dark:text-white">{formatDate(v.date_reception)}</td>
-                                            <td className="px-5 py-3">
-                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${versementTypeClass(v.type)}`}>
-                                                    {v.type_label}
-                                                </span>
-                                            </td>
                                             <td className="px-5 py-3 text-gray-600 dark:text-slate-400 font-mono text-xs">{v.reference ?? '—'}</td>
                                             <td className="px-5 py-3 text-right font-mono font-semibold text-gray-900 dark:text-white">{formatCurrency(v.montant)}</td>
                                         </tr>

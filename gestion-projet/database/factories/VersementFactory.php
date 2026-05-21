@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Enums\TypeVersement;
 use App\Models\Convention;
 use App\Models\Versement;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -23,7 +22,6 @@ class VersementFactory extends Factory
             'id_convention' => Convention::factory(),
             'versement_montant' => fake()->numberBetween(1000000, 50000000),
             'versement_date_reception' => fake()->dateTimeBetween('-6 months', 'now'),
-            'versement_type' => TypeVersement::Tranche,
             'versement_description' => fake()->sentence(),
             'versement_reference' => strtoupper(fake()->bothify('V-####-????')),
             'cree_le' => now(),

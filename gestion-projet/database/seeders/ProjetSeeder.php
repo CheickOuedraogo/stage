@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Enums\FormeConvention;
 use App\Enums\StatutConvention;
 use App\Enums\StatutProjet;
-use App\Enums\TypeVersement;
 use App\Models\Bailleur;
 use App\Models\Convention;
 use App\Models\Projet;
@@ -297,9 +296,9 @@ class ProjetSeeder extends Seeder
                     ['libelle' => 'Audit et évaluation', 'montant_prevu' => 15_000_000],
                 ],
                 'versements' => [
-                    ['montant' => 90_000_000, 'type' => TypeVersement::Avance, 'date' => '2023-03-15', 'ref' => 'VRS-BM-2023-001'],
-                    ['montant' => 75_000_000, 'type' => TypeVersement::Tranche, 'date' => '2024-01-20', 'ref' => 'VRS-BM-2024-001'],
-                    ['montant' => 60_000_000, 'type' => TypeVersement::Tranche, 'date' => '2024-09-10', 'ref' => 'VRS-BM-2024-002'],
+                    ['montant' => 90_000_000, 'date' => '2023-03-15', 'ref' => 'VRS-BM-2023-001'],
+                    ['montant' => 75_000_000, 'date' => '2024-01-20', 'ref' => 'VRS-BM-2024-001'],
+                    ['montant' => 60_000_000, 'date' => '2024-09-10', 'ref' => 'VRS-BM-2024-002'],
                 ],
             ],
             [
@@ -320,8 +319,8 @@ class ProjetSeeder extends Seeder
                     ['libelle' => 'Communication et dissémination', 'montant_prevu' => 30_000_000],
                 ],
                 'versements' => [
-                    ['montant' => 60_000_000, 'type' => TypeVersement::Avance, 'date' => '2023-04-01', 'ref' => 'VRS-AFD-2023-001'],
-                    ['montant' => 50_000_000, 'type' => TypeVersement::Tranche, 'date' => '2024-02-14', 'ref' => 'VRS-AFD-2024-001'],
+                    ['montant' => 60_000_000, 'date' => '2023-04-01', 'ref' => 'VRS-AFD-2023-001'],
+                    ['montant' => 50_000_000, 'date' => '2024-02-14', 'ref' => 'VRS-AFD-2024-001'],
                 ],
             ],
             [
@@ -343,8 +342,8 @@ class ProjetSeeder extends Seeder
                     ['libelle' => 'Fonctionnement', 'montant_prevu' => 15_000_000],
                 ],
                 'versements' => [
-                    ['montant' => 45_000_000, 'type' => TypeVersement::Avance, 'date' => '2023-07-10', 'ref' => 'VRS-UEMOA-2023-001'],
-                    ['montant' => 40_000_000, 'type' => TypeVersement::Tranche, 'date' => '2024-03-20', 'ref' => 'VRS-UEMOA-2024-001'],
+                    ['montant' => 45_000_000, 'date' => '2023-07-10', 'ref' => 'VRS-UEMOA-2023-001'],
+                    ['montant' => 40_000_000, 'date' => '2024-03-20', 'ref' => 'VRS-UEMOA-2024-001'],
                 ],
             ],
             [
@@ -364,7 +363,7 @@ class ProjetSeeder extends Seeder
                     ['libelle' => 'Traduction et révision', 'montant_prevu' => 25_000_000],
                 ],
                 'versements' => [
-                    ['montant' => 30_000_000, 'type' => TypeVersement::Avance, 'date' => '2023-09-01', 'ref' => 'VRS-DDC-2023-001'],
+                    ['montant' => 30_000_000, 'date' => '2023-09-01', 'ref' => 'VRS-DDC-2023-001'],
                 ],
             ],
             [
@@ -385,9 +384,9 @@ class ProjetSeeder extends Seeder
                     ['libelle' => 'Fonctionnement et coordination', 'montant_prevu' => 25_000_000],
                 ],
                 'versements' => [
-                    ['montant' => 54_000_000, 'type' => TypeVersement::Avance, 'date' => '2021-04-01', 'ref' => 'VRS-UE-2021-001'],
-                    ['montant' => 63_000_000, 'type' => TypeVersement::Tranche, 'date' => '2022-04-15', 'ref' => 'VRS-UE-2022-001'],
-                    ['montant' => 63_000_000, 'type' => TypeVersement::Tranche, 'date' => '2023-02-28', 'ref' => 'VRS-UE-2023-001'],
+                    ['montant' => 54_000_000, 'date' => '2021-04-01', 'ref' => 'VRS-UE-2021-001'],
+                    ['montant' => 63_000_000, 'date' => '2022-04-15', 'ref' => 'VRS-UE-2022-001'],
+                    ['montant' => 63_000_000, 'date' => '2023-02-28', 'ref' => 'VRS-UE-2023-001'],
                 ],
             ],
             [
@@ -410,8 +409,8 @@ class ProjetSeeder extends Seeder
                     ['libelle' => 'Fonctionnement et coordination', 'montant_prevu' => 25_000_000],
                 ],
                 'versements' => [
-                    ['montant' => 105_000_000, 'type' => TypeVersement::Avance, 'date' => '2023-01-10', 'ref' => 'VRS-BAD-2023-001'],
-                    ['montant' => 84_000_000, 'type' => TypeVersement::Tranche, 'date' => '2024-01-15', 'ref' => 'VRS-BAD-2024-001'],
+                    ['montant' => 105_000_000, 'date' => '2023-01-10', 'ref' => 'VRS-BAD-2023-001'],
+                    ['montant' => 84_000_000, 'date' => '2024-01-15', 'ref' => 'VRS-BAD-2024-001'],
                 ],
             ],
             [
@@ -432,8 +431,8 @@ class ProjetSeeder extends Seeder
                     ['libelle' => 'Formation des utilisateurs', 'montant_prevu' => 25_000_000],
                 ],
                 'versements' => [
-                    ['montant' => 60_000_000, 'type' => TypeVersement::Avance, 'date' => '2024-02-20', 'ref' => 'VRS-BM-2024-003'],
-                    ['montant' => 50_000_000, 'type' => TypeVersement::Tranche, 'date' => '2024-11-05', 'ref' => 'VRS-BM-2024-004'],
+                    ['montant' => 60_000_000, 'date' => '2024-02-20', 'ref' => 'VRS-BM-2024-003'],
+                    ['montant' => 50_000_000, 'date' => '2024-11-05', 'ref' => 'VRS-BM-2024-004'],
                 ],
             ],
             [
@@ -454,8 +453,8 @@ class ProjetSeeder extends Seeder
                     ['libelle' => 'Formation des techniciens', 'montant_prevu' => 15_000_000],
                 ],
                 'versements' => [
-                    ['montant' => 69_000_000, 'type' => TypeVersement::Avance, 'date' => '2023-10-15', 'ref' => 'VRS-AFD-2023-002'],
-                    ['montant' => 57_500_000, 'type' => TypeVersement::Tranche, 'date' => '2024-04-10', 'ref' => 'VRS-AFD-2024-002'],
+                    ['montant' => 69_000_000, 'date' => '2023-10-15', 'ref' => 'VRS-AFD-2023-002'],
+                    ['montant' => 57_500_000, 'date' => '2024-04-10', 'ref' => 'VRS-AFD-2024-002'],
                 ],
             ],
             [
@@ -476,7 +475,7 @@ class ProjetSeeder extends Seeder
                     ['libelle' => 'Fonctionnement', 'montant_prevu' => 20_000_000],
                 ],
                 'versements' => [
-                    ['montant' => 36_000_000, 'type' => TypeVersement::Avance, 'date' => '2023-11-01', 'ref' => 'VRS-DDC-2023-002'],
+                    ['montant' => 36_000_000, 'date' => '2023-11-01', 'ref' => 'VRS-DDC-2023-002'],
                 ],
             ],
             [
@@ -499,8 +498,8 @@ class ProjetSeeder extends Seeder
                     ['libelle' => 'Fonctionnement et coordination', 'montant_prevu' => 10_000_000],
                 ],
                 'versements' => [
-                    ['montant' => 66_000_000, 'type' => TypeVersement::Avance, 'date' => '2023-05-10', 'ref' => 'VRS-BM-2023-005'],
-                    ['montant' => 55_000_000, 'type' => TypeVersement::Tranche, 'date' => '2024-05-20', 'ref' => 'VRS-BM-2024-005'],
+                    ['montant' => 66_000_000, 'date' => '2023-05-10', 'ref' => 'VRS-BM-2023-005'],
+                    ['montant' => 55_000_000, 'date' => '2024-05-20', 'ref' => 'VRS-BM-2024-005'],
                 ],
             ],
             [
@@ -522,8 +521,8 @@ class ProjetSeeder extends Seeder
                     ['libelle' => 'Dissémination et publications', 'montant_prevu' => 20_000_000],
                 ],
                 'versements' => [
-                    ['montant' => 48_000_000, 'type' => TypeVersement::Avance, 'date' => '2023-07-15', 'ref' => 'VRS-AFD-2023-003'],
-                    ['montant' => 40_000_000, 'type' => TypeVersement::Tranche, 'date' => '2024-06-10', 'ref' => 'VRS-AFD-2024-003'],
+                    ['montant' => 48_000_000, 'date' => '2023-07-15', 'ref' => 'VRS-AFD-2023-003'],
+                    ['montant' => 40_000_000, 'date' => '2024-06-10', 'ref' => 'VRS-AFD-2024-003'],
                 ],
             ],
         ];
@@ -564,7 +563,6 @@ class ProjetSeeder extends Seeder
                     'id_convention' => $convention->id_utilisateur,
                     'versement_montant' => $v['montant'],
                     'versement_date_reception' => $v['date'],
-                    'versement_type' => $v['type']->value,
                     'versement_reference' => $v['ref'],
                     'versement_description' => null,
                 ]);
