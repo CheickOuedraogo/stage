@@ -51,7 +51,7 @@ class HandleInertiaRequests extends Middleware
                     'utilisateur_actif' => $user->utilisateur_actif,
                     'url_avatar' => $user->url_avatar,
                     'utilisateur_telephone' => $user->utilisateur_telephone,
-                    'notifications_non_lues' => $user->unreadNotifications()->count(),
+                    'notifications_non_lues' => $user->notificationsNonLues()->count(),
                 ] : null,
             ],
             'flash' => [

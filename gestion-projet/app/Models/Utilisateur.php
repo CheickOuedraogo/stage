@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 
 /**
  * @method static Builder actif()
@@ -22,7 +21,7 @@ use Illuminate\Notifications\Notifiable;
 class Utilisateur extends Authenticatable
 {
     /** @use HasFactory<UtilisateurFactory> */
-    use Auditable, HasFactory, Notifiable;
+    use Auditable, HasFactory;
 
     protected $table = 'utilisateurs';
 
@@ -100,6 +99,16 @@ class Utilisateur extends Authenticatable
     public function journauxAudit(): HasMany
     {
         return $this->hasMany(JournalAudit::class, 'id_utilisateur');
+    }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class, 'id_utilisateur')->orderByDesc('cree_le');
+    }
+
+    public function notificationsNonLues(): HasMany
+    {
+        return $this->hasMany(Notification::class, 'id_utilisateur')->whereNull('lu_le');
     }
 
     /** @var list<string> */
