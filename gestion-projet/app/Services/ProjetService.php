@@ -9,9 +9,9 @@ use App\Enums\StatutProjet;
 use App\Models\Convention;
 use App\Models\DemandeDepense;
 use App\Models\JournalAudit;
+use App\Models\Notification;
 use App\Models\Projet;
 use App\Models\Utilisateur;
-use App\Notifications\ProjetClotureNotification;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -86,7 +86,7 @@ class ProjetService
             );
 
             $projet->loadMissing('porteur');
-            $projet->porteur->notify(new ProjetClotureNotification($projet));
+            Notification::pourProjetCloture($projet->id_porteur, $projet);
         });
     }
 

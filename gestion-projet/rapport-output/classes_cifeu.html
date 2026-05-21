@@ -405,53 +405,30 @@
 
 <!-- NOTIFICATION -->
 <div class="cls" id="notification">
-  <div class="cls-header notif"><span class="cls-name">Notification</span><span class="cls-table">table : <code>notifications</code> &nbsp;·&nbsp; ⚠️ table système Laravel — colonnes non francisées</span></div>
+  <div class="cls-header notif"><span class="cls-name">Notification</span><span class="cls-table">table : <code>notifications</code> &nbsp;·&nbsp; sans <code>mis_a_jour_le</code></span></div>
   <div class="section-title">Propriétés</div>
   <table>
     <tr><th>Propriété</th><th>Type UML</th><th>Vis.</th><th>Description</th></tr>
-    <tr><td><code>id</code> <span class="badge b-pk">PK</span></td><td><span class="badge b-str">UUID</span></td><td><span class="vis-pri">—</span></td><td>UUID unique de la notification (généré par Laravel)</td></tr>
-    <tr><td><code>type</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Classe PHP de la notification (ex. App\Notifications\DemandeValidee)</td></tr>
-    <tr><td><code>notifiable_type</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Type du modèle destinataire — relation polymorphique</td></tr>
-    <tr><td><code>notifiable_id</code></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pub">+</span></td><td>Identifiant du modèle destinataire (ici : id_utilisateur)</td></tr>
-    <tr><td><code>data</code></td><td><span class="badge b-json">JSON</span></td><td><span class="vis-pub">+</span></td><td>Payload JSON : objet, statut, motif, demande_id…</td></tr>
-    <tr><td><code>read_at</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatage de lecture (null = non lue)</td></tr>
-    <tr><td><code>created_at / updated_at</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatages Laravel (framework, non modifiables)</td></tr>
+    <tr><td><code>id_notification</code> <span class="badge b-pk">PK</span></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pri">—</span></td><td>Identifiant unique auto-incrémenté</td></tr>
+    <tr><td><code>type_notification</code></td><td><span class="badge b-enum">Enum</span> <code>TypeNotification</code></td><td><span class="vis-pub">+</span></td><td>demande_statut_change / projet_cloture</td></tr>
+    <tr><td><code>notification_objet</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Objet de la demande ou titre du projet (nullable)</td></tr>
+    <tr><td><code>notification_libelle_statut</code></td><td><span class="badge b-str">String(100)</span></td><td><span class="vis-pub">+</span></td><td>Libellé du nouveau statut de la demande (nullable)</td></tr>
+    <tr><td><code>notification_motif</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Motif de rejet (nullable, uniquement sur rejet)</td></tr>
+    <tr><td><code>lu_le</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatage de lecture (null = non lue)</td></tr>
+    <tr><td><code>cree_le</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatage de création de la notification</td></tr>
   </table>
-  <div class="section-title">Méthodes (trait Notifiable sur Utilisateur)</div>
+  <div class="section-title">Méthodes</div>
   <table>
     <tr><th>Méthode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
-    <tr><td><code>notifications()</code></td><td><span class="badge b-rel">relation</span></td><td>MorphMany&lt;Notification&gt;</td><td>Toutes les notifications de l'utilisateur</td></tr>
-    <tr><td><code>unreadNotifications()</code></td><td><span class="badge b-rel">relation</span></td><td>MorphMany&lt;Notification&gt;</td><td>Notifications non lues (read_at IS NULL)</td></tr>
-    <tr><td><code>markAsRead()</code></td><td><span class="badge b-vis">instance</span></td><td>void</td><td>Marque la notification comme lue</td></tr>
+    <tr><td><code>pourDemandeStatut(idUtilisateur, demande, libelleStatut, motif?)</code></td><td><span class="badge b-vis">static</span></td><td>Notification</td><td>Crée une notification de changement de statut de demande</td></tr>
+    <tr><td><code>pourProjetCloture(idUtilisateur, projet)</code></td><td><span class="badge b-vis">static</span></td><td>Notification</td><td>Crée une notification de clôture de projet</td></tr>
+    <tr><td><code>marquerCommentLue()</code></td><td><span class="badge b-vis">instance</span></td><td>void</td><td>Renseigne <code>lu_le</code> si la notification n'a pas déjà été lue</td></tr>
+    <tr><td><code>scopeNonLue(query)</code></td><td><span class="badge b-scope">scope</span></td><td><span class="badge b-rel">Builder</span></td><td>Filtre les notifications non lues (lu_le IS NULL)</td></tr>
+    <tr><td><code>utilisateur()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;Utilisateur&gt;</td><td>Utilisateur destinataire de la notification</td></tr>
+    <tr><td><code>demande()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;DemandeDepense&gt;</td><td>Demande concernée (nullable)</td></tr>
+    <tr><td><code>projet()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;Projet&gt;</td><td>Projet concerné (nullable)</td></tr>
   </table>
 </div>
-
-<!-- NOTE MODELISATION MULTI-ASSOCIATIONS -->
-<div class="cls" style="border-color:#0969da;margin-bottom:28px">
-  <div class="cls-header" style="background:#dff4ff;border-bottom:1px solid #0969da">
-    <span class="cls-name" style="color:#0550ae">📐 Note de modélisation — associations multiples vers la même classe</span>
-  </div>
-  <div style="padding:14px 18px;font-size:0.82rem;line-height:1.8;color:#24292f">
-    <strong>Problème :</strong> Plusieurs classes sont liées à <code>Utilisateur</code> via plusieurs rôles distincts (ex. <em>MessageChat</em> a un expéditeur ET un destinataire, tous deux Utilisateur).<br><br>
-    <strong>Solution UML — associations nommées avec rôles de fin :</strong><br>
-    • Tracer <strong>une flèche par rôle</strong> entre les deux mêmes classes.<br>
-    • Placer le <strong>nom de rôle</strong> (<em>end role</em>) près de la classe cible pour distinguer chaque lien.<br>
-    • Optionnel : ajouter un <strong>nom d'association</strong> sur la ligne (ex. <em>«envoie»</em>, <em>«reçoit»</em>).<br><br>
-    <strong>Dans Visual Paradigm Community :</strong><br>
-    1. Sélectionner l'outil <em>Association</em> → tracer la première flèche → double-clic → onglet <em>Role</em> → saisir le nom de rôle côté cible.<br>
-    2. Répéter pour chaque rôle supplémentaire (autant de lignes d'association que de rôles).<br><br>
-    <strong>Cas dans CIFEU :</strong><br>
-    <table style="font-size:0.78rem;width:auto;border-collapse:collapse">
-      <tr style="background:#f6f8fa"><th style="padding:4px 10px;text-align:left;border:1px solid #d0d7de">Classe source</th><th style="padding:4px 10px;border:1px solid #d0d7de">Classe cible</th><th style="padding:4px 10px;border:1px solid #d0d7de">Rôle 1</th><th style="padding:4px 10px;border:1px solid #d0d7de">Rôle 2</th><th style="padding:4px 10px;border:1px solid #d0d7de">Rôle 3</th></tr>
-      <tr><td style="padding:4px 10px;border:1px solid #d0d7de"><code>MessageChat</code></td><td style="padding:4px 10px;border:1px solid #d0d7de"><code>Utilisateur</code></td><td style="padding:4px 10px;border:1px solid #d0d7de"><em>expéditeur</em></td><td style="padding:4px 10px;border:1px solid #d0d7de"><em>destinataire</em></td><td style="padding:4px 10px;border:1px solid #d0d7de">—</td></tr>
-      <tr style="background:#f6f8fa"><td style="padding:4px 10px;border:1px solid #d0d7de"><code>DemandeDepense</code></td><td style="padding:4px 10px;border:1px solid #d0d7de"><code>Utilisateur</code></td><td style="padding:4px 10px;border:1px solid #d0d7de"><em>porteur</em></td><td style="padding:4px 10px;border:1px solid #d0d7de"><em>validateurDaf</em></td><td style="padding:4px 10px;border:1px solid #d0d7de"><em>validateurAc</em></td></tr>
-      <tr><td style="padding:4px 10px;border:1px solid #d0d7de"><code>Paiement</code></td><td style="padding:4px 10px;border:1px solid #d0d7de"><code>Utilisateur</code></td><td style="padding:4px 10px;border:1px solid #d0d7de"><em>enregistreur</em></td><td style="padding:4px 10px;border:1px solid #d0d7de">—</td><td style="padding:4px 10px;border:1px solid #d0d7de">—</td></tr>
-      <tr style="background:#f6f8fa"><td style="padding:4px 10px;border:1px solid #d0d7de"><code>PaiementDirect</code></td><td style="padding:4px 10px;border:1px solid #d0d7de"><code>Utilisateur</code></td><td style="padding:4px 10px;border:1px solid #d0d7de"><em>enregistreur</em></td><td style="padding:4px 10px;border:1px solid #d0d7de">—</td><td style="padding:4px 10px;border:1px solid #d0d7de">—</td></tr>
-      <tr><td style="padding:4px 10px;border:1px solid #d0d7de"><code>JournalAudit</code></td><td style="padding:4px 10px;border:1px solid #d0d7de"><code>Utilisateur</code></td><td style="padding:4px 10px;border:1px solid #d0d7de"><em>auteur</em></td><td style="padding:4px 10px;border:1px solid #d0d7de">—</td><td style="padding:4px 10px;border:1px solid #d0d7de">—</td></tr>
-    </table>
-  </div>
-</div>
-
 <!-- ASSOCIATIONS -->
 <div class="assoc-section" id="associations">
   <div class="assoc-header">📐 Tableau des associations UML</div>
@@ -481,6 +458,9 @@
     <tr class="associ"><td>Utilisateur</td><td>JournalAudit</td><td><span class="assoc-type">— Association</span></td><td><em>auteur</em></td><td>0..1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> JournalAudit<br><small>nom : «génère»</small></td><td>FK nullable (actions système sans utilisateur). JournalAudit = trace immuable.</td></tr>
     <tr class="associ"><td>Utilisateur</td><td>MessageChat</td><td><span class="assoc-type">— Association</span></td><td><em>expéditeur</em></td><td>1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> MessageChat<br><small>nom : «envoie»</small></td><td>Un Utilisateur envoie 0..* messages. 1re flèche — rôle expéditeur.</td></tr>
     <tr class="associ"><td>Utilisateur</td><td>MessageChat</td><td><span class="assoc-type">— Association</span></td><td><em>destinataire</em></td><td>1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> MessageChat<br><small>nom : «reçoit»</small></td><td>Un Utilisateur reçoit 0..* messages. 2e flèche entre mêmes classes.</td></tr>
+    <tr class="associ"><td>Utilisateur</td><td>Notification</td><td><span class="assoc-type">— Association</span></td><td><em>destinataire</em></td><td>1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> Notification</td><td>Un Utilisateur reçoit 0..* notifications. Relation directe sans polymorphisme.</td></tr>
+    <tr class="associ"><td>DemandeDepense</td><td>Notification</td><td><span class="assoc-type">— Association</span></td><td><em>demande</em></td><td>0..1</td><td>0..*</td><td>DemandeDepense <strong>——&gt;</strong> Notification</td><td>Notification référence optionnellement une demande (nullable — absent pour projet_cloture).</td></tr>
+    <tr class="associ"><td>Projet</td><td>Notification</td><td><span class="assoc-type">— Association</span></td><td><em>projet</em></td><td>0..1</td><td>0..*</td><td>Projet <strong>——&gt;</strong> Notification</td><td>Notification référence optionnellement un projet (nullable — absent pour demande_statut_change).</td></tr>
   </table>
 </div>
 

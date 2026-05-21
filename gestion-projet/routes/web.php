@@ -44,8 +44,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Notifications (all roles)
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::patch('/notifications/{notification}/lue', [NotificationController::class, 'markRead'])->name('notifications.read');
-    Route::patch('/notifications/toutes-lues', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+    Route::patch('/notifications/{notification}/lue', [NotificationController::class, 'marquerLue'])->name('notifications.read');
+    Route::patch('/notifications/toutes-lues', [NotificationController::class, 'marquerToutesLues'])->name('notifications.read-all');
 
     // File downloads — accessible by porteur (owner) + daf + ac
     Route::get('/fichiers/demandes/{demande}/justificatif', [PorteurDemandeDepenseController::class, 'downloadJustificatif'])->name('demandes.justificatif.download');
