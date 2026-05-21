@@ -66,7 +66,11 @@
 <p class="subtitle">Propriétés · Types · Méthodes · Associations UML — Laravel 13 · Merise snake_case</p>
 
 <div class="nav">
-  <a href="#utilisateur">Utilisateur</a>
+  <a href="#utilisateur">Utilisateur &lt;&lt;abstract&gt;&gt;</a>
+  <a href="#porteur" style="background:#e8f5e9;border-color:#a5d6a7;color:#2e7d32">Porteur</a>
+  <a href="#daf" style="background:#e3f2fd;border-color:#90caf9;color:#1565c0">Daf</a>
+  <a href="#ac" style="background:#fce4ec;border-color:#f48fb1;color:#880e4f">AgentComptable</a>
+  <a href="#admin" style="background:#fff3e0;border-color:#ffcc80;color:#e65100">Administrateur</a>
   <a href="#projet">Projet</a>
   <a href="#bailleur">Bailleur</a>
   <a href="#convention">Convention</a>
@@ -85,7 +89,7 @@
 
 <!-- UTILISATEUR -->
 <div class="cls" id="utilisateur">
-  <div class="cls-header utilisateur"><span class="cls-name">Utilisateur</span><span class="cls-table">table : <code>utilisateurs</code></span></div>
+  <div class="cls-header utilisateur"><span class="cls-name">Utilisateur</span> <span class="badge b-vis" style="font-size:0.75rem">&lt;&lt;abstract&gt;&gt;</span><span class="cls-table">table : <code>utilisateurs</code></span></div>
   <div class="section-title">Propriétés</div>
   <table>
     <tr><th>Propriété</th><th>Type UML</th><th>Vis.</th><th>Description</th></tr>
@@ -103,18 +107,81 @@
   <div class="section-title">Méthodes</div>
   <table>
     <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
-    <tr><td><code>seConnecter(email: String, motDePasse: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Boolean</code></td><td>Verifie les identifiants et ouvre la session</td></tr>
-    <tr><td><code>changerMotDePasse(ancien: String, nouveau: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Met a jour le mot de passe apres verification de l'ancien</td></tr>
-    <tr><td><code>modifierProfil(nom: String, telephone: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Modifie les informations personnelles</td></tr>
-    <tr><td><code>validerDemande(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>DAF ou AC valide une demande dans le circuit</td></tr>
-    <tr><td><code>rejeterDemande(demande: DemandeDepense, motif: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>DAF ou AC rejette avec motif obligatoire</td></tr>
-    <tr><td><code>enregistrerPaiement(demande: DemandeDepense, montant: Integer, mode: ModePaiement, date: Date)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Paiement</code></td><td>AC enregistre le reglement d'une demande validee</td></tr>
-    <tr><td><code>envoyerMessage(destinataire: Utilisateur, contenu: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>MessageChat</code></td><td>Envoie un message dans le chat interne</td></tr>
-    <tr><td><code>validerRapport(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>DAF ou AC valide le rapport d'execution soumis</td></tr>
-    <tr><td><code>rejeterRapport(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>DAF ou AC rejette le rapport — porteur doit resoumettre</td></tr>
+    <tr><td><code>seConnecter(email: String, motDePasse: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Boolean</code></td><td>Verifie les identifiants et ouvre la session — commun a tous les roles</td></tr>
+    <tr><td><code>changerMotDePasse(ancien: String, nouveau: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Met a jour le mot de passe apres verification</td></tr>
+    <tr><td><code>modifierProfil(nom: String, telephone: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Modifie les informations personnelles communes</td></tr>
   </table>
 
 </div>
+<!-- PORTEUR -->
+<div class="cls" id="porteur">
+  <div class="cls-header utilisateur" style="background:#c8e6c9"><span class="cls-name">Porteur</span><span class="cls-table">specialisation de <code>Utilisateur</code> &nbsp;·&nbsp; role : <code>porteur</code></span></div>
+  <div class="section-title">Attributs supplementaires</div>
+  <p style="padding:6px 18px;font-size:0.8rem;color:#57606a;font-style:italic">Herite de tous les attributs de Utilisateur. Aucun attribut specifique.</p>
+  <div class="section-title">Methodes</div>
+  <table>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>soumettreDemandeDepense(convention: Convention, rubrique: Rubrique, montant: Integer, objet: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>DemandeDepense</code></td><td>Cree et soumet une demande apres verification du budget disponible</td></tr>
+    <tr><td><code>soumettreRapport(demande: DemandeDepense, cheminFichier: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Depose le rapport d'execution apres reception du paiement</td></tr>
+    <tr><td><code>envoyerMessage(destinataire: Daf, contenu: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>MessageChat</code></td><td>Envoie un message au DAF ou AC via le chat interne</td></tr>
+  </table>
+</div>
+
+<!-- DAF -->
+<div class="cls" id="daf">
+  <div class="cls-header utilisateur" style="background:#bbdefb"><span class="cls-name">Daf</span><span class="cls-table">specialisation de <code>Utilisateur</code> &nbsp;·&nbsp; role : <code>daf</code></span></div>
+  <div class="section-title">Attributs supplementaires</div>
+  <p style="padding:6px 18px;font-size:0.8rem;color:#57606a;font-style:italic">Herite de tous les attributs de Utilisateur. Aucun attribut specifique.</p>
+  <div class="section-title">Methodes</div>
+  <table>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>validerDemande(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Valide la demande soumise — passe le statut a validee_daf</td></tr>
+    <tr><td><code>rejeterDemande(demande: DemandeDepense, motif: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Rejette la demande avec motif obligatoire — statut rejetee_daf</td></tr>
+    <tr><td><code>validerRapport(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Valide le rapport d'execution soumis par le porteur</td></tr>
+    <tr><td><code>rejeterRapport(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Rejette le rapport — le porteur doit en soumettre un nouveau</td></tr>
+    <tr><td><code>enregistrerVersement(convention: Convention, montant: Integer, date: Date)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Versement</code></td><td>Enregistre un versement recu du bailleur sur la convention</td></tr>
+    <tr><td><code>ajouterRubrique(convention: Convention, libelle: String, montant: Integer)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Rubrique</code></td><td>Cree une ligne budgetaire sur la convention</td></tr>
+    <tr><td><code>enregistrerPaiementDirect(convention: Convention, rubrique: Rubrique, montant: Integer, objet: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>PaiementDirect</code></td><td>Enregistre un paiement direct sans circuit de validation</td></tr>
+    <tr><td><code>cloturerProjet(projet: Projet, dateFinReelle: Date, statutFinal: StatutFinalProjet)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Cloture le projet en renseignant la date reelle et le resultat final</td></tr>
+    <tr><td><code>terminerConvention(convention: Convention)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Passe la convention au statut terminee</td></tr>
+    <tr><td><code>envoyerMessage(destinataire: Utilisateur, contenu: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>MessageChat</code></td><td>Envoie un message via le chat interne</td></tr>
+  </table>
+</div>
+
+<!-- AGENTCOMPTABLE -->
+<div class="cls" id="ac">
+  <div class="cls-header utilisateur" style="background:#fce4ec"><span class="cls-name">AgentComptable</span><span class="cls-table">specialisation de <code>Utilisateur</code> &nbsp;·&nbsp; role : <code>ac</code></span></div>
+  <div class="section-title">Attributs supplementaires</div>
+  <p style="padding:6px 18px;font-size:0.8rem;color:#57606a;font-style:italic">Herite de tous les attributs de Utilisateur. Aucun attribut specifique.</p>
+  <div class="section-title">Methodes</div>
+  <table>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>validerDemande(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Valide la demande DAF-validee — passe au statut validee_ac</td></tr>
+    <tr><td><code>rejeterDemande(demande: DemandeDepense, motif: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Rejette la demande avec motif — statut rejetee_ac</td></tr>
+    <tr><td><code>enregistrerPaiement(demande: DemandeDepense, montant: Integer, mode: ModePaiement, date: Date)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Paiement</code></td><td>Cree le paiement et passe la demande au statut payee</td></tr>
+    <tr><td><code>validerRapport(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Valide le rapport d'execution soumis par le porteur</td></tr>
+    <tr><td><code>rejeterRapport(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Rejette le rapport — le porteur doit en soumettre un nouveau</td></tr>
+    <tr><td><code>envoyerMessage(destinataire: Utilisateur, contenu: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>MessageChat</code></td><td>Envoie un message via le chat interne</td></tr>
+  </table>
+</div>
+
+<!-- ADMINISTRATEUR -->
+<div class="cls" id="admin">
+  <div class="cls-header utilisateur" style="background:#fff3e0"><span class="cls-name">Administrateur</span><span class="cls-table">specialisation de <code>Utilisateur</code> &nbsp;·&nbsp; role : <code>admin</code></span></div>
+  <div class="section-title">Attributs supplementaires</div>
+  <p style="padding:6px 18px;font-size:0.8rem;color:#57606a;font-style:italic">Herite de tous les attributs de Utilisateur. Aucun attribut specifique.</p>
+  <div class="section-title">Methodes</div>
+  <table>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>creerUtilisateur(nom: String, email: String, motDePasse: String, role: RoleUtilisateur)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Utilisateur</code></td><td>Cree un nouveau compte utilisateur avec le role indique</td></tr>
+    <tr><td><code>desactiverCompte(utilisateur: Utilisateur)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Desactive un compte (utilisateur_actif = false)</td></tr>
+    <tr><td><code>activerCompte(utilisateur: Utilisateur)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Reactive un compte desactive</td></tr>
+    <tr><td><code>publierFaq(question: String, reponse: String, roles: RoleUtilisateur[])</code></td><td><span class="badge b-vis">instance</span></td><td><code>Faq</code></td><td>Cree et publie une entree FAQ visible pour les roles cibles</td></tr>
+    <tr><td><code>activerMaintenance(jusqua: DateTime, raison: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Active le mode maintenance et bloque l'acces aux utilisateurs</td></tr>
+    <tr><td><code>envoyerMessage(destinataire: Utilisateur, contenu: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>MessageChat</code></td><td>Envoie un message via le chat interne</td></tr>
+  </table>
+</div>
+
 
 <!-- PROJET -->
 <div class="cls" id="projet">
@@ -410,7 +477,11 @@
   </div>
   <table>
     <tr><th>Classe source</th><th>Classe cible</th><th>Type</th><th>Rôle (fin cible)</th><th>Card. source</th><th>Card. cible</th><th>Notation UML</th><th>Justification</th></tr>
-    <tr class="comp"><td><strong>Projet</strong></td><td>Convention</td><td><span class="assoc-type">◆ Composition</span></td><td><em>conventions</em></td><td>1</td><td>0..*</td><td>Projet <strong>◆——</strong> Convention<br><small>nom : «regroupe»</small></td><td>Convention sans Projet = sans sens. Cascade à la suppression.</td></tr>
+    <tr style="background:#e8f5e9"><td><strong>Porteur</strong></td><td>Utilisateur</td><td><span class="assoc-type">--|&gt; Generalisation</span></td><td><em>—</em></td><td>—</td><td>—</td><td>Porteur <strong>--|&gt;</strong> Utilisateur</td><td>Porteur herite de Utilisateur. Specialisation par le role porteur.</td></tr>
+    <tr style="background:#e3f2fd"><td><strong>Daf</strong></td><td>Utilisateur</td><td><span class="assoc-type">--|&gt; Generalisation</span></td><td><em>—</em></td><td>—</td><td>—</td><td>Daf <strong>--|&gt;</strong> Utilisateur</td><td>Daf herite de Utilisateur. Specialisation par le role daf.</td></tr>
+    <tr style="background:#fce4ec"><td><strong>AgentComptable</strong></td><td>Utilisateur</td><td><span class="assoc-type">--|&gt; Generalisation</span></td><td><em>—</em></td><td>—</td><td>—</td><td>AgentComptable <strong>--|&gt;</strong> Utilisateur</td><td>AgentComptable herite de Utilisateur. Specialisation par le role ac.</td></tr>
+    <tr style="background:#fff3e0"><td><strong>Administrateur</strong></td><td>Utilisateur</td><td><span class="assoc-type">--|&gt; Generalisation</span></td><td><em>—</em></td><td>—</td><td>—</td><td>Administrateur <strong>--|&gt;</strong> Utilisateur</td><td>Administrateur herite de Utilisateur. Specialisation par le role admin.</td></tr>
+        <tr class="comp"><td><strong>Projet</strong></td><td>Convention</td><td><span class="assoc-type">◆ Composition</span></td><td><em>conventions</em></td><td>1</td><td>0..*</td><td>Projet <strong>◆——</strong> Convention<br><small>nom : «regroupe»</small></td><td>Convention sans Projet = sans sens. Cascade à la suppression.</td></tr>
     <tr class="comp"><td><strong>Convention</strong></td><td>Rubrique</td><td><span class="assoc-type">◆ Composition</span></td><td><em>rubriques</em></td><td>1</td><td>0..*</td><td>Convention <strong>◆——</strong> Rubrique<br><small>nom : «subdivise»</small></td><td>Rubrique = sous-division budgétaire d'une Convention. N'existe pas sans elle.</td></tr>
     <tr class="comp"><td><strong>Convention</strong></td><td>Versement</td><td><span class="assoc-type">◆ Composition</span></td><td><em>versements</em></td><td>1</td><td>0..*</td><td>Convention <strong>◆——</strong> Versement<br><small>nom : «enregistre»</small></td><td>Versement = flux entrant attaché à une Convention. Pas d'existence sans elle.</td></tr>
     <tr class="comp"><td><strong>Convention</strong></td><td>DemandeDepense</td><td><span class="assoc-type">◆ Composition</span></td><td><em>demandesDepenses</em></td><td>1</td><td>0..*</td><td>Convention <strong>◆——</strong> DemandeDepense<br><small>nom : «contient»</small></td><td>Convention = parent composite principal de la Demande (FK structurante).</td></tr>
