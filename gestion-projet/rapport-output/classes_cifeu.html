@@ -102,19 +102,18 @@
   </table>
   <div class="section-title">Méthodes</div>
   <table>
-    <tr><th>Méthode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
-    <tr><td><code>aRole(role : RoleUtilisateur)</code></td><td><span class="badge b-vis">instance</span></td><td><span class="badge b-bool">Boolean</span></td><td>Vérifie si l'utilisateur a le rôle donné</td></tr>
-    <tr><td><code>estAdministrateur()</code></td><td><span class="badge b-vis">instance</span></td><td><span class="badge b-bool">Boolean</span></td><td>Vrai si rôle = admin</td></tr>
-    <tr><td><code>estDaf()</code></td><td><span class="badge b-vis">instance</span></td><td><span class="badge b-bool">Boolean</span></td><td>Vrai si rôle = daf</td></tr>
-    <tr><td><code>estAgentComptable()</code></td><td><span class="badge b-vis">instance</span></td><td><span class="badge b-bool">Boolean</span></td><td>Vrai si rôle = ac</td></tr>
-    <tr><td><code>estPorteur()</code></td><td><span class="badge b-vis">instance</span></td><td><span class="badge b-bool">Boolean</span></td><td>Vrai si rôle = porteur</td></tr>
-    <tr><td><code>routeTableauBord()</code></td><td><span class="badge b-vis">instance</span></td><td><span class="badge b-str">String</span></td><td>Route nommée du tableau de bord selon le rôle</td></tr>
-    <tr><td><code>getLabelRoleAttribute()</code></td><td><span class="badge b-attr">computed</span></td><td><span class="badge b-str">String</span></td><td>Libellé court du rôle (ex. « DAF »)</td></tr>
-    <tr><td><code>getUrlAvatarAttribute()</code></td><td><span class="badge b-attr">computed</span></td><td><span class="badge b-str">String</span></td><td>URL publique de l'avatar (nullable)</td></tr>
-    <tr><td><code>scopeActif(query)</code></td><td><span class="badge b-scope">scope</span></td><td><span class="badge b-rel">Builder</span></td><td>Filtre les utilisateurs actifs</td></tr>
-    <tr><td><code>scopeParRole(query, role)</code></td><td><span class="badge b-scope">scope</span></td><td><span class="badge b-rel">Builder</span></td><td>Filtre par rôle donné</td></tr>
-    <tr><td><code>journauxAudit()</code></td><td><span class="badge b-rel">relation</span></td><td>HasMany&lt;JournalAudit&gt;</td><td>Journaux d'audit liés à cet utilisateur</td></tr>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>seConnecter(email: String, motDePasse: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Boolean</code></td><td>Verifie les identifiants et ouvre la session</td></tr>
+    <tr><td><code>changerMotDePasse(ancien: String, nouveau: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Met a jour le mot de passe apres verification de l'ancien</td></tr>
+    <tr><td><code>modifierProfil(nom: String, telephone: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Modifie les informations personnelles</td></tr>
+    <tr><td><code>validerDemande(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>DAF ou AC valide une demande dans le circuit</td></tr>
+    <tr><td><code>rejeterDemande(demande: DemandeDepense, motif: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>DAF ou AC rejette avec motif obligatoire</td></tr>
+    <tr><td><code>enregistrerPaiement(demande: DemandeDepense, montant: Integer, mode: ModePaiement, date: Date)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Paiement</code></td><td>AC enregistre le reglement d'une demande validee</td></tr>
+    <tr><td><code>envoyerMessage(destinataire: Utilisateur, contenu: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>MessageChat</code></td><td>Envoie un message dans le chat interne</td></tr>
+    <tr><td><code>validerRapport(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>DAF ou AC valide le rapport d'execution soumis</td></tr>
+    <tr><td><code>rejeterRapport(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>DAF ou AC rejette le rapport — porteur doit resoumettre</td></tr>
   </table>
+
 </div>
 
 <!-- PROJET -->
@@ -137,14 +136,12 @@
   </table>
   <div class="section-title">Méthodes</div>
   <table>
-    <tr><th>Méthode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
-    <tr><td><code>scopePourPorteur(query, idPorteur)</code></td><td><span class="badge b-scope">scope</span></td><td><span class="badge b-rel">Builder</span></td><td>Filtre les projets d'un porteur donné</td></tr>
-    <tr><td><code>getMontantTotalVersementsAttribute()</code></td><td><span class="badge b-attr">computed</span></td><td><span class="badge b-int">Integer</span></td><td>Somme des versements reçus sur toutes les conventions</td></tr>
-    <tr><td><code>getPourcentageFinancementAttribute()</code></td><td><span class="badge b-attr">computed</span></td><td><span class="badge b-int">Integer</span></td><td>% du montant estimé mobilisé (0–100)</td></tr>
-    <tr><td><code>porteur()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;Utilisateur&gt;</td><td>Porteur du projet</td></tr>
-    <tr><td><code>conventions()</code></td><td><span class="badge b-rel">relation</span></td><td>HasMany&lt;Convention&gt;</td><td>Conventions de financement</td></tr>
-    <tr><td><code>versements()</code></td><td><span class="badge b-rel">relation</span></td><td>HasManyThrough&lt;Versement,Convention&gt;</td><td>Versements reçus via les conventions</td></tr>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>cloturer(dateFinReelle: Date, statutFinal: StatutFinalProjet)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>DAF cloture le projet — enregistre date reelle et resultat final</td></tr>
+    <tr><td><code>calculerTotalVersements()</code></td><td><span class="badge b-vis">instance</span></td><td><code>Integer</code></td><td>Somme tous les versements recus sur les conventions du projet</td></tr>
+    <tr><td><code>calculerPourcentageFinancement()</code></td><td><span class="badge b-vis">instance</span></td><td><code>Integer</code></td><td>Ratio versements / montant estime, borne a 100 %</td></tr>
   </table>
+
 </div>
 
 <!-- BAILLEUR -->
@@ -165,10 +162,8 @@
     <tr><td><code>bailleur_description</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Description libre (nullable)</td></tr>
   </table>
   <div class="section-title">Méthodes</div>
-  <table>
-    <tr><th>Méthode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
-    <tr><td><code>conventions()</code></td><td><span class="badge b-rel">relation</span></td><td>HasMany&lt;Convention&gt;</td><td>Conventions financées par ce bailleur</td></tr>
-  </table>
+  <p style="padding:8px 18px;font-size:0.8rem;color:#57606a;font-style:italic">Entite de donnees — aucune methode metier propre.</p>
+
 </div>
 
 <!-- CONVENTION -->
@@ -192,17 +187,14 @@
   </table>
   <div class="section-title">Méthodes</div>
   <table>
-    <tr><th>Méthode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
-    <tr><td><code>getMontantFcfaAttribute()</code></td><td><span class="badge b-attr">computed</span></td><td><span class="badge b-int">Integer</span></td><td>convention_montant × convention_taux_conversion</td></tr>
-    <tr><td><code>getMontantTotalRubriquesAttribute()</code></td><td><span class="badge b-attr">computed</span></td><td><span class="badge b-int">Integer</span></td><td>Somme des montants prévus des rubriques</td></tr>
-    <tr><td><code>getMontantTotalVersementsAttribute()</code></td><td><span class="badge b-attr">computed</span></td><td><span class="badge b-int">Integer</span></td><td>Somme des versements reçus</td></tr>
-    <tr><td><code>projet()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;Projet&gt;</td><td>Projet propriétaire</td></tr>
-    <tr><td><code>bailleur()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;Bailleur&gt;</td><td>Bailleur financeur</td></tr>
-    <tr><td><code>rubriques()</code></td><td><span class="badge b-rel">relation</span></td><td>HasMany&lt;Rubrique&gt;</td><td>Rubriques budgétaires</td></tr>
-    <tr><td><code>versements()</code></td><td><span class="badge b-rel">relation</span></td><td>HasMany&lt;Versement&gt;</td><td>Versements reçus</td></tr>
-    <tr><td><code>demandesDepenses()</code></td><td><span class="badge b-rel">relation</span></td><td>HasMany&lt;DemandeDepense&gt;</td><td>Demandes imputées</td></tr>
-    <tr><td><code>paiementsDirects()</code></td><td><span class="badge b-rel">relation</span></td><td>HasMany&lt;PaiementDirect&gt;</td><td>Paiements directs liés</td></tr>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>calculerMontantFCFA()</code></td><td><span class="badge b-vis">instance</span></td><td><code>Integer</code></td><td>Convertit convention_montant en FCFA via le taux de conversion</td></tr>
+    <tr><td><code>calculerTotalRubriques()</code></td><td><span class="badge b-vis">instance</span></td><td><code>Integer</code></td><td>Somme les montants prevus de toutes les rubriques</td></tr>
+    <tr><td><code>calculerTotalVersements()</code></td><td><span class="badge b-vis">instance</span></td><td><code>Integer</code></td><td>Somme les montants de tous les versements recus</td></tr>
+    <tr><td><code>terminer()</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Passe la convention au statut terminee</td></tr>
+    <tr><td><code>annuler()</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Passe la convention au statut annulee</td></tr>
   </table>
+
 </div>
 
 <!-- RUBRIQUE -->
@@ -218,11 +210,12 @@
   </table>
   <div class="section-title">Méthodes</div>
   <table>
-    <tr><th>Méthode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
-    <tr><td><code>convention()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;Convention&gt;</td><td>Convention parente</td></tr>
-    <tr><td><code>demandesDepenses()</code></td><td><span class="badge b-rel">relation</span></td><td>HasMany&lt;DemandeDepense&gt;</td><td>Demandes imputées</td></tr>
-    <tr><td><code>paiementsDirects()</code></td><td><span class="badge b-rel">relation</span></td><td>HasMany&lt;PaiementDirect&gt;</td><td>Paiements directs imputés</td></tr>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>calculerMontantConsomme()</code></td><td><span class="badge b-vis">instance</span></td><td><code>Integer</code></td><td>Somme les montants des demandes approuvees imputees a cette rubrique</td></tr>
+    <tr><td><code>calculerSolde()</code></td><td><span class="badge b-vis">instance</span></td><td><code>Integer</code></td><td>montant_prevu - montant_consomme - paiements_directs</td></tr>
+    <tr><td><code>verifierBudgetDisponible(montant: Integer)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Boolean</code></td><td>Verifie que le montant demande ne depasse pas le solde</td></tr>
   </table>
+
 </div>
 
 <!-- VERSEMENT -->
@@ -238,10 +231,8 @@
     <tr><td><code>versement_date_reception</code></td><td><span class="badge b-date">Date</span></td><td><span class="vis-pub">+</span></td><td>Date effective de réception (nullable)</td></tr>
   </table>
   <div class="section-title">Méthodes</div>
-  <table>
-    <tr><th>Méthode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
-    <tr><td><code>convention()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;Convention&gt;</td><td>Convention parente</td></tr>
-  </table>
+  <p style="padding:8px 18px;font-size:0.8rem;color:#57606a;font-style:italic">Entite de donnees — aucune methode metier propre.</p>
+
 </div>
 
 <!-- DEMANDEDEPENSE -->
@@ -267,19 +258,16 @@
   </table>
   <div class="section-title">Méthodes</div>
   <table>
-    <tr><th>Méthode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
-    <tr><td><code>getPossedeJustificatifAttribute()</code></td><td><span class="badge b-attr">computed</span></td><td><span class="badge b-bool">Boolean</span></td><td>Vrai si justificatif présent sur le disque privé</td></tr>
-    <tr><td><code>getPossedeRapportAttribute()</code></td><td><span class="badge b-attr">computed</span></td><td><span class="badge b-bool">Boolean</span></td><td>Vrai si rapport d'exécution présent sur le disque privé</td></tr>
-    <tr><td><code>scopeActive(query)</code></td><td><span class="badge b-scope">scope</span></td><td><span class="badge b-rel">Builder</span></td><td>Demandes en cours (non terminées / non rejetées)</td></tr>
-    <tr><td><code>scopeEnAttenteDaf(query)</code></td><td><span class="badge b-scope">scope</span></td><td><span class="badge b-rel">Builder</span></td><td>Statut « soumise » — file d'attente DAF</td></tr>
-    <tr><td><code>scopeEnAttenteAgentComptable(query)</code></td><td><span class="badge b-scope">scope</span></td><td><span class="badge b-rel">Builder</span></td><td>Statut « validee_daf » — file d'attente AC</td></tr>
-    <tr><td><code>rubrique()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;Rubrique&gt;</td><td>Rubrique budgétaire</td></tr>
-    <tr><td><code>convention()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;Convention&gt;</td><td>Convention parente</td></tr>
-    <tr><td><code>porteur()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;Utilisateur&gt;</td><td>Porteur soumettant la demande</td></tr>
-    <tr><td><code>validateurDaf()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;Utilisateur&gt;</td><td>Agent DAF validateur</td></tr>
-    <tr><td><code>validateurAgentComptable()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;Utilisateur&gt;</td><td>Agent AC validateur</td></tr>
-    <tr><td><code>paiement()</code></td><td><span class="badge b-rel">relation</span></td><td>HasOne&lt;Paiement&gt;</td><td>Paiement soldant la demande (nullable)</td></tr>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>soumettre(porteur: Utilisateur, rubrique: Rubrique, montant: Integer, objet: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Porteur soumet la demande apres verification du budget disponible</td></tr>
+    <tr><td><code>valider(validateur: Utilisateur)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Change le statut a validee_daf ou validee_ac selon le role du validateur</td></tr>
+    <tr><td><code>rejeter(validateur: Utilisateur, motif: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Change le statut a rejetee_daf ou rejetee_ac avec motif</td></tr>
+    <tr><td><code>payer(ac: Utilisateur, montant: Integer, mode: ModePaiement, date: Date)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Paiement</code></td><td>AC cree le paiement et passe la demande au statut payee</td></tr>
+    <tr><td><code>soumettreRapport(porteur: Utilisateur, cheminFichier: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Porteur depose le rapport apres reception du paiement</td></tr>
+    <tr><td><code>possedeJustificatif()</code></td><td><span class="badge b-vis">instance</span></td><td><code>Boolean</code></td><td>Verifie que le fichier justificatif existe sur le disque</td></tr>
+    <tr><td><code>possedeRapport()</code></td><td><span class="badge b-vis">instance</span></td><td><code>Boolean</code></td><td>Verifie que le fichier rapport existe sur le disque</td></tr>
   </table>
+
 </div>
 
 <!-- PAIEMENT -->
@@ -296,11 +284,8 @@
     <tr><td><code>paiement_date</code></td><td><span class="badge b-date">Date</span></td><td><span class="vis-pub">+</span></td><td>Date effective du paiement (nullable)</td></tr>
   </table>
   <div class="section-title">Méthodes</div>
-  <table>
-    <tr><th>Méthode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
-    <tr><td><code>demande()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;DemandeDepense&gt;</td><td>Demande associée</td></tr>
-    <tr><td><code>enregistrePar()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;Utilisateur&gt;</td><td>Agent AC ayant enregistré</td></tr>
-  </table>
+  <p style="padding:8px 18px;font-size:0.8rem;color:#57606a;font-style:italic">Entite de donnees — aucune methode metier propre.</p>
+
 </div>
 
 <!-- PAIEMENTDIRECT -->
@@ -319,11 +304,10 @@
   </table>
   <div class="section-title">Méthodes</div>
   <table>
-    <tr><th>Méthode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
-    <tr><td><code>convention()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;Convention&gt;</td><td>Convention parente</td></tr>
-    <tr><td><code>rubrique()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;Rubrique&gt;</td><td>Rubrique imputée (nullable)</td></tr>
-    <tr><td><code>enregistrePar()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;Utilisateur&gt;</td><td>Agent DAF ayant enregistré</td></tr>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>enregistrer(daf: Utilisateur, convention: Convention, rubrique: Rubrique, montant: Integer, objet: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>DAF enregistre un paiement direct sans circuit de validation</td></tr>
   </table>
+
 </div>
 
 <!-- FAQ -->
@@ -342,10 +326,12 @@
   </table>
   <div class="section-title">Méthodes</div>
   <table>
-    <tr><th>Méthode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
-    <tr><td><code>isVisibleFor(role : RoleUtilisateur)</code></td><td><span class="badge b-vis">instance</span></td><td><span class="badge b-bool">Boolean</span></td><td>Vrai si l'entrée est visible pour le rôle donné</td></tr>
-    <tr><td><code>scopeActive(query)</code></td><td><span class="badge b-scope">scope</span></td><td><span class="badge b-rel">Builder</span></td><td>Entrées actives triées par id_faq</td></tr>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>publier()</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Active l'entree FAQ (faq_actif = true)</td></tr>
+    <tr><td><code>masquer()</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Desactive l'entree FAQ sans suppression</td></tr>
+    <tr><td><code>estVisiblePour(role: RoleUtilisateur)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Boolean</code></td><td>Teste visible_porteur / visible_daf / visible_ac selon le role</td></tr>
   </table>
+
 </div>
 
 <!-- MESSAGECHAT -->
@@ -361,10 +347,10 @@
   </table>
   <div class="section-title">Méthodes</div>
   <table>
-    <tr><th>Méthode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
-    <tr><td><code>expediteur()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;Utilisateur&gt;</td><td>Utilisateur expéditeur</td></tr>
-    <tr><td><code>destinataire()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;Utilisateur&gt;</td><td>Utilisateur destinataire</td></tr>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>marquerLu(destinataire: Utilisateur)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Destinataire marque le message comme lu</td></tr>
   </table>
+
 </div>
 
 <!-- JOURNALAUDIT -->
@@ -385,10 +371,10 @@
   </table>
   <div class="section-title">Méthodes</div>
   <table>
-    <tr><th>Méthode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
-    <tr><td><code>log(action, auditable?, oldValues?, newValues?, description?)</code></td><td><span class="badge b-vis">static</span></td><td>JournalAudit</td><td>Crée une entrée d'audit (utilisée dans tout le système)</td></tr>
-    <tr><td><code>utilisateur()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;Utilisateur&gt;</td><td>Auteur de l'action</td></tr>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>enregistrer(utilisateur: Utilisateur, action: String, entite: Object, description: String)</code></td><td><span class="badge b-vis">static</span></td><td><code>JournalAudit</code></td><td>Cree une entree d'audit — appele sur toute mutation metier</td></tr>
   </table>
+
 </div>
 
 <!-- NOTIFICATION -->
@@ -406,15 +392,12 @@
   </table>
   <div class="section-title">Méthodes</div>
   <table>
-    <tr><th>Méthode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
-    <tr><td><code>pourDemandeStatut(idUtilisateur, demande, libelleStatut, motif?)</code></td><td><span class="badge b-vis">static</span></td><td>Notification</td><td>Crée une notification de changement de statut de demande</td></tr>
-    <tr><td><code>pourProjetCloture(idUtilisateur, projet)</code></td><td><span class="badge b-vis">static</span></td><td>Notification</td><td>Crée une notification de clôture de projet</td></tr>
-    <tr><td><code>marquerCommentLue()</code></td><td><span class="badge b-vis">instance</span></td><td>void</td><td>Renseigne <code>lu_le</code> si la notification n'a pas déjà été lue</td></tr>
-    <tr><td><code>scopeNonLue(query)</code></td><td><span class="badge b-scope">scope</span></td><td><span class="badge b-rel">Builder</span></td><td>Filtre les notifications non lues (lu_le IS NULL)</td></tr>
-    <tr><td><code>utilisateur()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;Utilisateur&gt;</td><td>Utilisateur destinataire de la notification</td></tr>
-    <tr><td><code>demande()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;DemandeDepense&gt;</td><td>Demande concernée (nullable)</td></tr>
-    <tr><td><code>projet()</code></td><td><span class="badge b-rel">relation</span></td><td>BelongsTo&lt;Projet&gt;</td><td>Projet concerné (nullable)</td></tr>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>marquerLue()</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Renseigne lu_le avec l'horodatage courant</td></tr>
+    <tr><td><code>notifierStatutDemande(utilisateur: Utilisateur, demande: DemandeDepense, libelleStatut: String)</code></td><td><span class="badge b-vis">static</span></td><td><code>Notification</code></td><td>Cree une notification de changement de statut de demande</td></tr>
+    <tr><td><code>notifierCloture(utilisateur: Utilisateur, projet: Projet)</code></td><td><span class="badge b-vis">static</span></td><td><code>Notification</code></td><td>Cree une notification de cloture de projet</td></tr>
   </table>
+
 </div>
 <!-- ASSOCIATIONS -->
 <div class="assoc-section" id="associations">
