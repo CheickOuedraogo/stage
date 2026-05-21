@@ -15,7 +15,13 @@ class Paiement extends Model
     /** @use HasFactory<PaiementFactory> */
     use HasFactory;
 
+    protected $table = 'paiements';
+
     protected $primaryKey = 'id_paiement';
+
+    const CREATED_AT = 'cree_le';
+
+    const UPDATED_AT = 'mis_a_jour_le';
 
     protected function casts(): array
     {
@@ -26,19 +32,13 @@ class Paiement extends Model
         ];
     }
 
-    /** Transparent id accessor so $paiement->id still works */
-    public function getIdAttribute(): mixed
-    {
-        return $this->getAttribute($this->getKeyName());
-    }
-
     public function demande(): BelongsTo
     {
         return $this->belongsTo(DemandeDepense::class, 'id_demande');
     }
 
-    public function enregistrePar(): BelongsTo
+    public function enregistreur(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'id_enregistreur_paiement');
+        return $this->belongsTo(Utilisateur::class, 'id_enregistreur_paiement');
     }
 }

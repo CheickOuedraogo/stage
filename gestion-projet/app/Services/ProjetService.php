@@ -2,16 +2,16 @@
 
 namespace App\Services;
 
-use App\Enums\ConventionStatus;
-use App\Enums\DemandeStatus;
-use App\Enums\ProjectStatus;
-use App\Enums\ProjetStatutFinal;
-use App\Models\AuditLog;
+use App\Enums\StatutConvention;
+use App\Enums\StatutDemande;
+use App\Enums\StatutFinalProjet;
+use App\Enums\StatutProjet;
 use App\Models\Convention;
 use App\Models\DemandeDepense;
+use App\Models\JournalAudit;
+use App\Models\Notification;
 use App\Models\Projet;
-use App\Models\User;
-use App\Notifications\ProjetCloture;
+use App\Models\Utilisateur;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -23,7 +23,7 @@ class ProjetService
      */
     public function getBlockersCloture(Projet $projet): ?string
     {
-        if ($projet->projet_statut !== ProjectStatus::EnCours) {
+        if ($projet->projet_statut !== StatutProjet::EnCours) {
             return "Statut actuel : {$projet->projet_statut->label()}. Seuls les projets en cours peuvent être clôturés.";
         }
 
@@ -31,9 +31,9 @@ class ProjetService
 
         $demandesActives = DemandeDepense::whereIn('id_convention', $conventionIds)
             ->whereNotIn('demande_statut', [
-                DemandeStatus::Terminee->value,
-                DemandeStatus::RejetéeDaf->value,
-                DemandeStatus::RejetéeAc->value,
+                StatutDemande::Terminee->value,
+                StatutDemande::RejetéeDaf->value,
+                StatutDemande::RejetéeAgentComptable->value,
             ])
             ->count();
 
@@ -43,8 +43,8 @@ class ProjetService
 
         $conventionsActives = $projet->conventions->filter(
             fn (Convention $c) => ! in_array($c->convention_statut, [
-                ConventionStatus::Terminee,
-                ConventionStatus::Annulee,
+                StatutConvention::Terminee,
+                StatutConvention::Annulee,
             ])
         )->count();
 
@@ -70,23 +70,23 @@ class ProjetService
     /**
      * Closes the project: updates status, date, final outcome, logs to audit, and notifies the porteur.
      */
-    public function cloturer(Projet $projet, User $daf, CarbonInterface $dateFinReelle, ProjetStatutFinal $statutFinal): void
+    public function cloturer(Projet $projet, Utilisateur $daf, CarbonInterface $dateFinReelle, StatutFinalProjet $statutFinal): void
     {
         DB::transaction(function () use ($projet, $daf, $dateFinReelle, $statutFinal): void {
             $projet->update([
-                'projet_statut' => ProjectStatus::Termine,
+                'projet_statut' => StatutProjet::Termine,
                 'projet_date_fin_reelle' => $dateFinReelle,
                 'statut_final' => $statutFinal,
             ]);
 
-            AuditLog::log(
+            JournalAudit::log(
                 'projet_cloture',
                 $projet,
-                description: "Clôture du projet « {$projet->projet_titre} » par {$daf->name}",
+                description: "Clôture du projet « {$projet->projet_titre} » par {$daf->utilisateur_nom}",
             );
 
             $projet->loadMissing('porteur');
-            $projet->porteur->notify(new ProjetCloture($projet));
+            Notification::pourProjetCloture($projet->id_porteur, $projet);
         });
     }
 
@@ -108,21 +108,21 @@ class ProjetService
             'conventions.bailleur:id_bailleur,bailleur_nom,bailleur_sigle',
             'conventions.versements',
             'conventions.rubriques.demandesDepenses' => fn ($q) => $q
-                ->where('demande_statut', DemandeStatus::Terminee->value)
+                ->where('demande_statut', StatutDemande::Terminee->value)
                 ->with('paiement'),
             'conventions.paiementsDirects.rubrique:id_rubrique,rubrique_libelle',
         ]);
 
         $conventions = $projet->conventions->map(fn (Convention $c) => [
-            'id' => $c->id,
+            'id' => $c->id_utilisateur,
             'titre' => $c->convention_titre,
             'bailleur' => $c->bailleur->bailleur_nom,
             'bailleur_sigle' => $c->bailleur->bailleur_sigle,
-            'montant_fcfa' => $c->convention_montant_fcfa,
+            'montant_fcfa' => $c->montant_fcfa,
             'total_versements' => $c->versements->sum('versement_montant'),
             'total_depenses' => $c->rubriques->flatMap->demandesDepenses->sum('demande_montant'),
             'total_paiements_directs' => $c->paiementsDirects->sum('paiement_direct_montant'),
-            'solde' => $c->convention_montant_fcfa - $c->versements->sum('versement_montant'),
+            'solde' => $c->montant_fcfa - $c->versements->sum('versement_montant'),
         ])->values();
 
         $demandes = $projet->conventions->flatMap(fn (Convention $c) => $c->rubriques->flatMap(fn ($r) => $r->demandesDepenses->map(fn (DemandeDepense $d) => [
@@ -144,7 +144,7 @@ class ProjetService
         ])
         )->values();
 
-        $budgetPrevu = $projet->conventions->sum('convention_montant_fcfa');
+        $budgetPrevu = $projet->conventions->sum('montant_fcfa');
         $totalVersements = $conventions->sum('total_versements');
         $totalDepenses = $conventions->sum('total_depenses') + $conventions->sum('total_paiements_directs');
 
@@ -161,11 +161,11 @@ class ProjetService
 
         return [
             'projet' => [
-                'id' => $projet->id,
+                'id' => $projet->id_utilisateur,
                 'titre' => $projet->projet_titre,
-                'porteur' => $projet->porteur->name,
-                'status' => $projet->projet_statut->value,
-                'status_label' => $projet->projet_statut->label(),
+                'porteur' => $projet->porteur->utilisateur_nom,
+                'statut' => $projet->projet_statut->value,
+                'libelle_statut' => $projet->projet_statut->label(),
                 'statut_final' => $projet->statut_final?->value,
                 'statut_final_label' => $projet->statut_final?->label(),
                 'date_debut' => $projet->projet_date_debut?->toDateString(),

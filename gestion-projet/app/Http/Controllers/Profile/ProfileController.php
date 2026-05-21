@@ -16,22 +16,22 @@ class ProfileController extends Controller
     public function edit(): Response
     {
         return Inertia::render('profile/Edit', [
-            'user' => auth()->user()->only(['id', 'name', 'email', 'telephone', 'avatar_url', 'utilisateur_role']),
+            'user' => auth()->user()->only(['id', 'utilisateur_nom', 'utilisateur_email', 'utilisateur_telephone', 'url_avatar', 'utilisateur_role']),
         ]);
     }
 
     public function update(UpdateProfileRequest $request): RedirectResponse
     {
         $user = auth()->user();
-        $data = $request->safe()->only(['name', 'telephone']);
+        $data = $request->safe()->only(['utilisateur_nom', 'utilisateur_telephone']);
 
         if ($request->hasFile('avatar')) {
             // Delete old avatar if exists
-            if ($user->avatar_path) {
-                Storage::disk('public')->delete($user->avatar_path);
+            if ($user->utilisateur_avatar_chemin) {
+                Storage::disk('public')->delete($user->utilisateur_avatar_chemin);
             }
 
-            $data['avatar_path'] = $request->file('avatar')->store('avatars', 'public');
+            $data['utilisateur_avatar_chemin'] = $request->file('avatar')->store('avatars', 'public');
         }
 
         $user->update($data);
@@ -42,7 +42,7 @@ class ProfileController extends Controller
     public function updatePassword(UpdatePasswordRequest $request): RedirectResponse
     {
         auth()->user()->update([
-            'password' => Hash::make($request->validated('password')),
+            'utilisateur_mot_de_passe' => Hash::make($request->validated('utilisateur_mot_de_passe')),
         ]);
 
         return back()->with('success', 'Mot de passe mis à jour avec succès.');

@@ -11,7 +11,7 @@ import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 interface Contact {
     id: number;
-    name: string;
+    utilisateur_nom: string;
     role: string;
 }
 
@@ -24,8 +24,8 @@ export default function AdminChatShow() {
     const { contact, messages } = usePage<Props>().props;
 
     return (
-        <AppLayout title={`Messages — ${contact.name}`}>
-            <Head title={`Messages — ${contact.name} — Admin — CIFEU`} />
+        <AppLayout title={`Messages — ${contact.utilisateur_nom}`}>
+            <Head title={`Messages — ${contact.utilisateur_nom} — Admin — CIFEU`} />
 
             <div className="mb-6 flex items-center gap-3">
                 <Link
@@ -35,7 +35,7 @@ export default function AdminChatShow() {
                     <ArrowLeftIcon className="w-4 h-4" />
                 </Link>
                 <div>
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">{contact.name}</h2>
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">{contact.utilisateur_nom}</h2>
                     <p className="text-sm text-slate-500">{contact.role}</p>
                 </div>
             </div>
@@ -45,7 +45,7 @@ export default function AdminChatShow() {
                     messages={messages}
                     sendUrl={chatSend.url(contact.id)}
                     pollUrl={chatPoll.url(contact.id)}
-                    contactName={contact.name}
+                    contactName={contact.utilisateur_nom}
                 />
             </div>
         </AppLayout>

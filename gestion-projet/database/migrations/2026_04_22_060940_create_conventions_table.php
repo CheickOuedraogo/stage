@@ -17,20 +17,19 @@ return new class extends Migration
             $table->foreignId('id_bailleur')->constrained('bailleurs', 'id_bailleur');
             $table->string('convention_titre');
             $table->text('convention_description')->nullable();
-            $table->unsignedBigInteger('convention_montant');
-            $table->string('convention_forme')->default('don'); // don | prêt
+            $table->bigInteger('convention_montant');
+            $table->string('convention_forme')->default('don'); // don, prêt, etc.
             $table->string('convention_devise')->default('XOF');
             $table->decimal('convention_taux_conversion', 12, 6)->default(1);
-            $table->unsignedBigInteger('convention_montant_fcfa');
-            $table->string('convention_statut')->default('active');
+            $table->string('convention_statut')->default('active')->index();
             $table->date('convention_date_signature')->nullable();
             $table->date('convention_date_debut')->nullable();
             $table->date('convention_date_fin')->nullable();
-            $table->timestamps();
+            $table->timestamp('cree_le')->useCurrent();
+            $table->timestamp('mis_a_jour_le')->useCurrent();
 
             $table->index('id_projet');
             $table->index('id_bailleur');
-            $table->index('convention_statut');
         });
     }
 

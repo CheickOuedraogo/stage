@@ -16,8 +16,6 @@ interface Versement {
     id: number;
     montant: number;
     date_reception: string;
-    type: string;
-    type_label: string;
     reference: string | null;
     description: string | null;
     convention: string;
@@ -36,7 +34,6 @@ interface PaginatedVersements {
 }
 
 interface Filters {
-    type?: string;
     search?: string;
 }
 
@@ -45,11 +42,6 @@ interface Props extends PageProps {
     total_montant: number;
     filters: Filters;
 }
-
-const TYPE_BADGE: Record<string, string> = {
-    avance: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-    tranche: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-};
 
 export default function DafVersementsIndex() {
     const { versements, total_montant, filters } = usePage<Props>().props;
@@ -69,7 +61,7 @@ export default function DafVersementsIndex() {
         router.get(versementsIndex.url(), {}, { preserveScroll: true });
     };
 
-    const hasFilters = !!(filters.type || filters.search);
+    const hasFilters = !!filters.search;
 
     return (
         <AppLayout title="Versements">
@@ -107,17 +99,7 @@ export default function DafVersementsIndex() {
                     </button>
                 </form>
 
-                <select
-                    value={filters.type ?? ''}
-                    onChange={(e) => applyFilter('type', e.target.value)}
-                    className="px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                >
-                    <option value="">Tous les types</option>
-                    <option value="avance">Avance</option>
-                    <option value="tranche">Tranche</option>
-                </select>
-
-                {hasFilters && (
+{hasFilters && (
                     <button onClick={clearFilters} className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 dark:text-slate-400 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
                         <XMarkIcon className="w-4 h-4" /> Réinitialiser
                     </button>
@@ -138,7 +120,6 @@ export default function DafVersementsIndex() {
                                     <tr className="border-b border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/50">
                                         <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Projet / Convention</th>
                                         <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Bailleur</th>
-                                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Type</th>
                                         <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Montant</th>
                                         <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Date</th>
                                         <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide hidden lg:table-cell">Référence</th>
@@ -157,11 +138,6 @@ export default function DafVersementsIndex() {
                                                 <p className="text-xs text-slate-500 mt-0.5 truncate max-w-[220px]">{v.projet}</p>
                                             </td>
                                             <td className="px-4 py-3.5 text-slate-700 dark:text-slate-300 font-medium">{v.bailleur}</td>
-                                            <td className="px-4 py-3.5">
-                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${TYPE_BADGE[v.type] ?? ''}`}>
-                                                    {v.type_label}
-                                                </span>
-                                            </td>
                                             <td className="px-4 py-3.5 text-right font-mono font-semibold text-emerald-600">{formatCurrency(v.montant)}</td>
                                             <td className="px-4 py-3.5 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDate(v.date_reception)}</td>
                                             <td className="px-4 py-3.5 text-slate-400 font-mono text-xs hidden lg:table-cell">{v.reference ?? '—'}</td>

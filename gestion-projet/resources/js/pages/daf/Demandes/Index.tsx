@@ -12,11 +12,11 @@ interface Demande {
     id: number;
     objet: string;
     montant: number;
-    status: string;
-    status_label: string;
+    statut: string;
+    libelle_statut: string;
     badge_class: string;
-    created_at: string;
-    porteur: { name: string };
+    cree_le: string;
+    porteur: { utilisateur_nom: string };
     convention: { id: number; titre: string };
     projet: { id: number; titre: string };
     rubrique: { libelle: string };
@@ -38,13 +38,13 @@ interface Status {
 interface Props {
     en_attente: Demande[];
     historique: PaginatedDemandes;
-    filters: { status?: string };
+    filters: { statut?: string };
     statuses: Status[];
 }
 
 export default function DafDemandesIndex({ en_attente, historique, filters, statuses }: Props) {
     const [activeTab, setActiveTab] = useState<'attente' | 'historique'>('attente');
-    const [status, setStatus] = useState(filters.status ?? '');
+    const [statut, setStatut] = useState(filters.statut ?? '');
 
     return (
         <AppLayout title="Demandes de dépenses">
@@ -106,12 +106,12 @@ export default function DafDemandesIndex({ en_attente, historique, filters, stat
                 <div role="tabpanel" id="panel-historique" aria-labelledby="tab-historique">
                     <div className="mb-4">
                         <select
-                            value={status}
+                            value={statut}
                             onChange={(e) => {
-                                setStatus(e.target.value);
+                                setStatut(e.target.value);
                                 router.get(
                                     window.location.pathname,
-                                    { status: e.target.value || undefined },
+                                    { statut: e.target.value || undefined },
                                     { preserveState: true }
                                 );
                             }}
@@ -168,15 +168,15 @@ function DemandeRow({ demande }: { demande: Demande }) {
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${demande.badge_class}`}>
-                            {demande.status_label}
+                            {demande.libelle_statut}
                         </span>
                         <span className="text-xs text-gray-400 dark:text-slate-500">
-                            {formatDate(demande.created_at)}
+                            {formatDate(demande.cree_le)}
                         </span>
                     </div>
                     <p className="font-medium text-gray-900 dark:text-white truncate">{demande.objet}</p>
                     <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
-                        {demande.porteur.name} · {demande.projet.titre} · {demande.rubrique.libelle}
+                        {demande.porteur.utilisateur_nom} · {demande.projet.titre} · {demande.rubrique.libelle}
                     </p>
                 </div>
                 <span className="font-mono text-sm font-semibold text-gray-800 dark:text-slate-200 shrink-0">

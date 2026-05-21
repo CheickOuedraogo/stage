@@ -11,7 +11,7 @@ import {
     ClipboardDocumentListIcon,
     FolderIcon,
     ShieldCheckIcon,
-    UsersIcon,
+    UtilisateursIcon,
 } from '@heroicons/react/24/outline';
 import { FormEvent } from 'react';
 
@@ -21,7 +21,7 @@ interface AuditLogEntry {
     description: string | null;
     user: string;
     user_role: string | null;
-    created_at: string;
+    cree_le: string;
 }
 
 interface AdminDashboardProps {
@@ -67,7 +67,7 @@ export default function AdminDashboard({ stats, recent_audit_logs }: AdminDashbo
 
             <div className="mb-6">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    Bonjour, {auth.user?.name.split(' ')[0]}
+                    Bonjour, {auth.user?.utilisateur_nom.split(' ')[0]}
                 </h2>
                 <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
                     Vue d'ensemble de l'administration du système CIFEU
@@ -78,7 +78,7 @@ export default function AdminDashboard({ stats, recent_audit_logs }: AdminDashbo
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <Link href={usersIndex.url()} className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4 hover:border-blue-300 hover:shadow-sm transition-all">
                     <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center mb-3">
-                        <UsersIcon className="w-5 h-5 text-blue-600" />
+                        <UtilisateursIcon className="w-5 h-5 text-blue-600" />
                     </div>
                     <p className="text-2xl font-bold font-mono text-slate-900 dark:text-white">{stats.total_users}</p>
                     <p className="text-xs text-slate-500 mt-0.5">Utilisateurs</p>
@@ -241,7 +241,7 @@ export default function AdminDashboard({ stats, recent_audit_logs }: AdminDashbo
                                         )}
                                         {log.description && <span className="text-slate-500 dark:text-slate-400"> — {log.description}</span>}
                                     </p>
-                                    <p className="text-xs text-slate-400 mt-0.5">{log.action} · {log.created_at}</p>
+                                    <p className="text-xs text-slate-400 mt-0.5">{log.action} · {log.cree_le}</p>
                                 </div>
                             </div>
                         ))}

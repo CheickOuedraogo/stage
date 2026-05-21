@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum ProjetStatutFinal: string
+enum StatutFinalProjet: string
 {
     case Succes = 'succes';
     case Echec = 'echec';

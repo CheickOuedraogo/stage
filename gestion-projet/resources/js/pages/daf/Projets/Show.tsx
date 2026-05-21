@@ -17,8 +17,8 @@ interface Convention {
     montant_fcfa: number;
     forme: string;
     forme_label: string;
-    status: string;
-    status_label: string;
+    statut: string;
+    libelle_statut: string;
     total_rubriques: number;
     total_versements: number;
     rubriques_count: number;
@@ -42,8 +42,8 @@ interface Projet {
     titre: string;
     description: string | null;
     objectifs: string | null;
-    status: string;
-    status_label: string;
+    statut: string;
+    libelle_statut: string;
     statut_final: string | null;
     statut_final_label: string | null;
     montant_estime: number;
@@ -52,7 +52,7 @@ interface Projet {
     date_debut: string | null;
     date_fin_prevue: string | null;
     date_fin_reelle: string | null;
-    porteur: { nom: string; email: string; telephone: string | null };
+    porteur: { nom: string; utilisateur_email: string; utilisateur_telephone: string | null };
     conventions: Convention[];
     analyse_ecarts: AnalyseEcarts;
     can_cloturer: boolean;
@@ -72,7 +72,7 @@ export default function DafProjetShow({ projet }: Props) {
         date_fin_reelle: new Date().toISOString().split('T')[0],
         statut_final: '' as 'succes' | 'echec' | '',
     });
-    const statusEnCours = projet.status === 'en_cours';
+    const statusEnCours = projet.statut === 'en_cours';
 
     const submitCloture = (e: FormEvent) => {
         e.preventDefault();
@@ -103,13 +103,13 @@ export default function DafProjetShow({ projet }: Props) {
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 flex-wrap">
                         <h2 className="text-xl font-bold text-gray-900 dark:text-white truncate">{projet.titre}</h2>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${projectStatusClass(projet.status)}`}>
-                            {projet.status_label}
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${projectStatusClass(projet.statut)}`}>
+                            {projet.libelle_statut}
                         </span>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-slate-400 mt-0.5">
                         Porteur : {projet.porteur.nom}
-                        {projet.porteur.telephone && ` · ${projet.porteur.telephone}`}
+                        {projet.porteur.utilisateur_telephone && ` · ${projet.porteur.utilisateur_telephone}`}
                     </p>
                 </div>
                 {projet.bilan_url && (
@@ -372,8 +372,8 @@ export default function DafProjetShow({ projet }: Props) {
                                     >
                                         <div className="flex items-start justify-between gap-2 mb-1">
                                             <p className="text-xs font-semibold text-gray-900 dark:text-white">{c.bailleur.sigle ?? c.bailleur.nom}</p>
-                                            <span className={`shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${conventionStatusClass(c.status)}`}>
-                                                {c.status_label}
+                                            <span className={`shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${conventionStatusClass(c.statut)}`}>
+                                                {c.libelle_statut}
                                             </span>
                                         </div>
                                         <p className="text-xs text-gray-600 dark:text-slate-400 mb-2 line-clamp-1">{c.titre}</p>

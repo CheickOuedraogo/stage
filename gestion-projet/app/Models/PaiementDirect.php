@@ -18,18 +18,16 @@ class PaiementDirect extends Model
 
     protected $primaryKey = 'id_paiement_direct';
 
+    const CREATED_AT = 'cree_le';
+
+    const UPDATED_AT = 'mis_a_jour_le';
+
     protected function casts(): array
     {
         return [
             'paiement_direct_montant' => 'integer',
             'paiement_direct_date' => 'date',
         ];
-    }
-
-    /** Transparent id accessor so $paiementDirect->id still works */
-    public function getIdAttribute(): mixed
-    {
-        return $this->getAttribute($this->getKeyName());
     }
 
     public function convention(): BelongsTo
@@ -42,8 +40,8 @@ class PaiementDirect extends Model
         return $this->belongsTo(Rubrique::class, 'id_rubrique');
     }
 
-    public function enregistrePar(): BelongsTo
+    public function enregistreur(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'id_enregistreur_paiement_direct');
+        return $this->belongsTo(Utilisateur::class, 'id_enregistreur_paiement_direct');
     }
 }

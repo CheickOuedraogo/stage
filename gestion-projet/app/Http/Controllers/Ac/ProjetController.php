@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Ac;
+namespace App\Http\Controllers\AgentComptable;
 
 use App\Http\Controllers\Controller;
 use App\Models\Projet;
@@ -34,6 +34,6 @@ class ProjetController extends Controller
 
         $pdf = Pdf::loadView('pdf.bilan-projet', compact('bilan'))->setPaper('a4');
 
-        return $pdf->download("bilan-projet-{$projet->id}.pdf");
+        return $pdf->download("bilan-projet-{$projet->id_utilisateur}.pdf");
     }
 }

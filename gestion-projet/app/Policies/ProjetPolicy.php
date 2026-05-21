@@ -3,21 +3,21 @@
 namespace App\Policies;
 
 use App\Models\Projet;
-use App\Models\User;
+use App\Models\Utilisateur;
 
 class ProjetPolicy
 {
-    public function cloturer(User $user, Projet $projet): bool
+    public function cloturer(Utilisateur $user, Projet $projet): bool
     {
-        return $user->isDaf();
+        return $user->estDaf();
     }
 
-    public function voirBilan(User $user, Projet $projet): bool
+    public function voirBilan(Utilisateur $user, Projet $projet): bool
     {
-        if ($user->isDaf() || $user->isAc()) {
+        if ($user->estDaf() || $user->isAgentComptable()) {
             return true;
         }
 
-        return $user->isPorteur() && $projet->id_porteur === $user->id;
+        return $user->estPorteur() && $projet->id_utilisateur_porteur === $user->id_utilisateur;
     }
 }

@@ -2,15 +2,15 @@
 
 namespace App\Notifications;
 
-use App\Enums\DemandeStatus;
+use App\Enums\StatutDemande;
 use App\Models\DemandeDepense;
 use Illuminate\Notifications\Notification;
 
-class DemandeStatusChanged extends Notification
+class StatutDemandeChange extends Notification
 {
     public function __construct(
         public readonly DemandeDepense $demande,
-        public readonly DemandeStatus $newStatus,
+        public readonly StatutDemande $newStatus,
         public readonly ?string $motif = null,
     ) {}
 
@@ -22,7 +22,7 @@ class DemandeStatusChanged extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'demande_id' => $this->demande->id,
+            'demande_id' => $this->demande->id_utilisateur,
             'objet' => $this->demande->objet,
             'status' => $this->newStatus->value,
             'status_label' => $this->newStatus->label(),

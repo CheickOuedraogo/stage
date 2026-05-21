@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Setting;
+use App\Models\Parametre;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -40,18 +40,18 @@ class HandleInertiaRequests extends Middleware
 
         return [
             ...parent::share($request),
-            'name' => config('app.name'),
+            'nom_application' => config('app.name'),
             'auth' => [
                 'user' => $user ? [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
+                    'id' => $user->id_utilisateur,
+                    'utilisateur_nom' => $user->utilisateur_nom,
+                    'utilisateur_email' => $user->utilisateur_email,
                     'utilisateur_role' => $user->utilisateur_role?->value,
-                    'role_label' => $user->utilisateur_role?->shortLabel(),
+                    'label_role' => $user->utilisateur_role?->shortLabel(),
                     'utilisateur_actif' => $user->utilisateur_actif,
-                    'avatar_url' => $user->avatar_url,
-                    'telephone' => $user->telephone,
-                    'unread_notifications' => $user->unreadNotifications()->count(),
+                    'url_avatar' => $user->url_avatar,
+                    'utilisateur_telephone' => $user->utilisateur_telephone,
+                    'notifications_non_lues' => $user->notificationsNonLues()->count(),
                 ] : null,
             ],
             'flash' => [
@@ -60,9 +60,9 @@ class HandleInertiaRequests extends Middleware
                 'warning' => $request->session()->get('warning'),
             ],
             'maintenance' => [
-                'active' => Setting::isMaintenanceActive(),
-                'until' => Setting::get('maintenance_until'),
-                'reason' => Setting::get('maintenance_reason'),
+                'active' => Parametre::estMaintenanceActive(),
+                'until' => Parametre::get('maintenance_until'),
+                'reason' => Parametre::get('maintenance_reason'),
             ],
         ];
     }

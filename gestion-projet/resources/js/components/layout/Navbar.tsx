@@ -100,7 +100,7 @@ export function Navbar({ user }: NavbarProps) {
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const { isDark, toggle: toggleDark } = useDarkMode();
 
-    const items = getNavItems(user.utilisateur_role, user.unread_notifications);
+    const items = getNavItems(user.utilisateur_role, user.notifications_non_lues);
 
     const handleLogout = () => {
         router.post(logout.url());
@@ -176,15 +176,15 @@ export function Navbar({ user }: NavbarProps) {
                     <Link
                         href={notificationsIndex.url()}
                         className="relative p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                        aria-label={`${user.unread_notifications} notification${user.unread_notifications !== 1 ? 's' : ''}`}
+                        aria-label={`${user.notifications_non_lues} notification${user.notifications_non_lues !== 1 ? 's' : ''}`}
                     >
                         <BellIcon className="w-4.5 h-4.5" style={{ width: '1.125rem', height: '1.125rem' }} />
-                        {user.unread_notifications > 0 && (
+                        {user.notifications_non_lues > 0 && (
                             <span
                                 className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center"
                                 aria-hidden="true"
                             >
-                                {user.unread_notifications > 9 ? '9+' : user.unread_notifications}
+                                {user.notifications_non_lues > 9 ? '9+' : user.notifications_non_lues}
                             </span>
                         )}
                     </Link>
@@ -197,19 +197,19 @@ export function Navbar({ user }: NavbarProps) {
                             aria-label="Menu utilisateur"
                             aria-expanded={userMenuOpen}
                         >
-                            {user.avatar_url ? (
+                            {user.url_avatar ? (
                                 <img
-                                    src={user.avatar_url}
-                                    alt={`Avatar de ${user.name}`}
+                                    src={user.url_avatar}
+                                    alt={`Avatar de ${user.utilisateur_nom}`}
                                     className="w-7 h-7 rounded-full object-cover ring-2 ring-gray-200 dark:ring-slate-600"
                                 />
                             ) : (
                                 <div className="w-7 h-7 rounded-full bg-slate-700 dark:bg-slate-600 text-white text-xs font-bold flex items-center justify-center">
-                                    {getInitials(user.name)}
+                                    {getInitials(user.utilisateur_nom)}
                                 </div>
                             )}
                             <span className="hidden sm:block text-sm font-medium text-gray-700 dark:text-slate-300 max-w-[120px] truncate">
-                                {user.name.split(' ')[0]}
+                                {user.utilisateur_nom.split(' ')[0]}
                             </span>
                         </button>
 
@@ -225,8 +225,8 @@ export function Navbar({ user }: NavbarProps) {
                                     role="menu"
                                 >
                                     <div className="px-4 py-3 border-b border-gray-100 dark:border-slate-600">
-                                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.name}</p>
-                                        <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{user.role_label}</p>
+                                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.utilisateur_nom}</p>
+                                        <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{user.label_role}</p>
                                     </div>
                                     <div className="py-1">
                                         <Link

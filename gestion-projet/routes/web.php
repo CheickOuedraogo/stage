@@ -1,19 +1,19 @@
 <?php
 
-use App\Enums\UserRole;
-use App\Http\Controllers\Ac\ChatController as AcChatController;
-use App\Http\Controllers\Ac\DemandeDepenseController as AcDemandeDepenseController;
-use App\Http\Controllers\Ac\PaiementController as AcPaiementController;
-use App\Http\Controllers\Ac\ProjetController as AcProjetController;
-use App\Http\Controllers\Admin\AuditLogController;
-use App\Http\Controllers\Admin\ChatController as AdminChatController;
-use App\Http\Controllers\Admin\FaqController as AdminFaqController;
-use App\Http\Controllers\Admin\MaintenanceController;
-use App\Http\Controllers\Admin\UserController;
+use App\Enums\RoleUtilisateur;
+use App\Http\Controllers\Administrateur\FaqController as AdministrateurFaqController;
+use App\Http\Controllers\Administrateur\JournalAuditController;
+use App\Http\Controllers\Administrateur\MaintenanceController;
+use App\Http\Controllers\Administrateur\MessageChatControleur as AdministrateurMessageChatControleur;
+use App\Http\Controllers\Administrateur\UtilisateurControleur;
+use App\Http\Controllers\AgentComptable\DemandeDepenseController as AgentComptableDemandeDepenseController;
+use App\Http\Controllers\AgentComptable\MessageChatControleur as AgentComptableMessageChatControleur;
+use App\Http\Controllers\AgentComptable\PaiementController as AgentComptablePaiementController;
+use App\Http\Controllers\AgentComptable\ProjetController as AgentComptableProjetController;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Daf\ChatController as DafChatController;
 use App\Http\Controllers\Daf\ConventionController as DafConventionController;
 use App\Http\Controllers\Daf\DemandeDepenseController as DafDemandeDepenseController;
+use App\Http\Controllers\Daf\MessageChatControleur as DafMessageChatControleur;
 use App\Http\Controllers\Daf\PaiementDirectController as DafPaiementDirectController;
 use App\Http\Controllers\Daf\ProjetController as DafProjetController;
 use App\Http\Controllers\Daf\RapportController as DafRapportController;
@@ -44,8 +44,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Notifications (all roles)
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::patch('/notifications/{notification}/lue', [NotificationController::class, 'markRead'])->name('notifications.read');
-    Route::patch('/notifications/toutes-lues', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+    Route::patch('/notifications/{notification}/lue', [NotificationController::class, 'marquerLue'])->name('notifications.read');
+    Route::patch('/notifications/toutes-lues', [NotificationController::class, 'marquerToutesLues'])->name('notifications.read-all');
 
     // File downloads — accessible by porteur (owner) + daf + ac
     Route::get('/fichiers/demandes/{demande}/justificatif', [PorteurDemandeDepenseController::class, 'downloadJustificatif'])->name('demandes.justificatif.download');
@@ -56,35 +56,35 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profil', [ProfileController::class, 'update'])->name('profile.update');
     Route::patch('/profil/mot-de-passe', [ProfileController::class, 'updatePassword'])->name('profile.password');
 
-    // ── Admin ──────────────────────────────────────────────────────────────
+    // ── Administrateur ──────────────────────────────────────────────────────────────
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/tableau-de-bord', [DashboardController::class, 'admin'])->name('dashboard');
 
-        // Users
-        Route::get('/utilisateurs', [UserController::class, 'index'])->name('users.index');
-        Route::get('/utilisateurs/creer', [UserController::class, 'create'])->name('users.create');
-        Route::post('/utilisateurs', [UserController::class, 'store'])->name('users.store');
-        Route::get('/utilisateurs/{user}/modifier', [UserController::class, 'edit'])->name('users.edit');
-        Route::patch('/utilisateurs/{user}', [UserController::class, 'update'])->name('users.update');
-        Route::patch('/utilisateurs/{user}/activer', [UserController::class, 'toggleActive'])->name('users.toggle-active');
+        // Utilisateurs
+        Route::get('/utilisateurs', [UtilisateurControleur::class, 'index'])->name('users.index');
+        Route::get('/utilisateurs/creer', [UtilisateurControleur::class, 'create'])->name('users.create');
+        Route::post('/utilisateurs', [UtilisateurControleur::class, 'store'])->name('users.store');
+        Route::get('/utilisateurs/{user}/modifier', [UtilisateurControleur::class, 'edit'])->name('users.edit');
+        Route::patch('/utilisateurs/{user}', [UtilisateurControleur::class, 'update'])->name('users.update');
+        Route::patch('/utilisateurs/{user}/activer', [UtilisateurControleur::class, 'toggleActive'])->name('users.toggle-active');
 
         // Maintenance
         Route::patch('/maintenance', [MaintenanceController::class, 'update'])->name('maintenance.update');
 
         // Audit log
-        Route::get('/journal-audit', [AuditLogController::class, 'index'])->name('audit-log');
+        Route::get('/journal-audit', [JournalAuditController::class, 'index'])->name('audit-log');
 
         // FAQ CRUD
-        Route::get('/faq', [AdminFaqController::class, 'index'])->name('faq.index');
-        Route::post('/faq', [AdminFaqController::class, 'store'])->name('faq.store');
-        Route::patch('/faq/{faqItem}', [AdminFaqController::class, 'update'])->name('faq.update');
-        Route::delete('/faq/{faqItem}', [AdminFaqController::class, 'destroy'])->name('faq.destroy');
+        Route::get('/faq', [AdministrateurFaqController::class, 'index'])->name('faq.index');
+        Route::post('/faq', [AdministrateurFaqController::class, 'store'])->name('faq.store');
+        Route::patch('/faq/{faq}', [AdministrateurFaqController::class, 'update'])->name('faq.update');
+        Route::delete('/faq/{faq}', [AdministrateurFaqController::class, 'destroy'])->name('faq.destroy');
 
         // Chat admin
-        Route::get('/messages', [AdminChatController::class, 'index'])->name('chat.index');
-        Route::get('/messages/{user}', [AdminChatController::class, 'show'])->name('chat.show');
-        Route::post('/messages/{user}', [AdminChatController::class, 'send'])->name('chat.send');
-        Route::get('/messages/{user}/poll', [AdminChatController::class, 'poll'])->name('chat.poll');
+        Route::get('/messages', [AdministrateurMessageChatControleur::class, 'index'])->name('chat.index');
+        Route::get('/messages/{user}', [AdministrateurMessageChatControleur::class, 'show'])->name('chat.show');
+        Route::post('/messages/{user}', [AdministrateurMessageChatControleur::class, 'send'])->name('chat.send');
+        Route::get('/messages/{user}/poll', [AdministrateurMessageChatControleur::class, 'poll'])->name('chat.poll');
     });
 
     // ── DAF ───────────────────────────────────────────────────────────────
@@ -122,9 +122,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/rubriques', [DafRubriqueController::class, 'index'])->name('rubriques.index');
 
         // Chat DAF
-        Route::get('/assistance', [DafChatController::class, 'index'])->name('chat.index');
-        Route::post('/assistance', [DafChatController::class, 'send'])->name('chat.send');
-        Route::get('/assistance/poll', [DafChatController::class, 'poll'])->name('chat.poll');
+        Route::get('/assistance', [DafMessageChatControleur::class, 'index'])->name('chat.index');
+        Route::post('/assistance', [DafMessageChatControleur::class, 'send'])->name('chat.send');
+        Route::get('/assistance/poll', [DafMessageChatControleur::class, 'poll'])->name('chat.poll');
 
         // Rapports
         Route::get('/rapports', [DafRapportController::class, 'index'])->name('rapports.index');
@@ -145,25 +145,25 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/tableau-de-bord', [DashboardController::class, 'ac'])->name('dashboard');
 
         // Bilan projet (lecture seule)
-        Route::get('/projets/{projet}/bilan', [AcProjetController::class, 'bilan'])->name('projets.bilan');
-        Route::get('/projets/{projet}/bilan/pdf', [AcProjetController::class, 'exporterBilanPdf'])->name('projets.bilan.pdf');
+        Route::get('/projets/{projet}/bilan', [AgentComptableProjetController::class, 'bilan'])->name('projets.bilan');
+        Route::get('/projets/{projet}/bilan/pdf', [AgentComptableProjetController::class, 'exporterBilanPdf'])->name('projets.bilan.pdf');
 
         // Paiements
-        Route::get('/paiements', [AcPaiementController::class, 'index'])->name('paiements.index');
+        Route::get('/paiements', [AgentComptablePaiementController::class, 'index'])->name('paiements.index');
 
         // Chat AC
-        Route::get('/assistance', [AcChatController::class, 'index'])->name('chat.index');
-        Route::post('/assistance', [AcChatController::class, 'send'])->name('chat.send');
-        Route::get('/assistance/poll', [AcChatController::class, 'poll'])->name('chat.poll');
+        Route::get('/assistance', [AgentComptableMessageChatControleur::class, 'index'])->name('chat.index');
+        Route::post('/assistance', [AgentComptableMessageChatControleur::class, 'send'])->name('chat.send');
+        Route::get('/assistance/poll', [AgentComptableMessageChatControleur::class, 'poll'])->name('chat.poll');
 
         // Demandes de dépenses
-        Route::get('/demandes', [AcDemandeDepenseController::class, 'index'])->name('demandes.index');
-        Route::get('/demandes/{demande}', [AcDemandeDepenseController::class, 'show'])->name('demandes.show');
-        Route::post('/demandes/{demande}/valider', [AcDemandeDepenseController::class, 'valider'])->name('demandes.valider');
-        Route::post('/demandes/{demande}/rejeter', [AcDemandeDepenseController::class, 'rejeter'])->name('demandes.rejeter');
-        Route::post('/demandes/{demande}/paiement', [AcDemandeDepenseController::class, 'enregistrerPaiement'])->name('demandes.paiement');
-        Route::post('/demandes/{demande}/valider-rapport', [AcDemandeDepenseController::class, 'validerRapport'])->name('demandes.valider-rapport');
-        Route::post('/demandes/{demande}/rejeter-rapport', [AcDemandeDepenseController::class, 'rejeterRapport'])->name('demandes.rejeter-rapport');
+        Route::get('/demandes', [AgentComptableDemandeDepenseController::class, 'index'])->name('demandes.index');
+        Route::get('/demandes/{demande}', [AgentComptableDemandeDepenseController::class, 'show'])->name('demandes.show');
+        Route::post('/demandes/{demande}/valider', [AgentComptableDemandeDepenseController::class, 'valider'])->name('demandes.valider');
+        Route::post('/demandes/{demande}/rejeter', [AgentComptableDemandeDepenseController::class, 'rejeter'])->name('demandes.rejeter');
+        Route::post('/demandes/{demande}/paiement', [AgentComptableDemandeDepenseController::class, 'enregistrerPaiement'])->name('demandes.paiement');
+        Route::post('/demandes/{demande}/valider-rapport', [AgentComptableDemandeDepenseController::class, 'validerRapport'])->name('demandes.valider-rapport');
+        Route::post('/demandes/{demande}/rejeter-rapport', [AgentComptableDemandeDepenseController::class, 'rejeterRapport'])->name('demandes.rejeter-rapport');
     });
 
     // ── Porteur ───────────────────────────────────────────────────────────
@@ -195,10 +195,10 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/', function () {
     return Auth::check()
         ? redirect(match (Auth::user()->role) {
-            UserRole::Admin => route('admin.dashboard'),
-            UserRole::Daf => route('daf.dashboard'),
-            UserRole::Ac => route('ac.dashboard'),
-            UserRole::Porteur => route('porteur.dashboard'),
+            RoleUtilisateur::Administrateur => route('admin.dashboard'),
+            RoleUtilisateur::Daf => route('daf.dashboard'),
+            RoleUtilisateur::AgentComptable => route('ac.dashboard'),
+            RoleUtilisateur::Porteur => route('porteur.dashboard'),
         })
         : redirect()->route('login');
 })->name('home');

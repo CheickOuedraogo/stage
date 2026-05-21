@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum ConventionStatus: string
+enum StatutConvention: string
 {
     case Active = 'active';
     case Suspendue = 'suspendue';

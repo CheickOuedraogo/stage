@@ -34,14 +34,14 @@ interface Demande {
     id: number;
     objet: string;
     montant: number;
-    status: string;
-    status_label: string;
+    statut: string;
+    libelle_statut: string;
     badge_class: string;
-    created_at: string;
+    cree_le: string;
     description: string | null;
     motif_rejet: string | null;
-    has_justificatif: boolean;
-    has_rapport: boolean;
+    possede_justificatif: boolean;
+    possede_rapport: boolean;
     rapport_validee_daf: boolean;
     rapport_validee_ac: boolean;
     validee_daf_at: string | null;
@@ -59,12 +59,12 @@ interface Props {
 }
 
 const STATUS_STEPS = [
-    { status: 'soumise', label: 'Soumise', icon: ClockIcon },
-    { status: 'validee_daf', label: 'Validée DAF', icon: CheckCircleIcon },
-    { status: 'validee_ac', label: 'Validée AC', icon: CheckCircleIcon },
-    { status: 'payee', label: 'Payée', icon: BanknotesIcon },
-    { status: 'rapport_soumis', label: 'Rapport soumis', icon: DocumentArrowUpIcon },
-    { status: 'terminee', label: 'Terminée', icon: CheckCircleIcon },
+    { statut: 'soumise', label: 'Soumise', icon: ClockIcon },
+    { statut: 'validee_daf', label: 'Validée DAF', icon: CheckCircleIcon },
+    { statut: 'validee_ac', label: 'Validée AC', icon: CheckCircleIcon },
+    { statut: 'payee', label: 'Payée', icon: BanknotesIcon },
+    { statut: 'rapport_soumis', label: 'Rapport soumis', icon: DocumentArrowUpIcon },
+    { statut: 'terminee', label: 'Terminée', icon: CheckCircleIcon },
 ];
 
 const STATUS_ORDER = ['soumise', 'validee_daf', 'validee_ac', 'payee', 'rapport_soumis', 'terminee'];
@@ -90,8 +90,8 @@ function getStepState(stepStatus: string, currentStatus: string): 'done' | 'curr
 export default function DemandeShow({ demande }: Props) {
     const rapportForm = useForm<{ rapport: File | null }>({ rapport: null });
 
-    const isRejected = demande.status === 'rejetee_daf' || demande.status === 'rejetee_ac';
-    const canUploadRapport = demande.status === 'payee';
+    const isRejected = demande.statut === 'rejetee_daf' || demande.statut === 'rejetee_ac';
+    const canUploadRapport = demande.statut === 'payee';
 
     function handleRapportSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -123,7 +123,7 @@ export default function DemandeShow({ demande }: Props) {
                         <div className="flex items-start justify-between gap-4 flex-wrap mb-4">
                             <div>
                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mb-2 ${demande.badge_class}`}>
-                                    {demande.status_label}
+                                    {demande.libelle_statut}
                                 </span>
                                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{demande.objet}</h2>
                                 <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
@@ -156,7 +156,7 @@ export default function DemandeShow({ demande }: Props) {
                     <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
                         <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Documents</h3>
                         <div className="flex flex-wrap gap-3">
-                            {demande.has_justificatif && (
+                            {demande.possede_justificatif && (
                                 <a
                                     href={downloadJustificatifAction.url(demande.id)}
                                     className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-lg transition-colors"
@@ -165,7 +165,7 @@ export default function DemandeShow({ demande }: Props) {
                                     Justificatif PDF
                                 </a>
                             )}
-                            {demande.has_rapport && (
+                            {demande.possede_rapport && (
                                 <a
                                     href={downloadRapportAction.url(demande.id)}
                                     className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-lg transition-colors"
@@ -206,7 +206,7 @@ export default function DemandeShow({ demande }: Props) {
                     )}
 
                     {/* Validation rapport */}
-                    {demande.status === 'rapport_soumis' && (
+                    {demande.statut === 'rapport_soumis' && (
                         <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-xl p-6">
                             <h3 className="text-sm font-semibold text-purple-800 dark:text-purple-300 mb-2">
                                 Rapport en cours de validation
@@ -242,10 +242,10 @@ export default function DemandeShow({ demande }: Props) {
                         </h3>
                         <div className="space-y-4">
                             {STATUS_STEPS.map((step, idx) => {
-                                const state = getStepState(step.status, demande.status);
+                                const state = getStepState(step.statut, demande.statut);
                                 const Icon = step.icon;
                                 return (
-                                    <div key={step.status} className="flex gap-3">
+                                    <div key={step.statut} className="flex gap-3">
                                         <div className="flex flex-col items-center">
                                             <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-colors ${
                                                 state === 'done' ? 'bg-emerald-500 text-white' :
@@ -267,12 +267,12 @@ export default function DemandeShow({ demande }: Props) {
                                             }`}>
                                                 {step.label}
                                             </p>
-                                            {step.status === 'validee_daf' && demande.validee_daf_at && (
+                                            {step.statut === 'validee_daf' && demande.validee_daf_at && (
                                                 <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
                                                     {formatDateTime(demande.validee_daf_at)} · {demande.validateur_daf}
                                                 </p>
                                             )}
-                                            {step.status === 'validee_ac' && demande.validee_ac_at && (
+                                            {step.statut === 'validee_ac' && demande.validee_ac_at && (
                                                 <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
                                                     {formatDateTime(demande.validee_ac_at)} · {demande.validateur_ac}
                                                 </p>

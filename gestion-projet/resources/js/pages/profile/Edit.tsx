@@ -2,7 +2,7 @@ import AppLayout from '@/components/layout/AppLayout';
 import { password as profilePassword, update as profileUpdate } from '@/routes/profile';
 import type { PageProps } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { CameraIcon, CheckIcon, KeyIcon, UserIcon } from '@heroicons/react/24/outline';
+import { CameraIcon, CheckIcon, KeyIcon, UtilisateurIcon } from '@heroicons/react/24/outline';
 import { FormEvent, useRef, useState } from 'react';
 
 function getInitials(name: string) {
@@ -22,8 +22,8 @@ export default function ProfileEdit() {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     const profileForm = useForm({
-        name: user.name,
-        telephone: user.telephone ?? '',
+        utilisateur_nom: user.utilisateur_nom,
+        utilisateur_telephone: user.utilisateur_telephone ?? '',
         avatar: null as File | null,
     });
 
@@ -59,7 +59,7 @@ export default function ProfileEdit() {
         });
     };
 
-    const avatarSrc = previewUrl ?? user.avatar_url;
+    const avatarSrc = previewUrl ?? user.url_avatar;
     const roleLabels: Record<string, string> = {
         admin: 'Administrateur',
         daf: 'Direction Administration et Finances',
@@ -89,12 +89,12 @@ export default function ProfileEdit() {
                                 {avatarSrc ? (
                                     <img
                                         src={avatarSrc}
-                                        alt={`Avatar de ${user.name}`}
+                                        alt={`Avatar de ${user.utilisateur_nom}`}
                                         className="w-full h-full object-cover"
                                     />
                                 ) : (
                                     <div className="w-full h-full bg-gray-900 text-white text-xl font-bold flex items-center justify-center">
-                                        {getInitials(user.name)}
+                                        {getInitials(user.utilisateur_nom)}
                                     </div>
                                 )}
                             </div>
@@ -118,9 +118,9 @@ export default function ProfileEdit() {
                         </div>
 
                         <div>
-                            <p className="text-lg font-semibold text-gray-900 dark:text-white">{user.name}</p>
-                            <p className="text-sm text-gray-500 dark:text-slate-400">{user.email}</p>
-                            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{roleLabels[user.utilisateur_role] ?? user.role_label}</p>
+                            <p className="text-lg font-semibold text-gray-900 dark:text-white">{user.utilisateur_nom}</p>
+                            <p className="text-sm text-gray-500 dark:text-slate-400">{user.utilisateur_email}</p>
+                            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{roleLabels[user.utilisateur_role] ?? user.label_role}</p>
                             {previewUrl && (
                                 <p className="text-xs text-blue-600 mt-1 font-medium">
                                     Nouvelle photo sélectionnée — enregistrez pour appliquer
@@ -134,7 +134,7 @@ export default function ProfileEdit() {
                 <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
                     <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100 dark:border-slate-800">
                         <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
-                            <UserIcon className="w-4 h-4 text-gray-600 dark:text-slate-400" />
+                            <UtilisateurIcon className="w-4 h-4 text-gray-600 dark:text-slate-400" />
                         </div>
                         <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Informations personnelles</h3>
                     </div>
@@ -149,14 +149,14 @@ export default function ProfileEdit() {
                                 <input
                                     id="name"
                                     type="text"
-                                    value={profileForm.data.name}
-                                    onChange={(e) => profileForm.setData('name', e.target.value)}
+                                    value={profileForm.data.utilisateur_nom}
+                                    onChange={(e) => profileForm.setData('utilisateur_nom', e.target.value)}
                                     required
-                                    aria-invalid={!!profileForm.errors.name}
+                                    aria-invalid={!!profileForm.errors.utilisateur_nom}
                                     className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
                                 />
-                                {profileForm.errors.name && (
-                                    <p className="text-xs text-red-600">{profileForm.errors.name}</p>
+                                {profileForm.errors.utilisateur_nom && (
+                                    <p className="text-xs text-red-600">{profileForm.errors.utilisateur_nom}</p>
                                 )}
                             </div>
 
@@ -168,14 +168,14 @@ export default function ProfileEdit() {
                                 <input
                                     id="telephone"
                                     type="tel"
-                                    value={profileForm.data.telephone}
-                                    onChange={(e) => profileForm.setData('telephone', e.target.value)}
+                                    value={profileForm.data.utilisateur_telephone}
+                                    onChange={(e) => profileForm.setData('utilisateur_telephone', e.target.value)}
                                     placeholder="+226 70 00 00 00"
-                                    aria-invalid={!!profileForm.errors.telephone}
+                                    aria-invalid={!!profileForm.errors.utilisateur_telephone}
                                     className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
                                 />
-                                {profileForm.errors.telephone && (
-                                    <p className="text-xs text-red-600">{profileForm.errors.telephone}</p>
+                                {profileForm.errors.utilisateur_telephone && (
+                                    <p className="text-xs text-red-600">{profileForm.errors.utilisateur_telephone}</p>
                                 )}
                             </div>
                         </div>
@@ -187,7 +187,7 @@ export default function ProfileEdit() {
                             </label>
                             <input
                                 type="email"
-                                value={user.email}
+                                value={user.utilisateur_email}
                                 disabled
                                 readOnly
                                 aria-label="Adresse e-mail (non modifiable)"

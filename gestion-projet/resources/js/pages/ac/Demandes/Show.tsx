@@ -35,14 +35,14 @@ interface Demande {
     id: number;
     objet: string;
     montant: number;
-    status: string;
-    status_label: string;
+    statut: string;
+    libelle_statut: string;
     badge_class: string;
-    created_at: string;
+    cree_le: string;
     description: string | null;
     motif_rejet: string | null;
-    has_justificatif: boolean;
-    has_rapport: boolean;
+    possede_justificatif: boolean;
+    possede_rapport: boolean;
     rapport_validee_daf: boolean;
     rapport_validee_ac: boolean;
     validee_daf_at: string | null;
@@ -53,7 +53,7 @@ interface Demande {
     convention: { id: number; titre: string };
     projet: { id: number; titre: string };
     rubrique: { libelle: string };
-    porteur: { name: string };
+    porteur: { utilisateur_nom: string };
     paiement: {
         montant: number;
         date_paiement: string;
@@ -80,9 +80,9 @@ export default function AcDemandeShow({ demande, modes_paiement }: Props) {
         reference: '',
     });
 
-    const canValidate = demande.status === 'validee_daf';
-    const canPay = demande.status === 'validee_ac' && !demande.paiement;
-    const canValidateRapport = demande.status === 'rapport_soumis';
+    const canValidate = demande.statut === 'validee_daf';
+    const canPay = demande.statut === 'validee_ac' && !demande.paiement;
+    const canValidateRapport = demande.statut === 'rapport_soumis';
 
     function handleValider() {
         router.post(validerAction.url(demande.id), {}, { preserveScroll: true });
@@ -126,11 +126,11 @@ export default function AcDemandeShow({ demande, modes_paiement }: Props) {
                         <div className="flex items-start justify-between gap-4 flex-wrap mb-4">
                             <div>
                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mb-2 ${demande.badge_class}`}>
-                                    {demande.status_label}
+                                    {demande.libelle_statut}
                                 </span>
                                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{demande.objet}</h2>
                                 <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
-                                    Par <strong>{demande.porteur.name}</strong> · {demande.projet.titre} · {demande.convention.titre}
+                                    Par <strong>{demande.porteur.utilisateur_nom}</strong> · {demande.projet.titre} · {demande.convention.titre}
                                 </p>
                             </div>
                             <span className="font-mono text-xl font-bold text-gray-900 dark:text-white">
@@ -179,13 +179,13 @@ export default function AcDemandeShow({ demande, modes_paiement }: Props) {
                     <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
                         <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Documents</h3>
                         <div className="flex flex-wrap gap-3">
-                            {demande.has_justificatif && (
+                            {demande.possede_justificatif && (
                                 <a href={downloadJustificatifAction.url(demande.id)} className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-lg transition-colors">
                                     <DocumentArrowDownIcon className="w-4 h-4" />
                                     Justificatif PDF
                                 </a>
                             )}
-                            {demande.has_rapport && (
+                            {demande.possede_rapport && (
                                 <a href={downloadRapportAction.url(demande.id)} className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-lg transition-colors">
                                     <DocumentArrowDownIcon className="w-4 h-4" />
                                     Rapport d'exécution
@@ -359,7 +359,7 @@ export default function AcDemandeShow({ demande, modes_paiement }: Props) {
                         <dl className="space-y-3 text-sm">
                             <div>
                                 <dt className="text-slate-500 dark:text-slate-400 mb-0.5">Porteur</dt>
-                                <dd className="font-medium text-gray-800 dark:text-slate-200">{demande.porteur.name}</dd>
+                                <dd className="font-medium text-gray-800 dark:text-slate-200">{demande.porteur.utilisateur_nom}</dd>
                                 <dd className="text-xs text-slate-400">{demande.porteur_email}</dd>
                             </div>
                             <div>

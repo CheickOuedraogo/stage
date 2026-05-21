@@ -9,9 +9,9 @@ import {
     index as usersIndex,
     toggleActive as usersToggleActive,
 } from '@/routes/admin/users';
-import type { PageProps, PaginatedData, User } from '@/types';
+import type { PageProps, PaginatedData, Utilisateur } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { MagnifyingGlassIcon, PlusIcon, UserIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, PlusIcon, UtilisateurIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 
 interface Role {
@@ -19,13 +19,13 @@ interface Role {
     label: string;
 }
 
-interface UsersIndexProps {
-    users: PaginatedData<User & { created_at: string }>;
+interface UtilisateursIndexProps {
+    utilisateurs: PaginatedData<Utilisateur & { cree_le: string }>;
     filters: { role?: string; search?: string; active?: string };
     roles: Role[];
 }
 
-export default function UsersIndex({ users, filters, roles }: UsersIndexProps) {
+export default function UtilisateursIndex({ utilisateurs, filters, roles }: UtilisateursIndexProps) {
     const [search, setSearch] = useState(filters.search ?? '');
 
     const applyFilter = (params: Record<string, string | undefined>) => {
@@ -40,7 +40,7 @@ export default function UsersIndex({ users, filters, roles }: UsersIndexProps) {
                 <div>
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Utilisateurs</h2>
                     <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">
-                        {users.total} utilisateur{users.total !== 1 ? 's' : ''} au total
+                        {utilisateurs.total} utilisateur{utilisateurs.total !== 1 ? 's' : ''} au total
                     </p>
                 </div>
                 <Link href={usersCreate.url()}>
@@ -104,27 +104,27 @@ export default function UsersIndex({ users, filters, roles }: UsersIndexProps) {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
-                            {users.data.length === 0 ? (
+                            {utilisateurs.data.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="px-6 py-16 text-center text-gray-400 dark:text-slate-500">
-                                        <UserIcon className="w-10 h-10 mx-auto mb-2 opacity-40" />
+                                        <UtilisateurIcon className="w-10 h-10 mx-auto mb-2 opacity-40" />
                                         <p>Aucun utilisateur trouvé</p>
                                     </td>
                                 </tr>
                             ) : (
-                                users.data.map((user) => <UserRow key={user.id} user={user} />)
+                                utilisateurs.data.map((utilisateur) => <UtilisateurRow key={utilisateur.id_utilisateur} utilisateur={utilisateur} />)
                             )}
                         </tbody>
                     </table>
                 </div>
 
-                {users.last_page > 1 && (
+                {utilisateurs.last_page > 1 && (
                     <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-slate-700">
                         <p className="text-xs text-gray-500 dark:text-slate-400">
-                            {users.from}–{users.to} sur {users.total}
+                            {utilisateurs.from}–{utilisateurs.to} sur {utilisateurs.total}
                         </p>
                         <div className="flex gap-1.5">
-                            {users.links.map((link, i) => (
+                            {utilisateurs.links.map((link, i) => (
                                 <Link
                                     key={i}
                                     href={link.url ?? '#'}
@@ -148,57 +148,57 @@ export default function UsersIndex({ users, filters, roles }: UsersIndexProps) {
     );
 }
 
-function UserRow({ user }: { user: User & { created_at: string } }) {
+function UtilisateurRow({ utilisateur }: { utilisateur: Utilisateur & { cree_le: string } }) {
     const { auth } = usePage<PageProps>().props;
-    const isSelf = auth.user?.id === user.id;
+    const isSelf = auth.utilisateur?.id_utilisateur === utilisateur.id_utilisateur;
 
     const handleToggle = () => {
         if (isSelf) return;
-        router.patch(usersToggleActive.url(user.id), {}, { preserveScroll: true });
+        router.patch(usersToggleActive.url(utilisateur.id_utilisateur), {}, { preserveScroll: true });
     };
 
     return (
         <tr className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
             <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
-                    {user.avatar_url ? (
-                        <img src={user.avatar_url} alt="" className="w-9 h-9 rounded-full object-cover" />
+                    {utilisateur.url_avatar ? (
+                        <img src={utilisateur.url_avatar} alt="" className="w-9 h-9 rounded-full object-cover" />
                     ) : (
                         <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-slate-300 text-xs font-bold flex items-center justify-center shrink-0">
-                            {getInitials(user.name)}
+                            {getInitials(utilisateur.utilisateur_nom)}
                         </div>
                     )}
                     <div>
-                        <p className="font-medium text-gray-900 dark:text-white">{user.name}</p>
-                        <p className="text-xs text-gray-500 dark:text-slate-400">{user.email}</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{utilisateur.utilisateur_nom}</p>
+                        <p className="text-xs text-gray-500 dark:text-slate-400">{utilisateur.utilisateur_email}</p>
                     </div>
                 </div>
             </td>
-            <td className="px-6 py-4"><Badge variant={user.utilisateur_role as any}>{user.role_label}</Badge></td>
+            <td className="px-6 py-4"><Badge variant={utilisateur.utilisateur_role as any}>{utilisateur.label_role}</Badge></td>
             <td className="px-6 py-4">
-                <Badge variant={user.utilisateur_actif ? 'success' : 'muted'} dot>
-                    {user.utilisateur_actif ? 'Actif' : 'Désactivé'}
+                <Badge variant={utilisateur.utilisateur_actif ? 'success' : 'muted'} dot>
+                    {utilisateur.utilisateur_actif ? 'Actif' : 'Désactivé'}
                 </Badge>
             </td>
             <td className="px-6 py-4 hidden md:table-cell text-gray-500 dark:text-slate-400 text-xs">
-                {formatDate(user.created_at)}
+                {formatDate(utilisateur.cree_le)}
             </td>
             <td className="px-6 py-4">
                 <div className="flex items-center justify-end gap-2">
-                    <Link href={adminAuditLog.url({ query: { user_id: user.id } })}>
-                        <Button variant="ghost" size="sm" aria-label={`Journal de ${user.name}`}>Journal</Button>
+                    <Link href={adminAuditLog.url({ query: { id_utilisateur: utilisateur.id_utilisateur } })}>
+                        <Button variant="ghost" size="sm" aria-label={`Journal de ${utilisateur.utilisateur_nom}`}>Journal</Button>
                     </Link>
-                    <Link href={usersEdit.url(user.id)}>
-                        <Button variant="ghost" size="sm" aria-label={`Modifier ${user.name}`}>Modifier</Button>
+                    <Link href={usersEdit.url(utilisateur.id_utilisateur)}>
+                        <Button variant="ghost" size="sm" aria-label={`Modifier ${utilisateur.utilisateur_nom}`}>Modifier</Button>
                     </Link>
                     {!isSelf && (
                         <Button
-                            variant={user.utilisateur_actif ? 'outline' : 'secondary'}
+                            variant={utilisateur.utilisateur_actif ? 'outline' : 'secondary'}
                             size="sm"
                             onClick={handleToggle}
-                            aria-label={user.utilisateur_actif ? `Désactiver ${user.name}` : `Activer ${user.name}`}
+                            aria-label={utilisateur.utilisateur_actif ? `Désactiver ${utilisateur.utilisateur_nom}` : `Activer ${utilisateur.utilisateur_nom}`}
                         >
-                            {user.utilisateur_actif ? 'Désactiver' : 'Activer'}
+                            {utilisateur.utilisateur_actif ? 'Désactiver' : 'Activer'}
                         </Button>
                     )}
                 </div>

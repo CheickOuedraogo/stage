@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Http\Requests\Admin;
+namespace App\Http\Requests\Administrateur;
 
-use App\Enums\UserRole;
+use App\Enums\RoleUtilisateur;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
-class UpdateUserRequest extends FormRequest
+class StockageUtilisateurDemande extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->isAdmin();
+        return $this->user()->estAdministrateur();
     }
 
     /**
@@ -19,14 +19,12 @@ class UpdateUserRequest extends FormRequest
      */
     public function rules(): array
     {
-        $userId = $this->route('user')->id;
-
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId, 'id_utilisateur')],
-            'password' => ['nullable', Password::min(8)],
-            'utilisateur_role' => ['required', Rule::enum(UserRole::class)],
-            'telephone' => ['nullable', 'string', 'max:20'],
+            'utilisateur_nom' => ['required', 'string', 'max:255'],
+            'utilisateur_email' => ['required', 'string', 'utilisateur_email', 'max:255', 'unique:users,email'],
+            'utilisateur_mot_de_passe' => ['required', Password::min(8)],
+            'utilisateur_role' => ['required', Rule::enum(RoleUtilisateur::class)],
+            'utilisateur_telephone' => ['nullable', 'string', 'max:20'],
         ];
     }
 
@@ -39,6 +37,7 @@ class UpdateUserRequest extends FormRequest
             'name.required' => 'Le nom est obligatoire.',
             'email.required' => "L'adresse e-mail est obligatoire.",
             'email.unique' => 'Cette adresse e-mail est déjà utilisée.',
+            'password.required' => 'Le mot de passe est obligatoire.',
             'utilisateur_role.required' => 'Le rôle est obligatoire.',
         ];
     }

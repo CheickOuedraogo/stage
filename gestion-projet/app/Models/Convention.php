@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Enums\ConventionForme;
-use App\Enums\ConventionStatus;
+use App\Enums\FormeConvention;
+use App\Enums\StatutConvention;
 use Database\Factories\ConventionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,21 +11,26 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['id_projet', 'id_bailleur', 'convention_titre', 'convention_description', 'convention_montant', 'convention_forme', 'convention_devise', 'convention_taux_conversion', 'convention_montant_fcfa', 'convention_statut', 'convention_date_signature', 'convention_date_debut', 'convention_date_fin'])]
+#[Fillable(['id_projet', 'id_bailleur', 'convention_titre', 'convention_description', 'convention_montant', 'convention_forme', 'convention_devise', 'convention_taux_conversion', 'convention_statut', 'convention_date_signature', 'convention_date_debut', 'convention_date_fin'])]
 class Convention extends Model
 {
     /** @use HasFactory<ConventionFactory> */
     use HasFactory;
 
+    protected $table = 'conventions';
+
     protected $primaryKey = 'id_convention';
+
+    const CREATED_AT = 'cree_le';
+
+    const UPDATED_AT = 'mis_a_jour_le';
 
     protected function casts(): array
     {
         return [
-            'convention_forme' => ConventionForme::class,
-            'convention_statut' => ConventionStatus::class,
+            'convention_forme' => FormeConvention::class,
+            'convention_statut' => StatutConvention::class,
             'convention_montant' => 'integer',
-            'convention_montant_fcfa' => 'integer',
             'convention_taux_conversion' => 'decimal:6',
             'convention_date_signature' => 'date',
             'convention_date_debut' => 'date',
@@ -33,10 +38,10 @@ class Convention extends Model
         ];
     }
 
-    /** Transparent id accessor so $convention->id still works */
-    public function getIdAttribute(): mixed
+    /** Montant converti en FCFA (montant × taux_conversion) */
+    public function getMontantFcfaAttribute(): int
     {
-        return $this->getAttribute($this->getKeyName());
+        return (int) round($this->convention_montant * (float) $this->convention_taux_conversion);
     }
 
     public function projet(): BelongsTo
@@ -70,13 +75,13 @@ class Convention extends Model
     }
 
     /** Somme des rubriques budgétaires */
-    public function getTotalRubriquesAttribute(): int
+    public function getMontantTotalRubriquesAttribute(): int
     {
         return $this->rubriques()->sum('rubrique_montant_prevu');
     }
 
     /** Somme des versements reçus */
-    public function getTotalVersementsAttribute(): int
+    public function getMontantTotalVersementsAttribute(): int
     {
         return $this->versements()->sum('versement_montant');
     }

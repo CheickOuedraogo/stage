@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Dictionnaire des classes — CIFEU</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13.5px; background: #f6f8fa; color: #24292f; line-height: 1.5; padding: 30px 20px 60px; }
+  h1 { font-size: 1.5rem; font-weight: 600; text-align: center; color: #0d1117; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #57606a; font-size: 0.82rem; margin-bottom: 30px; }
+  .nav { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 32px; }
+  .nav a { background: #e7f3ff; color: #0969da; padding: 4px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 500; text-decoration: none; border: 1px solid #b6d4fb; }
+  .nav a:hover { background: #cce4ff; }
+  .cls { background: #fff; border: 1px solid #d0d7de; border-radius: 10px; margin-bottom: 28px; overflow: hidden; page-break-inside: avoid; }
+  .cls-header { padding: 10px 18px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #d0d7de; }
+  .cls-header.utilisateur { background: #ddf4ff; }
+  .cls-header.projet { background: #dafbe1; }
+  .cls-header.bailleur { background: #fff8c5; }
+  .cls-header.convention { background: #ffd8b2; }
+  .cls-header.rubrique { background: #f4d8fa; }
+  .cls-header.versement { background: #d3f1ff; }
+  .cls-header.demande { background: #ffe1e0; }
+  .cls-header.paiement { background: #e6f4d7; }
+  .cls-header.paiement-direct { background: #fef3c7; }
+  .cls-header.faq { background: #f0e8ff; }
+  .cls-header.chat { background: #e0f0ff; }
+  .cls-header.audit { background: #e1e4e8; }
+  .cls-header.notif { background: #ffecd2; border-left: 4px solid #f97316; }
+  .cls-name { font-size: 1rem; font-weight: 700; color: #0d1117; }
+  .cls-table { font-size: 0.8rem; color: #57606a; }
+  .section-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #57606a; padding: 8px 18px 4px; background: #f6f8fa; border-bottom: 1px solid #d0d7de; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  th { background: #f6f8fa; font-weight: 600; color: #57606a; padding: 6px 12px; text-align: left; border-bottom: 1px solid #d0d7de; font-size: 0.75rem; }
+  td { padding: 5px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f6f8fa; }
+  code { background: #eef0f3; border-radius: 4px; padding: 1px 5px; font-family: 'Cascadia Code','Fira Code','Courier New',monospace; font-size: 0.78rem; color: #cf222e; }
+  .badge { display: inline-block; padding: 1px 7px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; white-space: nowrap; }
+  .b-pk { background: #fff3b0; color: #7a4f00; border: 1px solid #d4a017; }
+  .b-fk { background: #cce4ff; color: #0550ae; border: 1px solid #96c5f7; }
+  .b-str { background: #e4fae4; color: #1a6b1a; border: 1px solid #8fd18f; }
+  .b-int { background: #fde6f6; color: #8a2270; border: 1px solid #e08bd0; }
+  .b-bool { background: #fff0df; color: #8a4800; border: 1px solid #f5b560; }
+  .b-enum { background: #ece8fe; color: #4e35c4; border: 1px solid #bdb0f5; }
+  .b-date { background: #e0f4f8; color: #0a5e78; border: 1px solid #74c6de; }
+  .b-text { background: #f6f0ff; color: #6539c4; border: 1px solid #c7aff5; }
+  .b-json { background: #f0f9e8; color: #2e6b00; border: 1px solid #96d45e; }
+  .b-vis { background: #f6f8fa; color: #57606a; border: 1px solid #d0d7de; }
+  .b-scope { background: #dff7e9; color: #1a5c2e; border: 1px solid #73c990; }
+  .b-rel { background: #e0effe; color: #0c41a0; border: 1px solid #8ab2f5; }
+  .b-attr { background: #fff1f5; color: #9a1b4a; border: 1px solid #f0a0bc; }
+  .vis-pub { color: #1a7f37; font-weight: 700; }
+  .vis-pri { color: #cf222e; font-weight: 700; }
+  .assoc-section { background: #fff; border: 2px solid #0969da; border-radius: 10px; margin-top: 32px; overflow: hidden; }
+  .assoc-header { background: #0969da; color: #fff; padding: 10px 18px; font-size: 1rem; font-weight: 700; }
+  .assoc-theory { padding: 12px 18px; font-size: 0.82rem; color: #57606a; background: #f0f6ff; border-bottom: 1px solid #b6d4fb; line-height: 1.7; }
+  .comp { background: #ffe1e0; }
+  .associ { background: #f6f8fa; }
+  .assoc-type { font-weight: 600; }
+  @media print { body { background: #fff; } .cls, .assoc-section { page-break-inside: avoid; } }
+</style>
+</head>
+<body>
+
+<h1>📚 Dictionnaire des classes — CIFEU</h1>
+<p class="subtitle">Propriétés · Types · Méthodes · Associations UML — Laravel 13 · Merise snake_case</p>
+
+<div class="nav">
+  <a href="#utilisateur">Utilisateur &lt;&lt;abstract&gt;&gt;</a>
+  <a href="#porteur" style="background:#e8f5e9;border-color:#a5d6a7;color:#2e7d32">Porteur</a>
+  <a href="#daf" style="background:#e3f2fd;border-color:#90caf9;color:#1565c0">Daf</a>
+  <a href="#ac" style="background:#fce4ec;border-color:#f48fb1;color:#880e4f">AgentComptable</a>
+  <a href="#admin" style="background:#fff3e0;border-color:#ffcc80;color:#e65100">Administrateur</a>
+  <a href="#projet">Projet</a>
+  <a href="#bailleur">Bailleur</a>
+  <a href="#convention">Convention</a>
+  <a href="#rubrique">Rubrique</a>
+  <a href="#versement">Versement</a>
+  <a href="#demande">DemandeDepense</a>
+  <a href="#paiement">Paiement</a>
+  <a href="#paiement-direct">PaiementDirect</a>
+  <a href="#faq">Faq</a>
+  <a href="#chat">MessageChat</a>
+  <a href="#audit">JournalAudit</a>
+  <a href="#notification">Notification</a>
+  <a href="#associations">▶ Associations UML</a>
+  <a href="#enumerations" style="background:#ede9fe;border-color:#c4b5fd;color:#6d28d9">▶ Énumérations</a>
+</div>
+
+<!-- UTILISATEUR -->
+<div class="cls" id="utilisateur">
+  <div class="cls-header utilisateur"><span class="cls-name">Utilisateur</span> <span class="badge b-vis" style="font-size:0.75rem">&lt;&lt;abstract&gt;&gt;</span><span class="cls-table">table : <code>utilisateurs</code></span></div>
+  <div class="section-title">Propriétés</div>
+  <table>
+    <tr><th>Propriété</th><th>Type UML</th><th>Vis.</th><th>Description</th></tr>
+    <tr><td><code>id_utilisateur</code> <span class="badge b-pk">PK</span></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pri">—</span></td><td>Identifiant unique auto-incrémenté</td></tr>
+    <tr><td><code>utilisateur_nom</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Nom complet de l'utilisateur</td></tr>
+    <tr><td><code>utilisateur_email</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Adresse e-mail (unique, identifiant de connexion)</td></tr>
+    <tr><td><code>utilisateur_mot_de_passe</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pri">—</span></td><td>Mot de passe haché (bcrypt)</td></tr>
+    <tr><td><code>utilisateur_role</code></td><td><span class="badge b-enum">Enum</span> <code>RoleUtilisateur</code></td><td><span class="vis-pub">+</span></td><td>admin / daf / ac / porteur</td></tr>
+    <tr><td><code>utilisateur_actif</code></td><td><span class="badge b-bool">Boolean</span></td><td><span class="vis-pub">+</span></td><td>Compte actif (défaut : true)</td></tr>
+    <tr><td><code>utilisateur_avatar_chemin</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Chemin relatif de l'avatar (nullable)</td></tr>
+    <tr><td><code>utilisateur_telephone</code></td><td><span class="badge b-str">String(20)</span></td><td><span class="vis-pub">+</span></td><td>Téléphone (nullable)</td></tr>
+    <tr><td><code>email_verifie_le</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatage de vérification e-mail (nullable)</td></tr>
+    <tr><td><code>jeton_souvenir</code></td><td><span class="badge b-str">String(100)</span></td><td><span class="vis-pri">—</span></td><td>Jeton « Se souvenir de moi » (nullable)</td></tr>
+  </table>
+  <div class="section-title">Méthodes</div>
+  <table>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>seConnecter(email: String, motDePasse: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Boolean</code></td><td>Verifie les identifiants et ouvre la session — commun a tous les roles</td></tr>
+    <tr><td><code>changerMotDePasse(ancien: String, nouveau: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Met a jour le mot de passe apres verification</td></tr>
+    <tr><td><code>modifierProfil(nom: String, telephone: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Modifie les informations personnelles communes</td></tr>
+  </table>
+
+</div>
+<!-- PORTEUR -->
+<div class="cls" id="porteur">
+  <div class="cls-header utilisateur" style="background:#c8e6c9"><span class="cls-name">Porteur</span><span class="cls-table">specialisation de <code>Utilisateur</code> &nbsp;·&nbsp; role : <code>porteur</code></span></div>
+  <div class="section-title">Attributs supplementaires</div>
+  <p style="padding:6px 18px;font-size:0.8rem;color:#57606a;font-style:italic">Herite de tous les attributs de Utilisateur. Aucun attribut specifique.</p>
+  <div class="section-title">Methodes</div>
+  <table>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>soumettreDemandeDepense(convention: Convention, rubrique: Rubrique, montant: Integer, objet: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>DemandeDepense</code></td><td>Cree et soumet une demande apres verification du budget disponible</td></tr>
+    <tr><td><code>soumettreRapport(demande: DemandeDepense, cheminFichier: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Depose le rapport d'execution apres reception du paiement</td></tr>
+    <tr><td><code>envoyerMessage(destinataire: Daf, contenu: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>MessageChat</code></td><td>Envoie un message au DAF ou AC via le chat interne</td></tr>
+  </table>
+</div>
+
+<!-- DAF -->
+<div class="cls" id="daf">
+  <div class="cls-header utilisateur" style="background:#bbdefb"><span class="cls-name">Daf</span><span class="cls-table">specialisation de <code>Utilisateur</code> &nbsp;·&nbsp; role : <code>daf</code></span></div>
+  <div class="section-title">Attributs supplementaires</div>
+  <p style="padding:6px 18px;font-size:0.8rem;color:#57606a;font-style:italic">Herite de tous les attributs de Utilisateur. Aucun attribut specifique.</p>
+  <div class="section-title">Methodes</div>
+  <table>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>validerDemande(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Valide la demande soumise — passe le statut a validee_daf</td></tr>
+    <tr><td><code>rejeterDemande(demande: DemandeDepense, motif: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Rejette la demande avec motif obligatoire — statut rejetee_daf</td></tr>
+    <tr><td><code>validerRapport(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Valide le rapport d'execution soumis par le porteur</td></tr>
+    <tr><td><code>rejeterRapport(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Rejette le rapport — le porteur doit en soumettre un nouveau</td></tr>
+    <tr><td><code>enregistrerVersement(convention: Convention, montant: Integer, date: Date)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Versement</code></td><td>Enregistre un versement recu du bailleur sur la convention</td></tr>
+    <tr><td><code>ajouterRubrique(convention: Convention, libelle: String, montant: Integer)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Rubrique</code></td><td>Cree une ligne budgetaire sur la convention</td></tr>
+    <tr><td><code>enregistrerPaiementDirect(convention: Convention, rubrique: Rubrique, montant: Integer, objet: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>PaiementDirect</code></td><td>Enregistre un paiement direct sans circuit de validation</td></tr>
+    <tr><td><code>cloturerProjet(projet: Projet, dateFinReelle: Date, statutFinal: StatutFinalProjet)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Cloture le projet en renseignant la date reelle et le resultat final</td></tr>
+    <tr><td><code>terminerConvention(convention: Convention)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Passe la convention au statut terminee</td></tr>
+    <tr><td><code>envoyerMessage(destinataire: Utilisateur, contenu: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>MessageChat</code></td><td>Envoie un message via le chat interne</td></tr>
+  </table>
+</div>
+
+<!-- AGENTCOMPTABLE -->
+<div class="cls" id="ac">
+  <div class="cls-header utilisateur" style="background:#fce4ec"><span class="cls-name">AgentComptable</span><span class="cls-table">specialisation de <code>Utilisateur</code> &nbsp;·&nbsp; role : <code>ac</code></span></div>
+  <div class="section-title">Attributs supplementaires</div>
+  <p style="padding:6px 18px;font-size:0.8rem;color:#57606a;font-style:italic">Herite de tous les attributs de Utilisateur. Aucun attribut specifique.</p>
+  <div class="section-title">Methodes</div>
+  <table>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>validerDemande(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Valide la demande DAF-validee — passe au statut validee_ac</td></tr>
+    <tr><td><code>rejeterDemande(demande: DemandeDepense, motif: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Rejette la demande avec motif — statut rejetee_ac</td></tr>
+    <tr><td><code>enregistrerPaiement(demande: DemandeDepense, montant: Integer, mode: ModePaiement, date: Date)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Paiement</code></td><td>Cree le paiement et passe la demande au statut payee</td></tr>
+    <tr><td><code>validerRapport(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Valide le rapport d'execution soumis par le porteur</td></tr>
+    <tr><td><code>rejeterRapport(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Rejette le rapport — le porteur doit en soumettre un nouveau</td></tr>
+    <tr><td><code>envoyerMessage(destinataire: Utilisateur, contenu: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>MessageChat</code></td><td>Envoie un message via le chat interne</td></tr>
+  </table>
+</div>
+
+<!-- ADMINISTRATEUR -->
+<div class="cls" id="admin">
+  <div class="cls-header utilisateur" style="background:#fff3e0"><span class="cls-name">Administrateur</span><span class="cls-table">specialisation de <code>Utilisateur</code> &nbsp;·&nbsp; role : <code>admin</code></span></div>
+  <div class="section-title">Attributs supplementaires</div>
+  <p style="padding:6px 18px;font-size:0.8rem;color:#57606a;font-style:italic">Herite de tous les attributs de Utilisateur. Aucun attribut specifique.</p>
+  <div class="section-title">Methodes</div>
+  <table>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>creerUtilisateur(nom: String, email: String, motDePasse: String, role: RoleUtilisateur)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Utilisateur</code></td><td>Cree un nouveau compte utilisateur avec le role indique</td></tr>
+    <tr><td><code>desactiverCompte(utilisateur: Utilisateur)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Desactive un compte (utilisateur_actif = false)</td></tr>
+    <tr><td><code>activerCompte(utilisateur: Utilisateur)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Reactive un compte desactive</td></tr>
+    <tr><td><code>publierFaq(question: String, reponse: String, roles: RoleUtilisateur[])</code></td><td><span class="badge b-vis">instance</span></td><td><code>Faq</code></td><td>Cree et publie une entree FAQ visible pour les roles cibles</td></tr>
+    <tr><td><code>activerMaintenance(jusqua: DateTime, raison: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Active le mode maintenance et bloque l'acces aux utilisateurs</td></tr>
+    <tr><td><code>envoyerMessage(destinataire: Utilisateur, contenu: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>MessageChat</code></td><td>Envoie un message via le chat interne</td></tr>
+  </table>
+</div>
+
+
+<!-- PROJET -->
+<div class="cls" id="projet">
+  <div class="cls-header projet"><span class="cls-name">Projet</span><span class="cls-table">table : <code>projets</code></span></div>
+  <div class="section-title">Propriétés</div>
+  <table>
+    <tr><th>Propriété</th><th>Type UML</th><th>Vis.</th><th>Description</th></tr>
+    <tr><td><code>id_projet</code> <span class="badge b-pk">PK</span></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pri">—</span></td><td>Identifiant unique</td></tr>
+    <tr><td><code>projet_titre</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Titre du projet</td></tr>
+    <tr><td><code>projet_description</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Description générale (nullable)</td></tr>
+    <tr><td><code>projet_objectifs</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Objectifs du projet (nullable)</td></tr>
+    <tr><td><code>projet_activites</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Activités prévues (nullable)</td></tr>
+    <tr><td><code>projet_montant_estime</code></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pub">+</span></td><td>Budget estimé en FCFA</td></tr>
+    <tr><td><code>projet_statut</code></td><td><span class="badge b-enum">Enum</span> <code>StatutProjet</code></td><td><span class="vis-pub">+</span></td><td>en_attente_financement / en_cours / suspendu / termine / annule</td></tr>
+    <tr><td><code>statut_final</code></td><td><span class="badge b-enum">Enum</span> <code>StatutFinalProjet</code></td><td><span class="vis-pub">+</span></td><td>succes / echec (nullable)</td></tr>
+    <tr><td><code>projet_date_debut</code></td><td><span class="badge b-date">Date</span></td><td><span class="vis-pub">+</span></td><td>Date de démarrage (nullable)</td></tr>
+    <tr><td><code>projet_date_fin_prevue</code></td><td><span class="badge b-date">Date</span></td><td><span class="vis-pub">+</span></td><td>Date de fin planifiée (nullable)</td></tr>
+    <tr><td><code>projet_date_fin_reelle</code></td><td><span class="badge b-date">Date</span></td><td><span class="vis-pub">+</span></td><td>Date de clôture effective (nullable)</td></tr>
+  </table>
+  <div class="section-title">Méthodes</div>
+  <table>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>cloturer(dateFinReelle: Date, statutFinal: StatutFinalProjet)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>DAF cloture le projet — enregistre date reelle et resultat final</td></tr>
+    <tr><td><code>calculerTotalVersements()</code></td><td><span class="badge b-vis">instance</span></td><td><code>Integer</code></td><td>Somme tous les versements recus sur les conventions du projet</td></tr>
+    <tr><td><code>calculerPourcentageFinancement()</code></td><td><span class="badge b-vis">instance</span></td><td><code>Integer</code></td><td>Ratio versements / montant estime, borne a 100 %</td></tr>
+  </table>
+
+</div>
+
+<!-- BAILLEUR -->
+<div class="cls" id="bailleur">
+  <div class="cls-header bailleur"><span class="cls-name">Bailleur</span><span class="cls-table">table : <code>bailleurs</code></span></div>
+  <div class="section-title">Propriétés</div>
+  <table>
+    <tr><th>Propriété</th><th>Type UML</th><th>Vis.</th><th>Description</th></tr>
+    <tr><td><code>id_bailleur</code> <span class="badge b-pk">PK</span></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pri">—</span></td><td>Identifiant unique</td></tr>
+    <tr><td><code>bailleur_nom</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Dénomination officielle</td></tr>
+    <tr><td><code>bailleur_sigle</code></td><td><span class="badge b-str">String(50)</span></td><td><span class="vis-pub">+</span></td><td>Sigle ou acronyme (nullable)</td></tr>
+    <tr><td><code>bailleur_type</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>multilatéral / bilatéral / fondation… (nullable)</td></tr>
+    <tr><td><code>bailleur_pays</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Pays d'origine (nullable)</td></tr>
+    <tr><td><code>bailleur_contact</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Nom du contact (nullable)</td></tr>
+    <tr><td><code>bailleur_email</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>E-mail (nullable)</td></tr>
+    <tr><td><code>bailleur_telephone</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Téléphone (nullable)</td></tr>
+    <tr><td><code>bailleur_adresse</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Adresse postale (nullable)</td></tr>
+    <tr><td><code>bailleur_description</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Description libre (nullable)</td></tr>
+  </table>
+  <div class="section-title">Méthodes</div>
+  <p style="padding:8px 18px;font-size:0.8rem;color:#57606a;font-style:italic">Entite de donnees — aucune methode metier propre.</p>
+
+</div>
+
+<!-- CONVENTION -->
+<div class="cls" id="convention">
+  <div class="cls-header convention"><span class="cls-name">Convention</span><span class="cls-table">table : <code>conventions</code></span></div>
+  <div class="section-title">Propriétés</div>
+  <table>
+    <tr><th>Propriété</th><th>Type UML</th><th>Vis.</th><th>Description</th></tr>
+    <tr><td><code>id_convention</code> <span class="badge b-pk">PK</span></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pri">—</span></td><td>Identifiant unique</td></tr>
+
+    <tr><td><code>convention_titre</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Intitulé officiel</td></tr>
+    <tr><td><code>convention_description</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Résumé (nullable)</td></tr>
+    <tr><td><code>convention_montant</code></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pub">+</span></td><td>Montant dans la devise d'origine</td></tr>
+    <tr><td><code>convention_forme</code></td><td><span class="badge b-enum">Enum</span> <code>FormeConvention</code></td><td><span class="vis-pub">+</span></td><td>don / pret</td></tr>
+    <tr><td><code>convention_devise</code></td><td><span class="badge b-str">String(10)</span></td><td><span class="vis-pub">+</span></td><td>Code ISO-4217 (défaut : XOF)</td></tr>
+    <tr><td><code>convention_taux_conversion</code></td><td><span class="badge b-str">Decimal(12,6)</span></td><td><span class="vis-pub">+</span></td><td>Taux → FCFA (défaut : 1)</td></tr>
+    <tr><td><code>convention_statut</code></td><td><span class="badge b-enum">Enum</span> <code>StatutConvention</code></td><td><span class="vis-pub">+</span></td><td>active / suspendue / terminee / annulee</td></tr>
+    <tr><td><code>convention_date_signature</code></td><td><span class="badge b-date">Date</span></td><td><span class="vis-pub">+</span></td><td>Date de signature (nullable)</td></tr>
+    <tr><td><code>convention_date_debut</code></td><td><span class="badge b-date">Date</span></td><td><span class="vis-pub">+</span></td><td>Date de début (nullable)</td></tr>
+    <tr><td><code>convention_date_fin</code></td><td><span class="badge b-date">Date</span></td><td><span class="vis-pub">+</span></td><td>Date d'expiration (nullable)</td></tr>
+  </table>
+  <div class="section-title">Méthodes</div>
+  <table>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>calculerMontantFCFA()</code></td><td><span class="badge b-vis">instance</span></td><td><code>Integer</code></td><td>Convertit convention_montant en FCFA via le taux de conversion</td></tr>
+    <tr><td><code>calculerTotalRubriques()</code></td><td><span class="badge b-vis">instance</span></td><td><code>Integer</code></td><td>Somme les montants prevus de toutes les rubriques</td></tr>
+    <tr><td><code>calculerTotalVersements()</code></td><td><span class="badge b-vis">instance</span></td><td><code>Integer</code></td><td>Somme les montants de tous les versements recus</td></tr>
+    <tr><td><code>terminer()</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Passe la convention au statut terminee</td></tr>
+    <tr><td><code>annuler()</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Passe la convention au statut annulee</td></tr>
+  </table>
+
+</div>
+
+<!-- RUBRIQUE -->
+<div class="cls" id="rubrique">
+  <div class="cls-header rubrique"><span class="cls-name">Rubrique</span><span class="cls-table">table : <code>rubriques</code></span></div>
+  <div class="section-title">Propriétés</div>
+  <table>
+    <tr><th>Propriété</th><th>Type UML</th><th>Vis.</th><th>Description</th></tr>
+    <tr><td><code>id_rubrique</code> <span class="badge b-pk">PK</span></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pri">—</span></td><td>Identifiant unique</td></tr>
+    <tr><td><code>rubrique_libelle</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Intitulé de la ligne budgétaire</td></tr>
+    <tr><td><code>rubrique_montant_prevu</code></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pub">+</span></td><td>Budget alloué en FCFA</td></tr>
+    <tr><td><code>rubrique_description</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Description (nullable)</td></tr>
+  </table>
+  <div class="section-title">Méthodes</div>
+  <table>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>calculerMontantConsomme()</code></td><td><span class="badge b-vis">instance</span></td><td><code>Integer</code></td><td>Somme les montants des demandes approuvees imputees a cette rubrique</td></tr>
+    <tr><td><code>calculerSolde()</code></td><td><span class="badge b-vis">instance</span></td><td><code>Integer</code></td><td>montant_prevu - montant_consomme - paiements_directs</td></tr>
+    <tr><td><code>verifierBudgetDisponible(montant: Integer)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Boolean</code></td><td>Verifie que le montant demande ne depasse pas le solde</td></tr>
+  </table>
+
+</div>
+
+<!-- VERSEMENT -->
+<div class="cls" id="versement">
+  <div class="cls-header versement"><span class="cls-name">Versement</span><span class="cls-table">table : <code>versements</code></span></div>
+  <div class="section-title">Propriétés</div>
+  <table>
+    <tr><th>Propriété</th><th>Type UML</th><th>Vis.</th><th>Description</th></tr>
+    <tr><td><code>id_versement</code> <span class="badge b-pk">PK</span></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pri">—</span></td><td>Identifiant unique</td></tr>
+    <tr><td><code>versement_montant</code></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pub">+</span></td><td>Montant versé en FCFA</td></tr>
+    <tr><td><code>versement_reference</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Référence bancaire (nullable)</td></tr>
+    <tr><td><code>versement_description</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Observations (nullable)</td></tr>
+    <tr><td><code>versement_date_reception</code></td><td><span class="badge b-date">Date</span></td><td><span class="vis-pub">+</span></td><td>Date effective de réception (nullable)</td></tr>
+  </table>
+  <div class="section-title">Méthodes</div>
+  <p style="padding:8px 18px;font-size:0.8rem;color:#57606a;font-style:italic">Entite de donnees — aucune methode metier propre.</p>
+
+</div>
+
+<!-- DEMANDEDEPENSE -->
+<div class="cls" id="demande">
+  <div class="cls-header demande"><span class="cls-name">DemandeDepense</span><span class="cls-table">table : <code>demandes_depense</code></span></div>
+  <div class="section-title">Propriétés</div>
+  <table>
+    <tr><th>Propriété</th><th>Type UML</th><th>Vis.</th><th>Description</th></tr>
+    <tr><td><code>id_demande</code> <span class="badge b-pk">PK</span></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pri">—</span></td><td>Identifiant unique</td></tr>
+
+
+    <tr><td><code>demande_montant</code></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pub">+</span></td><td>Montant demandé en FCFA</td></tr>
+    <tr><td><code>demande_objet</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Objet court de la dépense</td></tr>
+    <tr><td><code>demande_description</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Justification détaillée (nullable)</td></tr>
+    <tr><td><code>demande_justificatif</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Chemin PDF justificatif — stockage privé (nullable)</td></tr>
+    <tr><td><code>demande_statut</code></td><td><span class="badge b-enum">Enum</span> <code>StatutDemande</code></td><td><span class="vis-pub">+</span></td><td>soumise / validee_daf / rejetee_daf / validee_ac / rejetee_ac / payee / rapport_soumis / terminee</td></tr>
+    <tr><td><code>demande_motif_rejet</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Motif de rejet (nullable)</td></tr>
+    <tr><td><code>demande_rapport</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Chemin rapport exécution PDF (nullable)</td></tr>
+    <tr><td><code>demande_date_validation_daf</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatage validation DAF (nullable)</td></tr>
+    <tr><td><code>demande_date_validation_ac</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatage validation AC (nullable)</td></tr>
+    <tr><td><code>demande_rapport_valide_daf</code></td><td><span class="badge b-bool">Boolean</span></td><td><span class="vis-pub">+</span></td><td>Rapport validé par la DAF (défaut : false)</td></tr>
+    <tr><td><code>demande_rapport_valide_ac</code></td><td><span class="badge b-bool">Boolean</span></td><td><span class="vis-pub">+</span></td><td>Rapport validé par l'AC (défaut : false)</td></tr>
+  </table>
+  <div class="section-title">Méthodes</div>
+  <table>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>soumettre(porteur: Utilisateur, rubrique: Rubrique, montant: Integer, objet: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Porteur soumet la demande apres verification du budget disponible</td></tr>
+    <tr><td><code>valider(validateur: Utilisateur)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Change le statut a validee_daf ou validee_ac selon le role du validateur</td></tr>
+    <tr><td><code>rejeter(validateur: Utilisateur, motif: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Change le statut a rejetee_daf ou rejetee_ac avec motif</td></tr>
+    <tr><td><code>payer(ac: Utilisateur, montant: Integer, mode: ModePaiement, date: Date)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Paiement</code></td><td>AC cree le paiement et passe la demande au statut payee</td></tr>
+    <tr><td><code>soumettreRapport(porteur: Utilisateur, cheminFichier: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Porteur depose le rapport apres reception du paiement</td></tr>
+    <tr><td><code>possedeJustificatif()</code></td><td><span class="badge b-vis">instance</span></td><td><code>Boolean</code></td><td>Verifie que le fichier justificatif existe sur le disque</td></tr>
+    <tr><td><code>possedeRapport()</code></td><td><span class="badge b-vis">instance</span></td><td><code>Boolean</code></td><td>Verifie que le fichier rapport existe sur le disque</td></tr>
+  </table>
+
+</div>
+
+<!-- PAIEMENT -->
+<div class="cls" id="paiement">
+  <div class="cls-header paiement"><span class="cls-name">Paiement</span><span class="cls-table">table : <code>paiements</code></span></div>
+  <div class="section-title">Propriétés</div>
+  <table>
+    <tr><th>Propriété</th><th>Type UML</th><th>Vis.</th><th>Description</th></tr>
+    <tr><td><code>id_paiement</code> <span class="badge b-pk">PK</span></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pri">—</span></td><td>Identifiant unique</td></tr>
+
+    <tr><td><code>paiement_montant</code></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pub">+</span></td><td>Montant payé en FCFA</td></tr>
+    <tr><td><code>paiement_mode</code></td><td><span class="badge b-enum">Enum</span> <code>ModePaiement</code></td><td><span class="vis-pub">+</span></td><td>virement / cheque / especes</td></tr>
+    <tr><td><code>paiement_reference</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Référence bancaire (nullable)</td></tr>
+    <tr><td><code>paiement_date</code></td><td><span class="badge b-date">Date</span></td><td><span class="vis-pub">+</span></td><td>Date effective du paiement (nullable)</td></tr>
+  </table>
+  <div class="section-title">Méthodes</div>
+  <p style="padding:8px 18px;font-size:0.8rem;color:#57606a;font-style:italic">Entite de donnees — aucune methode metier propre.</p>
+
+</div>
+
+<!-- PAIEMENTDIRECT -->
+<div class="cls" id="paiement-direct">
+  <div class="cls-header paiement-direct"><span class="cls-name">PaiementDirect</span><span class="cls-table">table : <code>paiements_directs</code></span></div>
+  <div class="section-title">Propriétés</div>
+  <table>
+    <tr><th>Propriété</th><th>Type UML</th><th>Vis.</th><th>Description</th></tr>
+    <tr><td><code>id_paiement_direct</code> <span class="badge b-pk">PK</span></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pri">—</span></td><td>Identifiant unique</td></tr>
+
+
+    <tr><td><code>paiement_direct_montant</code></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pub">+</span></td><td>Montant en FCFA</td></tr>
+    <tr><td><code>paiement_direct_objet</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Objet du paiement</td></tr>
+    <tr><td><code>paiement_direct_description</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Description complémentaire (nullable)</td></tr>
+    <tr><td><code>paiement_direct_date</code></td><td><span class="badge b-date">Date</span></td><td><span class="vis-pub">+</span></td><td>Date d'exécution (nullable)</td></tr>
+  </table>
+  <div class="section-title">Méthodes</div>
+  <table>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>enregistrer(daf: Utilisateur, convention: Convention, rubrique: Rubrique, montant: Integer, objet: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>DAF enregistre un paiement direct sans circuit de validation</td></tr>
+  </table>
+
+</div>
+
+<!-- FAQ -->
+<div class="cls" id="faq">
+  <div class="cls-header faq"><span class="cls-name">Faq</span><span class="cls-table">table : <code>faq</code></span></div>
+  <div class="section-title">Propriétés</div>
+  <table>
+    <tr><th>Propriété</th><th>Type UML</th><th>Vis.</th><th>Description</th></tr>
+    <tr><td><code>id_faq</code> <span class="badge b-pk">PK</span></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pri">—</span></td><td>Identifiant unique</td></tr>
+    <tr><td><code>faq_question</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Intitulé de la question fréquemment posée</td></tr>
+    <tr><td><code>faq_reponse</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Réponse rédigée en Markdown</td></tr>
+    <tr><td><code>faq_actif</code></td><td><span class="badge b-bool">Boolean</span></td><td><span class="vis-pub">+</span></td><td>Entrée publiée (masquer sans supprimer, défaut : true)</td></tr>
+    <tr><td><code>visible_porteur</code></td><td><span class="badge b-bool">Boolean</span></td><td><span class="vis-pub">+</span></td><td>Visible pour les porteurs de projet (défaut : true)</td></tr>
+    <tr><td><code>visible_daf</code></td><td><span class="badge b-bool">Boolean</span></td><td><span class="vis-pub">+</span></td><td>Visible pour les agents DAF (défaut : true)</td></tr>
+    <tr><td><code>visible_ac</code></td><td><span class="badge b-bool">Boolean</span></td><td><span class="vis-pub">+</span></td><td>Visible pour les Agents Comptables (défaut : true)</td></tr>
+  </table>
+  <div class="section-title">Méthodes</div>
+  <table>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>publier()</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Active l'entree FAQ (faq_actif = true)</td></tr>
+    <tr><td><code>masquer()</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Desactive l'entree FAQ sans suppression</td></tr>
+    <tr><td><code>estVisiblePour(role: RoleUtilisateur)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Boolean</code></td><td>Teste visible_porteur / visible_daf / visible_ac selon le role</td></tr>
+  </table>
+
+</div>
+
+<!-- MESSAGECHAT -->
+<div class="cls" id="chat">
+  <div class="cls-header chat"><span class="cls-name">MessageChat</span><span class="cls-table">table : <code>messages_chat</code></span></div>
+  <div class="section-title">Propriétés</div>
+  <table>
+    <tr><th>Propriété</th><th>Type UML</th><th>Vis.</th><th>Description</th></tr>
+    <tr><td><code>id_message</code> <span class="badge b-pk">PK</span></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pri">—</span></td><td>Identifiant unique</td></tr>
+
+    <tr><td><code>message_contenu</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Texte du message</td></tr>
+    <tr><td><code>message_lu</code></td><td><span class="badge b-bool">Boolean</span></td><td><span class="vis-pub">+</span></td><td>Message lu par le destinataire (défaut : false)</td></tr>
+  </table>
+  <div class="section-title">Méthodes</div>
+  <table>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>marquerLu(destinataire: Utilisateur)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Destinataire marque le message comme lu</td></tr>
+  </table>
+
+</div>
+
+<!-- JOURNALAUDIT -->
+<div class="cls" id="audit">
+  <div class="cls-header audit"><span class="cls-name">JournalAudit</span><span class="cls-table">table : <code>journaux_audit</code></span></div>
+  <div class="section-title">Propriétés</div>
+  <table>
+    <tr><th>Propriété</th><th>Type UML</th><th>Vis.</th><th>Description</th></tr>
+    <tr><td><code>id_audit</code> <span class="badge b-pk">PK</span></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pri">—</span></td><td>Identifiant unique</td></tr>
+    <tr><td><code>audit_action</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Code action : created / updated / deleted / login…</td></tr>
+    <tr><td><code>audit_entite_type</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Classe PHP de l'entité concernée (nullable)</td></tr>
+    <tr><td><code>audit_entite_id</code></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pub">+</span></td><td>Identifiant de l'entité (nullable)</td></tr>
+    <tr><td><code>audit_anciennes_valeurs</code></td><td><span class="badge b-json">JSON</span></td><td><span class="vis-pub">+</span></td><td>Valeurs avant modification (nullable)</td></tr>
+    <tr><td><code>audit_nouvelles_valeurs</code></td><td><span class="badge b-json">JSON</span></td><td><span class="vis-pub">+</span></td><td>Valeurs après modification (nullable)</td></tr>
+    <tr><td><code>audit_adresse_ip</code></td><td><span class="badge b-str">String(45)</span></td><td><span class="vis-pub">+</span></td><td>Adresse IP (nullable)</td></tr>
+    <tr><td><code>audit_navigateur</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>User-Agent (nullable)</td></tr>
+    <tr><td><code>audit_description</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Description lisible (nullable)</td></tr>
+  </table>
+  <div class="section-title">Méthodes</div>
+  <table>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>enregistrer(utilisateur: Utilisateur, action: String, entite: Object, description: String)</code></td><td><span class="badge b-vis">static</span></td><td><code>JournalAudit</code></td><td>Cree une entree d'audit — appele sur toute mutation metier</td></tr>
+  </table>
+
+</div>
+
+<!-- NOTIFICATION -->
+<div class="cls" id="notification">
+  <div class="cls-header notif"><span class="cls-name">Notification</span><span class="cls-table">table : <code>notifications</code></span></div>
+  <div class="section-title">Propriétés</div>
+  <table>
+    <tr><th>Propriété</th><th>Type UML</th><th>Vis.</th><th>Description</th></tr>
+    <tr><td><code>id_notification</code> <span class="badge b-pk">PK</span></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pri">—</span></td><td>Identifiant unique auto-incrémenté</td></tr>
+    <tr><td><code>type_notification</code></td><td><span class="badge b-enum">Enum</span> <code>TypeNotification</code></td><td><span class="vis-pub">+</span></td><td>demande_statut_change / projet_cloture</td></tr>
+    <tr><td><code>notification_objet</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Objet de la demande ou titre du projet (nullable)</td></tr>
+    <tr><td><code>notification_libelle_statut</code></td><td><span class="badge b-str">String(100)</span></td><td><span class="vis-pub">+</span></td><td>Libellé du nouveau statut de la demande (nullable)</td></tr>
+    <tr><td><code>notification_motif</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Motif de rejet (nullable, uniquement sur rejet)</td></tr>
+    <tr><td><code>lu_le</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatage de lecture (null = non lue)</td></tr>
+  </table>
+  <div class="section-title">Méthodes</div>
+  <table>
+    <tr><th>Methode</th><th>Type</th><th>Retour</th><th>Description</th></tr>
+    <tr><td><code>marquerLue()</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Renseigne lu_le avec l'horodatage courant</td></tr>
+    <tr><td><code>notifierStatutDemande(utilisateur: Utilisateur, demande: DemandeDepense, libelleStatut: String)</code></td><td><span class="badge b-vis">static</span></td><td><code>Notification</code></td><td>Cree une notification de changement de statut de demande</td></tr>
+    <tr><td><code>notifierCloture(utilisateur: Utilisateur, projet: Projet)</code></td><td><span class="badge b-vis">static</span></td><td><code>Notification</code></td><td>Cree une notification de cloture de projet</td></tr>
+  </table>
+
+</div>
+<!-- ASSOCIATIONS -->
+<div class="assoc-section" id="associations">
+  <div class="assoc-header">📐 Tableau des associations UML</div>
+  <div class="assoc-theory">
+    <strong>Types d'associations :</strong><br>
+    • <strong>Association simple (—)</strong> : lien sans possession. Les objets vivent indépendamment.<br>
+    • <strong>Composition (◆)</strong> : la partie ne peut pas exister sans le tout. Losange plein côté "tout".<br><br>
+    ⚠️ <strong>Composition unique :</strong> un objet ne peut avoir qu'un seul parent composite. Quand une classe a plusieurs FK (ex. DemandeDepense → Convention + Rubrique + Utilisateur), seule la relation la plus structurante est une composition.
+  </div>
+  <table>
+    <tr><th>Classe source</th><th>Classe cible</th><th>Type</th><th>Rôle (fin cible)</th><th>Card. source</th><th>Card. cible</th><th>Notation UML</th><th>Justification</th></tr>
+    <tr style="background:#e8f5e9"><td><strong>Porteur</strong></td><td>Utilisateur</td><td><span class="assoc-type">--|&gt; Generalisation</span></td><td><em>—</em></td><td>—</td><td>—</td><td>Porteur <strong>--|&gt;</strong> Utilisateur</td><td>Porteur herite de Utilisateur. Specialisation par le role porteur.</td></tr>
+    <tr style="background:#e3f2fd"><td><strong>Daf</strong></td><td>Utilisateur</td><td><span class="assoc-type">--|&gt; Generalisation</span></td><td><em>—</em></td><td>—</td><td>—</td><td>Daf <strong>--|&gt;</strong> Utilisateur</td><td>Daf herite de Utilisateur. Specialisation par le role daf.</td></tr>
+    <tr style="background:#fce4ec"><td><strong>AgentComptable</strong></td><td>Utilisateur</td><td><span class="assoc-type">--|&gt; Generalisation</span></td><td><em>—</em></td><td>—</td><td>—</td><td>AgentComptable <strong>--|&gt;</strong> Utilisateur</td><td>AgentComptable herite de Utilisateur. Specialisation par le role ac.</td></tr>
+    <tr style="background:#fff3e0"><td><strong>Administrateur</strong></td><td>Utilisateur</td><td><span class="assoc-type">--|&gt; Generalisation</span></td><td><em>—</em></td><td>—</td><td>—</td><td>Administrateur <strong>--|&gt;</strong> Utilisateur</td><td>Administrateur herite de Utilisateur. Specialisation par le role admin.</td></tr>
+        <tr class="comp"><td><strong>Projet</strong></td><td>Convention</td><td><span class="assoc-type">◆ Composition</span></td><td><em>conventions</em></td><td>1</td><td>0..*</td><td>Projet <strong>◆——</strong> Convention<br><small>nom : «regroupe»</small></td><td>Convention sans Projet = sans sens. Cascade à la suppression.</td></tr>
+    <tr class="comp"><td><strong>Convention</strong></td><td>Rubrique</td><td><span class="assoc-type">◆ Composition</span></td><td><em>rubriques</em></td><td>1</td><td>0..*</td><td>Convention <strong>◆——</strong> Rubrique<br><small>nom : «subdivise»</small></td><td>Rubrique = sous-division budgétaire d'une Convention. N'existe pas sans elle.</td></tr>
+    <tr class="comp"><td><strong>Convention</strong></td><td>Versement</td><td><span class="assoc-type">◆ Composition</span></td><td><em>versements</em></td><td>1</td><td>0..*</td><td>Convention <strong>◆——</strong> Versement<br><small>nom : «enregistre»</small></td><td>Versement = flux entrant attaché à une Convention. Pas d'existence sans elle.</td></tr>
+    <tr class="comp"><td><strong>Convention</strong></td><td>DemandeDepense</td><td><span class="assoc-type">◆ Composition</span></td><td><em>demandesDepenses</em></td><td>1</td><td>0..*</td><td>Convention <strong>◆——</strong> DemandeDepense<br><small>nom : «contient»</small></td><td>Convention = parent composite principal de la Demande (FK structurante).</td></tr>
+    <tr class="comp"><td><strong>Convention</strong></td><td>PaiementDirect</td><td><span class="assoc-type">◆ Composition</span></td><td><em>paiementsDirects</em></td><td>1</td><td>0..*</td><td>Convention <strong>◆——</strong> PaiementDirect<br><small>nom : «enregistre»</small></td><td>PaiementDirect imputé à une Convention. Pas d'existence propre hors contexte.</td></tr>
+    <tr class="comp"><td><strong>DemandeDepense</strong></td><td>Paiement</td><td><span class="assoc-type">◆ Composition</span></td><td><em>paiement</em></td><td>1</td><td>0..1</td><td>DemandeDepense <strong>◆——</strong> Paiement<br><small>nom : «est soldée par»</small></td><td>Paiement = solde unique d'une Demande (HasOne, FK UNIQUE).</td></tr>
+    <tr class="associ"><td>Utilisateur</td><td>Projet</td><td><span class="assoc-type">— Association</span></td><td><em>porteur</em></td><td>1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> Projet<br><small>nom : «porte»</small></td><td>L'Utilisateur est référencé par le Projet. Peut exister sans projet.</td></tr>
+    <tr class="associ"><td>Bailleur</td><td>Convention</td><td><span class="assoc-type">— Association</span></td><td><em>bailleur</em></td><td>1</td><td>0..*</td><td>Bailleur <strong>——&gt;</strong> Convention<br><small>nom : «finance»</small></td><td>Bailleur = entité de référence indépendante. Convention le cite sans lui appartenir.</td></tr>
+    <tr class="associ"><td>Rubrique</td><td>DemandeDepense</td><td><span class="assoc-type">— Association</span></td><td><em>rubrique</em></td><td>1</td><td>0..*</td><td>Rubrique <strong>——&gt;</strong> DemandeDepense<br><small>nom : «impute»</small></td><td>Rubrique = second parent de la Demande. Composition principale vers Convention.</td></tr>
+    <tr class="associ"><td>Rubrique</td><td>PaiementDirect</td><td><span class="assoc-type">— Association</span></td><td><em>rubrique</em></td><td>0..1</td><td>0..*</td><td>Rubrique <strong>——&gt;</strong> PaiementDirect<br><small>nom : «impute»</small></td><td>FK nullable. Composition principale vers Convention.</td></tr>
+    <tr class="associ"><td>Utilisateur</td><td>DemandeDepense</td><td><span class="assoc-type">— Association</span></td><td><em>porteur</em></td><td>1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> DemandeDepense<br><small>nom : «soumet»</small></td><td>Porteur soumet des demandes sans les posséder. 1re flèche.</td></tr>
+    <tr class="associ"><td>Utilisateur</td><td>DemandeDepense</td><td><span class="assoc-type">— Association</span></td><td><em>validateurDaf</em></td><td>0..1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> DemandeDepense<br><small>nom : «valide (DAF)»</small></td><td>Agent DAF validateur. FK nullable SET NULL. 2e flèche vers DemandeDepense.</td></tr>
+    <tr class="associ"><td>Utilisateur</td><td>DemandeDepense</td><td><span class="assoc-type">— Association</span></td><td><em>validateurAc</em></td><td>0..1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> DemandeDepense<br><small>nom : «valide (AC)»</small></td><td>Agent AC validateur. FK nullable SET NULL. 3e flèche vers DemandeDepense.</td></tr>
+    <tr class="associ"><td>Utilisateur</td><td>Paiement</td><td><span class="assoc-type">— Association</span></td><td><em>enregistreur</em></td><td>1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> Paiement<br><small>nom : «enregistre»</small></td><td>Traçabilité de l'agent AC enregistreur.</td></tr>
+    <tr class="associ"><td>Utilisateur</td><td>PaiementDirect</td><td><span class="assoc-type">— Association</span></td><td><em>enregistreur</em></td><td>1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> PaiementDirect<br><small>nom : «enregistre»</small></td><td>Traçabilité de l'agent DAF enregistreur.</td></tr>
+    <tr class="associ"><td>Utilisateur</td><td>JournalAudit</td><td><span class="assoc-type">— Association</span></td><td><em>auteur</em></td><td>0..1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> JournalAudit<br><small>nom : «génère»</small></td><td>FK nullable (actions système sans utilisateur). JournalAudit = trace immuable.</td></tr>
+    <tr class="associ"><td>Utilisateur</td><td>MessageChat</td><td><span class="assoc-type">— Association</span></td><td><em>expéditeur</em></td><td>1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> MessageChat<br><small>nom : «envoie»</small></td><td>Un Utilisateur envoie 0..* messages. 1re flèche — rôle expéditeur.</td></tr>
+    <tr class="associ"><td>Utilisateur</td><td>MessageChat</td><td><span class="assoc-type">— Association</span></td><td><em>destinataire</em></td><td>1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> MessageChat<br><small>nom : «reçoit»</small></td><td>Un Utilisateur reçoit 0..* messages. 2e flèche entre mêmes classes.</td></tr>
+    <tr class="associ"><td>Utilisateur</td><td>Notification</td><td><span class="assoc-type">— Association</span></td><td><em>destinataire</em></td><td>1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> Notification<br><small>nom : «reçoit»</small></td><td>Un Utilisateur reçoit 0..* notifications. Relation directe sans polymorphisme.</td></tr>
+    <tr class="associ"><td>DemandeDepense</td><td>Notification</td><td><span class="assoc-type">— Association</span></td><td><em>demande</em></td><td>0..1</td><td>0..*</td><td>DemandeDepense <strong>——&gt;</strong> Notification<br><small>nom : «déclenche»</small></td><td>Notification référence optionnellement une demande (nullable — absent pour projet_cloture).</td></tr>
+    <tr class="associ"><td>Projet</td><td>Notification</td><td><span class="assoc-type">— Association</span></td><td><em>projet</em></td><td>0..1</td><td>0..*</td><td>Projet <strong>——&gt;</strong> Notification<br><small>nom : «déclenche»</small></td><td>Notification référence optionnellement un projet (nullable — absent pour demande_statut_change).</td></tr>
+  </table>
+</div>
+
+<!-- ENUMERATIONS -->
+<div class="assoc-section" id="enumerations" style="border-color:#7c3aed;margin-top:32px">
+  <div class="assoc-header" style="background:#7c3aed">📋 Tableau des énumérations</div>
+  <div class="assoc-theory">
+    Chaque <strong>Enum</strong> est un type valeur lié à une colonne de table précise. En UML, les énumérations sont représentées comme des classes stéréotypées <code>&lt;&lt;enumeration&gt;&gt;</code> reliées par une dépendance (<code>..&gt;</code>) à la classe qui les utilise.
+  </div>
+  <table>
+    <tr>
+      <th>Enum (PHP)</th><th>Table</th><th>Colonne</th><th>Valeurs (case = valeur DB)</th><th>Description</th>
+    </tr>
+    <tr style="background:#f6f0ff">
+      <td><code>RoleUtilisateur</code></td>
+      <td><code>utilisateurs</code></td>
+      <td><code>utilisateur_role</code></td>
+      <td><code>Administrateur = 'admin'</code><br><code>Daf = 'daf'</code><br><code>AgentComptable = 'ac'</code><br><code>Porteur = 'porteur'</code></td>
+      <td>Rôle fonctionnel de l'utilisateur dans le système</td>
+    </tr>
+    <tr>
+      <td><code>StatutProjet</code></td>
+      <td><code>projets</code></td>
+      <td><code>projet_statut</code></td>
+      <td><code>EnAttenteFinancement = 'en_attente_financement'</code><br><code>EnCours = 'en_cours'</code><br><code>Suspendu = 'suspendu'</code><br><code>Termine = 'termine'</code><br><code>Annule = 'annule'</code></td>
+      <td>Statut courant du projet dans son cycle de vie</td>
+    </tr>
+    <tr style="background:#f6f0ff">
+      <td><code>StatutFinalProjet</code></td>
+      <td><code>projets</code></td>
+      <td><code>statut_final</code></td>
+      <td><code>Succes = 'succes'</code><br><code>Echec = 'echec'</code></td>
+      <td>Résultat final renseigné à la clôture du projet</td>
+    </tr>
+    <tr>
+      <td><code>StatutConvention</code></td>
+      <td><code>conventions</code></td>
+      <td><code>convention_statut</code></td>
+      <td><code>Active = 'active'</code><br><code>Suspendue = 'suspendue'</code><br><code>Terminee = 'terminee'</code><br><code>Annulee = 'annulee'</code></td>
+      <td>Statut de la convention de financement</td>
+    </tr>
+    <tr style="background:#f6f0ff">
+      <td><code>FormeConvention</code></td>
+      <td><code>conventions</code></td>
+      <td><code>convention_forme</code></td>
+      <td><code>Don = 'don'</code><br><code>Pret = 'pret'</code></td>
+      <td>Nature juridique du financement accordé par le bailleur</td>
+    </tr>
+    <tr style="background:#f6f0ff">
+      <td><code>StatutDemande</code></td>
+      <td><code>demandes_depense</code></td>
+      <td><code>demande_statut</code></td>
+      <td><code>Soumise = 'soumise'</code><br><code>ValideeDaf = 'validee_daf'</code><br><code>RejeteeDaf = 'rejetee_daf'</code><br><code>ValideeAgentComptable = 'validee_ac'</code><br><code>RejeteeAgentComptable = 'rejetee_ac'</code><br><code>Payee = 'payee'</code><br><code>RapportSoumis = 'rapport_soumis'</code><br><code>Terminee = 'terminee'</code></td>
+      <td>Position de la demande dans le circuit de validation à 3 niveaux</td>
+    </tr>
+    <tr>
+      <td><code>ModePaiement</code></td>
+      <td><code>paiements</code></td>
+      <td><code>paiement_mode</code></td>
+      <td><code>Virement = 'virement'</code><br><code>Cheque = 'cheque'</code><br><code>Especes = 'especes'</code></td>
+      <td>Mode de règlement utilisé pour le paiement</td>
+    </tr>
+    <tr style="background:#f6f0ff">
+      <td><code>TypeNotification</code></td>
+      <td><code>notifications</code></td>
+      <td><code>type_notification</code></td>
+      <td><code>DemandeStatutChange = 'demande_statut_change'</code><br><code>ProjetCloture = 'projet_cloture'</code></td>
+      <td>Catégorie de la notification — détermine les colonnes pertinentes</td>
+    </tr>
+  </table>
+</div>
+
+</body>
+</html>

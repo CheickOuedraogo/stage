@@ -98,7 +98,7 @@ interface SidebarProps {
 
 export function Sidebar({ user, collapsed = false }: SidebarProps) {
     const { url } = usePage();
-    const items = getNavItems(user.utilisateur_role, user.unread_notifications);
+    const items = getNavItems(user.utilisateur_role, user.notifications_non_lues);
 
     return (
         <aside
@@ -183,7 +183,7 @@ export function Sidebar({ user, collapsed = false }: SidebarProps) {
             {!collapsed && (
                 <div className="px-4 py-3 border-t border-white/10">
                     <p className="text-xs text-blue-300">Connecté en tant que</p>
-                    <p className="text-sm font-medium text-white truncate">{user.role_label}</p>
+                    <p className="text-sm font-medium text-white truncate">{user.label_role}</p>
                 </div>
             )}
         </aside>

@@ -15,14 +15,15 @@ return new class extends Migration
             $table->id('id_bailleur');
             $table->string('bailleur_nom');
             $table->string('bailleur_sigle')->nullable();
-            $table->string('bailleur_type')->nullable();
+            $table->string('bailleur_type')->nullable(); // multilatéral, bilatéral, fondation, etc.
             $table->string('bailleur_pays')->nullable();
-            $table->string('contact')->nullable();
-            $table->string('email')->nullable();
-            $table->string('telephone')->nullable();
-            $table->string('adresse')->nullable();
-            $table->text('description')->nullable();
-            $table->timestamps();
+            $table->string('bailleur_contact')->nullable();
+            $table->string('bailleur_email')->nullable();
+            $table->string('bailleur_telephone')->nullable();
+            $table->string('bailleur_adresse')->nullable();
+            $table->text('bailleur_description')->nullable();
+            $table->timestamp('cree_le')->useCurrent();
+            $table->timestamp('mis_a_jour_le')->useCurrent();
         });
     }
 

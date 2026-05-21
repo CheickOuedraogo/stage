@@ -12,8 +12,8 @@ import { FormEvent, useState } from 'react';
 interface Projet {
     id: number;
     titre: string;
-    status: string;
-    status_label: string;
+    statut: string;
+    libelle_statut: string;
 }
 
 interface Props extends PageProps {
@@ -69,7 +69,7 @@ function RapportForm({
                     >
                         <option value="">Sélectionner un projet…</option>
                         {projets.map((p) => (
-                            <option key={p.id} value={p.id}>{p.titre} ({p.status_label})</option>
+                            <option key={p.id} value={p.id}>{p.titre} ({p.libelle_statut})</option>
                         ))}
                     </select>
                 </div>

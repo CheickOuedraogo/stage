@@ -14,10 +14,10 @@ interface Demande {
     id: number;
     objet: string;
     montant: number;
-    status: string;
-    status_label: string;
+    statut: string;
+    libelle_statut: string;
     badge_class: string;
-    created_at: string;
+    cree_le: string;
     convention: { id: number; titre: string };
     projet: { id: number; titre: string };
     rubrique: { libelle: string };
@@ -37,12 +37,12 @@ interface Status {
 interface Props {
     demandes: Demande[];
     conventions: Convention[];
-    filters: { status?: string; convention_id?: string };
+    filters: { statut?: string; convention_id?: string };
     statuses: Status[];
 }
 
 export default function DemandesIndex({ demandes, conventions, filters, statuses }: Props) {
-    const [status, setStatus] = useState(filters.status ?? '');
+    const [statut, setStatut] = useState(filters.statut ?? '');
     const [conventionId, setConventionId] = useState(filters.convention_id ?? '');
 
     const applyFilter = (params: Record<string, string | undefined>) => {
@@ -63,10 +63,10 @@ export default function DemandesIndex({ demandes, conventions, filters, statuses
             {/* Filtres */}
             <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-4 mb-6 flex flex-col sm:flex-row gap-3">
                 <select
-                    value={status}
+                    value={statut}
                     onChange={(e) => {
-                        setStatus(e.target.value);
-                        applyFilter({ status: e.target.value || undefined });
+                        setStatut(e.target.value);
+                        applyFilter({ statut: e.target.value || undefined });
                     }}
                     className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                     aria-label="Filtrer par statut"
@@ -127,10 +127,10 @@ export default function DemandesIndex({ demandes, conventions, filters, statuses
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${d.badge_class}`}>
-                                            {d.status_label}
+                                            {d.libelle_statut}
                                         </span>
                                         <span className="text-xs text-gray-400 dark:text-slate-500">
-                                            {formatDate(d.created_at)}
+                                            {formatDate(d.cree_le)}
                                         </span>
                                     </div>
                                     <p className="font-medium text-gray-900 dark:text-white truncate">{d.objet}</p>

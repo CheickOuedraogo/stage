@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Administrateur;
 
 use App\Http\Controllers\Controller;
-use App\Models\AuditLog;
+use App\Models\JournalAudit;
 use App\Services\MaintenanceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,14 +38,14 @@ class MaintenanceController extends Controller
                 until: $validated['until'] ?? null,
             );
 
-            AuditLog::log('maintenance_enabled', description: 'Mode maintenance activé par '.auth()->user()->name);
+            JournalAudit::log('maintenance_enabled', description: 'Mode maintenance activé par '.auth()->user()->utilisateur_nom);
 
             return back()->with('success', 'Mode maintenance activé. Tous les utilisateurs ont été déconnectés.');
         }
 
         $this->maintenanceService->disable();
 
-        AuditLog::log('maintenance_disabled', description: 'Mode maintenance désactivé par '.auth()->user()->name);
+        JournalAudit::log('maintenance_disabled', description: 'Mode maintenance désactivé par '.auth()->user()->utilisateur_nom);
 
         return back()->with('success', 'Mode maintenance désactivé.');
     }

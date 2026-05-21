@@ -1,27 +1,27 @@
 <?php
 
-use App\Enums\UserRole;
-use App\Models\User;
+use App\Enums\RoleUtilisateur;
+use App\Models\Utilisateur;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 
 uses(LazilyRefreshDatabase::class);
 
-describe('Gestion des utilisateurs (Admin)', function () {
+describe('Gestion des utilisateurs (Administrateur)', function () {
     beforeEach(function () {
-        $this->admin = User::factory()->admin()->create();
+        $this->admin = Utilisateur::factory()->admin()->create();
     });
 
     it('liste les utilisateurs', function () {
-        User::factory()->count(5)->porteur()->create();
+        Utilisateur::factory()->count(5)->porteur()->create();
 
         $this->actingAs($this->admin)
             ->get(route('admin.users.index'))
             ->assertStatus(200)
-            ->assertInertia(fn ($page) => $page->component('admin/Users/Index'));
+            ->assertInertia(fn ($page) => $page->component('admin/Utilisateurs/Index'));
     });
 
     it('un non-admin ne peut pas accéder à la liste', function () {
-        $porteur = User::factory()->porteur()->create();
+        $porteur = Utilisateur::factory()->porteur()->create();
 
         $this->actingAs($porteur)
             ->get(route('admin.users.index'))
@@ -31,59 +31,59 @@ describe('Gestion des utilisateurs (Admin)', function () {
     it('crée un utilisateur', function () {
         $this->actingAs($this->admin)
             ->post(route('admin.users.store'), [
-                'name' => 'Nouveau Utilisateur',
-                'email' => 'nouveau@ujkz.bf',
-                'password' => 'Password123',
-                'utilisateur_role' => UserRole::Porteur->value,
-                'telephone' => '+226 70 00 00 00',
+                'utilisateur_nom' => 'Nouveau Utilisateur',
+                'utilisateur_email' => 'nouveau@ujkz.bf',
+                'utilisateur_mot_de_passe' => 'Password123',
+                'utilisateur_role' => RoleUtilisateur::Porteur->value,
+                'utilisateur_telephone' => '+226 70 00 00 00',
             ])
             ->assertRedirect(route('admin.users.index'));
 
         $this->assertDatabaseHas('users', [
-            'email' => 'nouveau@ujkz.bf',
-            'utilisateur_role' => UserRole::Porteur->value,
+            'utilisateur_email' => 'nouveau@ujkz.bf',
+            'utilisateur_role' => RoleUtilisateur::Porteur->value,
         ]);
     });
 
     it('valide les données lors de la création', function () {
         $this->actingAs($this->admin)
             ->post(route('admin.users.store'), [
-                'name' => '',
-                'email' => 'pas-un-email',
+                'utilisateur_nom' => '',
+                'utilisateur_email' => 'pas-un-email',
                 'utilisateur_role' => 'role-invalide',
             ])
-            ->assertSessionHasErrors(['name', 'email', 'utilisateur_role', 'password']);
+            ->assertSessionHasErrors(['utilisateur_nom', 'utilisateur_email', 'utilisateur_role', 'utilisateur_mot_de_passe']);
     });
 
     it('rejette un email déjà utilisé', function () {
-        User::factory()->create(['email' => 'existant@test.bf']);
+        Utilisateur::factory()->create(['utilisateur_email' => 'existant@test.bf']);
 
         $this->actingAs($this->admin)
             ->post(route('admin.users.store'), [
-                'name' => 'Test',
-                'email' => 'existant@test.bf',
-                'password' => 'Password123',
-                'role' => UserRole::Porteur->value,
+                'utilisateur_nom' => 'Test',
+                'utilisateur_email' => 'existant@test.bf',
+                'utilisateur_mot_de_passe' => 'Password123',
+                'role' => RoleUtilisateur::Porteur->value,
             ])
-            ->assertSessionHasErrors('email');
+            ->assertSessionHasErrors('utilisateur_email');
     });
 
     it('modifie un utilisateur', function () {
-        $user = User::factory()->porteur()->create();
+        $user = Utilisateur::factory()->porteur()->create();
 
         $this->actingAs($this->admin)
             ->patch(route('admin.users.update', $user), [
-                'name' => 'Nouveau Nom',
-                'email' => $user->email,
-                'utilisateur_role' => UserRole::Porteur->value,
+                'utilisateur_nom' => 'Nouveau Nom',
+                'utilisateur_email' => $user->utilisateur_email,
+                'utilisateur_role' => RoleUtilisateur::Porteur->value,
             ])
             ->assertRedirect(route('admin.users.index'));
 
-        $this->assertDatabaseHas('users', ['id_utilisateur' => $user->id, 'name' => 'Nouveau Nom']);
+        $this->assertDatabaseHas('users', ['id_utilisateur' => $user->id_utilisateur, 'utilisateur_nom' => 'Nouveau Nom']);
     });
 
     it('active et désactive un utilisateur', function () {
-        $user = User::factory()->porteur()->create(['utilisateur_actif' => true]);
+        $user = Utilisateur::factory()->porteur()->create(['utilisateur_actif' => true]);
 
         $this->actingAs($this->admin)
             ->patch(route('admin.users.toggle-active', $user))

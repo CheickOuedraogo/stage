@@ -10,23 +10,25 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class BailleurFactory extends Factory
 {
+    protected $model = Bailleur::class;
+
     /**
-     * Define the model's default state.
-     *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
         return [
-            'bailleur_nom' => $this->faker->company(),
-            'bailleur_sigle' => strtoupper($this->faker->lexify('???')),
-            'bailleur_type' => $this->faker->randomElement(['bilatéral', 'multilatéral']),
-            'bailleur_pays' => $this->faker->country(),
-            'contact' => $this->faker->name(),
-            'email' => $this->faker->companyEmail(),
-            'telephone' => $this->faker->phoneNumber(),
-            'adresse' => $this->faker->address(),
-            'description' => $this->faker->paragraph(),
+            'bailleur_nom' => fake()->company(),
+            'bailleur_sigle' => strtoupper(fake()->lexify('???')),
+            'bailleur_type' => fake()->randomElement(['multilatéral', 'bilatéral', 'fondation', 'ONG']),
+            'bailleur_pays' => fake()->country(),
+            'bailleur_contact' => fake()->name(),
+            'bailleur_email' => fake()->companyEmail(),
+            'bailleur_telephone' => fake()->phoneNumber(),
+            'bailleur_adresse' => fake()->address(),
+            'bailleur_description' => fake()->paragraph(),
+            'cree_le' => now(),
+            'mis_a_jour_le' => now(),
         ];
     }
 }
