@@ -54,7 +54,7 @@ class ProjetController extends Controller
     {
         $projet->load([
             'porteur:id_utilisateur,utilisateur_nom,utilisateur_email,utilisateur_telephone',
-            'conventions' => fn ($q) => $q->with(['bailleur:id_bailleur,bailleur_nom,bailleur_sigle', 'rubriques:id_rubrique,id_convention,rubrique_libelle,rubrique_montant_prevu', 'versements:id_versement,id_convention,versement_montant,versement_date_reception,versement_type']),
+            'conventions' => fn ($q) => $q->with(['bailleur:id_bailleur,bailleur_nom,bailleur_sigle', 'rubriques:id_rubrique,id_convention,rubrique_libelle,rubrique_montant_prevu', 'versements:id_versement,id_convention,versement_montant,versement_date_reception']),
         ]);
 
         $totalVersements = $projet->conventions->flatMap->versements->sum('versement_montant');

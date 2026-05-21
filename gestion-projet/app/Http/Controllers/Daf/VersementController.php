@@ -17,7 +17,6 @@ class VersementController extends Controller
             'convention.projet:id_projet,projet_titre',
             'convention.bailleur:id_bailleur,bailleur_nom,bailleur_sigle',
         ])
-            ->when($request->filled('type'), fn ($q) => $q->where('versement_type', $request->type))
             ->when($request->filled('search'), fn ($q) => $q->where(
                 fn ($q2) => $q2->where('versement_reference', 'like', "%{$request->search}%")
                     ->orWhereHas('convention', fn ($q3) => $q3->where('convention_titre', 'like', "%{$request->search}%"))
@@ -29,8 +28,6 @@ class VersementController extends Controller
                 'id' => $v->id_utilisateur,
                 'montant' => $v->versement_montant,
                 'date_reception' => $v->versement_date_reception->toDateString(),
-                'type' => $v->versement_type->value,
-                'type_label' => $v->versement_type->label(),
                 'reference' => $v->versement_reference,
                 'description' => $v->versement_description,
                 'convention' => $v->convention->convention_titre,
@@ -40,12 +37,12 @@ class VersementController extends Controller
                 'projet_id' => $v->convention->id_utilisateur_projet,
             ]);
 
-        $totalMontant = Versement::when($request->filled('type'), fn ($q) => $q->where('versement_type', $request->type))->sum('versement_montant');
+        $totalMontant = Versement::sum('versement_montant');
 
         return Inertia::render('daf/Versements/Index', [
             'versements' => $versements,
             'total_montant' => $totalMontant,
-            'filters' => $request->only(['type', 'search']),
+            'filters' => $request->only(['search']),
         ]);
     }
 }
