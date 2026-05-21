@@ -80,6 +80,7 @@
   <a href="#audit">JournalAudit</a>
   <a href="#notification">Notification</a>
   <a href="#associations">▶ Associations UML</a>
+  <a href="#enumerations" style="background:#ede9fe;border-color:#c4b5fd;color:#6d28d9">▶ Énumérations</a>
 </div>
 
 <!-- UTILISATEUR -->
@@ -440,16 +441,16 @@
   </div>
   <table>
     <tr><th>Classe source</th><th>Classe cible</th><th>Type</th><th>Rôle (fin cible)</th><th>Card. source</th><th>Card. cible</th><th>Notation UML</th><th>Justification</th></tr>
-    <tr class="comp"><td><strong>Projet</strong></td><td>Convention</td><td><span class="assoc-type">◆ Composition</span></td><td><em>conventions</em></td><td>1</td><td>0..*</td><td>Projet <strong>◆——</strong> Convention</td><td>Convention sans Projet = sans sens. Cascade à la suppression.</td></tr>
-    <tr class="comp"><td><strong>Convention</strong></td><td>Rubrique</td><td><span class="assoc-type">◆ Composition</span></td><td><em>rubriques</em></td><td>1</td><td>0..*</td><td>Convention <strong>◆——</strong> Rubrique</td><td>Rubrique = sous-division budgétaire d'une Convention. N'existe pas sans elle.</td></tr>
-    <tr class="comp"><td><strong>Convention</strong></td><td>Versement</td><td><span class="assoc-type">◆ Composition</span></td><td><em>versements</em></td><td>1</td><td>0..*</td><td>Convention <strong>◆——</strong> Versement</td><td>Versement = flux entrant attaché à une Convention. Pas d'existence sans elle.</td></tr>
-    <tr class="comp"><td><strong>Convention</strong></td><td>DemandeDepense</td><td><span class="assoc-type">◆ Composition</span></td><td><em>demandesDepenses</em></td><td>1</td><td>0..*</td><td>Convention <strong>◆——</strong> DemandeDepense</td><td>Convention = parent composite principal de la Demande (FK structurante).</td></tr>
-    <tr class="comp"><td><strong>Convention</strong></td><td>PaiementDirect</td><td><span class="assoc-type">◆ Composition</span></td><td><em>paiementsDirects</em></td><td>1</td><td>0..*</td><td>Convention <strong>◆——</strong> PaiementDirect</td><td>PaiementDirect imputé à une Convention. Pas d'existence propre hors contexte.</td></tr>
-    <tr class="comp"><td><strong>DemandeDepense</strong></td><td>Paiement</td><td><span class="assoc-type">◆ Composition</span></td><td><em>paiement</em></td><td>1</td><td>0..1</td><td>DemandeDepense <strong>◆——</strong> Paiement</td><td>Paiement = solde unique d'une Demande (HasOne, FK UNIQUE).</td></tr>
+    <tr class="comp"><td><strong>Projet</strong></td><td>Convention</td><td><span class="assoc-type">◆ Composition</span></td><td><em>conventions</em></td><td>1</td><td>0..*</td><td>Projet <strong>◆——</strong> Convention<br><small>nom : «regroupe»</small></td><td>Convention sans Projet = sans sens. Cascade à la suppression.</td></tr>
+    <tr class="comp"><td><strong>Convention</strong></td><td>Rubrique</td><td><span class="assoc-type">◆ Composition</span></td><td><em>rubriques</em></td><td>1</td><td>0..*</td><td>Convention <strong>◆——</strong> Rubrique<br><small>nom : «subdivise»</small></td><td>Rubrique = sous-division budgétaire d'une Convention. N'existe pas sans elle.</td></tr>
+    <tr class="comp"><td><strong>Convention</strong></td><td>Versement</td><td><span class="assoc-type">◆ Composition</span></td><td><em>versements</em></td><td>1</td><td>0..*</td><td>Convention <strong>◆——</strong> Versement<br><small>nom : «enregistre»</small></td><td>Versement = flux entrant attaché à une Convention. Pas d'existence sans elle.</td></tr>
+    <tr class="comp"><td><strong>Convention</strong></td><td>DemandeDepense</td><td><span class="assoc-type">◆ Composition</span></td><td><em>demandesDepenses</em></td><td>1</td><td>0..*</td><td>Convention <strong>◆——</strong> DemandeDepense<br><small>nom : «contient»</small></td><td>Convention = parent composite principal de la Demande (FK structurante).</td></tr>
+    <tr class="comp"><td><strong>Convention</strong></td><td>PaiementDirect</td><td><span class="assoc-type">◆ Composition</span></td><td><em>paiementsDirects</em></td><td>1</td><td>0..*</td><td>Convention <strong>◆——</strong> PaiementDirect<br><small>nom : «enregistre»</small></td><td>PaiementDirect imputé à une Convention. Pas d'existence propre hors contexte.</td></tr>
+    <tr class="comp"><td><strong>DemandeDepense</strong></td><td>Paiement</td><td><span class="assoc-type">◆ Composition</span></td><td><em>paiement</em></td><td>1</td><td>0..1</td><td>DemandeDepense <strong>◆——</strong> Paiement<br><small>nom : «est soldée par»</small></td><td>Paiement = solde unique d'une Demande (HasOne, FK UNIQUE).</td></tr>
     <tr class="associ"><td>Utilisateur</td><td>Projet</td><td><span class="assoc-type">— Association</span></td><td><em>porteur</em></td><td>1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> Projet<br><small>nom : «porte»</small></td><td>L'Utilisateur est référencé par le Projet. Peut exister sans projet.</td></tr>
     <tr class="associ"><td>Bailleur</td><td>Convention</td><td><span class="assoc-type">— Association</span></td><td><em>bailleur</em></td><td>1</td><td>0..*</td><td>Bailleur <strong>——&gt;</strong> Convention<br><small>nom : «finance»</small></td><td>Bailleur = entité de référence indépendante. Convention le cite sans lui appartenir.</td></tr>
     <tr class="associ"><td>Rubrique</td><td>DemandeDepense</td><td><span class="assoc-type">— Association</span></td><td><em>rubrique</em></td><td>1</td><td>0..*</td><td>Rubrique <strong>——&gt;</strong> DemandeDepense<br><small>nom : «impute»</small></td><td>Rubrique = second parent de la Demande. Composition principale vers Convention.</td></tr>
-    <tr class="associ"><td>Rubrique</td><td>PaiementDirect</td><td><span class="assoc-type">— Association</span></td><td><em>rubrique</em></td><td>0..1</td><td>0..*</td><td>Rubrique <strong>——&gt;</strong> PaiementDirect</td><td>FK nullable. Composition principale vers Convention.</td></tr>
+    <tr class="associ"><td>Rubrique</td><td>PaiementDirect</td><td><span class="assoc-type">— Association</span></td><td><em>rubrique</em></td><td>0..1</td><td>0..*</td><td>Rubrique <strong>——&gt;</strong> PaiementDirect<br><small>nom : «impute»</small></td><td>FK nullable. Composition principale vers Convention.</td></tr>
     <tr class="associ"><td>Utilisateur</td><td>DemandeDepense</td><td><span class="assoc-type">— Association</span></td><td><em>porteur</em></td><td>1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> DemandeDepense<br><small>nom : «soumet»</small></td><td>Porteur soumet des demandes sans les posséder. 1re flèche.</td></tr>
     <tr class="associ"><td>Utilisateur</td><td>DemandeDepense</td><td><span class="assoc-type">— Association</span></td><td><em>validateurDaf</em></td><td>0..1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> DemandeDepense<br><small>nom : «valide (DAF)»</small></td><td>Agent DAF validateur. FK nullable SET NULL. 2e flèche vers DemandeDepense.</td></tr>
     <tr class="associ"><td>Utilisateur</td><td>DemandeDepense</td><td><span class="assoc-type">— Association</span></td><td><em>validateurAc</em></td><td>0..1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> DemandeDepense<br><small>nom : «valide (AC)»</small></td><td>Agent AC validateur. FK nullable SET NULL. 3e flèche vers DemandeDepense.</td></tr>
@@ -458,9 +459,85 @@
     <tr class="associ"><td>Utilisateur</td><td>JournalAudit</td><td><span class="assoc-type">— Association</span></td><td><em>auteur</em></td><td>0..1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> JournalAudit<br><small>nom : «génère»</small></td><td>FK nullable (actions système sans utilisateur). JournalAudit = trace immuable.</td></tr>
     <tr class="associ"><td>Utilisateur</td><td>MessageChat</td><td><span class="assoc-type">— Association</span></td><td><em>expéditeur</em></td><td>1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> MessageChat<br><small>nom : «envoie»</small></td><td>Un Utilisateur envoie 0..* messages. 1re flèche — rôle expéditeur.</td></tr>
     <tr class="associ"><td>Utilisateur</td><td>MessageChat</td><td><span class="assoc-type">— Association</span></td><td><em>destinataire</em></td><td>1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> MessageChat<br><small>nom : «reçoit»</small></td><td>Un Utilisateur reçoit 0..* messages. 2e flèche entre mêmes classes.</td></tr>
-    <tr class="associ"><td>Utilisateur</td><td>Notification</td><td><span class="assoc-type">— Association</span></td><td><em>destinataire</em></td><td>1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> Notification</td><td>Un Utilisateur reçoit 0..* notifications. Relation directe sans polymorphisme.</td></tr>
-    <tr class="associ"><td>DemandeDepense</td><td>Notification</td><td><span class="assoc-type">— Association</span></td><td><em>demande</em></td><td>0..1</td><td>0..*</td><td>DemandeDepense <strong>——&gt;</strong> Notification</td><td>Notification référence optionnellement une demande (nullable — absent pour projet_cloture).</td></tr>
-    <tr class="associ"><td>Projet</td><td>Notification</td><td><span class="assoc-type">— Association</span></td><td><em>projet</em></td><td>0..1</td><td>0..*</td><td>Projet <strong>——&gt;</strong> Notification</td><td>Notification référence optionnellement un projet (nullable — absent pour demande_statut_change).</td></tr>
+    <tr class="associ"><td>Utilisateur</td><td>Notification</td><td><span class="assoc-type">— Association</span></td><td><em>destinataire</em></td><td>1</td><td>0..*</td><td>Utilisateur <strong>——&gt;</strong> Notification<br><small>nom : «reçoit»</small></td><td>Un Utilisateur reçoit 0..* notifications. Relation directe sans polymorphisme.</td></tr>
+    <tr class="associ"><td>DemandeDepense</td><td>Notification</td><td><span class="assoc-type">— Association</span></td><td><em>demande</em></td><td>0..1</td><td>0..*</td><td>DemandeDepense <strong>——&gt;</strong> Notification<br><small>nom : «déclenche»</small></td><td>Notification référence optionnellement une demande (nullable — absent pour projet_cloture).</td></tr>
+    <tr class="associ"><td>Projet</td><td>Notification</td><td><span class="assoc-type">— Association</span></td><td><em>projet</em></td><td>0..1</td><td>0..*</td><td>Projet <strong>——&gt;</strong> Notification<br><small>nom : «déclenche»</small></td><td>Notification référence optionnellement un projet (nullable — absent pour demande_statut_change).</td></tr>
+  </table>
+</div>
+
+<!-- ENUMERATIONS -->
+<div class="assoc-section" id="enumerations" style="border-color:#7c3aed;margin-top:32px">
+  <div class="assoc-header" style="background:#7c3aed">📋 Tableau des énumérations</div>
+  <div class="assoc-theory">
+    Chaque <strong>Enum</strong> est un type valeur lié à une colonne de table précise. En UML, les énumérations sont représentées comme des classes stéréotypées <code>&lt;&lt;enumeration&gt;&gt;</code> reliées par une dépendance (<code>..&gt;</code>) à la classe qui les utilise.
+  </div>
+  <table>
+    <tr>
+      <th>Enum (PHP)</th><th>Table</th><th>Colonne</th><th>Valeurs (case = valeur DB)</th><th>Description</th>
+    </tr>
+    <tr style="background:#f6f0ff">
+      <td><code>RoleUtilisateur</code></td>
+      <td><code>utilisateurs</code></td>
+      <td><code>utilisateur_role</code></td>
+      <td><code>Administrateur = 'admin'</code><br><code>Daf = 'daf'</code><br><code>AgentComptable = 'ac'</code><br><code>Porteur = 'porteur'</code></td>
+      <td>Rôle fonctionnel de l'utilisateur dans le système</td>
+    </tr>
+    <tr>
+      <td><code>StatutProjet</code></td>
+      <td><code>projets</code></td>
+      <td><code>projet_statut</code></td>
+      <td><code>EnAttenteFinancement = 'en_attente_financement'</code><br><code>EnCours = 'en_cours'</code><br><code>Suspendu = 'suspendu'</code><br><code>Termine = 'termine'</code><br><code>Annule = 'annule'</code></td>
+      <td>Statut courant du projet dans son cycle de vie</td>
+    </tr>
+    <tr style="background:#f6f0ff">
+      <td><code>StatutFinalProjet</code></td>
+      <td><code>projets</code></td>
+      <td><code>statut_final</code></td>
+      <td><code>Succes = 'succes'</code><br><code>Echec = 'echec'</code></td>
+      <td>Résultat final renseigné à la clôture du projet</td>
+    </tr>
+    <tr>
+      <td><code>StatutConvention</code></td>
+      <td><code>conventions</code></td>
+      <td><code>convention_statut</code></td>
+      <td><code>Active = 'active'</code><br><code>Suspendue = 'suspendue'</code><br><code>Terminee = 'terminee'</code><br><code>Annulee = 'annulee'</code></td>
+      <td>Statut de la convention de financement</td>
+    </tr>
+    <tr style="background:#f6f0ff">
+      <td><code>FormeConvention</code></td>
+      <td><code>conventions</code></td>
+      <td><code>convention_forme</code></td>
+      <td><code>Don = 'don'</code><br><code>Pret = 'pret'</code></td>
+      <td>Nature juridique du financement accordé par le bailleur</td>
+    </tr>
+    <tr>
+      <td><code>TypeVersement</code></td>
+      <td><code>versements</code></td>
+      <td><code>versement_type</code></td>
+      <td><code>Avance = 'avance'</code><br><code>Tranche = 'tranche'</code></td>
+      <td>Modalité de décaissement du versement</td>
+    </tr>
+    <tr style="background:#f6f0ff">
+      <td><code>StatutDemande</code></td>
+      <td><code>demandes_depense</code></td>
+      <td><code>demande_statut</code></td>
+      <td><code>Soumise = 'soumise'</code><br><code>ValideeDaf = 'validee_daf'</code><br><code>RejeteeDaf = 'rejetee_daf'</code><br><code>ValideeAgentComptable = 'validee_ac'</code><br><code>RejeteeAgentComptable = 'rejetee_ac'</code><br><code>Payee = 'payee'</code><br><code>RapportSoumis = 'rapport_soumis'</code><br><code>Terminee = 'terminee'</code></td>
+      <td>Position de la demande dans le circuit de validation à 3 niveaux</td>
+    </tr>
+    <tr>
+      <td><code>ModePaiement</code></td>
+      <td><code>paiements</code></td>
+      <td><code>paiement_mode</code></td>
+      <td><code>Virement = 'virement'</code><br><code>Cheque = 'cheque'</code><br><code>Especes = 'especes'</code></td>
+      <td>Mode de règlement utilisé pour le paiement</td>
+    </tr>
+    <tr style="background:#f6f0ff">
+      <td><code>TypeNotification</code></td>
+      <td><code>notifications</code></td>
+      <td><code>type_notification</code></td>
+      <td><code>DemandeStatutChange = 'demande_statut_change'</code><br><code>ProjetCloture = 'projet_cloture'</code></td>
+      <td>Catégorie de la notification — détermine les colonnes pertinentes</td>
+    </tr>
   </table>
 </div>
 
