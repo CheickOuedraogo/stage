@@ -93,7 +93,7 @@
 | id_rubrique | Identifiant unique de la rubrique | Entier | PK, NOT NULL, AUTO_INCREMENT |
 | id_convention | Convention de rattachement | Entier | FK → conventions(id_convention), NOT NULL |
 | rubrique_libelle | Intitulé de la ligne budgétaire | Chaîne (255) | NOT NULL |
-| rubrique_montant_prevu | Montant alloué en FCFA | Entier (BIGINT) | NOT NULL |
+| rubrique_montant | Montant alloué en FCFA | Entier (BIGINT) | NOT NULL |
 | rubrique_description | Description complémentaire | Texte | NULLABLE |
 | cree_le | Date et heure de création | Timestamp | NOT NULL, défaut : CURRENT_TIMESTAMP |
 | mis_a_jour_le | Date et heure de la dernière modification | Timestamp | NOT NULL, défaut : CURRENT_TIMESTAMP |

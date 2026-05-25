@@ -33,11 +33,11 @@ class RubriqueController extends Controller
             ->through(fn (Rubrique $r) => [
                 'id' => $r->id_utilisateur,
                 'libelle' => $r->rubrique_libelle,
-                'montant_prevu' => $r->rubrique_montant_prevu,
+                'montant_prevu' => $r->rubrique_montant,
                 'consomme' => $r->demandesDepenses->sum('demande_montant'),
-                'disponible' => max(0, $r->rubrique_montant_prevu - $r->demandesDepenses->sum('demande_montant')),
-                'taux' => $r->rubrique_montant_prevu > 0
-                    ? round(($r->demandesDepenses->sum('demande_montant') / $r->rubrique_montant_prevu) * 100)
+                'disponible' => max(0, $r->rubrique_montant - $r->demandesDepenses->sum('demande_montant')),
+                'taux' => $r->rubrique_montant > 0
+                    ? round(($r->demandesDepenses->sum('demande_montant') / $r->rubrique_montant) * 100)
                     : 0,
                 'convention' => $r->convention->convention_titre,
                 'projet' => $r->convention->projet->projet_titre,
@@ -48,7 +48,7 @@ class RubriqueController extends Controller
             ]);
 
         $stats = [
-            'total_prevu' => Rubrique::sum('rubrique_montant_prevu'),
+            'total_prevu' => Rubrique::sum('rubrique_montant'),
             'total_rubriques' => Rubrique::count(),
         ];
 

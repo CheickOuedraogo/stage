@@ -16,7 +16,8 @@ class MessageChatControleur extends Controller
 {
     public function index(): Response
     {
-        $conversations = Utilisateur::whereIn('utilisateur_role', [RoleUtilisateur::Daf, RoleUtilisateur::AgentComptable])
+        $conversations = Utilisateur::with('projets')
+            ->whereIn('role_key', [RoleUtilisateur::Daf, RoleUtilisateur::AgentComptable, RoleUtilisateur::Porteur])
             ->get()
             ->map(function (Utilisateur $u) {
                 $lastMsg = MessageChat::where(fn ($q) => $q
@@ -33,10 +34,15 @@ class MessageChatControleur extends Controller
                 return [
                     'user_id' => $u->id_utilisateur,
                     'utilisateur_nom' => $u->utilisateur_nom,
-                    'role' => $u->utilisateur_role->label(),
+                    'utilisateur_email' => $u->utilisateur_email,
+                    'role' => $u->role_key->label(),
+                    'role_key' => $u->role_key->value,
                     'unread' => $unread,
                     'last_message' => $lastMsg?->message_contenu,
-                    'last_at' => $lastMsg?->created_at->diffForHumans(),
+                    'last_at' => $lastMsg?->cree_le?->diffForHumans(),
+                    'projets' => $u->role_key === RoleUtilisateur::Porteur
+                        ? $u->projets->map(fn ($p) => ['id' => $p->id_projet, 'titre' => $p->projet_titre])
+                        : [],
                 ];
             });
 
@@ -59,14 +65,13 @@ class MessageChatControleur extends Controller
             ->reverse()
             ->values()
             ->map(fn (MessageChat $m) => [
-                'id' => $m->id_utilisateur,
+                'id' => $m->id_message,
                 'message' => $m->message_contenu,
-                'is_mine' => $m->id_utilisateur_expediteur === $admin->id_utilisateur,
-                'sender_name' => $m->id_utilisateur_expediteur === $admin->id_utilisateur ? 'Moi (Administrateur)' : $user->utilisateur_nom,
-                'created_at' => $m->created_at->toIso8601String(),
+                'is_mine' => $m->id_expediteur === $admin->id_utilisateur,
+                'sender_name' => $m->id_expediteur === $admin->id_utilisateur ? 'Moi (Administrateur)' : $user->utilisateur_nom,
+                'created_at' => $m->cree_le->toIso8601String(),
             ]);
 
-        // Mark user's messages as read
         MessageChat::where('id_expediteur', $user->id_utilisateur)
             ->where('id_destinataire', $admin->id_utilisateur)
             ->where('message_lu', false)
@@ -76,7 +81,12 @@ class MessageChatControleur extends Controller
             'contact' => [
                 'id' => $user->id_utilisateur,
                 'utilisateur_nom' => $user->utilisateur_nom,
-                'role' => $user->utilisateur_role->label(),
+                'utilisateur_email' => $user->utilisateur_email,
+                'role' => $user->role_key->label(),
+                'role_key' => $user->role_key->value,
+                'projets' => $user->role_key === RoleUtilisateur::Porteur
+                    ? $user->projets->map(fn ($p) => ['id' => $p->id_projet, 'titre' => $p->projet_titre])
+                    : [],
             ],
             'messages' => $messages,
         ]);
@@ -102,20 +112,20 @@ class MessageChatControleur extends Controller
 
         $messages = MessageChat::where('id_expediteur', $user->id_utilisateur)
             ->where('id_destinataire', $admin->id_utilisateur)
-            ->where('id', '>', $since)
+            ->where('id_message', '>', $since)
             ->get()
             ->map(fn (MessageChat $m) => [
-                'id' => $m->id_utilisateur,
+                'id' => $m->id_message,
                 'message' => $m->message_contenu,
                 'is_mine' => false,
                 'sender_name' => $user->utilisateur_nom,
-                'created_at' => $m->created_at->toIso8601String(),
+                'created_at' => $m->cree_le->toIso8601String(),
             ]);
 
         if ($messages->isNotEmpty()) {
             MessageChat::where('id_expediteur', $user->id_utilisateur)
                 ->where('id_destinataire', $admin->id_utilisateur)
-                ->where('id', '>', $since)
+                ->where('id_message', '>', $since)
                 ->update(['message_lu' => true]);
         }
 

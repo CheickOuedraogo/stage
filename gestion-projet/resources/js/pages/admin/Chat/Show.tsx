@@ -4,7 +4,7 @@ import {
     index as chatIndex,
     send as chatSend,
     poll as chatPoll,
-} from '@/actions/App/Http/Controllers/Admin/ChatController';
+} from '@/actions/App/Http/Controllers/Administrateur/MessageChatControleur';
 import type { PageProps } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
@@ -12,6 +12,7 @@ import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 interface Contact {
     id: number;
     utilisateur_nom: string;
+    utilisateur_email: string;
     role: string;
 }
 
@@ -43,8 +44,8 @@ export default function AdminChatShow() {
             <div className="max-w-2xl">
                 <ChatInterface
                     messages={messages}
-                    sendUrl={chatSend.url(contact.id)}
-                    pollUrl={chatPoll.url(contact.id)}
+                    sendUrl={chatSend.url({ user: contact.id })}
+                    pollUrl={chatPoll.url({ user: contact.id })}
                     contactName={contact.utilisateur_nom}
                 />
             </div>

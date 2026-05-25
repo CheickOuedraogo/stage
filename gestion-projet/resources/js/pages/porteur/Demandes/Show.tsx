@@ -42,6 +42,7 @@ interface Demande {
     motif_rejet: string | null;
     possede_justificatif: boolean;
     possede_rapport: boolean;
+    rapport_motif_rejet: string | null;
     rapport_validee_daf: boolean;
     rapport_validee_ac: boolean;
     validee_daf_at: string | null;
@@ -183,6 +184,17 @@ export default function DemandeShow({ demande }: Props) {
                             <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-1">
                                 Rapport d'exécution requis
                             </h3>
+
+                            {demande.rapport_motif_rejet && (
+                                <div className="flex gap-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-4">
+                                    <XCircleIcon className="w-5 h-5 text-red-500 shrink-0" />
+                                    <div>
+                                        <p className="text-sm font-medium text-red-800 dark:text-red-300">Rapport rejeté</p>
+                                        <p className="text-sm text-red-700 dark:text-red-400 mt-0.5">{demande.rapport_motif_rejet}</p>
+                                    </div>
+                                </div>
+                            )}
+
                             <p className="text-sm text-amber-700 dark:text-amber-400 mb-4">
                                 Le paiement a été effectué. Veuillez soumettre le rapport d'exécution (PDF).
                             </p>

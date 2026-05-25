@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Storage;
 #[Fillable([
     'id_rubrique', 'id_convention', 'id_porteur', 'demande_montant', 'demande_objet', 'demande_description',
     'demande_justificatif', 'demande_statut', 'demande_motif_rejet', 'demande_rapport',
+    'demande_rapport_motif_rejet',
     'demande_date_validation_daf', 'id_validateur_daf', 'demande_date_validation_ac', 'id_validateur_ac',
     'demande_rapport_valide_daf', 'demande_rapport_valide_ac',
 ])]
@@ -74,6 +75,11 @@ class DemandeDepense extends Model
     }
 
     public function scopeActive(Builder $query): Builder
+    {
+        return $this->scopeActif($query);
+    }
+
+    public function scopeActif(Builder $query): Builder
     {
         return $query->whereNotIn('demande_statut', [
             StatutDemande::RejeteeDaf->value,

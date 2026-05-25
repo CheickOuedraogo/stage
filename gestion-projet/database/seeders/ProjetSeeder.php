@@ -18,7 +18,7 @@ class ProjetSeeder extends Seeder
 {
     public function run(): void
     {
-        $porteurs = Utilisateur::where('utilisateur_role', 'porteur')
+        $porteurs = Utilisateur::where('role_key', 'porteur')
             ->where('utilisateur_actif', true)
             ->orderBy('id_utilisateur')
             ->get()
@@ -553,7 +553,7 @@ class ProjetSeeder extends Seeder
                 Rubrique::create([
                     'id_convention' => $convention->id_utilisateur,
                     'rubrique_libelle' => $r['libelle'],
-                    'rubrique_montant_prevu' => $r['montant_prevu'],
+                    'rubrique_montant' => $r['montant_prevu'],
                     'rubrique_description' => null,
                 ]);
             }

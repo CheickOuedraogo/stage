@@ -17,7 +17,7 @@ import { index as acPaiementsIndex } from '@/routes/ac/paiements';
 import { dashboard as porteurDashboard } from '@/routes/porteur';
 import { index as porteurDemandesIndex } from '@/routes/porteur/demandes';
 import { index as porteurProjetsIndex } from '@/routes/porteur/projets';
-import { index as porteurFaqIndex } from '@/routes/porteur/faq';
+import { index as porteurChatIndex } from '@/routes/porteur/chat';
 import { index as notificationsIndex } from '@/routes/notifications';
 import { edit as profileEdit } from '@/routes/profile';
 import type { User } from '@/types';
@@ -50,10 +50,10 @@ interface NavItem {
     badge?: number;
 }
 
-function getNavItems(role: User['utilisateur_role'], notifs: number): NavItem[] {
+function getNavItems(role: User['role_key'], notifs: number): NavItem[] {
     const notifBadge = notifs > 0 ? notifs : undefined;
 
-    const navByRole: Record<User['utilisateur_role'], NavItem[]> = {
+    const navByRole: Record<User['role_key'], NavItem[]> = {
         admin: [
             { label: 'Tableau de bord', href: adminDashboard.url(), icon: HomeIcon },
             { label: 'Utilisateurs', href: usersIndex.url(), icon: UsersIcon },
@@ -77,7 +77,7 @@ function getNavItems(role: User['utilisateur_role'], notifs: number): NavItem[] 
         porteur: [
             { label: 'Mes projets', href: porteurProjetsIndex.url(), icon: FolderIcon },
             { label: 'Mes demandes', href: porteurDemandesIndex.url(), icon: ClipboardDocumentListIcon },
-            { label: 'Assistance', href: porteurFaqIndex.url(), icon: QuestionMarkCircleIcon },
+            { label: 'Assistance', href: porteurChatIndex.url(), icon: QuestionMarkCircleIcon },
         ],
     };
 
@@ -100,7 +100,7 @@ export function Navbar({ user }: NavbarProps) {
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const { isDark, toggle: toggleDark } = useDarkMode();
 
-    const items = getNavItems(user.utilisateur_role, user.notifications_non_lues);
+    const items = getNavItems(user.role_key, user.notifications_non_lues);
 
     const handleLogout = () => {
         router.post(logout.url());

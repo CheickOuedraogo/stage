@@ -2,7 +2,7 @@ import AppLayout from '@/components/layout/AppLayout';
 import { password as profilePassword, update as profileUpdate } from '@/routes/profile';
 import type { PageProps } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { CameraIcon, CheckIcon, KeyIcon, UtilisateurIcon } from '@heroicons/react/24/outline';
+import { CameraIcon, CheckIcon, KeyIcon, UserIcon } from '@heroicons/react/24/outline';
 import { FormEvent, useRef, useState } from 'react';
 
 function getInitials(name: string) {
@@ -120,7 +120,7 @@ export default function ProfileEdit() {
                         <div>
                             <p className="text-lg font-semibold text-gray-900 dark:text-white">{user.utilisateur_nom}</p>
                             <p className="text-sm text-gray-500 dark:text-slate-400">{user.utilisateur_email}</p>
-                            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{roleLabels[user.utilisateur_role] ?? user.label_role}</p>
+                            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{roleLabels[user.role_key] ?? user.label_role}</p>
                             {previewUrl && (
                                 <p className="text-xs text-blue-600 mt-1 font-medium">
                                     Nouvelle photo sélectionnée — enregistrez pour appliquer
@@ -134,7 +134,7 @@ export default function ProfileEdit() {
                 <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
                     <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100 dark:border-slate-800">
                         <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
-                            <UtilisateurIcon className="w-4 h-4 text-gray-600 dark:text-slate-400" />
+                            <UserIcon className="w-4 h-4 text-gray-600 dark:text-slate-400" />
                         </div>
                         <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Informations personnelles</h3>
                     </div>

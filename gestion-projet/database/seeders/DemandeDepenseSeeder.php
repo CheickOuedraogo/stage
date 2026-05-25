@@ -7,7 +7,6 @@ use App\Enums\StatutDemande;
 use App\Models\Convention;
 use App\Models\DemandeDepense;
 use App\Models\Paiement;
-use App\Models\PaiementDirect;
 use App\Models\Rubrique;
 use App\Models\Utilisateur;
 use Carbon\Carbon;
@@ -20,11 +19,11 @@ class DemandeDepenseSeeder extends Seeder
     {
         $this->createDummyFiles();
 
-        $daf = Utilisateur::where('utilisateur_role', 'daf')->first();
-        $ac = Utilisateur::where('utilisateur_role', 'ac')->first();
+        $daf = Utilisateur::where('role_key', 'daf')->first();
+        $ac = Utilisateur::where('role_key', 'ac')->first();
 
         // Porteurs chargés par email pour un mapping fiable et explicite
-        $porteurs = Utilisateur::where('utilisateur_role', 'porteur')
+        $porteurs = Utilisateur::where('role_key', 'porteur')
             ->where('utilisateur_actif', true)
             ->get()
             ->keyBy('utilisateur_email');
@@ -273,42 +272,48 @@ class DemandeDepenseSeeder extends Seeder
                 ->where('rubrique_libelle', 'like', '%Réactifs%')
                 ->first();
 
-            PaiementDirect::create([
+            Paiement::create([
+                'type_paiement' => 'direct',
                 'id_convention' => $conv->id_utilisateur,
+                'id_projet' => $conv->id_projet,
                 'id_rubrique' => $rubrique?->id_utilisateur,
-                'paiement_direct_montant' => 4_200_000,
-                'paiement_direct_objet' => 'Règlement direct fournisseur — Azote liquide SONABHY (2 bonbonnes de 50L)',
-                'paiement_direct_description' => 'Paiement effectué directement par la Banque Mondiale auprès de SONABHY pour la fourniture '
+                'paiement_montant' => 4_200_000,
+                'paiement_objet' => 'Règlement direct fournisseur — Azote liquide SONABHY (2 bonbonnes de 50L)',
+                'paiement_description' => 'Paiement effectué directement par la Banque Mondiale auprès de SONABHY pour la fourniture '
                     ."d'azote liquide destiné à la conservation des échantillons biologiques à -196°C.",
-                'paiement_direct_date' => '2024-05-12',
-                'id_enregistreur_paiement_direct' => $jb->id_utilisateur,
+                'paiement_date' => '2024-05-12',
+                'id_enregistreur_paiement' => $jb->id_utilisateur,
             ]);
 
-            PaiementDirect::create([
+            Paiement::create([
+                'type_paiement' => 'direct',
                 'id_convention' => $conv->id_utilisateur,
+                'id_projet' => $conv->id_projet,
                 'id_rubrique' => null,
-                'paiement_direct_montant' => 1_500_000,
-                'paiement_direct_objet' => 'Frais de douane — équipements importés USA',
-                'paiement_direct_description' => 'Paiement des frais de douane pour le dédouanement du spectrophotomètre NanoDrop 2000 '
+                'paiement_montant' => 1_500_000,
+                'paiement_objet' => 'Frais de douane — équipements importés USA',
+                'paiement_description' => 'Paiement des frais de douane pour le dédouanement du spectrophotomètre NanoDrop 2000 '
                     .'importé des États-Unis (DGTCP/DRF Ouagadougou). Taxe de mise à la consommation + droits TEC CEDEAO.',
-                'paiement_direct_date' => '2024-07-30',
-                'id_enregistreur_paiement_direct' => $jb->id_utilisateur,
+                'paiement_date' => '2024-07-30',
+                'id_enregistreur_paiement' => $jb->id_utilisateur,
             ]);
         }
 
         // ── 11. Paiement direct — ENERGY-SOLAR / Prof. Boly ──────────────────
         $conv = Convention::where('convention_titre', 'like', '%AFD-SOLAR%')->first();
         if ($conv && $boly) {
-            PaiementDirect::create([
+            Paiement::create([
+                'type_paiement' => 'direct',
                 'id_convention' => $conv->id_utilisateur,
+                'id_projet' => $conv->id_projet,
                 'id_rubrique' => null,
-                'paiement_direct_montant' => 3_800_000,
-                'paiement_direct_objet' => 'Frais de mission expert AFD — Évaluation technique mi-parcours',
-                'paiement_direct_description' => "Prise en charge directe par l'AFD des frais de mission de l'expert évaluateur M. Laurent Dupont "
+                'paiement_montant' => 3_800_000,
+                'paiement_objet' => 'Frais de mission expert AFD — Évaluation technique mi-parcours',
+                'paiement_description' => "Prise en charge directe par l'AFD des frais de mission de l'expert évaluateur M. Laurent Dupont "
                     ."(Ingénieur en énergies renouvelables, Paris) pour la mission d'évaluation technique du projet "
                     .'du 03 au 14 novembre 2024 à Ouagadougou et Koudougou.',
-                'paiement_direct_date' => '2024-11-14',
-                'id_enregistreur_paiement_direct' => $boly->id_utilisateur,
+                'paiement_date' => '2024-11-14',
+                'id_enregistreur_paiement' => $boly->id_utilisateur,
             ]);
         }
     }

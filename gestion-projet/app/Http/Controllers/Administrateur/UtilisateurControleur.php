@@ -29,7 +29,7 @@ class UtilisateurControleur extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        return Inertia::render('admin/Utilisateurs/Index', [
+        return Inertia::render('admin/Users/Index', [
             'users' => $users,
             'filters' => $request->only(['role', 'search', 'active']),
             'roles' => collect(RoleUtilisateur::cases())->map(fn ($r) => [
@@ -43,7 +43,7 @@ class UtilisateurControleur extends Controller
     {
         $this->authorize('create', Utilisateur::class);
 
-        return Inertia::render('admin/Utilisateurs/Form', [
+        return Inertia::render('admin/Users/Form', [
             'roles' => collect(RoleUtilisateur::cases())->map(fn ($r) => [
                 'value' => $r->value,
                 'label' => $r->label(),
@@ -64,8 +64,8 @@ class UtilisateurControleur extends Controller
         JournalAudit::log(
             'created',
             $user,
-            newValues: ['utilisateur_nom' => $user->utilisateur_nom, 'utilisateur_email' => $user->utilisateur_email, 'utilisateur_role' => $user->utilisateur_role->value],
-            description: "Création de l'utilisateur « {$user->utilisateur_nom} » ({$user->utilisateur_role->shortLabel()})",
+            newValues: ['utilisateur_nom' => $user->utilisateur_nom, 'utilisateur_email' => $user->utilisateur_email, 'role_key' => $user->role_key->value],
+            description: "Création de l'utilisateur « {$user->utilisateur_nom} » ({$user->role_key->shortLabel()})",
         );
 
         return redirect()->route('admin.users.index')
@@ -76,8 +76,8 @@ class UtilisateurControleur extends Controller
     {
         $this->authorize('update', $user);
 
-        return Inertia::render('admin/Utilisateurs/Form', [
-            'user' => $user->only(['id', 'utilisateur_nom', 'utilisateur_email', 'utilisateur_role', 'utilisateur_telephone', 'utilisateur_actif']),
+        return Inertia::render('admin/Users/Form', [
+            'user' => $user->only(['id_utilisateur', 'utilisateur_nom', 'utilisateur_email', 'role_key', 'utilisateur_telephone', 'utilisateur_actif']),
             'roles' => collect(RoleUtilisateur::cases())->map(fn ($r) => [
                 'value' => $r->value,
                 'label' => $r->label(),
@@ -95,9 +95,9 @@ class UtilisateurControleur extends Controller
             $data['utilisateur_mot_de_passe'] = Hash::make($request->validated('utilisateur_mot_de_passe'));
         }
 
-        $oldValues = $user->only(['utilisateur_nom', 'utilisateur_email', 'utilisateur_role', 'utilisateur_telephone', 'utilisateur_actif']);
+        $oldValues = $user->only(['utilisateur_nom', 'utilisateur_email', 'role_key', 'utilisateur_telephone', 'utilisateur_actif']);
         $user->update($data);
-        $newValues = array_intersect_key($user->fresh()->only(['utilisateur_nom', 'utilisateur_email', 'utilisateur_role', 'utilisateur_telephone', 'utilisateur_actif']), $oldValues);
+        $newValues = array_intersect_key($user->fresh()->only(['utilisateur_nom', 'utilisateur_email', 'role_key', 'utilisateur_telephone', 'utilisateur_actif']), $oldValues);
         $changed = array_filter(
             $newValues,
             fn ($v, $k) => $oldValues[$k] !== $v,

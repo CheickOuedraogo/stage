@@ -17,7 +17,7 @@ class MaintenanceController extends Controller
     public function index(): Response
     {
         return Inertia::render('admin/Maintenance', [
-            'maintenance' => $this->maintenanceService->getStatus(),
+            'maintenance' => $this->maintenanceService->getStatut(),
         ]);
     }
 
@@ -33,9 +33,9 @@ class MaintenanceController extends Controller
         ]);
 
         if ($validated['active']) {
-            $this->maintenanceService->enable(
-                reason: $validated['reason'] ?? 'Maintenance en cours.',
-                until: $validated['until'] ?? null,
+            $this->maintenanceService->activer(
+                raison: $validated['reason'] ?? 'Maintenance en cours.',
+                jusqua: $validated['until'] ?? null,
             );
 
             JournalAudit::log('maintenance_enabled', description: 'Mode maintenance activé par '.auth()->user()->utilisateur_nom);
@@ -43,7 +43,7 @@ class MaintenanceController extends Controller
             return back()->with('success', 'Mode maintenance activé. Tous les utilisateurs ont été déconnectés.');
         }
 
-        $this->maintenanceService->disable();
+        $this->maintenanceService->desactiver();
 
         JournalAudit::log('maintenance_disabled', description: 'Mode maintenance désactivé par '.auth()->user()->utilisateur_nom);
 

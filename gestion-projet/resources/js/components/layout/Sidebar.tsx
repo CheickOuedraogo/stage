@@ -15,7 +15,7 @@ import { index as dafProjetsIndex } from '@/routes/daf/projets';
 import { index as dafRapportsIndex } from '@/routes/daf/rapports';
 import { index as dafRubriquesIndex } from '@/routes/daf/rubriques';
 import { index as dafVersementsIndex } from '@/routes/daf/versements';
-import { index as porteurFaqIndex } from '@/routes/porteur/faq';
+import { index as porteurChatIndex } from '@/routes/porteur/chat';
 import { index as projetsIndex } from '@/routes/porteur/projets';
 import { index as porteurDemandesIndex } from '@/routes/porteur/demandes';
 import { index as notificationsIndex } from '@/routes/notifications';
@@ -44,10 +44,10 @@ interface NavItem {
     badge?: number | string;
 }
 
-function getNavItems(role: User['utilisateur_role'], notifs: number): NavItem[] {
+function getNavItems(role: User['role_key'], notifs: number): NavItem[] {
     const notifBadge = notifs > 0 ? notifs : undefined;
 
-    const navByRole: Record<User['utilisateur_role'], NavItem[]> = {
+    const navByRole: Record<User['role_key'], NavItem[]> = {
         admin: [
             { label: 'Tableau de bord', href: adminDashboard.url(), icon: HomeIcon },
             { label: 'Utilisateurs', href: usersIndex.url(), icon: UsersIcon },
@@ -76,7 +76,7 @@ function getNavItems(role: User['utilisateur_role'], notifs: number): NavItem[] 
             { label: 'Mes Projets', href: projetsIndex.url(), icon: FolderIcon },
             { label: 'Mes Demandes', href: porteurDemandesIndex.url(), icon: ClipboardDocumentListIcon },
             { label: 'Mon Profil', href: profileEdit.url(), icon: UserCircleIcon },
-            { label: 'Assistance', href: porteurFaqIndex.url(), icon: ChatBubbleLeftRightIcon },
+            { label: 'Assistance', href: porteurChatIndex.url(), icon: ChatBubbleLeftRightIcon },
             { label: 'Notifications', href: notificationsIndex.url(), icon: BellIcon, badge: notifBadge },
         ],
     };
@@ -98,7 +98,7 @@ interface SidebarProps {
 
 export function Sidebar({ user, collapsed = false }: SidebarProps) {
     const { url } = usePage();
-    const items = getNavItems(user.utilisateur_role, user.notifications_non_lues);
+    const items = getNavItems(user.role_key, user.notifications_non_lues);
 
     return (
         <aside

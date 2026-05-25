@@ -1,6 +1,6 @@
 import AppLayout from '@/components/layout/AppLayout';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { show as demandeShow } from '@/actions/App/Http/Controllers/Ac/DemandeDepenseController';
+import { show as demandeShow } from '@/actions/App/Http/Controllers/AgentComptable/DemandeDepenseController';
 import { Head, Link, router } from '@inertiajs/react';
 import { ClipboardDocumentCheckIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';

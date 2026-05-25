@@ -18,16 +18,16 @@ class MaintenanceMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         // Auto-disable maintenance if scheduled end time has passed
-        $until = Parametre::getMaintenanceUntil();
+        $until = Parametre::getMaintenanceJusqua();
 
-        if ($until && $until->isPast() && Parametre::isMaintenanceActive()) {
+        if ($until && $until->isPast() && Parametre::estMaintenanceActive()) {
             Parametre::set('maintenance_mode', 'false');
             Parametre::set('maintenance_reason', '');
             Parametre::set('maintenance_until', '');
         }
 
         // Check if maintenance is still active after potential auto-disable
-        if (! Parametre::isMaintenanceActive()) {
+        if (! Parametre::estMaintenanceActive()) {
             return $next($request);
         }
 

@@ -49,6 +49,11 @@ class Projet extends Model
         return $this->hasMany(Convention::class, 'id_projet');
     }
 
+    public function paiements(): HasManyThrough
+    {
+        return $this->hasManyThrough(Paiement::class, Convention::class, 'id_projet', 'id_convention');
+    }
+
     public function versements(): HasManyThrough
     {
         return $this->hasManyThrough(Versement::class, Convention::class, 'id_projet', 'id_convention');

@@ -102,7 +102,7 @@ Ligne budgétaire d'une convention.
 | id_rubrique | Identifiant unique | Entier | PK, NOT NULL |
 | id_convention | Convention parente | Entier | FK (conventions), NOT NULL |
 | rubrique_libelle | Nom de la dépense autorisée | Chaîne | NOT NULL |
-| rubrique_montant_prevu | Montant alloué à cette ligne | Entier | NOT NULL |
+| rubrique_montant | Montant alloué à cette ligne | Entier | NOT NULL |
 | rubrique_description | Détails sur l'utilisation | Texte | NULLABLE |
 | cree_le | Date de création | Timestamp | NOT NULL |
 | mis_a_jour_le | Date de modification | Timestamp | NOT NULL |

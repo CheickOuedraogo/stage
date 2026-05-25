@@ -21,9 +21,9 @@ class StockageUtilisateurDemande extends FormRequest
     {
         return [
             'utilisateur_nom' => ['required', 'string', 'max:255'],
-            'utilisateur_email' => ['required', 'string', 'utilisateur_email', 'max:255', 'unique:users,email'],
+            'utilisateur_email' => ['required', 'string', 'email', 'max:255', 'unique:utilisateurs,utilisateur_email'],
             'utilisateur_mot_de_passe' => ['required', Password::min(8)],
-            'utilisateur_role' => ['required', Rule::enum(RoleUtilisateur::class)],
+            'role_key' => ['required', Rule::enum(RoleUtilisateur::class)],
             'utilisateur_telephone' => ['nullable', 'string', 'max:20'],
         ];
     }
@@ -34,11 +34,11 @@ class StockageUtilisateurDemande extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Le nom est obligatoire.',
-            'email.required' => "L'adresse e-mail est obligatoire.",
-            'email.unique' => 'Cette adresse e-mail est déjà utilisée.',
-            'password.required' => 'Le mot de passe est obligatoire.',
-            'utilisateur_role.required' => 'Le rôle est obligatoire.',
+            'utilisateur_nom.required' => 'Le nom est obligatoire.',
+            'utilisateur_email.required' => "L'adresse e-mail est obligatoire.",
+            'utilisateur_email.unique' => 'Cette adresse e-mail est déjà utilisée.',
+            'utilisateur_mot_de_passe.required' => 'Le mot de passe est obligatoire.',
+            'role_key.required' => 'Le rôle est obligatoire.',
         ];
     }
 }

@@ -8,6 +8,7 @@ use App\Enums\StatutDemande;
 use App\Enums\StatutProjet;
 use App\Models\Convention;
 use App\Models\DemandeDepense;
+use App\Models\Faq;
 use App\Models\JournalAudit;
 use App\Models\Paiement;
 use App\Models\Projet;
@@ -21,7 +22,7 @@ class DashboardController extends Controller
 {
     public function admin(): Response
     {
-        $recentJournalAudits = JournalAudit::with('utilisateur:id_utilisateur,utilisateur_nom,utilisateur_role')
+        $recentJournalAudits = JournalAudit::with('utilisateur:id_utilisateur,utilisateur_nom,role_key')
             ->latest('cree_le')
             ->limit(8)
             ->get()
@@ -30,7 +31,7 @@ class DashboardController extends Controller
                 'action' => $log->audit_action,
                 'description' => $log->audit_description,
                 'user' => $log->utilisateur?->utilisateur_nom ?? 'Système',
-                'user_role' => $log->utilisateur?->utilisateur_role?->shortLabel(),
+                'user_role' => $log->utilisateur?->role_key?->shortLabel(),
                 'cree_le' => $log->cree_le?->diffForHumans() ?? '—',
             ]);
 
@@ -47,12 +48,13 @@ class DashboardController extends Controller
                 'projets_actifs' => Projet::where('projet_statut', StatutProjet::EnCours)->count(),
                 'total_conventions' => Convention::count(),
                 'demandes_en_cours' => DemandeDepense::whereNotIn('demande_statut', [
-                    StatutDemande::RejetéeDaf->value,
-                    StatutDemande::RejetéeAgentComptable->value,
+                    StatutDemande::RejeteeDaf->value,
+                    StatutDemande::RejeteeAgentComptable->value,
                     StatutDemande::Terminee->value,
                 ])->count(),
             ],
             'recent_audit_logs' => $recentJournalAudits,
+            'faq_items' => $this->getFaqForRole(RoleUtilisateur::Administrateur),
         ]);
     }
 
@@ -62,7 +64,7 @@ class DashboardController extends Controller
         $conventionsActives = Convention::where('convention_statut', StatutConvention::Active)->count();
 
         $demandesEnAttente = DemandeDepense::where('demande_statut', StatutDemande::Soumise)->count();
-        $demandesEnAttenteAgentComptable = DemandeDepense::where('demande_statut', StatutDemande::ValidéeDaf)->count();
+        $demandesEnAttenteAgentComptable = DemandeDepense::where('demande_statut', StatutDemande::ValideeDaf)->count();
         $rapportsSoumis = DemandeDepense::where('demande_statut', StatutDemande::RapportSoumis)->count();
 
         $budgetTotal = Convention::where('convention_statut', StatutConvention::Active)->sum(\DB::raw('convention_montant * convention_taux_conversion'));
@@ -76,7 +78,7 @@ class DashboardController extends Controller
             'convention:id_convention,convention_titre',
             'porteur:id_utilisateur,utilisateur_nom',
         ])
-            ->whereIn('demande_statut', [StatutDemande::Soumise, StatutDemande::ValidéeDaf, StatutDemande::RapportSoumis])
+            ->whereIn('demande_statut', [StatutDemande::Soumise, StatutDemande::ValideeDaf, StatutDemande::RapportSoumis])
             ->latest()
             ->limit(5)
             ->get()
@@ -127,7 +129,7 @@ class DashboardController extends Controller
             ->map(fn (Rubrique $r) => [
                 'libelle' => mb_strimwidth($r->rubrique_libelle, 0, 22, '…'),
                 'consomme' => $r->demandesDepenses->sum('demande_montant'),
-                'prevu' => $r->rubrique_montant_prevu,
+                'prevu' => $r->rubrique_montant,
             ])
             ->filter(fn ($item) => $item['consomme'] > 0)
             ->sortByDesc('consomme')
@@ -148,12 +150,13 @@ class DashboardController extends Controller
             'versements_par_projet' => $versementsParProjet,
             'paiements_par_mois' => $paiementsParMois,
             'top_rubriques' => $topRubriques,
+            'faq_items' => $this->getFaqForRole(RoleUtilisateur::Daf),
         ]);
     }
 
     public function ac(): Response
     {
-        $demandesEnAttente = DemandeDepense::where('demande_statut', StatutDemande::ValidéeDaf)->count();
+        $demandesEnAttente = DemandeDepense::where('demande_statut', StatutDemande::ValideeDaf)->count();
         $rapportsSoumis = DemandeDepense::where('demande_statut', StatutDemande::RapportSoumis)->count();
         $paiementsEffectues = DemandeDepense::where('demande_statut', StatutDemande::Payee)
             ->orWhere('demande_statut', StatutDemande::RapportSoumis)
@@ -166,7 +169,7 @@ class DashboardController extends Controller
             'convention:id_convention,convention_titre',
             'porteur:id_utilisateur,utilisateur_nom',
         ])
-            ->whereIn('demande_statut', [StatutDemande::ValidéeDaf, StatutDemande::RapportSoumis])
+            ->whereIn('demande_statut', [StatutDemande::ValideeDaf, StatutDemande::RapportSoumis])
             ->latest()
             ->limit(5)
             ->get()
@@ -210,6 +213,7 @@ class DashboardController extends Controller
             ],
             'demandes_recentes' => $demandesRecentes,
             'paiements_recents' => $paiementsRecents,
+            'faq_items' => $this->getFaqForRole(RoleUtilisateur::AgentComptable),
         ]);
     }
 
@@ -221,7 +225,7 @@ class DashboardController extends Controller
         $projetsAgentComptabletifsCount = Projet::forPorteur($porteur->id_utilisateur)->where('projet_statut', StatutProjet::EnCours)->count();
 
         $demandesActives = DemandeDepense::where('id_porteur', $porteur->id_utilisateur)
-            ->whereNotIn('demande_statut', [StatutDemande::RejetéeDaf, StatutDemande::RejetéeAgentComptable, StatutDemande::Terminee])
+            ->whereNotIn('demande_statut', [StatutDemande::RejeteeDaf, StatutDemande::RejeteeAgentComptable, StatutDemande::Terminee])
             ->count();
         $demandesTotal = DemandeDepense::where('id_porteur', $porteur->id_utilisateur)->count();
 
@@ -281,5 +285,16 @@ class DashboardController extends Controller
             'demandes_recentes' => $demandesRecentes,
             'projets_budget' => $projetsBudget,
         ]);
+    }
+
+    /** @return list<array{id: int, question: string, reponse: string}> */
+    private function getFaqForRole(RoleUtilisateur $role): array
+    {
+        return Faq::active()
+            ->get()
+            ->filter(fn (Faq $f) => $f->isVisibleFor($role))
+            ->map(fn (Faq $f) => ['id' => $f->id_faq, 'question' => $f->faq_question, 'reponse' => $f->faq_reponse])
+            ->values()
+            ->toArray();
     }
 }

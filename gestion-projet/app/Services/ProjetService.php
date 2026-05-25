@@ -32,8 +32,8 @@ class ProjetService
         $demandesActives = DemandeDepense::whereIn('id_convention', $conventionIds)
             ->whereNotIn('demande_statut', [
                 StatutDemande::Terminee->value,
-                StatutDemande::RejetéeDaf->value,
-                StatutDemande::RejetéeAgentComptable->value,
+                StatutDemande::RejeteeDaf->value,
+                StatutDemande::RejeteeAgentComptable->value,
             ])
             ->count();
 
@@ -121,7 +121,7 @@ class ProjetService
             'montant_fcfa' => $c->montant_fcfa,
             'total_versements' => $c->versements->sum('versement_montant'),
             'total_depenses' => $c->rubriques->flatMap->demandesDepenses->sum('demande_montant'),
-            'total_paiements_directs' => $c->paiementsDirects->sum('paiement_direct_montant'),
+            'total_paiements_directs' => $c->paiementsDirects->sum('paiement_montant'),
             'solde' => $c->montant_fcfa - $c->versements->sum('versement_montant'),
         ])->values();
 
@@ -136,11 +136,11 @@ class ProjetService
         )->values();
 
         $paiementsDirects = $projet->conventions->flatMap(fn (Convention $c) => $c->paiementsDirects->map(fn ($p) => [
-            'objet' => $p->paiement_direct_objet,
-            'montant' => $p->paiement_direct_montant,
+            'objet' => $p->paiement_objet,
+            'montant' => $p->paiement_montant,
             'rubrique' => $p->rubrique?->rubrique_libelle,
             'convention' => $c->bailleur->bailleur_sigle ?? $c->bailleur->bailleur_nom,
-            'date_paiement' => $p->paiement_direct_date?->toDateString(),
+            'date_paiement' => $p->paiement_date?->toDateString(),
         ])
         )->values();
 

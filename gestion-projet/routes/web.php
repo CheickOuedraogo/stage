@@ -22,7 +22,7 @@ use App\Http\Controllers\Daf\VersementController as DafVersementController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Porteur\DemandeDepenseController as PorteurDemandeDepenseController;
-use App\Http\Controllers\Porteur\FaqController as PorteurFaqController;
+use App\Http\Controllers\Porteur\MessageChatControleur as PorteurMessageChatControleur;
 use App\Http\Controllers\Porteur\ProjetController as PorteurProjetController;
 use App\Http\Controllers\Profile\ProfileController;
 use Illuminate\Support\Facades\Auth;
@@ -123,8 +123,9 @@ Route::middleware(['auth'])->group(function () {
 
         // Chat DAF
         Route::get('/assistance', [DafMessageChatControleur::class, 'index'])->name('chat.index');
-        Route::post('/assistance', [DafMessageChatControleur::class, 'send'])->name('chat.send');
-        Route::get('/assistance/poll', [DafMessageChatControleur::class, 'poll'])->name('chat.poll');
+        Route::get('/assistance/{user}', [DafMessageChatControleur::class, 'show'])->name('chat.show');
+        Route::post('/assistance/{user}', [DafMessageChatControleur::class, 'send'])->name('chat.send');
+        Route::get('/assistance/{user}/poll', [DafMessageChatControleur::class, 'poll'])->name('chat.poll');
 
         // Rapports
         Route::get('/rapports', [DafRapportController::class, 'index'])->name('rapports.index');
@@ -153,8 +154,9 @@ Route::middleware(['auth'])->group(function () {
 
         // Chat AC
         Route::get('/assistance', [AgentComptableMessageChatControleur::class, 'index'])->name('chat.index');
-        Route::post('/assistance', [AgentComptableMessageChatControleur::class, 'send'])->name('chat.send');
-        Route::get('/assistance/poll', [AgentComptableMessageChatControleur::class, 'poll'])->name('chat.poll');
+        Route::get('/assistance/{user}', [AgentComptableMessageChatControleur::class, 'show'])->name('chat.show');
+        Route::post('/assistance/{user}', [AgentComptableMessageChatControleur::class, 'send'])->name('chat.send');
+        Route::get('/assistance/{user}/poll', [AgentComptableMessageChatControleur::class, 'poll'])->name('chat.poll');
 
         // Demandes de dépenses
         Route::get('/demandes', [AgentComptableDemandeDepenseController::class, 'index'])->name('demandes.index');
@@ -186,8 +188,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/demandes/{demande}/justificatif', [PorteurDemandeDepenseController::class, 'downloadJustificatif'])->name('demandes.justificatif');
         Route::get('/demandes/{demande}/rapport-pdf', [PorteurDemandeDepenseController::class, 'downloadRapport'])->name('demandes.rapport-pdf');
 
-        // FAQ
-        Route::get('/assistance', [PorteurFaqController::class, 'index'])->name('faq.index');
+        // Chat Porteur + FAQ
+        Route::get('/faq', [\App\Http\Controllers\Porteur\FaqController::class, 'index'])->name('faq.index');
+        Route::get('/assistance', [PorteurMessageChatControleur::class, 'index'])->name('chat.index');
+        Route::get('/assistance/{user}', [PorteurMessageChatControleur::class, 'show'])->name('chat.show');
+        Route::post('/assistance/{user}', [PorteurMessageChatControleur::class, 'send'])->name('chat.send');
+        Route::get('/assistance/{user}/poll', [PorteurMessageChatControleur::class, 'poll'])->name('chat.poll');
     });
 });
 

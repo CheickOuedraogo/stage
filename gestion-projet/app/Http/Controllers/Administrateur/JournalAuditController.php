@@ -15,21 +15,21 @@ class JournalAuditController extends Controller
     {
         $userId = $request->query('user_id');
 
-        $logs = JournalAudit::with('utilisateur:id_utilisateur,utilisateur_nom,utilisateur_email,utilisateur_role')
+        $logs = JournalAudit::with('utilisateur:id_utilisateur,utilisateur_nom,utilisateur_email,role_key')
             ->when($userId, fn ($q) => $q->where('id_utilisateur', $userId))
             ->orderByDesc('cree_le')
             ->paginate(50, ['id_audit', 'id_utilisateur', 'audit_action', 'audit_description', 'audit_entite_type', 'audit_entite_id', 'audit_anciennes_valeurs', 'audit_nouvelles_valeurs', 'audit_adresse_ip', 'cree_le'])
             ->withQueryString();
 
-        $users = Utilisateur::select('id_utilisateur', 'utilisateur_nom', 'utilisateur_email', 'utilisateur_role')
+        $users = Utilisateur::select('id_utilisateur', 'utilisateur_nom', 'utilisateur_email', 'role_key')
             ->orderBy('utilisateur_nom')
             ->get()
             ->map(fn ($u) => [
                 'id' => $u->id_utilisateur,
                 'utilisateur_nom' => $u->utilisateur_nom,
                 'utilisateur_email' => $u->utilisateur_email,
-                'role' => $u->utilisateur_role?->value,
-                'label_role' => $u->utilisateur_role?->shortLabel(),
+                'role' => $u->role_key?->value,
+                'label_role' => $u->role_key?->shortLabel(),
             ]);
 
         return Inertia::render('admin/JournalAudit', [

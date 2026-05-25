@@ -15,9 +15,18 @@ use Illuminate\Validation\ValidationException;
 
 class DemandeDepenseService
 {
+    public function assertConventionARubriques(Convention $convention): void
+    {
+        if ($convention->rubriques()->count() === 0) {
+            throw ValidationException::withMessages([
+                'convention_id' => 'Cette convention ne contient aucune rubrique budgétaire. Ajoutez-en avant de soumettre une demande.',
+            ]);
+        }
+    }
+
     public function assertPasDeDemandeActive(Convention $convention, ?int $excludeId = null): void
     {
-        $query = DemandeDepense::where('id_convention', $convention->id_utilisateur)->actif();
+        $query = DemandeDepense::where('id_convention', $convention->id_convention)->actif();
 
         if ($excludeId) {
             $query->where('id_demande', '!=', $excludeId);
@@ -44,8 +53,8 @@ class DemandeDepenseService
             ->when($excludeDemande, fn ($q) => $q->where('id_demande', '!=', $excludeDemande))
             ->sum('demande_montant');
 
-        $consommePaiementsDirects = $rubrique->paiementsDirects()->sum('paiement_direct_montant');
-        $solde = $rubrique->rubrique_montant_prevu - $consomme - $consommePaiementsDirects;
+        $consommePaiementsDirects = $rubrique->paiementsDirects()->sum('paiement_montant');
+        $solde = $rubrique->rubrique_montant - $consomme - $consommePaiementsDirects;
 
         if ($montant > $solde) {
             throw ValidationException::withMessages([
@@ -57,7 +66,7 @@ class DemandeDepenseService
     public function validerDaf(DemandeDepense $demande, Utilisateur $daf): void
     {
         abort_unless($demande->demande_statut === StatutDemande::Soumise, 403);
-        abort_unless($daf->utilisateur_role === RoleUtilisateur::Daf, 403);
+        abort_unless($daf->role_key === RoleUtilisateur::Daf, 403);
 
         $demande->update([
             'demande_statut' => StatutDemande::ValideeDaf,
@@ -73,7 +82,7 @@ class DemandeDepenseService
     public function rejeterDaf(DemandeDepense $demande, Utilisateur $daf, string $motif): void
     {
         abort_unless($demande->demande_statut === StatutDemande::Soumise, 403);
-        abort_unless($daf->utilisateur_role === RoleUtilisateur::Daf, 403);
+        abort_unless($daf->role_key === RoleUtilisateur::Daf, 403);
 
         $demande->update([
             'demande_statut' => StatutDemande::RejeteeDaf,
@@ -86,7 +95,7 @@ class DemandeDepenseService
     public function validerAgentComptable(DemandeDepense $demande, Utilisateur $ac): void
     {
         abort_unless($demande->demande_statut === StatutDemande::ValideeDaf, 403);
-        abort_unless($ac->utilisateur_role === RoleUtilisateur::AgentComptable, 403);
+        abort_unless($ac->role_key === RoleUtilisateur::AgentComptable, 403);
 
         $demande->update([
             'demande_statut' => StatutDemande::ValideeAgentComptable,
@@ -102,7 +111,7 @@ class DemandeDepenseService
     public function rejeterAgentComptable(DemandeDepense $demande, Utilisateur $ac, string $motif): void
     {
         abort_unless($demande->demande_statut === StatutDemande::ValideeDaf, 403);
-        abort_unless($ac->utilisateur_role === RoleUtilisateur::AgentComptable, 403);
+        abort_unless($ac->role_key === RoleUtilisateur::AgentComptable, 403);
 
         $demande->update([
             'demande_statut' => StatutDemande::RejeteeAgentComptable,
@@ -116,7 +125,7 @@ class DemandeDepenseService
     public function enregistrerPaiement(DemandeDepense $demande, Utilisateur $ac, array $data): Paiement
     {
         abort_unless($demande->demande_statut === StatutDemande::ValideeAgentComptable, 403);
-        abort_unless($ac->utilisateur_role === RoleUtilisateur::AgentComptable, 403);
+        abort_unless($ac->role_key === RoleUtilisateur::AgentComptable, 403);
 
         $paiement = Paiement::create([
             'id_demande' => $demande->id_demande,
@@ -152,7 +161,7 @@ class DemandeDepenseService
     public function validerRapportDaf(DemandeDepense $demande, Utilisateur $daf): void
     {
         abort_unless($demande->demande_statut === StatutDemande::RapportSoumis, 403);
-        abort_unless($daf->utilisateur_role === RoleUtilisateur::Daf, 403);
+        abort_unless($daf->role_key === RoleUtilisateur::Daf, 403);
 
         DB::transaction(function () use ($demande) {
             $demande->newQuery()->where('id_demande', $demande->id_demande)->lockForUpdate()->sole();
@@ -169,7 +178,7 @@ class DemandeDepenseService
     public function validerRapportAgentComptable(DemandeDepense $demande, Utilisateur $ac): void
     {
         abort_unless($demande->demande_statut === StatutDemande::RapportSoumis, 403);
-        abort_unless($ac->utilisateur_role === RoleUtilisateur::AgentComptable, 403);
+        abort_unless($ac->role_key === RoleUtilisateur::AgentComptable, 403);
 
         DB::transaction(function () use ($demande) {
             $demande->newQuery()->where('id_demande', $demande->id_demande)->lockForUpdate()->sole();
@@ -183,11 +192,11 @@ class DemandeDepenseService
         });
     }
 
-    public function rejeterRapport(DemandeDepense $demande, Utilisateur $user): void
+    public function rejeterRapport(DemandeDepense $demande, Utilisateur $user, ?string $motif = null): void
     {
         abort_unless($demande->demande_statut === StatutDemande::RapportSoumis, 403);
         abort_unless(
-            in_array($user->utilisateur_role, [RoleUtilisateur::Daf, RoleUtilisateur::AgentComptable]),
+            in_array($user->role_key, [RoleUtilisateur::Daf, RoleUtilisateur::AgentComptable]),
             403
         );
 
@@ -196,13 +205,18 @@ class DemandeDepenseService
             'demande_rapport' => null,
             'demande_rapport_valide_daf' => false,
             'demande_rapport_valide_ac' => false,
+            'demande_rapport_motif_rejet' => $motif,
         ]);
+
+        $message = $motif
+            ? "Rapport rejeté : {$motif}"
+            : 'Rapport rejeté, veuillez soumettre un nouveau rapport.';
 
         Notification::pourDemandeStatut(
             $demande->id_porteur,
             $demande,
             StatutDemande::Payee->label(),
-            'Rapport rejeté, veuillez soumettre un nouveau rapport.',
+            $message,
         );
     }
 
@@ -220,7 +234,7 @@ class DemandeDepenseService
 
     private function notifyDafAgentComptable(DemandeDepense $demande, StatutDemande $statut): void
     {
-        Utilisateur::whereIn('utilisateur_role', [RoleUtilisateur::Daf->value, RoleUtilisateur::AgentComptable->value])
+        Utilisateur::whereIn('role_key', [RoleUtilisateur::Daf->value, RoleUtilisateur::AgentComptable->value])
             ->get()
             ->each(fn (Utilisateur $u) => Notification::pourDemandeStatut($u->id_utilisateur, $demande, $statut->label()));
     }

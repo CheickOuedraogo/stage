@@ -23,9 +23,9 @@ class MiseAJourUtilisateurDemande extends FormRequest
 
         return [
             'utilisateur_nom' => ['required', 'string', 'max:255'],
-            'utilisateur_email' => ['required', 'string', 'utilisateur_email', 'max:255', Rule::unique('users', 'utilisateur_email')->ignore($userId, 'id_utilisateur')],
+            'utilisateur_email' => ['required', 'string', 'email', 'max:255', Rule::unique('utilisateurs', 'utilisateur_email')->ignore($userId, 'id_utilisateur')],
             'utilisateur_mot_de_passe' => ['nullable', Password::min(8)],
-            'utilisateur_role' => ['required', Rule::enum(RoleUtilisateur::class)],
+            'role_key' => ['required', Rule::enum(RoleUtilisateur::class)],
             'utilisateur_telephone' => ['nullable', 'string', 'max:20'],
         ];
     }
@@ -36,10 +36,10 @@ class MiseAJourUtilisateurDemande extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Le nom est obligatoire.',
-            'email.required' => "L'adresse e-mail est obligatoire.",
-            'email.unique' => 'Cette adresse e-mail est déjà utilisée.',
-            'utilisateur_role.required' => 'Le rôle est obligatoire.',
+            'utilisateur_nom.required' => 'Le nom est obligatoire.',
+            'utilisateur_email.required' => "L'adresse e-mail est obligatoire.",
+            'utilisateur_email.unique' => 'Cette adresse e-mail est déjà utilisée.',
+            'role_key.required' => 'Le rôle est obligatoire.',
         ];
     }
 }

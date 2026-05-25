@@ -11,8 +11,9 @@ import {
     ClipboardDocumentListIcon,
     FolderIcon,
     ShieldCheckIcon,
-    UtilisateursIcon,
+    UsersIcon,
 } from '@heroicons/react/24/outline';
+import { FaqAccordion, type FaqItem } from '@/components/shared/FaqAccordion';
 import { FormEvent } from 'react';
 
 interface AuditLogEntry {
@@ -35,6 +36,7 @@ interface AdminDashboardProps {
         demandes_en_cours: number;
     };
     recent_audit_logs: AuditLogEntry[];
+    faq_items: FaqItem[];
 }
 
 type BadgeVariant = 'admin' | 'daf' | 'ac' | 'porteur' | 'default';
@@ -46,7 +48,7 @@ const roleVariants: Record<string, BadgeVariant> = {
     Porteur: 'porteur',
 };
 
-export default function AdminDashboard({ stats, recent_audit_logs }: AdminDashboardProps) {
+export default function AdminDashboard({ stats, recent_audit_logs, faq_items }: AdminDashboardProps) {
     const { auth, maintenance } = usePage<PageProps>().props;
     const inactive = stats.total_users - stats.active_users;
 
@@ -78,7 +80,7 @@ export default function AdminDashboard({ stats, recent_audit_logs }: AdminDashbo
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <Link href={usersIndex.url()} className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4 hover:border-blue-300 hover:shadow-sm transition-all">
                     <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center mb-3">
-                        <UtilisateursIcon className="w-5 h-5 text-blue-600" />
+                        <UsersIcon className="w-5 h-5 text-blue-600" />
                     </div>
                     <p className="text-2xl font-bold font-mono text-slate-900 dark:text-white">{stats.total_users}</p>
                     <p className="text-xs text-slate-500 mt-0.5">Utilisateurs</p>
@@ -248,6 +250,7 @@ export default function AdminDashboard({ stats, recent_audit_logs }: AdminDashbo
                     </div>
                 )}
             </div>
+            <FaqAccordion items={faq_items} />
         </AppLayout>
     );
 }

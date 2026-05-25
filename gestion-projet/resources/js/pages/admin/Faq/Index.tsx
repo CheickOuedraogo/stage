@@ -4,7 +4,7 @@ import {
     store as faqStore,
     update as faqUpdate,
     destroy as faqDestroy,
-} from '@/actions/App/Http/Controllers/Admin/FaqController';
+} from '@/actions/App/Http/Controllers/Administrateur/FaqController';
 import type { PageProps } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import {

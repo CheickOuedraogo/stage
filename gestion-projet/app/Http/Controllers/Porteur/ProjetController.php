@@ -28,7 +28,7 @@ class ProjetController extends Controller
             ->latest()
             ->get()
             ->map(fn (Projet $p) => [
-                'id' => $p->id_utilisateur,
+                'id' => $p->id_projet,
                 'titre' => $p->projet_titre,
                 'statut' => $p->projet_statut->value,
                 'libelle_statut' => $p->projet_statut->label(),
@@ -50,7 +50,7 @@ class ProjetController extends Controller
 
     public function show(Request $request, Projet $projet): Response
     {
-        abort_unless($projet->id_utilisateur_porteur === $request->user()->id_utilisateur, 403);
+        abort_unless($projet->id_porteur === $request->user()->id_utilisateur, 403);
 
         $projet->load([
             'conventions' => fn ($q) => $q->with(['bailleur:id_bailleur,bailleur_nom,bailleur_sigle', 'versements:id_versement,id_convention,versement_montant,versement_date_reception']),
@@ -61,7 +61,7 @@ class ProjetController extends Controller
 
         return Inertia::render('porteur/Projets/Show', [
             'projet' => [
-                'id' => $projet->id_utilisateur,
+                'id' => $projet->id_projet,
                 'titre' => $projet->projet_titre,
                 'description' => $projet->projet_description,
                 'objectifs' => $projet->projet_objectifs,
@@ -78,7 +78,7 @@ class ProjetController extends Controller
                 'date_fin_prevue' => $projet->projet_date_fin_prevue?->toDateString(),
                 'date_fin_reelle' => $projet->projet_date_fin_reelle?->toDateString(),
                 'conventions' => $projet->conventions->map(fn (Convention $c) => [
-                    'id' => $c->id_utilisateur,
+                    'id' => $c->id_convention,
                     'titre' => $c->convention_titre,
                     'bailleur' => ['nom' => $c->bailleur->bailleur_nom, 'sigle' => $c->bailleur->bailleur_sigle],
                     'montant_fcfa' => $c->montant_fcfa,
@@ -96,8 +96,8 @@ class ProjetController extends Controller
 
     public function showConvention(Request $request, Projet $projet, Convention $convention): Response
     {
-        abort_unless($projet->id_utilisateur_porteur === $request->user()->id_utilisateur, 403);
-        abort_unless($convention->id_utilisateur_projet === $projet->id_utilisateur, 404);
+        abort_unless($projet->id_porteur === $request->user()->id_utilisateur, 403);
+        abort_unless($convention->id_projet === $projet->id_projet, 404);
 
         $convention->load(['bailleur:id_bailleur,bailleur_nom,bailleur_sigle,bailleur_type,bailleur_pays', 'rubriques', 'versements']);
 
@@ -105,12 +105,12 @@ class ProjetController extends Controller
 
         return Inertia::render('porteur/Projets/Convention', [
             'projet' => [
-                'id' => $projet->id_utilisateur,
+                'id' => $projet->id_projet,
                 'titre' => $projet->projet_titre,
             ],
             'has_demande_active' => $hasDemandeActive,
             'convention' => [
-                'id' => $convention->id_utilisateur,
+                'id' => $convention->id_convention,
                 'titre' => $convention->convention_titre,
                 'description' => $convention->convention_description,
                 'montant' => $convention->convention_montant,
@@ -130,17 +130,17 @@ class ProjetController extends Controller
                     'type' => $convention->bailleur->bailleur_type,
                     'pays' => $convention->bailleur->bailleur_pays,
                 ],
-                'total_rubriques' => $convention->rubriques->sum('rubrique_montant_prevu'),
+                'total_rubriques' => $convention->rubriques->sum('rubrique_montant'),
                 'total_versements' => $convention->versements->sum('versement_montant'),
                 'rubriques' => $convention->rubriques->map(fn ($r) => [
-                    'id' => $r->id_utilisateur,
+                    'id' => $r->id_rubrique,
                     'libelle' => $r->rubrique_libelle,
-                    'montant_prevu' => $r->rubrique_montant_prevu,
+                    'montant_prevu' => $r->rubrique_montant,
                     'montant_depense' => 0,
                     'description' => $r->rubrique_description,
                 ])->values(),
                 'versements' => $convention->versements->sortByDesc('versement_date_reception')->map(fn ($v) => [
-                    'id' => $v->id_utilisateur,
+                    'id' => $v->id_versement,
                     'montant' => $v->versement_montant,
                     'date_reception' => $v->versement_date_reception->toDateString(),
                     'reference' => $v->versement_reference,
@@ -152,7 +152,7 @@ class ProjetController extends Controller
 
     public function bilan(Request $request, Projet $projet): Response
     {
-        abort_unless($projet->id_utilisateur_porteur === $request->user()->id_utilisateur, 403);
+        abort_unless($projet->id_porteur === $request->user()->id_utilisateur, 403);
         $this->authorize('voirBilan', $projet);
 
         $bilan = $this->projetService->genererBilan($projet);
@@ -165,13 +165,13 @@ class ProjetController extends Controller
 
     public function exporterBilanPdf(Request $request, Projet $projet): HttpResponse
     {
-        abort_unless($projet->id_utilisateur_porteur === $request->user()->id_utilisateur, 403);
+        abort_unless($projet->id_porteur === $request->user()->id_utilisateur, 403);
         $this->authorize('voirBilan', $projet);
 
         $bilan = $this->projetService->genererBilan($projet);
 
         $pdf = Pdf::loadView('pdf.bilan-projet', compact('bilan'))->setPaper('a4');
 
-        return $pdf->download("bilan-projet-{$projet->id_utilisateur}.pdf");
+        return $pdf->download("bilan-projet-{$projet->id_projet}.pdf");
     }
 }

@@ -4,7 +4,7 @@ import { auditLog as adminAuditLog } from '@/routes/admin';
 import { formatDateTime, getInitials } from '@/lib/utils';
 import type { PaginatedData } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { ChevronDownIcon, FunnelIcon, UtilisateurIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon, FunnelIcon, UserIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useState as useLocalState } from 'react';
 
 interface AuditEntry {
@@ -21,7 +21,7 @@ interface AuditEntry {
         id: number;
         utilisateur_nom: string;
         utilisateur_email: string;
-        utilisateur_role: string | null;
+        role_key: string | null;
     } | null;
 }
 
@@ -29,7 +29,7 @@ interface UtilisateurOption {
     id: number;
     utilisateur_nom: string;
     utilisateur_email: string;
-    utilisateur_role: string | null;
+    role_key: string | null;
     label_role: string | null;
 }
 
@@ -72,7 +72,7 @@ const actionColors: Record<string, string> = {
 const FIELD_LABELS: Record<string, string> = {
     name: 'Nom',
     email: 'E-mail',
-    utilisateur_role: 'Rôle',
+    role_key: 'Rôle',
     utilisateur_actif: 'Actif',
     telephone: 'Téléphone',
     projet_statut: 'Statut',
@@ -81,8 +81,7 @@ const FIELD_LABELS: Record<string, string> = {
     demande_montant: 'Montant',
     versement_montant: 'Montant',
     paiement_montant: 'Montant',
-    paiement_direct_montant: 'Montant',
-    rubrique_montant_prevu: 'Montant prévu',
+    rubrique_montant: 'Montant prévu',
     convention_montant_fcfa: 'Montant FCFA',
     projet_titre: 'Titre',
     convention_titre: 'Titre',
@@ -198,7 +197,7 @@ export default function AuditLog({ logs, users, selectedUtilisateurId }: AuditLo
                                             : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'
                                     }`}
                                 >
-                                    <UtilisateurIcon className="w-4 h-4 shrink-0" />
+                                    <UserIcon className="w-4 h-4 shrink-0" />
                                     <span>Tous les utilisateurs</span>
                                 </button>
 
@@ -278,7 +277,7 @@ export default function AuditLog({ logs, users, selectedUtilisateurId }: AuditLo
                                                     </button>
                                                 ) : (
                                                     <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-500 flex items-center justify-center shrink-0 mt-0.5">
-                                                        <UtilisateurIcon className="w-4 h-4" />
+                                                        <UserIcon className="w-4 h-4" />
                                                     </div>
                                                 )}
 
@@ -292,9 +291,9 @@ export default function AuditLog({ logs, users, selectedUtilisateurId }: AuditLo
                                                         }`}>
                                                             {actionLabels[log.audit_action] ?? log.audit_action}
                                                         </span>
-                                                        {log.utilisateur?.utilisateur_role && (
+                                                        {log.utilisateur?.role_key && (
                                                             <span className="text-xs text-gray-400 dark:text-slate-500 bg-gray-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
-                                                                {log.utilisateur.utilisateur_role}
+                                                                {log.utilisateur.role_key}
                                                             </span>
                                                         )}
                                                     </div>

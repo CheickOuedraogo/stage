@@ -2,7 +2,7 @@ export interface User {
     id: number;
     utilisateur_nom: string;
     utilisateur_email: string;
-    utilisateur_role: 'admin' | 'daf' | 'ac' | 'porteur';
+    role_key: 'admin' | 'daf' | 'ac' | 'porteur';
     label_role: string;
     utilisateur_actif: boolean;
     url_avatar: string | null;
@@ -32,7 +32,7 @@ export interface Utilisateur {
     id_utilisateur?: number;
     utilisateur_nom?: string;
     utilisateur_email?: string;
-    utilisateur_role?: 'admin' | 'daf' | 'ac' | 'porteur';
+    role_key?: 'admin' | 'daf' | 'ac' | 'porteur';
     utilisateur_telephone?: string | null;
     utilisateur_actif?: boolean;
 }

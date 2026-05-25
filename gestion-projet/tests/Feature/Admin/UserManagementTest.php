@@ -17,7 +17,7 @@ describe('Gestion des utilisateurs (Administrateur)', function () {
         $this->actingAs($this->admin)
             ->get(route('admin.users.index'))
             ->assertStatus(200)
-            ->assertInertia(fn ($page) => $page->component('admin/Utilisateurs/Index'));
+            ->assertInertia(fn ($page) => $page->component('admin/Users/Index'));
     });
 
     it('un non-admin ne peut pas accéder à la liste', function () {
@@ -34,14 +34,14 @@ describe('Gestion des utilisateurs (Administrateur)', function () {
                 'utilisateur_nom' => 'Nouveau Utilisateur',
                 'utilisateur_email' => 'nouveau@ujkz.bf',
                 'utilisateur_mot_de_passe' => 'Password123',
-                'utilisateur_role' => RoleUtilisateur::Porteur->value,
+                'role_key' => RoleUtilisateur::Porteur->value,
                 'utilisateur_telephone' => '+226 70 00 00 00',
             ])
             ->assertRedirect(route('admin.users.index'));
 
-        $this->assertDatabaseHas('users', [
+        $this->assertDatabaseHas('utilisateurs', [
             'utilisateur_email' => 'nouveau@ujkz.bf',
-            'utilisateur_role' => RoleUtilisateur::Porteur->value,
+            'role_key' => RoleUtilisateur::Porteur->value,
         ]);
     });
 
@@ -50,9 +50,9 @@ describe('Gestion des utilisateurs (Administrateur)', function () {
             ->post(route('admin.users.store'), [
                 'utilisateur_nom' => '',
                 'utilisateur_email' => 'pas-un-email',
-                'utilisateur_role' => 'role-invalide',
+                'role_key' => 'role-invalide',
             ])
-            ->assertSessionHasErrors(['utilisateur_nom', 'utilisateur_email', 'utilisateur_role', 'utilisateur_mot_de_passe']);
+            ->assertSessionHasErrors(['utilisateur_nom', 'utilisateur_email', 'role_key', 'utilisateur_mot_de_passe']);
     });
 
     it('rejette un email déjà utilisé', function () {
@@ -75,11 +75,11 @@ describe('Gestion des utilisateurs (Administrateur)', function () {
             ->patch(route('admin.users.update', $user), [
                 'utilisateur_nom' => 'Nouveau Nom',
                 'utilisateur_email' => $user->utilisateur_email,
-                'utilisateur_role' => RoleUtilisateur::Porteur->value,
+                'role_key' => RoleUtilisateur::Porteur->value,
             ])
             ->assertRedirect(route('admin.users.index'));
 
-        $this->assertDatabaseHas('users', ['id_utilisateur' => $user->id_utilisateur, 'utilisateur_nom' => 'Nouveau Nom']);
+        $this->assertDatabaseHas('utilisateurs', ['id_utilisateur' => $user->id_utilisateur, 'utilisateur_nom' => 'Nouveau Nom']);
     });
 
     it('active et désactive un utilisateur', function () {

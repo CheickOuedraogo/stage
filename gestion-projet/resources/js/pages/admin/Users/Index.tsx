@@ -11,7 +11,7 @@ import {
 } from '@/routes/admin/users';
 import type { PageProps, PaginatedData, Utilisateur } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { MagnifyingGlassIcon, PlusIcon, UtilisateurIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, PlusIcon, UserIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 
 interface Role {
@@ -107,7 +107,7 @@ export default function UtilisateursIndex({ utilisateurs, filters, roles }: Util
                             {utilisateurs.data.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="px-6 py-16 text-center text-gray-400 dark:text-slate-500">
-                                        <UtilisateurIcon className="w-10 h-10 mx-auto mb-2 opacity-40" />
+                                        <UserIcon className="w-10 h-10 mx-auto mb-2 opacity-40" />
                                         <p>Aucun utilisateur trouvé</p>
                                     </td>
                                 </tr>
@@ -174,7 +174,7 @@ function UtilisateurRow({ utilisateur }: { utilisateur: Utilisateur & { cree_le:
                     </div>
                 </div>
             </td>
-            <td className="px-6 py-4"><Badge variant={utilisateur.utilisateur_role as any}>{utilisateur.label_role}</Badge></td>
+            <td className="px-6 py-4"><Badge variant={utilisateur.role_key as any}>{utilisateur.label_role}</Badge></td>
             <td className="px-6 py-4">
                 <Badge variant={utilisateur.utilisateur_actif ? 'success' : 'muted'} dot>
                     {utilisateur.utilisateur_actif ? 'Actif' : 'Désactivé'}

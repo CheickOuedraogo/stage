@@ -16,7 +16,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @method static Builder actif()
  * @method static Builder parRole(RoleUtilisateur $role)
  */
-#[Fillable(['utilisateur_nom', 'utilisateur_email', 'utilisateur_mot_de_passe', 'utilisateur_role', 'utilisateur_actif', 'utilisateur_avatar_chemin', 'utilisateur_telephone'])]
+#[Fillable(['utilisateur_nom', 'utilisateur_email', 'utilisateur_mot_de_passe', 'role_key', 'utilisateur_actif', 'utilisateur_avatar_chemin', 'utilisateur_telephone'])]
 #[Hidden(['utilisateur_mot_de_passe', 'jeton_souvenir'])]
 class Utilisateur extends Authenticatable
 {
@@ -41,27 +41,32 @@ class Utilisateur extends Authenticatable
         return [
             'email_verifie_le' => 'datetime',
             'utilisateur_mot_de_passe' => 'hashed',
-            'utilisateur_role' => RoleUtilisateur::class,
+            'role_key' => RoleUtilisateur::class,
             'utilisateur_actif' => 'boolean',
         ];
     }
 
     /** Scope: uniquement les utilisateurs actifs */
-    public function scopeAgentComptabletif(Builder $query): void
+    public function scopeActif(Builder $query): void
     {
         $query->where('utilisateur_actif', true);
+    }
+
+    public function scopeActive(Builder $query): void
+    {
+        $this->scopeActif($query);
     }
 
     /** Scope: filtrer par rôle */
     public function scopeParRole(Builder $query, RoleUtilisateur $role): void
     {
-        $query->where('utilisateur_role', $role->value);
+        $query->where('role_key', $role->value);
     }
 
     /** Vérifier si l'utilisateur a un rôle donné */
     public function aRole(RoleUtilisateur $role): bool
     {
-        return $this->utilisateur_role === $role;
+        return $this->role_key === $role;
     }
 
     public function estAdministrateur(): bool
@@ -87,7 +92,7 @@ class Utilisateur extends Authenticatable
     /** Route nommée pour le tableau de bord de cet utilisateur. */
     public function routeTableauBord(): string
     {
-        return match ($this->utilisateur_role) {
+        return match ($this->role_key) {
             RoleUtilisateur::Administrateur => route('admin.dashboard'),
             RoleUtilisateur::Daf => route('daf.dashboard'),
             RoleUtilisateur::AgentComptable => route('ac.dashboard'),
@@ -111,13 +116,18 @@ class Utilisateur extends Authenticatable
         return $this->hasMany(Notification::class, 'id_utilisateur')->whereNull('lu_le');
     }
 
+    public function projets(): HasMany
+    {
+        return $this->hasMany(Projet::class, 'id_porteur');
+    }
+
     /** @var list<string> */
     protected $appends = ['label_role', 'url_avatar'];
 
     /** Libellé court pour le rôle */
     public function getLabelRoleAttribute(): ?string
     {
-        return $this->utilisateur_role?->shortLabel();
+        return $this->role_key?->shortLabel();
     }
 
     /** URL de l'avatar */

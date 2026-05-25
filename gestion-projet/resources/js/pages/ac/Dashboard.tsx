@@ -1,7 +1,8 @@
 import AppLayout from '@/components/layout/AppLayout';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { show as demandeShow } from '@/actions/App/Http/Controllers/Ac/DemandeDepenseController';
+import { show as demandeShow } from '@/actions/App/Http/Controllers/AgentComptable/DemandeDepenseController';
 import { index as acDemandesIndex } from '@/routes/ac/demandes';
+import { FaqAccordion, type FaqItem } from '@/components/shared/FaqAccordion';
 import type { PageProps } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
@@ -47,10 +48,11 @@ interface Props extends PageProps {
     stats: Stats;
     demandes_recentes: Demande[];
     paiements_recents: PaiementRecent[];
+    faq_items: FaqItem[];
 }
 
 export default function AcDashboard() {
-    const { auth, stats, demandes_recentes, paiements_recents } = usePage<Props>().props;
+    const { auth, stats, demandes_recentes, paiements_recents, faq_items } = usePage<Props>().props;
     const firstName = auth.user?.utilisateur_nom.split(' ').find((p) => !p.includes('.')) ?? auth.user?.utilisateur_nom;
 
     return (
@@ -169,6 +171,7 @@ export default function AcDashboard() {
                     )}
                 </div>
             </div>
+            <FaqAccordion items={faq_items} />
         </AppLayout>
     );
 }

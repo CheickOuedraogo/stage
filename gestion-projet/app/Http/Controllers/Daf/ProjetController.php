@@ -54,7 +54,7 @@ class ProjetController extends Controller
     {
         $projet->load([
             'porteur:id_utilisateur,utilisateur_nom,utilisateur_email,utilisateur_telephone',
-            'conventions' => fn ($q) => $q->with(['bailleur:id_bailleur,bailleur_nom,bailleur_sigle', 'rubriques:id_rubrique,id_convention,rubrique_libelle,rubrique_montant_prevu', 'versements:id_versement,id_convention,versement_montant,versement_date_reception']),
+            'conventions' => fn ($q) => $q->with(['bailleur:id_bailleur,bailleur_nom,bailleur_sigle', 'rubriques:id_rubrique,id_convention,rubrique_libelle,rubrique_montant', 'versements:id_versement,id_convention,versement_montant,versement_date_reception']),
         ]);
 
         $totalVersements = $projet->conventions->flatMap->versements->sum('versement_montant');
@@ -98,7 +98,7 @@ class ProjetController extends Controller
                     'forme_label' => $c->convention_forme->label(),
                     'statut' => $c->convention_statut->value,
                     'libelle_statut' => $c->convention_statut->label(),
-                    'total_rubriques' => $c->rubriques->sum('rubrique_montant_prevu'),
+                    'total_rubriques' => $c->rubriques->sum('rubrique_montant'),
                     'total_versements' => $c->versements->sum('versement_montant'),
                     'rubriques_count' => $c->rubriques->count(),
                     'versements_count' => $c->versements->count(),

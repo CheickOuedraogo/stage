@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\StatutFinalProjet;
 use App\Enums\StatutProjet;
 use App\Models\Projet;
 use App\Models\Utilisateur;
@@ -32,5 +33,15 @@ class ProjetFactory extends Factory
             'cree_le' => now(),
             'mis_a_jour_le' => now(),
         ];
+    }
+
+    public function enCours(): static
+    {
+        return $this->state(['projet_statut' => StatutProjet::EnCours]);
+    }
+
+    public function termine(): static
+    {
+        return $this->state(['projet_statut' => StatutProjet::Termine, 'statut_final' => StatutFinalProjet::Succes]);
     }
 }

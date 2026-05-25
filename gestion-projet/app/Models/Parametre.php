@@ -53,4 +53,14 @@ class Parametre extends Model
 
         return $valeur ? Carbon::parse($valeur) : null;
     }
+
+    public static function isMaintenanceActive(): bool
+    {
+        return static::estMaintenanceActive();
+    }
+
+    public static function getMaintenanceUntil(): ?Carbon
+    {
+        return static::getMaintenanceJusqua();
+    }
 }

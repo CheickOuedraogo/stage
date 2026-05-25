@@ -56,7 +56,7 @@ class DemandeDepenseController extends Controller
         $demande->load([
             'convention.projet:id_projet,projet_titre',
             'convention:id_convention,convention_titre,id_projet',
-            'rubrique:id_rubrique,rubrique_libelle,rubrique_montant_prevu',
+            'rubrique:id_rubrique,rubrique_libelle,rubrique_montant',
             'porteur:id_utilisateur,utilisateur_nom,utilisateur_email',
             'paiement.enregistrePar:id_utilisateur,utilisateur_nom',
             'validateurDaf:id_utilisateur,utilisateur_nom',
@@ -95,7 +95,11 @@ class DemandeDepenseController extends Controller
 
     public function rejeterRapport(Request $request, DemandeDepense $demande): RedirectResponse
     {
-        $this->service->rejeterRapport($demande, $request->user());
+        $validated = $request->validate([
+            'motif' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $this->service->rejeterRapport($demande, $request->user(), $validated['motif'] ?? null);
 
         return back()->with('success', 'Rapport rejeté. Le porteur doit soumettre un nouveau rapport.');
     }
@@ -103,20 +107,20 @@ class DemandeDepenseController extends Controller
     private function formatDemande(DemandeDepense $d): array
     {
         return [
-            'id' => $d->id_utilisateur,
+            'id' => $d->id_demande,
             'objet' => $d->demande_objet,
             'montant' => $d->demande_montant,
             'statut' => $d->demande_statut->value,
             'libelle_statut' => $d->demande_statut->label(),
             'badge_class' => $d->demande_statut->badgeClass(),
-            'cree_le' => $d->created_at->toDateString(),
+            'cree_le' => $d->created_at?->toDateString(),
             'porteur' => ['utilisateur_nom' => $d->porteur->utilisateur_nom],
             'convention' => [
-                'id' => $d->convention->id_utilisateur,
+                'id' => $d->convention->id_convention,
                 'titre' => $d->convention->convention_titre,
             ],
             'projet' => [
-                'id' => $d->convention->projet->id_utilisateur,
+                'id' => $d->convention->projet->id_projet,
                 'titre' => $d->convention->projet->projet_titre,
             ],
             'rubrique' => ['libelle' => $d->rubrique->rubrique_libelle],
@@ -131,6 +135,7 @@ class DemandeDepenseController extends Controller
             'motif_rejet' => $d->demande_motif_rejet,
             'possede_justificatif' => $d->possede_justificatif,
             'possede_rapport' => $d->possede_rapport,
+            'rapport_motif_rejet' => $d->demande_rapport_motif_rejet,
             'rapport_validee_daf' => $d->demande_rapport_valide_daf,
             'rapport_validee_ac' => $d->demande_rapport_valide_ac,
             'validee_daf_at' => $d->demande_date_validation_daf?->toDateTimeString(),
@@ -138,10 +143,10 @@ class DemandeDepenseController extends Controller
             'validateur_daf' => $d->validateurDaf?->utilisateur_nom,
             'validateur_ac' => $d->validateurAgentComptable?->utilisateur_nom,
             'porteur_email' => $d->porteur->utilisateur_email,
-            'rubrique_montant_prevu' => $d->rubrique->rubrique_montant_prevu,
+            'rubrique_montant' => $d->rubrique->rubrique_montant,
             'paiement' => $d->paiement ? [
                 'montant' => $d->paiement->paiement_montant,
-                'date_paiement' => $d->paiement->paiement_date->toDateString(),
+                'date_paiement' => $d->paiement->paiement_date?->toDateString(),
                 'mode_paiement' => $d->paiement->paiement_mode->value,
                 'mode_paiement_label' => $d->paiement->paiement_mode->label(),
                 'reference' => $d->paiement->paiement_reference,

@@ -1,9 +1,9 @@
 import AppLayout from '@/components/layout/AppLayout';
-import { ChatInterface, type ChatMsg } from '@/components/shared/ChatInterface';
-import { send as chatSend, poll as chatPoll } from '@/actions/App/Http/Controllers/Ac/ChatController';
+import { ContactList, type Contact } from '@/components/shared/ContactList';
+import { index as chatIndex, show as chatShow } from '@/actions/App/Http/Controllers/AgentComptable/MessageChatControleur';
 import type { PageProps } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
-import { ChevronDownIcon, MagnifyingGlassIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
+import { ChatBubbleLeftRightIcon, ChevronDownIcon, MagnifyingGlassIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 
@@ -14,7 +14,7 @@ interface FaqItem {
 }
 
 interface Props extends PageProps {
-    messages: ChatMsg[];
+    contacts: Contact[];
     faq_items: FaqItem[];
 }
 
@@ -30,9 +30,7 @@ function FaqAccordion({ items }: { items: FaqItem[] }) {
           )
         : items;
 
-    if (items.length === 0) {
-        return null;
-    }
+    if (items.length === 0) return null;
 
     return (
         <div className="mb-8">
@@ -91,23 +89,29 @@ function FaqAccordion({ items }: { items: FaqItem[] }) {
 }
 
 export default function AcChat() {
-    const { messages, faq_items } = usePage<Props>().props;
+    const { contacts, faq_items } = usePage<Props>().props;
 
     return (
         <AppLayout title="Assistance">
             <Head title="Assistance — Agent Comptable — CIFEU" />
 
-            <div className="max-w-2xl mx-auto">
-                <div className="mb-5">
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Assistance</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Questions fréquentes et contact avec l'administrateur</p>
+            <div className="max-w-4xl mx-auto">
+                <div className="mb-6">
+                    <div className="flex items-center gap-3 mb-1">
+                        <ChatBubbleLeftRightIcon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                        <h2 className="text-xl font-bold text-slate-900 dark:text-white">Assistance</h2>
+                    </div>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 ml-9">
+                        Échangez avec les porteurs de projets et l'administrateur
+                    </p>
                 </div>
+
                 <FaqAccordion items={faq_items} />
-                <ChatInterface
-                    messages={messages}
-                    sendUrl={chatSend.url()}
-                    pollUrl={chatPoll.url()}
-                    contactName="Administrateur"
+
+                <ContactList
+                    contacts={contacts}
+                    getConversationUrl={(userId) => chatShow.url({ user: userId })}
+                    emptyMessage="Aucun contact disponible pour le moment."
                 />
             </div>
         </AppLayout>

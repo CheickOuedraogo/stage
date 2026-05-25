@@ -51,7 +51,7 @@ class RapportController extends Controller
         $rubriques = $projet->conventions->flatMap(fn ($c) => $c->rubriques->map(fn ($r) => [
             'libelle' => $r->rubrique_libelle,
             'convention' => "{$c->convention_titre} / {$c->bailleur->bailleur_sigle}",
-            'montant_prevu' => $r->rubrique_montant_prevu,
+            'montant_prevu' => $r->rubrique_montant,
             'consomme' => $r->demandesDepenses->sum('demande_montant'),
         ]))->values()->toArray();
 

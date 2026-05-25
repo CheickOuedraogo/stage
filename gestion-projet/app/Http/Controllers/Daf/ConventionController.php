@@ -24,7 +24,7 @@ class ConventionController extends Controller
             'bailleur:id_bailleur,bailleur_nom,bailleur_sigle,bailleur_type,bailleur_pays',
             'rubriques',
             'versements' => fn ($q) => $q->orderByDesc('versement_date_reception'),
-            'paiementsDirects' => fn ($q) => $q->with('rubrique:id_rubrique,rubrique_libelle')->orderByDesc('paiement_direct_date'),
+            'paiementsDirects' => fn ($q) => $q->with('rubrique:id_rubrique,rubrique_libelle')->orderByDesc('paiement_date'),
         ]);
 
         return Inertia::render('daf/Projets/Convention', [
@@ -43,7 +43,7 @@ class ConventionController extends Controller
 
         $convention->rubriques()->create([
             'rubrique_libelle' => $validated['libelle'],
-            'rubrique_montant_prevu' => $validated['montant_prevu'],
+            'rubrique_montant' => $validated['montant_prevu'],
             'rubrique_description' => $validated['description'] ?? null,
         ]);
 
@@ -61,7 +61,7 @@ class ConventionController extends Controller
 
         $rubrique->update([
             'rubrique_libelle' => $validated['libelle'],
-            'rubrique_montant_prevu' => $validated['montant_prevu'],
+            'rubrique_montant' => $validated['montant_prevu'],
             'rubrique_description' => $validated['description'] ?? null,
         ]);
 
@@ -188,7 +188,7 @@ class ConventionController extends Controller
 
         $total = $convention->rubriques()
             ->when($excludeRubriqueId, fn ($q) => $q->where('id_rubrique', '!=', $excludeRubriqueId))
-            ->sum('rubrique_montant_prevu') + $montant;
+            ->sum('rubrique_montant') + $montant;
 
         if ($total > $convention->montant_fcfa) {
             throw ValidationException::withMessages([
@@ -225,12 +225,12 @@ class ConventionController extends Controller
                 'type' => $convention->bailleur->bailleur_type,
                 'pays' => $convention->bailleur->bailleur_pays,
             ],
-            'total_rubriques' => $convention->rubriques->sum('rubrique_montant_prevu'),
+            'total_rubriques' => $convention->rubriques->sum('rubrique_montant'),
             'total_versements' => $convention->versements->sum('versement_montant'),
             'rubriques' => $convention->rubriques->map(fn ($r) => [
                 'id' => $r->id_utilisateur,
                 'libelle' => $r->rubrique_libelle,
-                'montant_prevu' => $r->rubrique_montant_prevu,
+                'montant_prevu' => $r->rubrique_montant,
                 'montant_depense' => 0,
                 'description' => $r->rubrique_description,
             ])->values(),
@@ -243,9 +243,9 @@ class ConventionController extends Controller
             ])->values(),
             'paiements_directs' => $convention->paiementsDirects->map(fn ($p) => [
                 'id' => $p->id_utilisateur,
-                'montant' => $p->paiement_direct_montant,
-                'objet_depense' => $p->paiement_direct_objet,
-                'date_paiement' => $p->paiement_direct_date->toDateString(),
+                'montant' => $p->paiement_montant,
+                'objet_depense' => $p->paiement_objet,
+                'date_paiement' => $p->paiement_date->toDateString(),
                 'rubrique' => $p->rubrique ? ['libelle' => $p->rubrique->rubrique_libelle] : null,
             ])->values(),
         ];

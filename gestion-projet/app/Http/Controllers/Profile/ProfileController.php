@@ -16,7 +16,7 @@ class ProfileController extends Controller
     public function edit(): Response
     {
         return Inertia::render('profile/Edit', [
-            'user' => auth()->user()->only(['id', 'utilisateur_nom', 'utilisateur_email', 'utilisateur_telephone', 'url_avatar', 'utilisateur_role']),
+            'user' => auth()->user()->only(['id', 'utilisateur_nom', 'utilisateur_email', 'utilisateur_telephone', 'url_avatar', 'role_key']),
         ]);
     }
 

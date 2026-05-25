@@ -25,7 +25,7 @@ export default function UtilisateurForm({ user, roles }: UtilisateurFormProps) {
         utilisateur_nom: user?.utilisateur_nom ?? '',
         utilisateur_email: user?.utilisateur_email ?? '',
         utilisateur_mot_de_passe: '',
-        utilisateur_role: user?.utilisateur_role ?? 'porteur',
+        role_key: user?.role_key ?? 'porteur',
         utilisateur_telephone: user?.utilisateur_telephone ?? '',
     });
 
@@ -84,22 +84,22 @@ export default function UtilisateurForm({ user, roles }: UtilisateurFormProps) {
                             />
 
                             <div className="space-y-1">
-                                <label htmlFor="utilisateur_role" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
+                                <label htmlFor="role_key" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
                                     Rôle <span className="text-red-500" aria-hidden="true">*</span>
                                 </label>
                                 <select
-                                    id="utilisateur_role"
-                                    value={data.utilisateur_role}
-                                    onChange={(e) => setData('utilisateur_role', e.target.value as Utilisateur['utilisateur_role'])}
+                                    id="role_key"
+                                    value={data.role_key}
+                                    onChange={(e) => setData('role_key', e.target.value as Utilisateur['role_key'])}
                                     aria-label="Sélectionner le rôle"
-                                    aria-invalid={!!errors.utilisateur_role}
+                                    aria-invalid={!!errors.role_key}
                                     className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                                 >
                                     {roles.map((r) => (
                                         <option key={r.value} value={r.value}>{r.label}</option>
                                     ))}
                                 </select>
-                                {errors.utilisateur_role && <p className="text-xs text-red-600">{errors.utilisateur_role}</p>}
+                                {errors.role_key && <p className="text-xs text-red-600">{errors.role_key}</p>}
                             </div>
 
                             <Input

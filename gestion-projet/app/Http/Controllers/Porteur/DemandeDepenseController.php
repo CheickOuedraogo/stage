@@ -39,11 +39,11 @@ class DemandeDepenseController extends Controller
             ->map(fn (DemandeDepense $d) => $this->formatDemande($d));
 
         $conventions = Convention::whereHas('projet', fn ($q) => $q->where('id_porteur', $porteur->id_utilisateur))
-            ->select('id', 'convention_titre', 'id_projet')
+            ->select('id_convention', 'convention_titre', 'id_projet')
             ->with('projet:id_projet,projet_titre')
             ->get()
             ->map(fn ($c) => [
-                'id' => $c->id_utilisateur,
+                'id' => $c->id_convention,
                 'titre' => $c->convention_titre,
                 'projet_titre' => $c->projet->projet_titre,
             ]);
@@ -62,26 +62,27 @@ class DemandeDepenseController extends Controller
     public function create(Request $request, Projet $projet, Convention $convention): Response
     {
         $porteur = $request->user();
-        abort_unless($projet->id_utilisateur_porteur === $porteur->id_utilisateur, 403);
-        abort_unless($convention->id_utilisateur_projet === $projet->id_utilisateur, 404);
+        abort_unless($projet->id_porteur === $porteur->id_utilisateur, 403);
+        abort_unless($convention->id_projet === $projet->id_projet, 404);
         abort_unless($projet->projet_statut === StatutProjet::EnCours, 403);
         abort_unless($convention->convention_statut === StatutConvention::Active, 403);
 
+        $this->service->assertConventionARubriques($convention);
         $this->service->assertPasDeDemandeActive($convention);
 
         $rubriques = $convention->rubriques()
             ->get()
             ->map(fn (Rubrique $r) => [
-                'id' => $r->id_utilisateur,
+                'id' => $r->id_rubrique,
                 'libelle' => $r->rubrique_libelle,
-                'montant_prevu' => $r->rubrique_montant_prevu,
+                'montant_prevu' => $r->rubrique_montant,
                 'description' => $r->rubrique_description,
             ]);
 
         return Inertia::render('porteur/Demandes/Create', [
-            'projet' => ['id' => $projet->id_utilisateur, 'titre' => $projet->projet_titre],
+            'projet' => ['id' => $projet->id_projet, 'titre' => $projet->projet_titre],
             'convention' => [
-                'id' => $convention->id_utilisateur,
+                'id' => $convention->id_convention,
                 'titre' => $convention->convention_titre,
                 'montant_fcfa' => $convention->montant_fcfa,
             ],
@@ -92,19 +93,20 @@ class DemandeDepenseController extends Controller
     public function store(Request $request, Projet $projet, Convention $convention): RedirectResponse
     {
         $porteur = $request->user();
-        abort_unless($projet->id_utilisateur_porteur === $porteur->id_utilisateur, 403);
-        abort_unless($convention->id_utilisateur_projet === $projet->id_utilisateur, 404);
+        abort_unless($projet->id_porteur === $porteur->id_utilisateur, 403);
+        abort_unless($convention->id_projet === $projet->id_projet, 404);
         abort_unless($projet->projet_statut === StatutProjet::EnCours, 403);
         abort_unless($convention->convention_statut === StatutConvention::Active, 403);
 
         $validated = $request->validate([
-            'rubrique_id' => ['required', 'integer', Rule::exists('rubriques', 'id_rubrique')->where('id_convention', $convention->id_utilisateur)],
+            'rubrique_id' => ['required', 'integer', Rule::exists('rubriques', 'id_rubrique')->where('id_convention', $convention->id_convention)],
             'montant' => ['required', 'integer', 'min:1'],
             'objet' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
             'justificatif' => ['required', 'file', 'mimes:pdf', 'max:10240'],
         ]);
 
+        $this->service->assertConventionARubriques($convention);
         $this->service->assertPasDeDemandeActive($convention);
 
         $rubrique = Rubrique::findOrFail($validated['rubrique_id']);
@@ -114,7 +116,7 @@ class DemandeDepenseController extends Controller
 
         DemandeDepense::create([
             'id_rubrique' => $validated['rubrique_id'],
-            'id_convention' => $convention->id_utilisateur,
+            'id_convention' => $convention->id_convention,
             'id_porteur' => $porteur->id_utilisateur,
             'demande_montant' => $validated['montant'],
             'demande_objet' => $validated['objet'],
@@ -129,12 +131,12 @@ class DemandeDepenseController extends Controller
 
     public function show(Request $request, DemandeDepense $demande): Response
     {
-        abort_unless($demande->id_utilisateur_porteur === $request->user()->id_utilisateur, 403);
+        abort_unless($demande->id_porteur === $request->user()->id_utilisateur, 403);
 
         $demande->load([
             'convention.projet:id_projet,projet_titre',
             'convention:id_convention,convention_titre,id_projet',
-            'rubrique:id_rubrique,rubrique_libelle,rubrique_montant_prevu',
+            'rubrique:id_rubrique,rubrique_libelle,rubrique_montant',
             'paiement.enregistrePar:id_utilisateur,utilisateur_nom',
             'validateurDaf:id_utilisateur,utilisateur_nom',
             'validateurAgentComptable:id_utilisateur,utilisateur_nom',
@@ -147,7 +149,7 @@ class DemandeDepenseController extends Controller
 
     public function uploadRapport(Request $request, DemandeDepense $demande): RedirectResponse
     {
-        abort_unless($demande->id_utilisateur_porteur === $request->user()->id_utilisateur, 403);
+        abort_unless($demande->id_porteur === $request->user()->id_utilisateur, 403);
 
         $request->validate([
             'rapport' => ['required', 'file', 'mimes:pdf', 'max:10240'],
@@ -163,8 +165,8 @@ class DemandeDepenseController extends Controller
     public function downloadJustificatif(Request $request, DemandeDepense $demande)
     {
         abort_unless(
-            $demande->id_utilisateur_porteur === $request->user()->id_utilisateur
-            || in_array($request->user()->utilisateur_role->value, ['daf', 'ac']),
+            $demande->id_porteur === $request->user()->id_utilisateur
+            || in_array($request->user()->role_key->value, ['daf', 'ac']),
             403
         );
         abort_unless($demande->demande_justificatif && Storage::disk('private')->exists($demande->demande_justificatif), 404);
@@ -175,8 +177,8 @@ class DemandeDepenseController extends Controller
     public function downloadRapport(Request $request, DemandeDepense $demande)
     {
         abort_unless(
-            $demande->id_utilisateur_porteur === $request->user()->id_utilisateur
-            || in_array($request->user()->utilisateur_role->value, ['daf', 'ac']),
+            $demande->id_porteur === $request->user()->id_utilisateur
+            || in_array($request->user()->role_key->value, ['daf', 'ac']),
             403
         );
         abort_unless($demande->demande_rapport && Storage::disk('private')->exists($demande->demande_rapport), 404);
@@ -187,19 +189,19 @@ class DemandeDepenseController extends Controller
     private function formatDemande(DemandeDepense $d): array
     {
         return [
-            'id' => $d->id_utilisateur,
+            'id' => $d->id_demande,
             'objet' => $d->demande_objet,
             'montant' => $d->demande_montant,
             'statut' => $d->demande_statut->value,
             'libelle_statut' => $d->demande_statut->label(),
             'badge_class' => $d->demande_statut->badgeClass(),
-            'cree_le' => $d->created_at->toDateString(),
+            'cree_le' => $d->created_at?->toDateString(),
             'convention' => [
-                'id' => $d->convention->id_utilisateur,
+                'id' => $d->convention->id_convention,
                 'titre' => $d->convention->convention_titre,
             ],
             'projet' => [
-                'id' => $d->convention->projet->id_utilisateur,
+                'id' => $d->convention->projet->id_projet,
                 'titre' => $d->convention->projet->projet_titre,
             ],
             'rubrique' => ['libelle' => $d->rubrique->rubrique_libelle],

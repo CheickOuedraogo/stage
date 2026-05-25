@@ -3,14 +3,13 @@
 use App\Enums\StatutConvention;
 use App\Enums\StatutDemande;
 use App\Enums\StatutProjet;
+use App\Enums\TypeNotification;
 use App\Models\Convention;
 use App\Models\DemandeDepense;
 use App\Models\Projet;
 use App\Models\Rubrique;
 use App\Models\Utilisateur;
-use App\Notifications\ProjetClotureNotification;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
-use Illuminate\Support\Facades\Notification;
 
 uses(LazilyRefreshDatabase::class);
 
@@ -51,8 +50,6 @@ describe('Clôture de projet', function () {
     });
 
     it('notifie le porteur à la clôture', function () {
-        Notification::fake();
-
         ['daf' => $daf, 'porteur' => $porteur, 'projet' => $projet] = makeProjetClotureNotificationable();
 
         $this->actingAs($daf)
@@ -61,7 +58,11 @@ describe('Clôture de projet', function () {
                 'statut_final' => 'succes',
             ]);
 
-        Notification::assertSentTo($porteur, ProjetClotureNotification::class);
+        $this->assertDatabaseHas('notifications', [
+            'id_utilisateur' => $porteur->id_utilisateur,
+            'type_notification' => TypeNotification::ProjetCloture,
+            'id_projet' => $projet->id_projet,
+        ]);
     });
 
     it('refuse si une demande est encore en cours', function () {

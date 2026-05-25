@@ -28,7 +28,7 @@ class UtilisateurFactory extends Factory
             'email_verifie_le' => now(),
             'utilisateur_mot_de_passe' => static::$password ??= Hash::make('utilisateur_mot_de_passe'),
             'jeton_souvenir' => Str::random(10),
-            'utilisateur_role' => RoleUtilisateur::Porteur,
+            'role_key' => RoleUtilisateur::Porteur,
             'utilisateur_actif' => true,
             'utilisateur_avatar_chemin' => null,
             'utilisateur_telephone' => null,
@@ -39,27 +39,32 @@ class UtilisateurFactory extends Factory
 
     public function admin(): static
     {
-        return $this->state(['utilisateur_role' => RoleUtilisateur::Administrateur]);
+        return $this->state(['role_key' => RoleUtilisateur::Administrateur]);
     }
 
     public function daf(): static
     {
-        return $this->state(['utilisateur_role' => RoleUtilisateur::Daf]);
+        return $this->state(['role_key' => RoleUtilisateur::Daf]);
     }
 
     public function ac(): static
     {
-        return $this->state(['utilisateur_role' => RoleUtilisateur::AgentComptable]);
+        return $this->state(['role_key' => RoleUtilisateur::AgentComptable]);
     }
 
     public function porteur(): static
     {
-        return $this->state(['utilisateur_role' => RoleUtilisateur::Porteur]);
+        return $this->state(['role_key' => RoleUtilisateur::Porteur]);
     }
 
     public function inactif(): static
     {
         return $this->state(['utilisateur_actif' => false]);
+    }
+
+    public function inactive(): static
+    {
+        return $this->inactif();
     }
 
     public function non_verifie(): static

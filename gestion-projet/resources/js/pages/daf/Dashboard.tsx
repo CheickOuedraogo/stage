@@ -4,6 +4,7 @@ import { show as demandeShow } from '@/actions/App/Http/Controllers/Daf/DemandeD
 import { index as dafDemandesIndex } from '@/routes/daf/demandes';
 import { index as dafProjetsIndex } from '@/routes/daf/projets';
 import { index as dafRapportsIndex } from '@/routes/daf/rapports';
+import { FaqAccordion, type FaqItem } from '@/components/shared/FaqAccordion';
 import type { PageProps } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
@@ -40,10 +41,11 @@ interface Demande {
 interface Props extends PageProps {
     stats: Stats;
     demandes_recentes: Demande[];
+    faq_items: FaqItem[];
 }
 
 export default function DafDashboard() {
-    const { auth, stats, demandes_recentes } = usePage<Props>().props;
+    const { auth, stats, demandes_recentes, faq_items } = usePage<Props>().props;
     const firstName = auth.user?.utilisateur_nom.split(' ').find((p) => !p.includes('.')) ?? auth.user?.utilisateur_nom;
     const tauxMobilisation = stats.budget_total > 0
         ? Math.min(100, Math.round((stats.versements_total / stats.budget_total) * 100))
@@ -166,6 +168,7 @@ export default function DafDashboard() {
                     </div>
                 )}
             </div>
+            <FaqAccordion items={faq_items} />
         </AppLayout>
     );
 }

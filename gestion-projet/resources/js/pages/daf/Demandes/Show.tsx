@@ -36,6 +36,7 @@ interface Demande {
     motif_rejet: string | null;
     possede_justificatif: boolean;
     possede_rapport: boolean;
+    rapport_motif_rejet: string | null;
     rapport_validee_daf: boolean;
     rapport_validee_ac: boolean;
     validee_daf_at: string | null;
@@ -43,7 +44,7 @@ interface Demande {
     validateur_daf: string | null;
     validateur_ac: string | null;
     porteur_email: string;
-    rubrique_montant_prevu: number;
+    rubrique_montant: number;
     convention: { id: number; titre: string };
     projet: { id: number; titre: string };
     rubrique: { libelle: string };
@@ -64,7 +65,9 @@ interface Props {
 
 export default function DafDemandeShow({ demande }: Props) {
     const [showRejectForm, setShowRejectForm] = useState(false);
+    const [showRapportRejectForm, setShowRapportRejectForm] = useState(false);
     const rejectForm = useForm({ motif: '' });
+    const rapportRejectForm = useForm({ motif: '' });
 
     const canValidate = demande.statut === 'soumise';
     const canValidateRapport = demande.statut === 'rapport_soumis';
@@ -77,6 +80,13 @@ export default function DafDemandeShow({ demande }: Props) {
         e.preventDefault();
         rejectForm.post(rejeterAction.url(demande.id), {
             onSuccess: () => setShowRejectForm(false),
+        });
+    }
+
+    function handleRapportRejeter(e: React.FormEvent) {
+        e.preventDefault();
+        rapportRejectForm.post(rejeterRapportAction.url(demande.id), {
+            onSuccess: () => setShowRapportRejectForm(false),
         });
     }
 
@@ -123,7 +133,7 @@ export default function DafDemandeShow({ demande }: Props) {
                             </div>
                             <div>
                                 <dt className="text-slate-500 dark:text-slate-400 mb-0.5">Montant prévu rubrique</dt>
-                                <dd className="font-mono font-medium text-gray-800 dark:text-slate-200">{formatCurrency(demande.rubrique_montant_prevu)}</dd>
+                                <dd className="font-mono font-medium text-gray-800 dark:text-slate-200">{formatCurrency(demande.rubrique_montant)}</dd>
                             </div>
                             <div>
                                 <dt className="text-slate-500 dark:text-slate-400 mb-0.5">Date de soumission</dt>
@@ -230,25 +240,51 @@ export default function DafDemandeShow({ demande }: Props) {
                             <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
                                 Validation du rapport d'exécution
                             </h3>
-                            <div className="flex gap-3">
-                                <Button
-                                    onClick={() => router.post(validerRapportAction.url(demande.id), {}, { preserveScroll: true })}
-                                    variant="primary"
-                                    disabled={demande.rapport_validee_daf}
-                                >
-                                    <CheckCircleIcon className="w-4 h-4" />
-                                    {demande.rapport_validee_daf ? 'Rapport déjà validé' : 'Valider le rapport'}
-                                </Button>
-                                {!demande.rapport_validee_daf && (
+                            {!showRapportRejectForm ? (
+                                <div className="flex gap-3">
                                     <Button
-                                        onClick={() => router.post(rejeterRapportAction.url(demande.id), {}, { preserveScroll: true })}
-                                        variant="danger"
+                                        onClick={() => router.post(validerRapportAction.url(demande.id), {}, { preserveScroll: true })}
+                                        variant="primary"
+                                        disabled={demande.rapport_validee_daf}
                                     >
-                                        <XCircleIcon className="w-4 h-4" />
-                                        Rejeter le rapport
+                                        <CheckCircleIcon className="w-4 h-4" />
+                                        {demande.rapport_validee_daf ? 'Rapport déjà validé' : 'Valider le rapport'}
                                     </Button>
-                                )}
-                            </div>
+                                    {!demande.rapport_validee_daf && (
+                                        <Button variant="danger" onClick={() => setShowRapportRejectForm(true)}>
+                                            <XCircleIcon className="w-4 h-4" />
+                                            Rejeter le rapport
+                                        </Button>
+                                    )}
+                                </div>
+                            ) : (
+                                <form onSubmit={handleRapportRejeter} className="space-y-3">
+                                    <div>
+                                        <label htmlFor="motif-rapport" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">
+                                            Motif de rejet <span className="text-red-500">*</span>
+                                        </label>
+                                        <textarea
+                                            id="motif-rapport"
+                                            rows={3}
+                                            value={rapportRejectForm.data.motif}
+                                            onChange={(e) => rapportRejectForm.setData('motif', e.target.value)}
+                                            className="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500/50 resize-none"
+                                            placeholder="Expliquer la raison du rejet…"
+                                        />
+                                        {rapportRejectForm.errors.motif && (
+                                            <p className="mt-1 text-xs text-red-600">{rapportRejectForm.errors.motif}</p>
+                                        )}
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <Button type="submit" variant="danger" loading={rapportRejectForm.processing}>
+                                            Confirmer le rejet
+                                        </Button>
+                                        <Button type="button" variant="ghost" onClick={() => setShowRapportRejectForm(false)}>
+                                            Annuler
+                                        </Button>
+                                    </div>
+                                </form>
+                            )}
                         </div>
                     )}
                 </div>
