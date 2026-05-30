@@ -13,7 +13,7 @@ interface Props {
     title?: string;
 }
 
-export function FaqAccordion({ items, title = 'Questions fréquentes' }: Props) {
+export function FaqAccordion({ items = [], title = 'Questions fréquentes' }: Props) {
     const [openId, setOpenId] = useState<number | null>(null);
     const [search, setSearch] = useState('');
 

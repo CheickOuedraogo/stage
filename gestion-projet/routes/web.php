@@ -22,6 +22,7 @@ use App\Http\Controllers\Daf\VersementController as DafVersementController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Porteur\DemandeDepenseController as PorteurDemandeDepenseController;
+use App\Http\Controllers\Porteur\FaqController;
 use App\Http\Controllers\Porteur\MessageChatControleur as PorteurMessageChatControleur;
 use App\Http\Controllers\Porteur\ProjetController as PorteurProjetController;
 use App\Http\Controllers\Profile\ProfileController;
@@ -189,7 +190,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/demandes/{demande}/rapport-pdf', [PorteurDemandeDepenseController::class, 'downloadRapport'])->name('demandes.rapport-pdf');
 
         // Chat Porteur + FAQ
-        Route::get('/faq', [\App\Http\Controllers\Porteur\FaqController::class, 'index'])->name('faq.index');
+        Route::get('/faq', [FaqController::class, 'index'])->name('faq.index');
         Route::get('/assistance', [PorteurMessageChatControleur::class, 'index'])->name('chat.index');
         Route::get('/assistance/{user}', [PorteurMessageChatControleur::class, 'show'])->name('chat.show');
         Route::post('/assistance/{user}', [PorteurMessageChatControleur::class, 'send'])->name('chat.send');
@@ -200,7 +201,7 @@ Route::middleware(['auth'])->group(function () {
 // Home redirect
 Route::get('/', function () {
     return Auth::check()
-        ? redirect(match (Auth::user()->role) {
+        ? redirect(match (Auth::user()->role_key) {
             RoleUtilisateur::Administrateur => route('admin.dashboard'),
             RoleUtilisateur::Daf => route('daf.dashboard'),
             RoleUtilisateur::AgentComptable => route('ac.dashboard'),

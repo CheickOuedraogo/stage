@@ -34,6 +34,6 @@ class ProjetController extends Controller
 
         $pdf = Pdf::loadView('pdf.bilan-projet', compact('bilan'))->setPaper('a4');
 
-        return $pdf->download("bilan-projet-{$projet->id_utilisateur}.pdf");
+        return $pdf->download("bilan-projet-{$projet->id_projet}.pdf");
     }
 }

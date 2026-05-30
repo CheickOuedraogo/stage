@@ -30,6 +30,7 @@ interface AnalyseEcarts {
     total_versements: number;
     total_depenses: number;
     ecart_budget: number;
+    solde_caisse: number;
     taux_execution: number;
     date_fin_prevue: string | null;
     date_fin_reelle: string | null;
@@ -296,7 +297,17 @@ export default function DafProjetShow({ projet }: Props) {
                             {projet.analyse_ecarts.ecart_budget >= 0 ? '+' : ''}{formatCurrency(projet.analyse_ecarts.ecart_budget)}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
-                            {projet.analyse_ecarts.ecart_budget >= 0 ? 'Sous-consommation' : 'Dépassement'}
+                            Reliquat budget prévu
+                        </p>
+                    </div>
+                    {/* Solde Caisse */}
+                    <div>
+                        <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Solde Caisse</p>
+                        <p className={`text-base font-bold font-mono ${projet.analyse_ecarts.solde_caisse >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                            {formatCurrency(projet.analyse_ecarts.solde_caisse)}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
+                            Fonds disponibles en caisse
                         </p>
                     </div>
                     {/* Total dépensé */}

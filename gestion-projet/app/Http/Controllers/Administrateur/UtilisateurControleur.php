@@ -25,12 +25,12 @@ class UtilisateurControleur extends Controller
             ->when($request->input('search'), fn ($q, $search) => $q->where('utilisateur_nom', 'like', "%{$search}%")
                 ->orWhere('utilisateur_email', 'like', "%{$search}%"))
             ->when($request->input('active') !== null, fn ($q) => $q->where('utilisateur_actif', $request->boolean('active')))
-            ->orderByDesc('created_at')
+            ->orderByDesc('cree_le')
             ->paginate(20)
             ->withQueryString();
 
         return Inertia::render('admin/Users/Index', [
-            'users' => $users,
+            'utilisateurs' => $users,
             'filters' => $request->only(['role', 'search', 'active']),
             'roles' => collect(RoleUtilisateur::cases())->map(fn ($r) => [
                 'value' => $r->value,

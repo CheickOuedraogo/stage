@@ -16,6 +16,22 @@ import {
 import { FaqAccordion, type FaqItem } from '@/components/shared/FaqAccordion';
 import { FormEvent } from 'react';
 
+const actionLabels: Record<string, string> = {
+    login: 'Connexion',
+    logout: 'Déconnexion',
+    created: 'Création',
+    updated: 'Modification',
+    deleted: 'Suppression',
+    maintenance_enabled: 'Maintenance',
+    maintenance_disabled: 'Maintenance',
+    password_changed: 'Mot de passe',
+    profile_updated: 'Profil',
+    avatar_updated: 'Avatar',
+    user_activated: 'Activé',
+    user_deactivated: 'Désactivé',
+    user_status_change: 'Statut',
+};
+
 interface AuditLogEntry {
     id: number;
     action: string;
@@ -243,7 +259,7 @@ export default function AdminDashboard({ stats, recent_audit_logs, faq_items }: 
                                         )}
                                         {log.description && <span className="text-slate-500 dark:text-slate-400"> — {log.description}</span>}
                                     </p>
-                                    <p className="text-xs text-slate-400 mt-0.5">{log.action} · {log.cree_le}</p>
+                                    <p className="text-xs text-slate-400 mt-0.5">{actionLabels[log.action] ?? log.action} · {log.cree_le}</p>
                                 </div>
                             </div>
                         ))}

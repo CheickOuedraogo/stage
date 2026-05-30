@@ -33,11 +33,11 @@ class PaiementController extends Controller
             ->paginate(20)
             ->withQueryString()
             ->through(fn (Paiement $p) => [
-                'id' => $p->id_utilisateur,
+                'id' => $p->id_paiement,
                 'montant' => $p->paiement_montant,
                 'date_paiement' => $p->paiement_date->toDateString(),
-                'mode_paiement' => $p->paiement_mode->value,
-                'mode_paiement_label' => $p->paiement_mode->label(),
+                'mode_paiement' => $p->paiement_mode?->value ?? '',
+                'mode_paiement_label' => $p->paiement_mode?->label() ?? '',
                 'reference' => $p->paiement_reference,
                 'objet' => $p->demande->demande_objet,
                 'porteur' => $p->demande->porteur->utilisateur_nom,

@@ -15,6 +15,8 @@ interface Projet {
     date_fin_prevue: string | null;
     conventions_count: number;
     montant_conventions: number;
+    total_consomme: number;
+    disponible_caisse: number;
     pourcentage_financement: number;
 }
 
@@ -123,19 +125,27 @@ function ProjetCard({ projet }: { projet: Projet }) {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="grid grid-cols-2 gap-x-3 gap-y-4 text-xs">
                     <div>
-                        <p className="text-gray-400 dark:text-slate-500">Montant estimé</p>
-                        <p className="font-mono font-medium text-gray-900 dark:text-white">{formatCurrency(projet.montant_estime)}</p>
+                        <p className="text-gray-400 dark:text-slate-500 mb-0.5">Budget total</p>
+                        <p className="font-mono font-semibold text-gray-900 dark:text-white line-clamp-1">{formatCurrency(projet.montant_conventions)}</p>
                     </div>
                     <div>
-                        <p className="text-gray-400 dark:text-slate-500">Conventions</p>
-                        <p className="font-medium text-gray-900 dark:text-white">{projet.conventions_count}</p>
+                        <p className="text-gray-400 dark:text-slate-500 mb-0.5">Dépensé</p>
+                        <p className="font-mono font-semibold text-blue-600 dark:text-blue-400 line-clamp-1">{formatCurrency(projet.total_consomme)}</p>
+                    </div>
+                    <div className="col-span-2 pt-1 border-t border-gray-50 dark:border-slate-800/50">
+                        <div className="flex justify-between items-center">
+                            <p className="text-gray-400 dark:text-slate-500">Disponible en caisse</p>
+                            <p className={`font-mono font-bold text-sm ${projet.disponible_caisse < 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                                {formatCurrency(projet.disponible_caisse)}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
                 {projet.date_fin_prevue && (
-                    <p className="mt-auto pt-3 text-xs text-gray-400 dark:text-slate-500">
+                    <p className="mt-4 pt-3 text-[10px] text-gray-400 dark:text-slate-500 border-t border-gray-50 dark:border-slate-800/50">
                         Fin prévue : {new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(projet.date_fin_prevue))}
                     </p>
                 )}

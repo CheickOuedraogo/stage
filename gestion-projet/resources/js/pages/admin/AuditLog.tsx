@@ -18,7 +18,7 @@ interface AuditEntry {
     audit_nouvelles_valeurs: Record<string, unknown> | null;
     cree_le: string;
     utilisateur: {
-        id: number;
+        id_utilisateur: number;
         utilisateur_nom: string;
         utilisateur_email: string;
         role_key: string | null;
@@ -52,6 +52,7 @@ const actionLabels: Record<string, string> = {
     profile_updated: 'Profil mis à jour',
     user_activated: 'Compte activé',
     user_deactivated: 'Compte désactivé',
+    user_status_change: 'Statut modifié',
 };
 
 const actionColors: Record<string, string> = {
@@ -67,6 +68,7 @@ const actionColors: Record<string, string> = {
     avatar_updated: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400',
     user_activated: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
     user_deactivated: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
+    user_status_change: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400',
 };
 
 const FIELD_LABELS: Record<string, string> = {
@@ -269,7 +271,7 @@ export default function AuditLog({ logs, users, selectedUtilisateurId }: AuditLo
                                             <div className="flex items-start gap-3">
                                                 {log.utilisateur ? (
                                                     <button
-                                                        onClick={() => filterByUtilisateur(log.utilisateur!.id)}
+                                                        onClick={() => filterByUtilisateur(log.utilisateur!.id_utilisateur)}
                                                         className="w-8 h-8 rounded-full bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-slate-300 text-xs font-bold flex items-center justify-center shrink-0 hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors mt-0.5"
                                                         title={`Filtrer par ${log.utilisateur.utilisateur_nom}`}
                                                     >

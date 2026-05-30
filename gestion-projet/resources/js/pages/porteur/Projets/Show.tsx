@@ -31,6 +31,8 @@ interface Projet {
     montant_estime: number;
     montant_conventions: number;
     total_versements: number;
+    total_consomme: number;
+    disponible_caisse: number;
     pourcentage_financement: number;
     date_debut: string | null;
     date_fin_prevue: string | null;
@@ -77,14 +79,9 @@ export default function ProjetShow({ projet }: Props) {
             </div>
 
             {/* Stats cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 <StatCard
-                    label="Montant estimé"
-                    value={formatCurrency(projet.montant_estime)}
-                    icon={<BanknotesIcon className="w-5 h-5 text-gray-400 dark:text-slate-500" />}
-                />
-                <StatCard
-                    label="Fonds mobilisés (conventions)"
+                    label="Fonds mobilisés"
                     value={formatCurrency(projet.montant_conventions)}
                     sub={`${projet.pourcentage_financement}% du budget estimé`}
                     icon={<BuildingLibraryIcon className="w-5 h-5 text-gray-400 dark:text-slate-500" />}
@@ -94,8 +91,21 @@ export default function ProjetShow({ projet }: Props) {
                     label="Versements reçus"
                     value={formatCurrency(projet.total_versements)}
                     sub={`${tauxVersements}% des conventions`}
-                    icon={<DocumentTextIcon className="w-5 h-5 text-gray-400 dark:text-slate-500" />}
+                    icon={<BanknotesIcon className="w-5 h-5 text-gray-400 dark:text-slate-500" />}
                     progressValue={tauxVersements}
+                />
+                <StatCard
+                    label="Dépensé total"
+                    value={formatCurrency(projet.total_consomme)}
+                    sub="Paiements effectués"
+                    icon={<DocumentTextIcon className="w-5 h-5 text-blue-400" />}
+                />
+                <StatCard
+                    label="Disponible en caisse"
+                    value={formatCurrency(projet.disponible_caisse)}
+                    sub="Fonds réellement dépensables"
+                    icon={<BanknotesIcon className="w-5 h-5 text-emerald-400" />}
+                    variant={projet.disponible_caisse < 0 ? 'danger' : 'success'}
                 />
             </div>
 
@@ -164,12 +174,13 @@ export default function ProjetShow({ projet }: Props) {
     );
 }
 
-function StatCard({ label, value, sub, icon, progressValue }: {
+function StatCard({ label, value, sub, icon, progressValue, variant }: {
     label: string;
     value: string;
     sub?: string;
     icon: React.ReactNode;
     progressValue?: number;
+    variant?: 'success' | 'danger' | 'default';
 }) {
     return (
         <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-5">
@@ -177,7 +188,11 @@ function StatCard({ label, value, sub, icon, progressValue }: {
                 {icon}
                 <p className="text-xs text-gray-500 dark:text-slate-400">{label}</p>
             </div>
-            <p className="text-lg font-mono font-bold text-gray-900 dark:text-white">{value}</p>
+            <p className={`text-lg font-mono font-bold ${
+                variant === 'danger' ? 'text-red-600' : 
+                variant === 'success' ? 'text-emerald-600' : 
+                'text-gray-900 dark:text-white'
+            }`}>{value}</p>
             {sub && <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{sub}</p>}
             {progressValue !== undefined && (
                 <div className="mt-2 w-full h-1.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">

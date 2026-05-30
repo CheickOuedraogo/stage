@@ -13,7 +13,7 @@ class JournalAuditController extends Controller
 {
     public function index(Request $request): Response
     {
-        $userId = $request->query('user_id');
+        $userId = $request->query('id_utilisateur');
 
         $logs = JournalAudit::with('utilisateur:id_utilisateur,utilisateur_nom,utilisateur_email,role_key')
             ->when($userId, fn ($q) => $q->where('id_utilisateur', $userId))
@@ -28,11 +28,11 @@ class JournalAuditController extends Controller
                 'id' => $u->id_utilisateur,
                 'utilisateur_nom' => $u->utilisateur_nom,
                 'utilisateur_email' => $u->utilisateur_email,
-                'role' => $u->role_key?->value,
+                'role_key' => $u->role_key?->value,
                 'label_role' => $u->role_key?->shortLabel(),
             ]);
 
-        return Inertia::render('admin/JournalAudit', [
+        return Inertia::render('admin/AuditLog', [
             'logs' => $logs,
             'users' => $users,
             'selectedUtilisateurId' => $userId ? (int) $userId : null,

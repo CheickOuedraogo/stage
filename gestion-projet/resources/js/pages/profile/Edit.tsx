@@ -29,8 +29,8 @@ export default function ProfileEdit() {
 
     const passwordForm = useForm({
         current_password: '',
-        password: '',
-        password_confirmation: '',
+        utilisateur_mot_de_passe: '',
+        utilisateur_mot_de_passe_confirmation: '',
     });
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -258,16 +258,16 @@ export default function ProfileEdit() {
                                 <input
                                     id="new_password"
                                     type="password"
-                                    value={passwordForm.data.password}
-                                    onChange={(e) => passwordForm.setData('password', e.target.value)}
+                                    value={passwordForm.data.utilisateur_mot_de_passe}
+                                    onChange={(e) => passwordForm.setData('utilisateur_mot_de_passe', e.target.value)}
                                     autoComplete="new-password"
                                     required
-                                    aria-invalid={!!passwordForm.errors.password}
+                                    aria-invalid={!!passwordForm.errors.utilisateur_mot_de_passe}
                                     placeholder="Min. 8 caractères"
                                     className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
                                 />
-                                {passwordForm.errors.password && (
-                                    <p className="text-xs text-red-600">{passwordForm.errors.password}</p>
+                                {passwordForm.errors.utilisateur_mot_de_passe && (
+                                    <p className="text-xs text-red-600">{passwordForm.errors.utilisateur_mot_de_passe}</p>
                                 )}
                             </div>
 
@@ -278,15 +278,15 @@ export default function ProfileEdit() {
                                 <input
                                     id="password_confirmation"
                                     type="password"
-                                    value={passwordForm.data.password_confirmation}
-                                    onChange={(e) => passwordForm.setData('password_confirmation', e.target.value)}
+                                    value={passwordForm.data.utilisateur_mot_de_passe_confirmation}
+                                    onChange={(e) => passwordForm.setData('utilisateur_mot_de_passe_confirmation', e.target.value)}
                                     autoComplete="new-password"
                                     required
-                                    aria-invalid={!!passwordForm.errors.password_confirmation}
+                                    aria-invalid={!!passwordForm.errors.utilisateur_mot_de_passe_confirmation}
                                     className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
                                 />
-                                {passwordForm.errors.password_confirmation && (
-                                    <p className="text-xs text-red-600">{passwordForm.errors.password_confirmation}</p>
+                                {passwordForm.errors.utilisateur_mot_de_passe_confirmation && (
+                                    <p className="text-xs text-red-600">{passwordForm.errors.utilisateur_mot_de_passe_confirmation}</p>
                                 )}
                             </div>
                         </div>

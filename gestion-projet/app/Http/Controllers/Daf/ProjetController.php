@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Daf;
 
-use App\Enums\StatutDemande;
 use App\Enums\StatutFinalProjet;
 use App\Enums\StatutProjet;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Daf\CloturerProjetRequest;
 use App\Models\Convention;
+use App\Models\Paiement;
 use App\Models\Projet;
 use App\Services\ProjetService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -22,30 +22,48 @@ class ProjetController extends Controller
 
     public function index(): Response
     {
-        $projets = Projet::with(['porteur:id_utilisateur,utilisateur_nom', 'conventions:id_convention,id_projet,convention_montant,convention_taux_conversion'])
+        $projets = Projet::with(['porteur:id_utilisateur,utilisateur_nom', 'conventions.versements'])
             ->withCount('conventions')
             ->latest()
             ->get()
-            ->map(fn (Projet $p) => [
-                'id' => $p->id_utilisateur,
-                'titre' => $p->projet_titre,
-                'porteur' => $p->porteur->utilisateur_nom,
-                'statut' => $p->projet_statut->value,
-                'libelle_statut' => $p->projet_statut->label(),
-                'montant_estime' => $p->projet_montant_estime,
-                'montant_conventions' => $p->conventions->sum('montant_fcfa'),
-                'conventions_count' => $p->conventions_count,
-                'date_debut' => $p->projet_date_debut?->toDateString(),
-                'date_fin_prevue' => $p->projet_date_fin_prevue?->toDateString(),
-            ]);
+            ->map(function (Projet $p) {
+                $montantConvs = $p->conventions->sum(fn ($c) => $c->montant_fcfa);
+                $totalConsomme = Paiement::sumForProjet($p->id_projet);
+                $totalVersements = $p->montant_total_versements;
+
+                return [
+                    'id' => $p->id_projet,
+                    'titre' => $p->projet_titre,
+                    'porteur' => $p->porteur->utilisateur_nom,
+                    'statut' => $p->projet_statut->value,
+                    'libelle_statut' => $p->projet_statut->label(),
+                    'montant_estime' => $p->projet_montant_estime,
+                    'montant_conventions' => $montantConvs,
+                    'total_versements' => $totalVersements,
+                    'total_consomme' => $totalConsomme,
+                    'conventions_count' => $p->conventions_count,
+                    'taux_execution' => $montantConvs > 0 ? round(($totalConsomme / $montantConvs) * 100, 1) : 0,
+                    'taux_financement' => $p->projet_montant_estime > 0 ? round(($montantConvs / $p->projet_montant_estime) * 100, 1) : 0,
+                    'date_debut' => $p->projet_date_debut?->toDateString(),
+                    'date_fin_prevue' => $p->projet_date_fin_prevue?->toDateString(),
+                ];
+            });
+
+        $totalBudgetInitial = Projet::sum('projet_montant_estime');
+        $totalConventions = Convention::all()->sum(fn ($c) => $c->montant_fcfa);
+        $totalConsommeGlobal = Paiement::sum('paiement_montant');
 
         return Inertia::render('daf/Projets/Index', [
             'projets' => $projets,
             'stats' => [
                 'total' => Projet::count(),
-                'en_cours' => Projet::where('projet_statut', 'en_cours')->count(),
-                'total_budget' => Projet::sum('projet_montant_estime'),
-                'total_conventions' => Convention::sum(\DB::raw('convention_montant * convention_taux_conversion')),
+                'en_cours' => Projet::where('projet_statut', StatutProjet::EnCours->value)->count(),
+                'total_budget' => $totalBudgetInitial,
+                'total_conventions' => $totalConventions,
+                'total_consomme' => $totalConsommeGlobal,
+                'taux_execution_global' => $totalConventions > 0
+                    ? round(($totalConsommeGlobal / $totalConventions) * 100, 1)
+                    : 0,
             ],
         ]);
     }
@@ -70,7 +88,7 @@ class ProjetController extends Controller
 
         return Inertia::render('daf/Projets/Show', [
             'projet' => [
-                'id' => $projet->id_utilisateur,
+                'id' => $projet->id_projet,
                 'titre' => $projet->projet_titre,
                 'description' => $projet->projet_description,
                 'objectifs' => $projet->projet_objectifs,
@@ -90,7 +108,7 @@ class ProjetController extends Controller
                     'utilisateur_telephone' => $projet->porteur->utilisateur_telephone,
                 ],
                 'conventions' => $projet->conventions->map(fn (Convention $c) => [
-                    'id' => $c->id_utilisateur,
+                    'id' => $c->id_convention,
                     'titre' => $c->convention_titre,
                     'bailleur' => ['nom' => $c->bailleur->bailleur_nom, 'sigle' => $c->bailleur->bailleur_sigle],
                     'montant_fcfa' => $c->montant_fcfa,
@@ -149,45 +167,31 @@ class ProjetController extends Controller
 
         $pdf = Pdf::loadView('pdf.bilan-projet', compact('bilan'))->setPaper('a4');
 
-        return $pdf->download("bilan-projet-{$projet->id_utilisateur}.pdf");
+        return $pdf->download("bilan-projet-{$projet->id_projet}.pdf");
     }
 
     /** @return array<string, mixed> */
     private function buildAnalyseEcarts(Projet $projet): array
     {
-        $totalVersements = $projet->conventions->flatMap->versements->sum('versement_montant');
+        $totalVersements = $projet->montant_total_versements;
+        $totalDepenses = Paiement::sumForProjet($projet->id_projet);
 
-        $totalDepenses = $projet->conventions->flatMap->rubriques->flatMap->demandesDepenses
-            ->whereIn('demande_statut', [
-                StatutDemande::Payee->value,
-                StatutDemande::RapportSoumis->value,
-                StatutDemande::Terminee->value,
-            ])->sum('demande_montant');
-
-        $budgetPrevu = $projet->conventions->sum('montant_fcfa');
+        $budgetPrevu = $projet->conventions->sum(fn ($c) => $c->montant_fcfa);
         $ecartBudget = $budgetPrevu - $totalDepenses;
 
-        $ecartTemps = null;
-        $ecartTempsLabel = null;
-
-        if ($projet->projet_date_fin_prevue) {
-            $dateRef = $projet->projet_date_fin_reelle ?? now();
-            $ecartTemps = $projet->projet_date_fin_prevue->diffInDays($dateRef, false);
-            $ecartTempsLabel = $ecartTemps > 0
-                ? "{$ecartTemps} jour(s) de retard"
-                : ($ecartTemps < 0 ? abs($ecartTemps).' jour(s) d\'avance' : 'Dans les délais');
-        }
+        $analyseDelais = $projet->analyse_delais;
 
         return [
             'budget_prevu' => $budgetPrevu,
             'total_versements' => $totalVersements,
             'total_depenses' => $totalDepenses,
             'ecart_budget' => $ecartBudget,
+            'solde_caisse' => $totalVersements - $totalDepenses,
             'taux_execution' => $budgetPrevu > 0 ? round(($totalDepenses / $budgetPrevu) * 100, 1) : 0,
             'date_fin_prevue' => $projet->projet_date_fin_prevue?->toDateString(),
             'date_fin_reelle' => $projet->projet_date_fin_reelle?->toDateString(),
-            'ecart_temps_jours' => $ecartTemps,
-            'ecart_temps_label' => $ecartTempsLabel,
+            'ecart_temps_jours' => $analyseDelais['jours'],
+            'ecart_temps_label' => $analyseDelais['label'],
         ];
     }
 }

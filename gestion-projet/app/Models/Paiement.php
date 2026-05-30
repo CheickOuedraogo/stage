@@ -63,4 +63,19 @@ class Paiement extends Model
     {
         return $this->belongsTo(Utilisateur::class, 'id_enregistreur_paiement');
     }
+
+    public static function sumForProjet(int $idProjet): int
+    {
+        return (int) self::where('id_projet', $idProjet)->sum('paiement_montant');
+    }
+
+    public static function sumForConvention(int $idConvention): int
+    {
+        return (int) self::where('id_convention', $idConvention)->sum('paiement_montant');
+    }
+
+    public static function sumForRubrique(int $idRubrique): int
+    {
+        return (int) self::where('id_rubrique', $idRubrique)->sum('paiement_montant');
+    }
 }

@@ -1,7 +1,7 @@
 import { createInertiaApp, router } from '@inertiajs/react';
 import React from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import ErrorPage from './pages/ErrorPage';
+import ErrorPage from './pages/Errors/Index';
 
 const appName = import.meta.env.VITE_APP_NAME || 'CIFEU';
 
@@ -12,7 +12,7 @@ router.on('httpException', (event) => {
     const status = (event as CustomEvent<{ response: { status: number } }>).detail?.response?.status ?? 500;
     if (appRoot) {
         appRoot.render(React.createElement(ErrorPage, { status }));
-    } else {
+    } else if (typeof document !== 'undefined') {
         const el = document.getElementById('app');
         if (el) createRoot(el).render(React.createElement(ErrorPage, { status }));
     }
@@ -30,6 +30,7 @@ createInertiaApp({
         return page;
     },
     setup({ el, App, props }) {
+        if (!el) return;
         appRoot = createRoot(el);
         appRoot.render(<App {...props} />);
     },

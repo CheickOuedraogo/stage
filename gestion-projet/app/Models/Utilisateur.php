@@ -15,6 +15,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 /**
  * @method static Builder actif()
  * @method static Builder parRole(RoleUtilisateur $role)
+ *
+ * @mixin Builder
  */
 #[Fillable(['utilisateur_nom', 'utilisateur_email', 'utilisateur_mot_de_passe', 'role_key', 'utilisateur_actif', 'utilisateur_avatar_chemin', 'utilisateur_telephone'])]
 #[Hidden(['utilisateur_mot_de_passe', 'jeton_souvenir'])]

@@ -14,7 +14,11 @@ interface Projet {
     libelle_statut: string;
     montant_estime: number;
     montant_conventions: number;
+    total_versements: number;
+    total_consomme: number;
     conventions_count: number;
+    taux_execution: number;
+    taux_financement: number;
     date_debut: string | null;
     date_fin_prevue: string | null;
 }
@@ -24,6 +28,8 @@ interface Stats {
     en_cours: number;
     total_budget: number;
     total_conventions: number;
+    total_consomme?: number;
+    taux_execution_global: number;
 }
 
 interface Props {
@@ -77,7 +83,7 @@ export default function DafProjetsIndex({ projets, stats }: Props) {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
                 <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
                     <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Total projets</p>
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
@@ -93,6 +99,14 @@ export default function DafProjetsIndex({ projets, stats }: Props) {
                 <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
                     <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Total conventions</p>
                     <p className="text-base font-mono font-bold text-gray-900 dark:text-white">{formatCurrency(stats.total_conventions)}</p>
+                </div>
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Total consommé</p>
+                    <p className="text-base font-mono font-bold text-gray-900 dark:text-white">{formatCurrency(stats.total_consomme || 0)}</p>
+                </div>
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Taux d'exécution global</p>
+                    <p className="text-2xl font-bold text-blue-600">{stats.taux_execution_global}%</p>
                 </div>
             </div>
 
@@ -150,13 +164,15 @@ export default function DafProjetsIndex({ projets, stats }: Props) {
                                 <th className="text-left px-6 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Statut</th>
                                 <th className="text-right px-6 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Budget estimé</th>
                                 <th className="text-right px-6 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Conventions</th>
+                                <th className="text-center px-3 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider hidden lg:table-cell">Taux financ.</th>
+                                <th className="text-center px-3 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider hidden lg:table-cell">Taux exéc.</th>
                                 <th className="text-left px-6 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider hidden lg:table-cell">Fin prévue</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
                             {projets.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-16 text-center text-gray-400 dark:text-slate-500">
+                                    <td colSpan={8} className="px-6 py-16 text-center text-gray-400 dark:text-slate-500">
                                         <FolderIcon className="w-10 h-10 mx-auto mb-2 opacity-40" />
                                         <p className="font-medium">Aucun projet trouvé</p>
                                         <p className="text-xs mt-1">Modifiez les filtres ou attendez qu'un porteur soit associé à un projet.</p>
@@ -182,6 +198,24 @@ export default function DafProjetsIndex({ projets, stats }: Props) {
                                         <td className="px-6 py-4 text-right">
                                             <p className="font-mono text-xs text-gray-900 dark:text-white">{formatCurrency(projet.montant_conventions)}</p>
                                             <p className="text-xs text-gray-500 dark:text-slate-400">{projet.conventions_count} convention{projet.conventions_count !== 1 ? 's' : ''}</p>
+                                        </td>
+                                        <td className="px-3 py-4 text-center text-xs hidden lg:table-cell">
+                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                                                projet.taux_financement >= 100 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                                                projet.taux_financement > 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                                                'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
+                                            }`}>
+                                                {projet.taux_financement}%
+                                            </span>
+                                        </td>
+                                        <td className="px-3 py-4 text-center text-xs hidden lg:table-cell">
+                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                                                projet.taux_execution >= 75 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                                                projet.taux_execution > 0 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                                                'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
+                                            }`}>
+                                                {projet.taux_execution}%
+                                            </span>
                                         </td>
                                         <td className="px-6 py-4 text-gray-600 dark:text-slate-400 text-xs hidden lg:table-cell">
                                             {projet.date_fin_prevue ? formatDate(projet.date_fin_prevue) : '—'}

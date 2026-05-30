@@ -15,6 +15,7 @@ use App\Models\Projet;
 use App\Models\Rubrique;
 use App\Models\Utilisateur;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -27,7 +28,7 @@ class DashboardController extends Controller
             ->limit(8)
             ->get()
             ->map(fn (JournalAudit $log) => [
-                'id' => $log->id_utilisateur,
+                'id' => $log->id_audit,
                 'action' => $log->audit_action,
                 'description' => $log->audit_description,
                 'user' => $log->utilisateur?->utilisateur_nom ?? 'Système',
@@ -83,7 +84,7 @@ class DashboardController extends Controller
             ->limit(5)
             ->get()
             ->map(fn (DemandeDepense $d) => [
-                'id' => $d->id_utilisateur,
+                'id' => $d->id_demande,
                 'objet' => $d->demande_objet,
                 'montant' => $d->demande_montant,
                 'statut' => $d->demande_statut->value,
@@ -91,7 +92,7 @@ class DashboardController extends Controller
                 'badge_class' => $d->demande_statut->badgeClass(),
                 'porteur' => $d->porteur->utilisateur_nom,
                 'convention' => $d->convention->convention_titre,
-                'cree_le' => $d->created_at->toDateString(),
+                'cree_le' => $d->cree_le?->toDateString() ?? '—',
             ]);
 
         // Pie chart — versements reçus par projet (top 6)
@@ -108,8 +109,10 @@ class DashboardController extends Controller
             ->values();
 
         // Line chart — paiements effectués par mois (12 derniers mois)
-        // SUBSTR(paiement_date, 1, 7) works on both SQLite and MySQL (gives YYYY-MM)
-        $paiementsParMois = Paiement::selectRaw('SUBSTR(paiement_date, 1, 7) as mois, SUM(paiement_montant) as total')
+        $dateExpr = DB::connection()->getDriverName() === 'pgsql'
+            ? "TO_CHAR(paiement_date, 'YYYY-MM')"
+            : 'SUBSTR(paiement_date, 1, 7)';
+        $paiementsParMois = Paiement::selectRaw("{$dateExpr} as mois, SUM(paiement_montant) as total")
             ->where('paiement_date', '>=', now()->subYear()->startOfMonth())
             ->groupBy('mois')
             ->orderBy('mois')
@@ -120,15 +123,11 @@ class DashboardController extends Controller
             ]);
 
         // Bar chart — top 5 rubriques les plus consommées
-        $topRubriques = Rubrique::with(['demandesDepenses' => fn ($q) => $q->whereIn('demande_statut', [
-            StatutDemande::Payee->value,
-            StatutDemande::RapportSoumis->value,
-            StatutDemande::Terminee->value,
-        ])])
+        $topRubriques = Rubrique::withSum('paiements', 'paiement_montant')
             ->get()
             ->map(fn (Rubrique $r) => [
                 'libelle' => mb_strimwidth($r->rubrique_libelle, 0, 22, '…'),
-                'consomme' => $r->demandesDepenses->sum('demande_montant'),
+                'consomme' => (int) $r->paiements_sum_paiement_montant,
                 'prevu' => $r->rubrique_montant,
             ])
             ->filter(fn ($item) => $item['consomme'] > 0)
@@ -174,7 +173,7 @@ class DashboardController extends Controller
             ->limit(5)
             ->get()
             ->map(fn (DemandeDepense $d) => [
-                'id' => $d->id_utilisateur,
+                'id' => $d->id_demande,
                 'objet' => $d->demande_objet,
                 'montant' => $d->demande_montant,
                 'statut' => $d->demande_statut->value,
@@ -182,7 +181,7 @@ class DashboardController extends Controller
                 'badge_class' => $d->demande_statut->badgeClass(),
                 'porteur' => $d->porteur->utilisateur_nom,
                 'convention' => $d->convention->convention_titre,
-                'cree_le' => $d->created_at->toDateString(),
+                'cree_le' => $d->cree_le?->toDateString() ?? '—',
             ]);
 
         $paiementsRecents = Paiement::with([
@@ -194,10 +193,10 @@ class DashboardController extends Controller
             ->limit(5)
             ->get()
             ->map(fn (Paiement $p) => [
-                'id' => $p->id_utilisateur,
+                'id' => $p->id_paiement,
                 'montant' => $p->paiement_montant,
                 'date_paiement' => $p->paiement_date->toDateString(),
-                'mode_paiement' => $p->paiement_mode->label(),
+                'mode_paiement' => $p->paiement_mode?->label() ?? '',
                 'reference' => $p->paiement_reference,
                 'objet' => $p->demande->demande_objet,
                 'porteur' => $p->demande->porteur->utilisateur_nom,
@@ -221,8 +220,8 @@ class DashboardController extends Controller
     {
         $porteur = $request->user();
 
-        $projetsCount = Projet::forPorteur($porteur->id_utilisateur)->count();
-        $projetsAgentComptabletifsCount = Projet::forPorteur($porteur->id_utilisateur)->where('projet_statut', StatutProjet::EnCours)->count();
+        $projetsCount = Projet::pourPorteur($porteur->id_utilisateur)->count();
+        $projetsAgentComptabletifsCount = Projet::pourPorteur($porteur->id_utilisateur)->where('projet_statut', StatutProjet::EnCours)->count();
 
         $demandesActives = DemandeDepense::where('id_porteur', $porteur->id_utilisateur)
             ->whereNotIn('demande_statut', [StatutDemande::RejeteeDaf, StatutDemande::RejeteeAgentComptable, StatutDemande::Terminee])
@@ -239,7 +238,7 @@ class DashboardController extends Controller
             ->limit(5)
             ->get()
             ->map(fn (DemandeDepense $d) => [
-                'id' => $d->id_utilisateur,
+                'id' => $d->id_demande,
                 'objet' => $d->demande_objet,
                 'montant' => $d->demande_montant,
                 'statut' => $d->demande_statut->value,
@@ -247,23 +246,18 @@ class DashboardController extends Controller
                 'badge_class' => $d->demande_statut->badgeClass(),
                 'convention' => $d->convention->convention_titre,
                 'projet' => $d->convention->projet->projet_titre,
-                'cree_le' => $d->created_at->toDateString(),
+                'cree_le' => $d->cree_le?->toDateString() ?? '—',
             ]);
 
         // Budget overview: top 4 projects with budget data
-        $projetsBudget = Projet::forPorteur($porteur->id_utilisateur)
-            ->with(['conventions.versements', 'conventions.rubriques.demandesDepenses'])
+        $projetsBudget = Projet::pourPorteur($porteur->id_utilisateur)
+            ->with(['conventions.versements'])
             ->latest()
             ->limit(4)
             ->get()
             ->map(function (Projet $p) {
                 $versements = $p->conventions->flatMap->versements->sum('versement_montant');
-                $depenses = $p->conventions->flatMap->rubriques->flatMap->demandesDepenses
-                    ->whereIn('demande_statut', [
-                        StatutDemande::Payee->value,
-                        StatutDemande::RapportSoumis->value,
-                        StatutDemande::Terminee->value,
-                    ])->sum('demande_montant');
+                $depenses = Paiement::sumForProjet($p->id_projet);
 
                 return [
                     'titre' => mb_strimwidth($p->projet_titre, 0, 24, '…'),
@@ -284,6 +278,7 @@ class DashboardController extends Controller
             ],
             'demandes_recentes' => $demandesRecentes,
             'projets_budget' => $projetsBudget,
+            'faq_items' => $this->getFaqForRole(RoleUtilisateur::Porteur),
         ]);
     }
 

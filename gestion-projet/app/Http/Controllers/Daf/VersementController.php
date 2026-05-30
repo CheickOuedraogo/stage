@@ -25,7 +25,7 @@ class VersementController extends Controller
             ->paginate(25)
             ->withQueryString()
             ->through(fn (Versement $v) => [
-                'id' => $v->id_utilisateur,
+                'id' => $v->id_versement,
                 'montant' => $v->versement_montant,
                 'date_reception' => $v->versement_date_reception->toDateString(),
                 'reference' => $v->versement_reference,
@@ -33,8 +33,8 @@ class VersementController extends Controller
                 'convention' => $v->convention->convention_titre,
                 'projet' => $v->convention->projet->projet_titre,
                 'bailleur' => $v->convention->bailleur->bailleur_sigle ?? $v->convention->bailleur->bailleur_nom,
-                'convention_id' => $v->id_utilisateur_convention,
-                'projet_id' => $v->convention->id_utilisateur_projet,
+                'convention_id' => $v->id_convention,
+                'projet_id' => $v->convention->id_projet,
             ]);
 
         $totalMontant = Versement::sum('versement_montant');

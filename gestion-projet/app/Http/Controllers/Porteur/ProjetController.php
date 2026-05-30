@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Porteur;
 
 use App\Http\Controllers\Controller;
 use App\Models\Convention;
+use App\Models\Paiement;
 use App\Models\Projet;
 use App\Services\ProjetService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -20,27 +21,36 @@ class ProjetController extends Controller
     {
         $porteur = $request->user();
 
-        $projets = Projet::forPorteur($porteur->id_utilisateur)
+        $projets = Projet::pourPorteur($porteur->id_utilisateur)
             ->withCount('conventions')
-            ->with(['conventions:id_convention,id_projet,convention_montant,convention_taux_conversion'])
+            ->with(['conventions.versements'])
             ->when($request->filled('search'), fn ($q) => $q->where('projet_titre', 'like', '%'.$request->search.'%'))
             ->when($request->filled('statut'), fn ($q) => $q->where('projet_statut', $request->statut))
             ->latest()
+            ->distinct()
             ->get()
-            ->map(fn (Projet $p) => [
-                'id' => $p->id_projet,
-                'titre' => $p->projet_titre,
-                'statut' => $p->projet_statut->value,
-                'libelle_statut' => $p->projet_statut->label(),
-                'montant_estime' => $p->projet_montant_estime,
-                'date_debut' => $p->projet_date_debut?->toDateString(),
-                'date_fin_prevue' => $p->projet_date_fin_prevue?->toDateString(),
-                'conventions_count' => $p->conventions_count,
-                'montant_conventions' => $p->conventions->sum('montant_fcfa'),
-                'pourcentage_financement' => $p->projet_montant_estime > 0
-                    ? (int) min(100, round(($p->conventions->sum('montant_fcfa') / $p->projet_montant_estime) * 100))
-                    : 0,
-            ]);
+            ->map(function (Projet $p) {
+                $montantConvs = $p->conventions->sum(fn ($c) => $c->montant_fcfa);
+                $totalConsomme = Paiement::sumForProjet($p->id_projet);
+                $totalVersements = $p->montant_total_versements;
+
+                return [
+                    'id' => $p->id_projet,
+                    'titre' => $p->projet_titre,
+                    'statut' => $p->projet_statut->value,
+                    'libelle_statut' => $p->projet_statut->label(),
+                    'montant_estime' => $p->projet_montant_estime,
+                    'date_debut' => $p->projet_date_debut?->toDateString(),
+                    'date_fin_prevue' => $p->projet_date_fin_prevue?->toDateString(),
+                    'conventions_count' => $p->conventions_count,
+                    'montant_conventions' => $montantConvs,
+                    'total_consomme' => $totalConsomme,
+                    'disponible_caisse' => $totalVersements - $totalConsomme,
+                    'pourcentage_financement' => $p->projet_montant_estime > 0
+                        ? (int) min(100, round(($montantConvs / $p->projet_montant_estime) * 100))
+                        : 0,
+                ];
+            });
 
         return Inertia::render('porteur/Projets/Index', [
             'projets' => $projets,
@@ -56,8 +66,9 @@ class ProjetController extends Controller
             'conventions' => fn ($q) => $q->with(['bailleur:id_bailleur,bailleur_nom,bailleur_sigle', 'versements:id_versement,id_convention,versement_montant,versement_date_reception']),
         ]);
 
-        $totalVersements = $projet->conventions->flatMap->versements->sum('versement_montant');
-        $montantConventions = $projet->conventions->sum('montant_fcfa');
+        $totalVersements = $projet->montant_total_versements;
+        $montantConventions = $projet->conventions->sum(fn ($c) => $c->montant_fcfa);
+        $totalConsomme = Paiement::sumForProjet($projet->id_projet);
 
         return Inertia::render('porteur/Projets/Show', [
             'projet' => [
@@ -71,6 +82,8 @@ class ProjetController extends Controller
                 'montant_estime' => $projet->projet_montant_estime,
                 'montant_conventions' => $montantConventions,
                 'total_versements' => $totalVersements,
+                'total_consomme' => $totalConsomme,
+                'disponible_caisse' => $totalVersements - $totalConsomme,
                 'pourcentage_financement' => $projet->projet_montant_estime > 0
                     ? (int) min(100, round(($montantConventions / $projet->projet_montant_estime) * 100))
                     : 0,
@@ -136,7 +149,7 @@ class ProjetController extends Controller
                     'id' => $r->id_rubrique,
                     'libelle' => $r->rubrique_libelle,
                     'montant_prevu' => $r->rubrique_montant,
-                    'montant_depense' => 0,
+                    'montant_depense' => Paiement::sumForRubrique($r->id_rubrique),
                     'description' => $r->rubrique_description,
                 ])->values(),
                 'versements' => $convention->versements->sortByDesc('versement_date_reception')->map(fn ($v) => [

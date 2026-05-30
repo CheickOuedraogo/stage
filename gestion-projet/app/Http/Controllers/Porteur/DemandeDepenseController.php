@@ -195,7 +195,7 @@ class DemandeDepenseController extends Controller
             'statut' => $d->demande_statut->value,
             'libelle_statut' => $d->demande_statut->label(),
             'badge_class' => $d->demande_statut->badgeClass(),
-            'cree_le' => $d->created_at?->toDateString(),
+            'cree_le' => $d->cree_le?->toDateString(),
             'convention' => [
                 'id' => $d->convention->id_convention,
                 'titre' => $d->convention->convention_titre,
@@ -224,9 +224,9 @@ class DemandeDepenseController extends Controller
             'validateur_ac' => $d->validateurAgentComptable?->utilisateur_nom,
             'paiement' => $d->paiement ? [
                 'montant' => $d->paiement->paiement_montant,
-                'date_paiement' => $d->paiement->paiement_date->toDateString(),
-                'mode_paiement' => $d->paiement->paiement_mode->value,
-                'mode_paiement_label' => $d->paiement->paiement_mode->label(),
+                'date_paiement' => $d->paiement->paiement_date?->toDateString(),
+                'mode_paiement' => $d->paiement->paiement_mode?->value ?? '',
+                'mode_paiement_label' => $d->paiement->paiement_mode?->label() ?? '',
                 'reference' => $d->paiement->paiement_reference,
                 'enregistre_par' => $d->paiement->enregistrePar->utilisateur_nom,
             ] : null,

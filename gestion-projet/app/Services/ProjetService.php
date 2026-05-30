@@ -29,7 +29,7 @@ class ProjetService
 
         $conventionIds = $projet->conventions->pluck('id_convention');
 
-        $demandesActives = DemandeDepense::whereIn('id_convention', $conventionIds)
+        $demandesActives = DemandeDepense::query()->whereIn('id_convention', $conventionIds)
             ->whereNotIn('demande_statut', [
                 StatutDemande::Terminee->value,
                 StatutDemande::RejeteeDaf->value,
@@ -104,26 +104,38 @@ class ProjetService
     public function genererBilan(Projet $projet): array
     {
         $projet->loadMissing([
-            'porteur:id_utilisateur,name',
+            'porteur:id_utilisateur,utilisateur_nom',
             'conventions.bailleur:id_bailleur,bailleur_nom,bailleur_sigle',
             'conventions.versements',
             'conventions.rubriques.demandesDepenses' => fn ($q) => $q
                 ->where('demande_statut', StatutDemande::Terminee->value)
                 ->with('paiement'),
             'conventions.paiementsDirects.rubrique:id_rubrique,rubrique_libelle',
+            'conventions.paiements',
         ]);
 
-        $conventions = $projet->conventions->map(fn (Convention $c) => [
-            'id' => $c->id_utilisateur,
-            'titre' => $c->convention_titre,
-            'bailleur' => $c->bailleur->bailleur_nom,
-            'bailleur_sigle' => $c->bailleur->bailleur_sigle,
-            'montant_fcfa' => $c->montant_fcfa,
-            'total_versements' => $c->versements->sum('versement_montant'),
-            'total_depenses' => $c->rubriques->flatMap->demandesDepenses->sum('demande_montant'),
-            'total_paiements_directs' => $c->paiementsDirects->sum('paiement_montant'),
-            'solde' => $c->montant_fcfa - $c->versements->sum('versement_montant'),
-        ])->values();
+        $conventions = $projet->conventions->map(function (Convention $c) {
+            $totalVersements = $c->versements->sum('versement_montant');
+            $totalPaiementsIndirects = $c->paiements->where('type_paiement', 'indirect')->sum('paiement_montant');
+            $totalPaiementsDirects = $c->paiements->where('type_paiement', 'direct')->sum('paiement_montant');
+            $totalConsomme = $totalPaiementsIndirects + $totalPaiementsDirects;
+
+            return [
+                'id' => $c->id_convention,
+                'titre' => $c->convention_titre,
+                'bailleur' => $c->bailleur->bailleur_nom,
+                'bailleur_sigle' => $c->bailleur->bailleur_sigle,
+                'montant_fcfa' => $c->montant_fcfa,
+                'total_versements' => $totalVersements,
+                'total_paiements_indirects' => $totalPaiementsIndirects,
+                'total_paiements_directs' => $totalPaiementsDirects,
+                'total_consomme' => $totalConsomme,
+                'solde_caisse' => $totalVersements - $totalPaiementsIndirects,
+                'solde_engagement' => $c->montant_fcfa - $totalConsomme,
+                'taux_execution' => $c->montant_fcfa > 0 ? round(($totalConsomme / $c->montant_fcfa) * 100, 1) : 0,
+                'alerte_depassement' => $totalPaiementsIndirects > $totalVersements,
+            ];
+        })->values();
 
         $demandes = $projet->conventions->flatMap(fn (Convention $c) => $c->rubriques->flatMap(fn ($r) => $r->demandesDepenses->map(fn (DemandeDepense $d) => [
             'objet' => $d->demande_objet,
@@ -144,9 +156,10 @@ class ProjetService
         ])
         )->values();
 
-        $budgetPrevu = $projet->conventions->sum('montant_fcfa');
-        $totalVersements = $conventions->sum('total_versements');
-        $totalDepenses = $conventions->sum('total_depenses') + $conventions->sum('total_paiements_directs');
+        $budgetPrevu = $projet->conventions->sum(fn ($c) => $c->montant_fcfa);
+        $totalVersementsProjet = $conventions->sum('total_versements');
+        $totalConsommeProjet = $conventions->sum('total_consomme');
+        $totalPaiementsIndirectsProjet = $conventions->sum('total_paiements_indirects');
 
         $ecartTemps = null;
         $ecartTempsLabel = null;
@@ -154,14 +167,19 @@ class ProjetService
         if ($projet->projet_date_fin_prevue) {
             $dateRef = $projet->projet_date_fin_reelle ?? now();
             $ecartTemps = (int) $projet->projet_date_fin_prevue->diffInDays($dateRef, false);
-            $ecartTempsLabel = $ecartTemps > 0
-                ? "{$ecartTemps} jour(s) de retard"
-                : ($ecartTemps < 0 ? abs($ecartTemps).' jour(s) d\'avance' : 'Dans les délais');
+            if ($ecartTemps > 0) {
+                $ecartTempsLabel = $ecartTemps === 1 ? '1 jour de retard' : "{$ecartTemps} jours de retard";
+            } elseif ($ecartTemps < 0) {
+                $joursRestants = abs($ecartTemps);
+                $ecartTempsLabel = $joursRestants === 1 ? '1 jour restant' : "{$joursRestants} jours restants";
+            } else {
+                $ecartTempsLabel = "Échéance aujourd'hui";
+            }
         }
 
         return [
             'projet' => [
-                'id' => $projet->id_utilisateur,
+                'id' => $projet->id_projet,
                 'titre' => $projet->projet_titre,
                 'porteur' => $projet->porteur->utilisateur_nom,
                 'statut' => $projet->projet_statut->value,
@@ -178,13 +196,17 @@ class ProjetService
             'analyse_ecarts' => [
                 'budget_initial' => $projet->projet_montant_estime,
                 'budget_prevu' => $budgetPrevu,
-                'total_versements' => $totalVersements,
-                'total_depenses' => $totalDepenses,
-                'ecart_budget' => $budgetPrevu - $totalDepenses,
-                'taux_execution' => $budgetPrevu > 0 ? round(($totalDepenses / $budgetPrevu) * 100, 1) : 0,
+                'total_versements' => $totalVersementsProjet,
+                'total_consomme' => $totalConsommeProjet,
+                'total_paiements_indirects' => $totalPaiementsIndirectsProjet,
+                'ecart_budget' => $budgetPrevu - $totalConsommeProjet,
+                'solde_caisse_global' => $totalVersementsProjet - $totalPaiementsIndirectsProjet,
+                'taux_execution' => $budgetPrevu > 0 ? round(($totalConsommeProjet / $budgetPrevu) * 100, 1) : 0,
+                'taux_mobilisation' => $budgetPrevu > 0 ? round(($totalVersementsProjet / $budgetPrevu) * 100, 1) : 0,
                 'conventions_depassent_budget_initial' => $budgetPrevu > $projet->projet_montant_estime,
                 'ecart_temps_jours' => $ecartTemps,
                 'ecart_temps_label' => $ecartTempsLabel,
+                'alerte_tresorerie' => $totalPaiementsIndirectsProjet > $totalVersementsProjet,
             ],
         ];
     }

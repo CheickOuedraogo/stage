@@ -93,7 +93,7 @@
         <div class="stat-box {{ $analyse['taux_execution'] <= 100 ? 'success' : 'danger' }}">
             <div class="stat-label">Taux d'exécution</div>
             <div class="stat-value {{ $analyse['taux_execution'] <= 100 ? 'success' : 'danger' }}">{{ $analyse['taux_execution'] }}%</div>
-            <div style="font-size: 9px; color: #64748b; margin-top: 2px;">{{ number_format($analyse['total_depenses'], 0, ',', ' ') }} FCFA consommés</div>
+            <div style="font-size: 9px; color: #64748b; margin-top: 2px;">{{ number_format($analyse['total_consomme'], 0, ',', ' ') }} FCFA consommés</div>
         </div>
         <div class="stat-box {{ $ecartBudget >= 0 ? 'success' : 'danger' }}">
             <div class="stat-label">Écart budgétaire</div>
@@ -132,8 +132,8 @@
                 <td>{{ $c['titre'] }}</td>
                 <td class="text-right">{{ number_format($c['montant_fcfa'], 0, ',', ' ') }}</td>
                 <td class="text-right">{{ number_format($c['total_versements'], 0, ',', ' ') }}</td>
-                <td class="text-right">{{ number_format($c['total_depenses'] + $c['total_paiements_directs'], 0, ',', ' ') }}</td>
-                <td class="text-right">{{ number_format($c['solde'], 0, ',', ' ') }}</td>
+                <td class="text-right">{{ number_format($c['total_consomme'], 0, ',', ' ') }}</td>
+                <td class="text-right">{{ number_format($c['total_versements'] - $c['total_consomme'], 0, ',', ' ') }}</td>
             </tr>
             @endforeach
         </tbody>
@@ -142,8 +142,8 @@
                 <td colspan="2">Total</td>
                 <td class="text-right">{{ number_format(array_sum(array_column($bilan['conventions'], 'montant_fcfa')), 0, ',', ' ') }}</td>
                 <td class="text-right">{{ number_format(array_sum(array_column($bilan['conventions'], 'total_versements')), 0, ',', ' ') }}</td>
-                <td class="text-right">{{ number_format($bilan['analyse_ecarts']['total_depenses'], 0, ',', ' ') }}</td>
-                <td class="text-right">{{ number_format(array_sum(array_column($bilan['conventions'], 'solde')), 0, ',', ' ') }}</td>
+                <td class="text-right">{{ number_format($bilan['analyse_ecarts']['total_consomme'], 0, ',', ' ') }}</td>
+                <td class="text-right">{{ number_format(array_sum(array_column($bilan['conventions'], 'total_versements')) - array_sum(array_column($bilan['conventions'], 'total_consomme')), 0, ',', ' ') }}</td>
             </tr>
         </tfoot>
     </table>
