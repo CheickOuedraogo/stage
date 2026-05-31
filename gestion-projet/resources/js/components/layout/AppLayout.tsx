@@ -111,7 +111,7 @@ export default function AppLayout({ title, children }: AppLayoutProps) {
                 </div>
             )}
 
-            <main className="flex-1 max-w-7xl mx-auto w-full px-4 lg:px-6 py-6" id="main-content">
+            <main className="flex-1 max-w-7xl mx-auto w-full px-4 lg:px-6 py-6 overflow-x-hidden" id="main-content">
                 {children}
             </main>
         </div>

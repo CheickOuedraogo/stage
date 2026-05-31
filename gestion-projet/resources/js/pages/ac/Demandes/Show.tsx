@@ -77,7 +77,6 @@ export default function AcDemandeShow({ demande, modes_paiement }: Props) {
     const rejectForm = useForm({ motif: '' });
     const rapportRejectForm = useForm({ motif: '' });
     const paiementForm = useForm({
-        montant: demande.montant.toString(),
         date_paiement: new Date().toISOString().split('T')[0],
         mode_paiement: '',
         reference: '',
@@ -261,18 +260,12 @@ export default function AcDemandeShow({ demande, modes_paiement }: Props) {
                                 <form onSubmit={handlePaiement} className="space-y-4">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label htmlFor="montant_p" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">
-                                                Montant <span className="text-red-500">*</span>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">
+                                                Montant
                                             </label>
-                                            <input
-                                                id="montant_p"
-                                                type="number"
-                                                min={1}
-                                                value={paiementForm.data.montant}
-                                                onChange={(e) => paiementForm.setData('montant', e.target.value)}
-                                                className="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-mono bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                                            />
-                                            {paiementForm.errors.montant && <p className="mt-1 text-xs text-red-600">{paiementForm.errors.montant}</p>}
+                                            <div className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg text-sm font-mono bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                                {formatCurrency(demande.montant)}
+                                            </div>
                                         </div>
                                         <div>
                                             <label htmlFor="date_p" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">

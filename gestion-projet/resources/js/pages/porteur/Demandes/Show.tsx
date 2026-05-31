@@ -245,9 +245,8 @@ export default function DemandeShow({ demande }: Props) {
                     )}
                 </div>
 
-                {/* Colonne droite - Timeline & Paiement */}
+                {/* Colonne droite - Timeline */}
                 <div className="space-y-6">
-                    {/* Timeline */}
                     <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
                         <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-5">
                             Suivi du circuit
@@ -295,41 +294,48 @@ export default function DemandeShow({ demande }: Props) {
                             })}
                         </div>
                     </div>
-
-                    {/* Paiement */}
-                    {demande.paiement && (
-                        <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
-                            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
-                                Paiement effectué
-                            </h3>
-                            <dl className="space-y-3 text-sm">
-                                <div className="flex justify-between">
-                                    <dt className="text-slate-500 dark:text-slate-400">Montant</dt>
-                                    <dd className="font-mono font-semibold text-gray-900 dark:text-white">{formatCurrency(demande.paiement.montant)}</dd>
-                                </div>
-                                <div className="flex justify-between">
-                                    <dt className="text-slate-500 dark:text-slate-400">Date</dt>
-                                    <dd className="text-gray-700 dark:text-slate-300">{formatDate(demande.paiement.date_paiement)}</dd>
-                                </div>
-                                <div className="flex justify-between">
-                                    <dt className="text-slate-500 dark:text-slate-400">Mode</dt>
-                                    <dd className="text-gray-700 dark:text-slate-300">{demande.paiement.mode_paiement_label}</dd>
-                                </div>
-                                {demande.paiement.reference && (
-                                    <div className="flex justify-between">
-                                        <dt className="text-slate-500 dark:text-slate-400">Référence</dt>
-                                        <dd className="font-mono text-gray-700 dark:text-slate-300">{demande.paiement.reference}</dd>
-                                    </div>
-                                )}
-                                <div className="flex justify-between">
-                                    <dt className="text-slate-500 dark:text-slate-400">Enregistré par</dt>
-                                    <dd className="text-gray-700 dark:text-slate-300">{demande.paiement.enregistre_par}</dd>
-                                </div>
-                            </dl>
-                        </div>
-                    )}
                 </div>
             </div>
+
+            {/* Paiement — pleine largeur en bas */}
+            {demande.paiement && (
+                <div className="mt-6 bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-800 rounded-xl overflow-hidden">
+                    <div className="flex items-center gap-3 px-6 py-4 bg-emerald-50 dark:bg-emerald-900/20 border-b border-emerald-100 dark:border-emerald-800">
+                        <div className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-800 flex items-center justify-center shrink-0">
+                            <BanknotesIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">
+                                Paiement effectué
+                            </h3>
+                            <p className="text-xs text-emerald-600 dark:text-emerald-400">
+                                Paiement enregistré le {formatDate(demande.paiement.date_paiement)}
+                            </p>
+                        </div>
+                        <span className="ml-auto font-mono text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                            {formatCurrency(demande.paiement.montant)}
+                        </span>
+                    </div>
+                    <div className="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Mode de paiement</p>
+                            <p className="text-sm font-medium text-slate-900 dark:text-white">{demande.paiement.mode_paiement_label}</p>
+                        </div>
+                        <div>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Référence</p>
+                            <p className="text-sm font-mono text-slate-900 dark:text-white">{demande.paiement.reference ?? '—'}</p>
+                        </div>
+                        <div>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Date de paiement</p>
+                            <p className="text-sm font-medium text-slate-900 dark:text-white">{formatDate(demande.paiement.date_paiement)}</p>
+                        </div>
+                        <div>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Enregistré par</p>
+                            <p className="text-sm font-medium text-slate-900 dark:text-white">{demande.paiement.enregistre_par}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AppLayout>
     );
 }

@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers\AgentComptable;
 
-use App\Enums\RoleUtilisateur;
 use App\Http\Controllers\Controller;
-use App\Models\Faq;
 use App\Models\MessageChat;
 use App\Models\Utilisateur;
 use Illuminate\Http\JsonResponse;
@@ -52,15 +50,8 @@ class MessageChatControleur extends Controller
             })
             ->values();
 
-        $faqItems = Faq::active()
-            ->get()
-            ->filter(fn (Faq $f) => $f->isVisibleFor(RoleUtilisateur::AgentComptable))
-            ->map(fn (Faq $f) => ['id' => $f->id_faq, 'question' => $f->faq_question, 'reponse' => $f->faq_reponse])
-            ->values();
-
         return Inertia::render('ac/Chat', [
             'contacts' => $contacts,
-            'faq_items' => $faqItems,
         ]);
     }
 

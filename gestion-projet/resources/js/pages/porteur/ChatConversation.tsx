@@ -24,8 +24,8 @@ export default function PorteurChatConversation() {
         <AppLayout title={`Discussion avec ${contact.utilisateur_nom}`}>
             <Head title={`${contact.utilisateur_nom} — Assistance — CIFEU`} />
 
-            <div className="max-w-4xl mx-auto">
-                <div className="mb-4">
+            <div className="max-w-4xl mx-auto h-full flex flex-col">
+                <div className="mb-4 shrink-0">
                     <Link
                         href={chatIndex.url()}
                         className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
@@ -35,7 +35,7 @@ export default function PorteurChatConversation() {
                     </Link>
                 </div>
 
-                <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center gap-3 mb-4 shrink-0">
                     <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
                         <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
                             {contact.utilisateur_nom.slice(0, 1)}
@@ -51,12 +51,14 @@ export default function PorteurChatConversation() {
                     </div>
                 </div>
 
-                <ChatInterface
+                <div className="flex-1 min-h-0">
+                    <ChatInterface
                     messages={messages}
                     sendUrl={chatSend.url({ user: contact.id })}
                     pollUrl={chatPoll.url({ user: contact.id })}
                     contactName={contact.utilisateur_nom}
                 />
+                </div>
             </div>
         </AppLayout>
     );

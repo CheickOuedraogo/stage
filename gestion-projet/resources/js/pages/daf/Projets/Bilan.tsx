@@ -1,7 +1,11 @@
 import AppLayout from '@/components/layout/AppLayout';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { Head } from '@inertiajs/react';
-import { ArrowLeftIcon, DocumentArrowDownIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import {
+    ArrowLeftIcon, BanknotesIcon, CalendarDaysIcon, ChartBarIcon,
+    CheckCircleIcon, ClockIcon, DocumentArrowDownIcon, ExclamationTriangleIcon,
+    InformationCircleIcon, ScaleIcon, UserIcon,
+} from '@heroicons/react/24/outline';
 
 interface Convention {
     id: number;
@@ -10,9 +14,10 @@ interface Convention {
     bailleur_sigle: string;
     montant_fcfa: number;
     total_versements: number;
-    total_depenses: number;
-    total_paiements_directs: number;
-    solde: number;
+    total_consomme: number;
+    solde_engagement: number;
+    taux_execution: number;
+    alerte_depassement: boolean;
 }
 
 interface Demande {
@@ -35,7 +40,7 @@ interface AnalyseEcarts {
     budget_initial: number;
     budget_prevu: number;
     total_versements: number;
-    total_depenses: number;
+    total_consomme: number;
     ecart_budget: number;
     taux_execution: number;
     conventions_depassent_budget_initial: boolean;
@@ -67,17 +72,48 @@ interface Props {
     pdf_url: string;
 }
 
+function StatutBadge({ label, type }: { label: string; type: 'success' | 'danger' }) {
+    return (
+        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+            type === 'success'
+                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+        }`}>
+            {type === 'success' ? <CheckCircleIcon className="w-3 h-3" /> : <ExclamationTriangleIcon className="w-3 h-3" />}
+            {label}
+        </span>
+    );
+}
+
+function KpiCard({ icon: Icon, label, value, colorClass, sub }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string; colorClass: string; sub?: string }) {
+    return (
+        <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-3 flex items-start gap-2">
+            <div className={`p-1.5 rounded-lg ${colorClass}`}>
+                <Icon className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+                <p className="text-xs text-gray-500 dark:text-slate-400 mb-0.5">{label}</p>
+                <p className="font-mono font-bold text-sm text-gray-900 dark:text-white">{value}</p>
+                {sub && <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{sub}</p>}
+            </div>
+        </div>
+    );
+}
+
 export default function BilanProjet({ bilan, pdf_url }: Props) {
     const { projet, conventions, demandes, paiements_directs, analyse_ecarts } = bilan;
-
     const ecartPositif = analyse_ecarts.ecart_budget >= 0;
+    const barColor = analyse_ecarts.taux_execution >= 100 ? 'bg-red-500'
+        : analyse_ecarts.taux_execution >= 90 ? 'bg-amber-500'
+        : analyse_ecarts.taux_execution >= 70 ? 'bg-blue-500'
+        : 'bg-emerald-500';
 
     return (
         <AppLayout title={`Bilan — ${projet.titre}`}>
             <Head title={`Bilan de clôture — ${projet.titre}`} />
 
             {/* En-tête */}
-            <div className="mb-6 flex items-start justify-between gap-4">
+            <div className="mb-4 flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
                     <button
                         type="button"
@@ -91,13 +127,7 @@ export default function BilanProjet({ bilan, pdf_url }: Props) {
                         <div className="flex items-center gap-2 flex-wrap">
                             <h2 className="text-xl font-bold text-gray-900 dark:text-white">Bilan de clôture</h2>
                             {projet.statut_final && (
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                                    projet.statut_final === 'succes'
-                                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                                        : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                                }`}>
-                                    {projet.statut_final_label}
-                                </span>
+                                <StatutBadge label={projet.statut_final_label!} type={projet.statut_final === 'succes' ? 'success' : 'danger'} />
                             )}
                         </div>
                         <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">{projet.titre}</p>
@@ -107,84 +137,118 @@ export default function BilanProjet({ bilan, pdf_url }: Props) {
                     href={pdf_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-sm"
                 >
                     <DocumentArrowDownIcon className="w-4 h-4" />
                     Exporter en PDF
                 </a>
             </div>
 
-            {/* Informations projet */}
-            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-5 mb-6">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Informations du projet</h3>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                    <div>
-                        <p className="text-xs text-gray-500 dark:text-slate-400">Porteur</p>
-                        <p className="font-medium text-gray-900 dark:text-white">{projet.porteur}</p>
+            {/* Infos projet */}
+            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4 mb-4">
+                <div className="flex items-center gap-2 mb-3">
+                    <InformationCircleIcon className="w-4 h-4 text-blue-500" />
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Informations du projet</h3>
+                </div>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+                    <div className="flex items-center gap-2">
+                        <UserIcon className="w-4 h-4 text-gray-400 shrink-0" />
+                        <div>
+                            <p className="text-xs text-gray-500 dark:text-slate-400">Porteur</p>
+                            <p className="font-medium text-gray-900 dark:text-white">{projet.porteur}</p>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-xs text-gray-500 dark:text-slate-400">Date de début</p>
-                        <p className="font-medium text-gray-900 dark:text-white">{projet.date_debut ? formatDate(projet.date_debut) : '—'}</p>
+                    <div className="flex items-center gap-2">
+                        <CalendarDaysIcon className="w-4 h-4 text-gray-400 shrink-0" />
+                        <div>
+                            <p className="text-xs text-gray-500 dark:text-slate-400">Date de début</p>
+                            <p className="font-medium text-gray-900 dark:text-white">{projet.date_debut ? formatDate(projet.date_debut) : '—'}</p>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-xs text-gray-500 dark:text-slate-400">Date de fin prévue</p>
-                        <p className="font-medium text-gray-900 dark:text-white">{projet.date_fin_prevue ? formatDate(projet.date_fin_prevue) : '—'}</p>
+                    <div className="flex items-center gap-2">
+                        <ClockIcon className="w-4 h-4 text-gray-400 shrink-0" />
+                        <div>
+                            <p className="text-xs text-gray-500 dark:text-slate-400">Date de fin prévue</p>
+                            <p className="font-medium text-gray-900 dark:text-white">{projet.date_fin_prevue ? formatDate(projet.date_fin_prevue) : '—'}</p>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-xs text-gray-500 dark:text-slate-400">Date de clôture</p>
-                        <p className="font-medium text-gray-900 dark:text-white">{projet.date_fin_reelle ? formatDate(projet.date_fin_reelle) : '—'}</p>
+                    <div className="flex items-center gap-2">
+                        <CheckCircleIcon className="w-4 h-4 text-gray-400 shrink-0" />
+                        <div>
+                            <p className="text-xs text-gray-500 dark:text-slate-400">Date de clôture</p>
+                            <p className="font-medium text-gray-900 dark:text-white">{projet.date_fin_reelle ? formatDate(projet.date_fin_reelle) : '—'}</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Alerte dépassement budget initial */}
+            {/* Alerte */}
             {analyse_ecarts.conventions_depassent_budget_initial && (
-                <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
-                    <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+                <div className="mb-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20">
+                    <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
                     <div className="text-sm">
                         <p className="font-semibold text-amber-800 dark:text-amber-300">Financement supérieur au budget initial</p>
                         <p className="mt-0.5 text-amber-700 dark:text-amber-400">
-                            Le total des conventions ({formatCurrency(analyse_ecarts.budget_prevu)}) dépasse le budget initial estimé du projet ({formatCurrency(analyse_ecarts.budget_initial)}).
+                            Le total des conventions ({formatCurrency(analyse_ecarts.budget_prevu)}) dépasse le budget initial estimé ({formatCurrency(analyse_ecarts.budget_initial)}).
                             Écart : +{formatCurrency(analyse_ecarts.budget_prevu - analyse_ecarts.budget_initial)}.
                         </p>
                     </div>
                 </div>
             )}
 
-            {/* Synthèse financière */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
-                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Budget prévu</p>
-                    <p className="font-mono font-bold text-blue-600 dark:text-blue-400 text-sm">{formatCurrency(analyse_ecarts.budget_prevu)}</p>
+            {/* KPI cards */}
+            <div className="grid grid-cols-4 gap-3 mb-4">
+                <KpiCard
+                    icon={BanknotesIcon}
+                    label="Budget prévu"
+                    value={formatCurrency(analyse_ecarts.budget_prevu)}
+                    colorClass="text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400"
+                />
+                <KpiCard
+                    icon={ScaleIcon}
+                    label="Versements reçus"
+                    value={formatCurrency(analyse_ecarts.total_versements)}
+                    colorClass="text-purple-600 bg-purple-50 dark:bg-purple-900/20 dark:text-purple-400"
+                />
+                <KpiCard
+                    icon={ChartBarIcon}
+                    label="Total consommé"
+                    value={formatCurrency(analyse_ecarts.total_consomme)}
+                    colorClass="text-gray-600 bg-gray-50 dark:bg-slate-800 dark:text-gray-300"
+                    sub={`${analyse_ecarts.taux_execution}% du budget`}
+                />
+                <KpiCard
+                    icon={ExclamationTriangleIcon}
+                    label="Écart budgétaire"
+                    value={`${ecartPositif ? '+' : ''}${formatCurrency(analyse_ecarts.ecart_budget)}`}
+                    colorClass={ecartPositif ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400' : 'text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400'}
+                    sub={ecartPositif ? 'Sous-consommation' : 'Dépassement'}
+                />
+            </div>
+
+            {/* Barre d'exécution */}
+            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-3 mb-4">
+                <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Taux d'exécution global</span>
+                    <span className="text-sm font-bold text-gray-900 dark:text-white">{analyse_ecarts.taux_execution}%</span>
                 </div>
-                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
-                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Versements reçus</p>
-                    <p className="font-mono font-bold text-gray-900 dark:text-white text-sm">{formatCurrency(analyse_ecarts.total_versements)}</p>
+                <div className="w-full h-2.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                        className={`h-full rounded-full transition-all ${barColor}`}
+                        style={{ width: `${Math.min(100, analyse_ecarts.taux_execution)}%` }}
+                    />
                 </div>
-                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
-                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Total consommé</p>
-                    <p className="font-mono font-bold text-gray-900 dark:text-white text-sm">{formatCurrency(analyse_ecarts.total_depenses)}</p>
-                    <div className="mt-1.5 w-full h-1.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                        <div
-                            className={`h-full rounded-full ${analyse_ecarts.taux_execution >= 90 ? 'bg-red-500' : analyse_ecarts.taux_execution >= 70 ? 'bg-amber-500' : 'bg-emerald-500'}`}
-                            style={{ width: `${Math.min(100, analyse_ecarts.taux_execution)}%` }}
-                        />
-                    </div>
-                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{analyse_ecarts.taux_execution}% du budget</p>
-                </div>
-                <div className={`border rounded-xl p-4 ${ecartPositif ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'}`}>
-                    <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Écart budgétaire</p>
-                    <p className={`font-mono font-bold text-sm ${ecartPositif ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'}`}>
-                        {ecartPositif ? '+' : ''}{formatCurrency(analyse_ecarts.ecart_budget)}
-                    </p>
-                    <p className={`text-xs mt-0.5 ${ecartPositif ? 'text-emerald-600 dark:text-emerald-500' : 'text-red-600 dark:text-red-500'}`}>
-                        {ecartPositif ? 'Sous-consommation' : 'Dépassement'}
-                    </p>
+                <div className="flex justify-between text-xs text-gray-400 mt-1.5">
+                    <span>0%</span>
+                    <span>50%</span>
+                    <span>100%</span>
                 </div>
             </div>
 
+            {/* Délais */}
             {analyse_ecarts.ecart_temps_label && (
-                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4 mb-6 flex items-center gap-3 text-sm">
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-3 mb-4 flex items-center gap-2 text-sm">
+                    <ClockIcon className={`w-5 h-5 ${(analyse_ecarts.ecart_temps_jours ?? 0) > 0 ? 'text-red-500' : 'text-emerald-500'}`} />
                     <span className="text-gray-500 dark:text-slate-400">Délais :</span>
                     <span className={`font-semibold ${(analyse_ecarts.ecart_temps_jours ?? 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                         {analyse_ecarts.ecart_temps_label}
@@ -192,10 +256,10 @@ export default function BilanProjet({ bilan, pdf_url }: Props) {
                 </div>
             )}
 
-            {/* Tableau conventions */}
+            {/* Conventions */}
             {conventions.length > 0 && (
-                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden mb-6">
-                    <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800">
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden mb-4">
+                    <div className="px-4 py-2.5 border-b border-gray-100 dark:border-slate-800">
                         <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Conventions de financement</h3>
                     </div>
                     <div className="overflow-x-auto">
@@ -205,9 +269,10 @@ export default function BilanProjet({ bilan, pdf_url }: Props) {
                                     <th className="text-left text-xs font-medium text-gray-500 dark:text-slate-400 px-4 py-3">Bailleur</th>
                                     <th className="text-left text-xs font-medium text-gray-500 dark:text-slate-400 px-4 py-3">Convention</th>
                                     <th className="text-right text-xs font-medium text-gray-500 dark:text-slate-400 px-4 py-3">Montant prévu</th>
-                                    <th className="text-right text-xs font-medium text-gray-500 dark:text-slate-400 px-4 py-3">Versements reçus</th>
+                                    <th className="text-right text-xs font-medium text-gray-500 dark:text-slate-400 px-4 py-3">Versements</th>
                                     <th className="text-right text-xs font-medium text-gray-500 dark:text-slate-400 px-4 py-3">Dépenses</th>
-                                    <th className="text-right text-xs font-medium text-gray-500 dark:text-slate-400 px-4 py-3">Solde</th>
+                                    <th className="text-right text-xs font-medium text-gray-500 dark:text-slate-400 px-4 py-3">Reliquat</th>
+                                    <th className="text-right text-xs font-medium text-gray-500 dark:text-slate-400 px-4 py-3">Taux</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
@@ -217,9 +282,18 @@ export default function BilanProjet({ bilan, pdf_url }: Props) {
                                         <td className="px-4 py-3 text-gray-600 dark:text-slate-400 max-w-xs truncate">{c.titre}</td>
                                         <td className="px-4 py-3 text-right font-mono text-gray-900 dark:text-white">{formatCurrency(c.montant_fcfa)}</td>
                                         <td className="px-4 py-3 text-right font-mono text-gray-900 dark:text-white">{formatCurrency(c.total_versements)}</td>
-                                        <td className="px-4 py-3 text-right font-mono text-gray-900 dark:text-white">{formatCurrency(c.total_depenses + c.total_paiements_directs)}</td>
-                                        <td className={`px-4 py-3 text-right font-mono font-medium ${c.solde >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
-                                            {c.solde >= 0 ? '+' : ''}{formatCurrency(c.solde)}
+                                        <td className="px-4 py-3 text-right font-mono text-gray-900 dark:text-white">{formatCurrency(c.total_consomme)}</td>
+                                        <td className={`px-4 py-3 text-right font-mono font-medium ${c.solde_engagement >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                                            {c.solde_engagement >= 0 ? '+' : ''}{formatCurrency(c.solde_engagement)}
+                                        </td>
+                                        <td className="px-4 py-3 text-right">
+                                            <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ${
+                                                c.taux_execution >= 100 ? 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                                                : c.taux_execution >= 90 ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
+                                                : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
+                                            }`}>
+                                                {c.taux_execution}%
+                                            </span>
                                         </td>
                                     </tr>
                                 ))}
@@ -229,8 +303,9 @@ export default function BilanProjet({ bilan, pdf_url }: Props) {
                                     <td colSpan={2} className="px-4 py-3 text-xs font-semibold text-gray-900 dark:text-white">Total</td>
                                     <td className="px-4 py-3 text-right font-mono font-semibold text-gray-900 dark:text-white text-xs">{formatCurrency(conventions.reduce((s, c) => s + c.montant_fcfa, 0))}</td>
                                     <td className="px-4 py-3 text-right font-mono font-semibold text-gray-900 dark:text-white text-xs">{formatCurrency(conventions.reduce((s, c) => s + c.total_versements, 0))}</td>
-                                    <td className="px-4 py-3 text-right font-mono font-semibold text-gray-900 dark:text-white text-xs">{formatCurrency(analyse_ecarts.total_depenses)}</td>
-                                    <td className="px-4 py-3 text-right font-mono font-semibold text-gray-900 dark:text-white text-xs">{formatCurrency(conventions.reduce((s, c) => s + c.solde, 0))}</td>
+                                    <td className="px-4 py-3 text-right font-mono font-semibold text-gray-900 dark:text-white text-xs">{formatCurrency(analyse_ecarts.total_consomme)}</td>
+                                    <td className="px-4 py-3 text-right font-mono font-semibold text-gray-900 dark:text-white text-xs">{formatCurrency(conventions.reduce((s, c) => s + c.solde_engagement, 0))}</td>
+                                    <td />
                                 </tr>
                             </tfoot>
                         </table>
@@ -238,9 +313,9 @@ export default function BilanProjet({ bilan, pdf_url }: Props) {
                 </div>
             )}
 
-            {/* Demandes terminées */}
-            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden mb-6">
-                <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+            {/* Demandes */}
+            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden mb-4">
+                <div className="px-4 py-2.5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
                     <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Demandes de dépense terminées</h3>
                     <span className="text-xs text-gray-500 dark:text-slate-400">{demandes.length}</span>
                 </div>
@@ -253,7 +328,7 @@ export default function BilanProjet({ bilan, pdf_url }: Props) {
                                     <th className="text-left text-xs font-medium text-gray-500 dark:text-slate-400 px-4 py-3">Rubrique</th>
                                     <th className="text-left text-xs font-medium text-gray-500 dark:text-slate-400 px-4 py-3">Convention</th>
                                     <th className="text-right text-xs font-medium text-gray-500 dark:text-slate-400 px-4 py-3">Montant</th>
-                                    <th className="text-left text-xs font-medium text-gray-500 dark:text-slate-400 px-4 py-3">Date paiement</th>
+                                    <th className="text-left text-xs font-medium text-gray-500 dark:text-slate-400 px-4 py-3">Paiement</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
@@ -282,8 +357,8 @@ export default function BilanProjet({ bilan, pdf_url }: Props) {
             </div>
 
             {/* Paiements directs */}
-            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden mb-6">
-                <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden mb-4">
+                <div className="px-4 py-2.5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
                     <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Paiements directs</h3>
                     <span className="text-xs text-gray-500 dark:text-slate-400">{paiements_directs.length}</span>
                 </div>

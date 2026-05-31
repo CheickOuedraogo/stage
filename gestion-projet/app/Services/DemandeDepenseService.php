@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\RoleUtilisateur;
 use App\Enums\StatutDemande;
+use App\Enums\TypePaiement;
 use App\Models\Convention;
 use App\Models\DemandeDepense;
 use App\Models\Notification;
@@ -129,11 +130,15 @@ class DemandeDepenseService
 
         $paiement = Paiement::create([
             'id_demande' => $demande->id_demande,
-            'paiement_montant' => $data['montant'],
+            'paiement_montant' => $demande->demande_montant,
             'paiement_date' => $data['date_paiement'],
             'paiement_mode' => $data['mode_paiement'],
             'paiement_reference' => $data['reference'] ?? null,
             'id_enregistreur_paiement' => $ac->id_utilisateur,
+            'id_convention' => $demande->id_convention,
+            'id_rubrique' => $demande->id_rubrique,
+            'id_projet' => $demande->convention->id_projet,
+            'type_paiement' => TypePaiement::Indirect,
         ]);
 
         $demande->update(['demande_statut' => StatutDemande::Payee]);

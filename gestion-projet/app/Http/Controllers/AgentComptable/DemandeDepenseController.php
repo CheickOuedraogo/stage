@@ -60,7 +60,7 @@ class DemandeDepenseController extends Controller
             'convention:id_convention,convention_titre,id_projet',
             'rubrique:id_rubrique,rubrique_libelle,rubrique_montant',
             'porteur:id_utilisateur,utilisateur_nom,utilisateur_email',
-            'paiement.enregistrePar:id_utilisateur,utilisateur_nom',
+            'paiement.enregistreur:id_utilisateur,utilisateur_nom',
             'validateurDaf:id_utilisateur,utilisateur_nom',
             'validateurAgentComptable:id_utilisateur,utilisateur_nom',
         ]);
@@ -95,7 +95,6 @@ class DemandeDepenseController extends Controller
     public function enregistrerPaiement(Request $request, DemandeDepense $demande): RedirectResponse
     {
         $validated = $request->validate([
-            'montant' => ['required', 'integer', 'min:1'],
             'date_paiement' => ['required', 'date', 'before_or_equal:today'],
             'mode_paiement' => ['required', Rule::enum(ModePaiement::class)],
             'reference' => ['nullable', 'string', 'max:255'],
@@ -169,7 +168,7 @@ class DemandeDepenseController extends Controller
                 'mode_paiement' => $d->paiement->paiement_mode?->value ?? '',
                 'mode_paiement_label' => $d->paiement->paiement_mode?->label() ?? '',
                 'reference' => $d->paiement->paiement_reference,
-                'enregistre_par' => $d->paiement->enregistrePar->utilisateur_nom,
+                'enregistre_par' => $d->paiement->enregistreur->utilisateur_nom,
             ] : null,
         ];
     }

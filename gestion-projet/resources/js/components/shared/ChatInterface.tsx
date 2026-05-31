@@ -81,8 +81,7 @@ export function ChatInterface({ messages: initialMessages, sendUrl, pollUrl, con
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-slate-900 p-4">
-            <div className="w-full max-w-2xl bg-white dark:bg-slate-800 rounded-xl shadow-lg flex flex-col overflow-hidden" style={{ height: 'calc(100vh - 4rem)' }}>
+        <div className="w-full max-w-2xl bg-white dark:bg-slate-800 rounded-xl shadow-lg flex flex-col overflow-hidden h-full">
                 {/* Header */}
                 <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/60 shrink-0">
                     <div className="flex items-center gap-3">
@@ -143,6 +142,5 @@ export function ChatInterface({ messages: initialMessages, sendUrl, pollUrl, con
                     </button>
                 </form>
             </div>
-        </div>
     );
 }

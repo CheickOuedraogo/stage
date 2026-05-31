@@ -195,12 +195,12 @@ class DashboardController extends Controller
             ->map(fn (Paiement $p) => [
                 'id' => $p->id_paiement,
                 'montant' => $p->paiement_montant,
-                'date_paiement' => $p->paiement_date->toDateString(),
+                'date_paiement' => $p->paiement_date?->toDateString(),
                 'mode_paiement' => $p->paiement_mode?->label() ?? '',
                 'reference' => $p->paiement_reference,
-                'objet' => $p->demande->demande_objet,
-                'porteur' => $p->demande->porteur->utilisateur_nom,
-                'convention' => $p->demande->convention->convention_titre,
+                'objet' => $p->demande?->demande_objet ?? $p->paiement_objet ?? '',
+                'porteur' => $p->demande?->porteur?->utilisateur_nom ?? '',
+                'convention' => $p->demande?->convention?->convention_titre ?? '',
             ]);
 
         return Inertia::render('ac/Dashboard', [
