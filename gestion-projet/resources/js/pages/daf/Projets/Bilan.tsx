@@ -70,6 +70,7 @@ interface Bilan {
 interface Props {
     bilan: Bilan;
     pdf_url: string;
+    excel_url?: string;
 }
 
 function StatutBadge({ label, type }: { label: string; type: 'success' | 'danger' }) {
@@ -100,7 +101,7 @@ function KpiCard({ icon: Icon, label, value, colorClass, sub }: { icon: React.Co
     );
 }
 
-export default function BilanProjet({ bilan, pdf_url }: Props) {
+export default function BilanProjet({ bilan, pdf_url, excel_url }: Props) {
     const { projet, conventions, demandes, paiements_directs, analyse_ecarts } = bilan;
     const ecartPositif = analyse_ecarts.ecart_budget >= 0;
     const barColor = analyse_ecarts.taux_execution >= 100 ? 'bg-red-500'
@@ -133,15 +134,28 @@ export default function BilanProjet({ bilan, pdf_url }: Props) {
                         <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">{projet.titre}</p>
                     </div>
                 </div>
-                <a
-                    href={pdf_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-sm"
-                >
-                    <DocumentArrowDownIcon className="w-4 h-4" />
-                    Exporter en PDF
-                </a>
+                <div className="flex gap-2 shrink-0">
+                    <a
+                        href={pdf_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-sm"
+                    >
+                        <DocumentArrowDownIcon className="w-4 h-4" />
+                        Exporter en PDF
+                    </a>
+                    {excel_url && (
+                        <a
+                            href={excel_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-colors shadow-sm"
+                        >
+                            <DocumentArrowDownIcon className="w-4 h-4" />
+                            Exporter en Excel
+                        </a>
+                    )}
+                </div>
             </div>
 
             {/* Infos projet */}

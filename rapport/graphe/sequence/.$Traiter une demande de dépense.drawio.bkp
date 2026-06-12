@@ -1,6 +1,6 @@
 <mxfile host="Electron">
   <diagram name="Page-1" id="zt5Y6-bsYDg1w0pBmrgp">
-    <mxGraphModel dx="1488" dy="888" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1103" dy="745" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -43,7 +43,7 @@
         <mxCell id="g0efIqg6wHuvS_S7rXbo-9" parent="g0efIqg6wHuvS_S7rXbo-8" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=14;fontStyle=1" value="[Validation par la DAF]" vertex="1">
           <mxGeometry height="20" width="779" x="66" as="geometry" />
         </mxCell>
-        <mxCell id="g0efIqg6wHuvS_S7rXbo-10" parent="g0efIqg6wHuvS_S7rXbo-8" style="shape=line;dashed=1;whiteSpace=wrap;verticalAlign=top;labelPosition=center;verticalLabelPosition=middle;align=center;strokeColor=#B3B3B3;fontSize=13;" value="[Rejet par la DAF]" vertex="1">
+        <mxCell id="g0efIqg6wHuvS_S7rXbo-10" parent="g0efIqg6wHuvS_S7rXbo-8" style="shape=line;dashed=1;whiteSpace=wrap;verticalAlign=top;labelPosition=center;verticalLabelPosition=middle;align=center;strokeColor=#B3B3B3;fontSize=18;fontStyle=1" value="[Rejet par la DAF]" vertex="1">
           <mxGeometry height="4" width="809" y="621" as="geometry" />
         </mxCell>
         <mxCell id="g0efIqg6wHuvS_S7rXbo-11" edge="1" parent="1" source="g0efIqg6wHuvS_S7rXbo-26" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;fontSize=13;" target="g0efIqg6wHuvS_S7rXbo-29" value="Accéder à la liste des demandes en attente">
@@ -149,10 +149,10 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="g0efIqg6wHuvS_S7rXbo-31" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" value="&lt;span style=&quot;font-size: 13px;&quot;&gt;Valider la demande&lt;/span&gt;">
+        <mxCell id="Xz7zy1G4VzIgNIM6eST--1" edge="1" parent="1" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" target="g0efIqg6wHuvS_S7rXbo-29" value="&lt;span style=&quot;font-size: 13px;&quot;&gt;Valider la demande&lt;/span&gt;">
           <mxGeometry relative="1" width="80" as="geometry">
-            <mxPoint x="84" y="370" as="sourcePoint" />
-            <mxPoint x="867" y="370" as="targetPoint" />
+            <mxPoint x="42.5" y="380" as="sourcePoint" />
+            <mxPoint x="871.5000000000005" y="380" as="targetPoint" />
           </mxGeometry>
         </mxCell>
       </root>

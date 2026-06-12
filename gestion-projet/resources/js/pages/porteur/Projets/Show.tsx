@@ -4,7 +4,7 @@ import { formatCurrency, formatDate, projectStatusClass, conventionStatusClass }
 import { index as projetsIndex, show as projetsShow } from '@/routes/porteur/projets';
 import { show as projetsConventionsShow } from '@/routes/porteur/projets/conventions';
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeftIcon, BanknotesIcon, BuildingLibraryIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, BanknotesIcon, BuildingLibraryIcon, DocumentTextIcon, ExclamationTriangleIcon, InformationCircleIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 
 interface Convention {
     id: number;
@@ -77,6 +77,9 @@ export default function ProjetShow({ projet }: Props) {
                     )}
                 </div>
             </div>
+
+            {/* Banner restriction selon statut */}
+            <StatusBanner statut={projet.statut} libelleStatut={projet.libelle_statut} />
 
             {/* Stats cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -199,6 +202,48 @@ function StatCard({ label, value, sub, icon, progressValue, variant }: {
                     <div className="h-full bg-blue-500 dark:bg-blue-400 rounded-full" style={{ width: `${progressValue}%` }} />
                 </div>
             )}
+        </div>
+    );
+}
+
+function StatusBanner({ statut, libelleStatut }: { statut: string; libelleStatut: string }) {
+    const messages: Record<string, { icon: React.ReactNode; title: string; text: string; className: string }> = {
+        en_attente_financement: {
+            icon: <InformationCircleIcon className="w-4 h-4 shrink-0" />,
+            title: 'Projet en attente de mise en cours',
+            text: 'Le DAF doit mettre le projet en cours pour que vous puissiez soumettre des demandes de dépenses. Les conventions peuvent être signées et des versements reçus, mais aucune demande ne peut être créée tant que le statut n\'est pas « En cours ».',
+            className: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-400',
+        },
+        termine: {
+            icon: <LockClosedIcon className="w-4 h-4 shrink-0" />,
+            title: 'Projet terminé',
+            text: 'Ce projet est clôturé. Aucune nouvelle demande de dépense ne peut être soumise.',
+            className: 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-400',
+        },
+        annule: {
+            icon: <ExclamationTriangleIcon className="w-4 h-4 shrink-0" />,
+            title: 'Projet annulé',
+            text: 'Ce projet a été annulé. Aucune nouvelle demande de dépense ne peut être soumise.',
+            className: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-400',
+        },
+        suspendu: {
+            icon: <ExclamationTriangleIcon className="w-4 h-4 shrink-0" />,
+            title: 'Projet suspendu',
+            text: 'Ce projet est suspendu temporairement. Les demandes de dépenses sont bloquées jusqu\'à la reprise.',
+            className: 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-400',
+        },
+    };
+
+    const config = messages[statut];
+    if (!config) return null;
+
+    return (
+        <div className={`mb-6 flex gap-3 p-4 rounded-xl border ${config.className}`}>
+            {config.icon}
+            <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-semibold">{config.title}</h3>
+                <p className="text-xs mt-0.5">{config.text}</p>
+            </div>
         </div>
     );
 }

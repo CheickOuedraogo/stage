@@ -133,6 +133,80 @@ class UtilisateurSeeder extends Seeder
             'utilisateur_telephone' => '+226 71 00 11 22',
         ]);
 
+        // ── Porteur additionnel pour AGRI-TECH-BF et SANTE-NUM-BF ──────────────
+        Utilisateur::create([
+            'utilisateur_nom' => 'Pr. Cheick OUÉDRAOGO',
+            'utilisateur_email' => 'ocheick419@gmail.com',
+            'utilisateur_mot_de_passe' => Hash::make('password'),
+            'role_key' => RoleUtilisateur::Porteur,
+            'utilisateur_actif' => true,
+            'utilisateur_telephone' => '+226 70 99 88 77',
+        ]);
+
+        // ── Nouveaux porteurs @gmail.com pour les 10 projets additionnels ─────────
+        Utilisateur::create([
+            'utilisateur_nom' => 'Dr. Seydou SANOGO',
+            'utilisateur_email' => 'seydou.sanogo@gmail.com',
+            'utilisateur_mot_de_passe' => Hash::make('password'),
+            'role_key' => RoleUtilisateur::Porteur,
+            'utilisateur_actif' => true,
+            'utilisateur_telephone' => '+226 72 11 22 33',
+        ]);
+
+        Utilisateur::create([
+            'utilisateur_nom' => 'Prof. Aissata OUATTARA',
+            'utilisateur_email' => 'aissata.ouattara@gmail.com',
+            'utilisateur_mot_de_passe' => Hash::make('password'),
+            'role_key' => RoleUtilisateur::Porteur,
+            'utilisateur_actif' => true,
+            'utilisateur_telephone' => '+226 72 22 33 44',
+        ]);
+
+        Utilisateur::create([
+            'utilisateur_nom' => 'Dr. Karim SAWADOGO',
+            'utilisateur_email' => 'karim.sawadogo@gmail.com',
+            'utilisateur_mot_de_passe' => Hash::make('password'),
+            'role_key' => RoleUtilisateur::Porteur,
+            'utilisateur_actif' => true,
+            'utilisateur_telephone' => '+226 72 33 44 55',
+        ]);
+
+        Utilisateur::create([
+            'utilisateur_nom' => 'Prof. Halimatou DIALLO',
+            'utilisateur_email' => 'halimatou.diallo@gmail.com',
+            'utilisateur_mot_de_passe' => Hash::make('password'),
+            'role_key' => RoleUtilisateur::Porteur,
+            'utilisateur_actif' => true,
+            'utilisateur_telephone' => '+226 72 44 55 66',
+        ]);
+
+        Utilisateur::create([
+            'utilisateur_nom' => 'Dr. Boubacar TRAORÉ',
+            'utilisateur_email' => 'boubacar.traore@gmail.com',
+            'utilisateur_mot_de_passe' => Hash::make('password'),
+            'role_key' => RoleUtilisateur::Porteur,
+            'utilisateur_actif' => true,
+            'utilisateur_telephone' => '+226 72 55 66 77',
+        ]);
+
+        Utilisateur::create([
+            'utilisateur_nom' => 'Prof. Fatoumata KONÉ',
+            'utilisateur_email' => 'fatoumata.kone@gmail.com',
+            'utilisateur_mot_de_passe' => Hash::make('password'),
+            'role_key' => RoleUtilisateur::Porteur,
+            'utilisateur_actif' => true,
+            'utilisateur_telephone' => '+226 72 66 77 88',
+        ]);
+
+        Utilisateur::create([
+            'utilisateur_nom' => 'Dr. Moussa COULIBALY',
+            'utilisateur_email' => 'moussa.coulibaly@gmail.com',
+            'utilisateur_mot_de_passe' => Hash::make('password'),
+            'role_key' => RoleUtilisateur::Porteur,
+            'utilisateur_actif' => true,
+            'utilisateur_telephone' => '+226 72 77 88 99',
+        ]);
+
         // ── Porteur inactif pour les tests ─────────────────────────────────────
         Utilisateur::create([
             'utilisateur_nom' => 'Dr. Adama TAPSOBA',

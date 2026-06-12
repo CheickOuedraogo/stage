@@ -96,8 +96,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/projets', [DafProjetController::class, 'index'])->name('projets.index');
         Route::get('/projets/{projet}', [DafProjetController::class, 'show'])->name('projets.show');
         Route::post('/projets/{projet}/cloturer', [DafProjetController::class, 'cloturer'])->name('projets.cloturer');
+        Route::post('/projets/{projet}/mettre-en-cours', [DafProjetController::class, 'mettreEnCours'])->name('projets.mettre-en-cours');
         Route::get('/projets/{projet}/bilan', [DafProjetController::class, 'bilan'])->name('projets.bilan');
         Route::get('/projets/{projet}/bilan/pdf', [DafProjetController::class, 'exporterBilanPdf'])->name('projets.bilan.pdf');
+        Route::get('/projets/{projet}/bilan/excel', [DafProjetController::class, 'exporterBilanExcel'])->name('projets.bilan.excel');
 
         // Conventions d'un projet
         Route::get('/projets/{projet}/conventions/{convention}', [DafConventionController::class, 'show'])->name('projets.conventions.show');
@@ -149,6 +151,7 @@ Route::middleware(['auth'])->group(function () {
         // Bilan projet (lecture seule)
         Route::get('/projets/{projet}/bilan', [AgentComptableProjetController::class, 'bilan'])->name('projets.bilan');
         Route::get('/projets/{projet}/bilan/pdf', [AgentComptableProjetController::class, 'exporterBilanPdf'])->name('projets.bilan.pdf');
+        Route::get('/projets/{projet}/bilan/excel', [AgentComptableProjetController::class, 'exporterBilanExcel'])->name('projets.bilan.excel');
 
         // Paiements
         Route::get('/paiements', [AgentComptablePaiementController::class, 'index'])->name('paiements.index');
@@ -178,6 +181,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/projets/{projet}', [PorteurProjetController::class, 'show'])->name('projets.show');
         Route::get('/projets/{projet}/bilan', [PorteurProjetController::class, 'bilan'])->name('projets.bilan');
         Route::get('/projets/{projet}/bilan/pdf', [PorteurProjetController::class, 'exporterBilanPdf'])->name('projets.bilan.pdf');
+        Route::get('/projets/{projet}/bilan/excel', [PorteurProjetController::class, 'exporterBilanExcel'])->name('projets.bilan.excel');
         Route::get('/projets/{projet}/conventions/{convention}', [PorteurProjetController::class, 'showConvention'])->name('projets.conventions.show');
 
         // Demandes de dépenses

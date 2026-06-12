@@ -4,7 +4,7 @@ import { clampPercent, conventionStatusClass, formatCurrency, formatDate } from 
 import { create as createDemande } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
 import { show as projetsShow } from '@/routes/porteur/projets';
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeftIcon, CalendarIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, CalendarIcon, PlusIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 
 interface Rubrique {
     id: number;
@@ -45,7 +45,7 @@ interface Convention {
 }
 
 interface Props {
-    projet: { id: number; titre: string };
+    projet: { id: number; titre: string; statut: string; libelle_statut: string };
     convention: Convention;
     has_demande_active: boolean;
 }
@@ -161,18 +161,36 @@ export default function ConventionShow({ projet, convention, has_demande_active 
 
                 {/* Bouton nouvelle demande */}
                 <div className="flex items-center justify-end">
-                    <Link
-                        href={createDemande.url({ projet: projet.id, convention: convention.id })}
-                        className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                            has_demande_active
-                                ? 'bg-slate-100 text-slate-400 cursor-not-allowed pointer-events-none dark:bg-slate-800 dark:text-slate-600'
-                                : 'bg-blue-600 hover:bg-blue-700 text-white motion-safe:hover:scale-[1.02] active:scale-[0.98]'
-                        }`}
-                        aria-disabled={has_demande_active}
-                    >
-                        <PlusIcon className="w-4 h-4" />
-                        {has_demande_active ? 'Demande en cours' : 'Nouvelle demande'}
-                    </Link>
+                    {projet.statut !== 'en_cours' && (
+                        <div className="relative inline-flex items-center">
+                            <button
+                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-slate-100 text-slate-400 cursor-not-allowed pointer-events-none dark:bg-slate-800 dark:text-slate-600"
+                                disabled
+                                aria-disabled="true"
+                            >
+                                <PlusIcon className="w-4 h-4" />
+                                Nouvelle demande
+                            </button>
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 text-xs text-white bg-gray-900 rounded shadow-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                                Projet <strong>{projet.libelle_statut}</strong> : Le DAF doit mettre le projet en cours pour autoriser les demandes.
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+                            </div>
+                        </div>
+                    )}
+                    {projet.statut === 'en_cours' && (
+                        <Link
+                            href={createDemande.url({ projet: projet.id, convention: convention.id })}
+                            className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                                has_demande_active
+                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed pointer-events-none dark:bg-slate-800 dark:text-slate-600'
+                                    : 'bg-blue-600 hover:bg-blue-700 text-white motion-safe:hover:scale-[1.02] active:scale-[0.98]'
+                            }`}
+                            aria-disabled={has_demande_active}
+                        >
+                            <PlusIcon className="w-4 h-4" />
+                            {has_demande_active ? 'Demande en cours' : 'Nouvelle demande'}
+                        </Link>
+                    )}
                 </div>
 
                 {/* Rubriques */}

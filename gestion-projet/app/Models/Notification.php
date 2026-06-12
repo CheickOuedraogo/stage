@@ -93,4 +93,15 @@ class Notification extends Model
             'notification_objet' => $projet->projet_titre,
         ]);
     }
+
+    /** Créer une notification de mise en cours de projet */
+    public static function pourProjetMisEnCours(int $idUtilisateur, Projet $projet): self
+    {
+        return self::create([
+            'id_utilisateur' => $idUtilisateur,
+            'type_notification' => TypeNotification::ProjetMisEnCours,
+            'id_projet' => $projet->id_projet,
+            'notification_objet' => $projet->projet_titre,
+        ]);
+    }
 }

@@ -21,6 +21,7 @@ interface Projet {
     taux_financement: number;
     date_debut: string | null;
     date_fin_prevue: string | null;
+    pret_a_demarrer: boolean;
 }
 
 interface Stats {
@@ -166,6 +167,7 @@ export default function DafProjetsIndex({ projets, stats }: Props) {
                                 <th className="text-right px-6 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Conventions</th>
                                 <th className="text-center px-3 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider hidden lg:table-cell">Taux financ.</th>
                                 <th className="text-center px-3 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider hidden lg:table-cell">Taux exéc.</th>
+                                <th className="text-center px-3 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider hidden lg:table-cell">Prêt à démarrer</th>
                                 <th className="text-left px-6 py-3.5 text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider hidden lg:table-cell">Fin prévue</th>
                             </tr>
                         </thead>
@@ -216,6 +218,18 @@ export default function DafProjetsIndex({ projets, stats }: Props) {
                                             }`}>
                                                 {projet.taux_execution}%
                                             </span>
+                                        </td>
+                                        <td className="px-3 py-4 text-center text-xs hidden lg:table-cell">
+                                            {projet.pret_a_demarrer && (
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                                                    Prêt
+                                                </span>
+                                            )}
+                                            {!projet.pret_a_demarrer && projet.statut === 'en_attente_financement' && (
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                                                    Attente convention
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="px-6 py-4 text-gray-600 dark:text-slate-400 text-xs hidden lg:table-cell">
                                             {projet.date_fin_prevue ? formatDate(projet.date_fin_prevue) : '—'}

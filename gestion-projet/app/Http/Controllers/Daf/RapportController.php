@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Daf;
 
-use App\Exports\ClotureProjetExport;
+use App\Exports\BilanProjetExport;
 use App\Exports\ExecutionBudgetaireExport;
 use App\Http\Controllers\Controller;
 use App\Models\Paiement;
 use App\Models\Projet;
+use App\Services\ProjetService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,6 +16,8 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class RapportController extends Controller
 {
+    public function __construct(private readonly ProjetService $projetService) {}
+
     public function index(Request $request): Response
     {
         $projets = Projet::orderBy('projet_titre')
@@ -83,55 +86,18 @@ class RapportController extends Controller
             'format' => ['required', 'in:pdf,excel'],
         ]);
 
-        $projet = Projet::with([
-            'porteur:id_utilisateur,utilisateur_nom',
-            'conventions.bailleur:id_bailleur,bailleur_nom,bailleur_sigle',
-            'conventions.versements',
-            'conventions.rubriques',
-        ])->findOrFail($request->projet_id);
-
-        $totalVersions = $projet->conventions->flatMap->versements->sum('versement_montant');
-        $totalDepenses = Paiement::sumForProjet($projet->id_projet);
-        $budgetPrevu = $projet->conventions->sum('montant_fcfa');
-        $ecartBudget = $budgetPrevu - $totalDepenses;
-
-        $analyseDelais = $projet->analyse_delais;
-
-        $projetData = [
-            'titre' => $projet->projet_titre,
-            'porteur' => $projet->porteur->utilisateur_nom,
-            'libelle_statut' => $projet->projet_statut->label(),
-            'date_debut' => $projet->projet_date_debut?->format('d/m/Y'),
-            'date_fin_prevue' => $projet->projet_date_fin_prevue?->format('d/m/Y'),
-            'date_fin_reelle' => $projet->projet_date_fin_reelle?->format('d/m/Y'),
-        ];
-
-        $analyse = [
-            'budget_prevu' => $budgetPrevu,
-            'total_versements' => $totalVersions,
-            'total_depenses' => $totalDepenses,
-            'ecart_budget' => $ecartBudget,
-            'taux_execution' => $budgetPrevu > 0 ? round(($totalDepenses / $budgetPrevu) * 100, 1) : 0,
-            'ecart_temps_jours' => $analyseDelais['jours'],
-            'ecart_temps_label' => $analyseDelais['label'],
-        ];
-
-        $conventions = $projet->conventions->map(fn ($c) => [
-            'bailleur' => $c->bailleur->bailleur_nom,
-            'forme_label' => $c->convention_forme->label(),
-            'montant_fcfa' => $c->montant_fcfa,
-            'total_versements' => $c->versements->sum('versement_montant'),
-        ])->toArray();
+        $projet = Projet::findOrFail($request->projet_id);
+        $bilan = $this->projetService->genererBilan($projet);
 
         if ($request->format === 'pdf') {
-            $pdf = Pdf::loadView('rapports.cloture_projet', compact('projet', 'analyse', 'conventions'))
-                ->setPaper('a4');
+            $pdf = Pdf::loadView('pdf.bilan-projet', compact('bilan'))
+                ->setPaper('a4', 'landscape');
 
             return $pdf->download("cloture_{$projet->id_projet}.pdf");
         }
 
         return Excel::download(
-            new ClotureProjetExport($projetData, $analyse, $conventions),
+            new BilanProjetExport($bilan),
             "cloture_{$projet->id_projet}.xlsx"
         );
     }

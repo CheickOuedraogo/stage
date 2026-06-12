@@ -56,6 +56,61 @@ class ProjetService
     }
 
     /**
+     * Returns a human-readable blocker message, or null if the project can be set to EnCours.
+     */
+    public function getBlockersMettreEnCours(Projet $projet): ?string
+    {
+        if ($projet->projet_statut !== StatutProjet::EnAttenteFinancement) {
+            return "Statut actuel : {$projet->projet_statut->label()}. Seuls les projets en attente de financement peuvent être mis en cours.";
+        }
+
+        $conventionsActives = $projet->conventions->filter(
+            fn (Convention $c) => $c->convention_statut === StatutConvention::Active
+        )->count();
+
+        if ($conventionsActives === 0) {
+            return 'Aucune convention active. Une convention active est requise pour mettre le projet en cours.';
+        }
+
+        return null;
+    }
+
+    /**
+     * Throws a ValidationException if the project cannot be set to EnCours.
+     */
+    public function verifierConditionsMettreEnCours(Projet $projet): void
+    {
+        $blocker = $this->getBlockersMettreEnCours($projet);
+
+        if ($blocker !== null) {
+            throw ValidationException::withMessages(['projet' => $blocker]);
+        }
+    }
+
+    /**
+     * Sets the project to EnCours: updates status, logs to audit, and notifies the porteur.
+     */
+    public function mettreEnCours(Projet $projet, Utilisateur $daf): void
+    {
+        $this->verifierConditionsMettreEnCours($projet);
+
+        DB::transaction(function () use ($projet, $daf): void {
+            $projet->update([
+                'projet_statut' => StatutProjet::EnCours,
+            ]);
+
+            JournalAudit::log(
+                'projet_mis_en_cours',
+                $projet,
+                description: "Mise en cours du projet « {$projet->projet_titre} » par {$daf->utilisateur_nom}",
+            );
+
+            $projet->loadMissing('porteur');
+            Notification::pourProjetMisEnCours($projet->id_porteur, $projet);
+        });
+    }
+
+    /**
      * Throws a ValidationException if the project cannot be closed.
      */
     public function verifierConditionsCloture(Projet $projet): void

@@ -22,7 +22,7 @@ return new class extends Migration
         DB::statement('DROP TYPE IF EXISTS mode_paiement CASCADE');
         DB::statement("CREATE TYPE mode_paiement AS ENUM ('virement', 'cheque', 'especes')");
         DB::statement('DROP TYPE IF EXISTS type_notification CASCADE');
-        DB::statement("CREATE TYPE type_notification AS ENUM ('demande_statut_change', 'projet_cloture')");
+        DB::statement("CREATE TYPE type_notification AS ENUM ('demande_statut_change', 'projet_cloture', 'projet_mis_en_cours')");
         DB::statement('DROP TYPE IF EXISTS statut_projet CASCADE');
         DB::statement("CREATE TYPE statut_projet AS ENUM ('en_attente_financement', 'en_cours', 'suspendu', 'termine', 'annule')");
         DB::statement('DROP TYPE IF EXISTS statut_final_projet CASCADE');

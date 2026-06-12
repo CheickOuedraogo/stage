@@ -80,7 +80,12 @@ class DemandeDepenseController extends Controller
             ]);
 
         return Inertia::render('porteur/Demandes/Create', [
-            'projet' => ['id' => $projet->id_projet, 'titre' => $projet->projet_titre],
+            'projet' => [
+                'id' => $projet->id_projet,
+                'titre' => $projet->projet_titre,
+                'statut' => $projet->projet_statut->value,
+                'libelle_statut' => $projet->projet_statut->label(),
+            ],
             'convention' => [
                 'id' => $convention->id_convention,
                 'titre' => $convention->convention_titre,

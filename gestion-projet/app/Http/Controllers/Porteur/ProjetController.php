@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Porteur;
 
+use App\Exports\BilanProjetExport;
 use App\Http\Controllers\Controller;
 use App\Models\Convention;
 use App\Models\Paiement;
@@ -12,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
 use Inertia\Inertia;
 use Inertia\Response;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProjetController extends Controller
 {
@@ -120,6 +122,8 @@ class ProjetController extends Controller
             'projet' => [
                 'id' => $projet->id_projet,
                 'titre' => $projet->projet_titre,
+                'statut' => $projet->projet_statut->value,
+                'libelle_statut' => $projet->projet_statut->label(),
             ],
             'has_demande_active' => $hasDemandeActive,
             'convention' => [
@@ -173,6 +177,7 @@ class ProjetController extends Controller
         return Inertia::render('daf/Projets/Bilan', [
             'bilan' => $bilan,
             'pdf_url' => route('porteur.projets.bilan.pdf', $projet),
+            'excel_url' => route('porteur.projets.bilan.excel', $projet),
         ]);
     }
 
@@ -183,8 +188,21 @@ class ProjetController extends Controller
 
         $bilan = $this->projetService->genererBilan($projet);
 
-        $pdf = Pdf::loadView('pdf.bilan-projet', compact('bilan'))->setPaper('a4');
+        $pdf = Pdf::loadView('pdf.bilan-projet', compact('bilan'))->setPaper('a4', 'landscape');
 
         return $pdf->download("bilan-projet-{$projet->id_projet}.pdf");
+    }
+
+    public function exporterBilanExcel(Request $request, Projet $projet): mixed
+    {
+        abort_unless($projet->id_porteur === $request->user()->id_utilisateur, 403);
+        $this->authorize('voirBilan', $projet);
+
+        $bilan = $this->projetService->genererBilan($projet);
+
+        return Excel::download(
+            new BilanProjetExport($bilan),
+            "rapport-financier-{$projet->id_projet}.xlsx"
+        );
     }
 }

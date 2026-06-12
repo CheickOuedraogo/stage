@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Daf;
 
+use App\Enums\StatutProjet;
 use App\Http\Controllers\Controller;
 use App\Models\Convention;
 use App\Models\Paiement;
@@ -15,6 +16,7 @@ class PaiementDirectController extends Controller
     public function store(Request $request, Projet $projet, Convention $convention): RedirectResponse
     {
         abort_unless($convention->id_projet === $projet->id_projet, 404);
+        abort_unless($projet->projet_statut === StatutProjet::EnCours, 403, 'Impossible d\'enregistrer un paiement direct : le projet doit être en cours.');
 
         $validated = $request->validate([
             'rubrique_id' => ['nullable', 'integer', Rule::exists('rubriques', 'id_rubrique')->where('id_convention', $convention->id_convention)],
@@ -43,6 +45,7 @@ class PaiementDirectController extends Controller
     {
         abort_unless($convention->id_projet === $projet->id_projet, 404);
         abort_unless($paiementDirect->id_convention === $convention->id_convention, 404);
+        abort_unless($projet->projet_statut === StatutProjet::EnCours, 403, 'Impossible de supprimer un paiement direct : le projet doit être en cours.');
 
         $paiementDirect->delete();
 

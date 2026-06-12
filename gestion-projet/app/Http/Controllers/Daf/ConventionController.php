@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Daf;
 
 use App\Enums\StatutConvention;
+use App\Enums\StatutProjet;
 use App\Http\Controllers\Controller;
 use App\Models\Convention;
 use App\Models\Paiement;
@@ -37,6 +38,7 @@ class ConventionController extends Controller
     public function storeRubrique(Request $request, Projet $projet, Convention $convention): RedirectResponse
     {
         abort_unless($convention->id_projet === $projet->id_projet, 404);
+        abort_unless($projet->projet_statut === StatutProjet::EnCours, 403, 'Impossible d\'ajouter une rubrique : le projet doit être en cours.');
 
         $validated = $request->validate($this->rubriqueRules());
 
@@ -55,6 +57,7 @@ class ConventionController extends Controller
     {
         abort_unless($convention->id_projet === $projet->id_projet, 404);
         abort_unless($rubrique->id_convention === $convention->id_convention, 404);
+        abort_unless($projet->projet_statut === StatutProjet::EnCours, 403, 'Impossible de modifier une rubrique : le projet doit être en cours.');
 
         $validated = $request->validate($this->rubriqueRules());
 
@@ -103,6 +106,7 @@ class ConventionController extends Controller
     {
         abort_unless($convention->id_projet === $projet->id_projet, 404);
         abort_unless($rubrique->id_convention === $convention->id_convention, 404);
+        abort_unless($projet->projet_statut === StatutProjet::EnCours, 403, 'Impossible de supprimer une rubrique : le projet doit être en cours.');
 
         $rubrique->delete();
 
@@ -112,6 +116,7 @@ class ConventionController extends Controller
     public function storeVersement(Request $request, Projet $projet, Convention $convention): RedirectResponse
     {
         abort_unless($convention->id_projet === $projet->id_projet, 404);
+        abort_unless($projet->projet_statut === StatutProjet::EnCours, 403, 'Impossible d\'enregistrer un versement : le projet doit être en cours.');
 
         $validated = $request->validate([
             'montant' => ['required', 'integer', 'min:1'],
@@ -134,6 +139,7 @@ class ConventionController extends Controller
     {
         abort_unless($convention->id_projet === $projet->id_projet, 404);
         abort_unless($versement->id_convention === $convention->id_convention, 404);
+        abort_unless($projet->projet_statut === StatutProjet::EnCours, 403, 'Impossible de modifier un versement : le projet doit être en cours.');
 
         $validated = $request->validate([
             'montant' => ['required', 'integer', 'min:1'],
@@ -156,6 +162,7 @@ class ConventionController extends Controller
     {
         abort_unless($convention->id_projet === $projet->id_projet, 404);
         abort_unless($versement->id_convention === $convention->id_convention, 404);
+        abort_unless($projet->projet_statut === StatutProjet::EnCours, 403, 'Impossible de supprimer un versement : le projet doit être en cours.');
 
         $versement->delete();
 

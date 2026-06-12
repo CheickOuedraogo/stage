@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Daf;
 
+use App\Enums\StatutConvention;
 use App\Enums\StatutFinalProjet;
 use App\Enums\StatutProjet;
+use App\Exports\BilanProjetExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Daf\CloturerProjetRequest;
 use App\Models\Convention;
@@ -15,6 +17,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response as HttpResponse;
 use Inertia\Inertia;
 use Inertia\Response;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProjetController extends Controller
 {
@@ -31,6 +34,9 @@ class ProjetController extends Controller
                 $totalConsomme = Paiement::sumForProjet($p->id_projet);
                 $totalVersements = $p->montant_total_versements;
 
+                $hasActiveConvention = $p->conventions->contains(fn (Convention $c) => $c->convention_statut === StatutConvention::Active);
+                $pretADemarrer = $p->projet_statut === StatutProjet::EnAttenteFinancement && $hasActiveConvention;
+
                 return [
                     'id' => $p->id_projet,
                     'titre' => $p->projet_titre,
@@ -46,6 +52,7 @@ class ProjetController extends Controller
                     'taux_financement' => $p->projet_montant_estime > 0 ? round(($montantConvs / $p->projet_montant_estime) * 100, 1) : 0,
                     'date_debut' => $p->projet_date_debut?->toDateString(),
                     'date_fin_prevue' => $p->projet_date_fin_prevue?->toDateString(),
+                    'pret_a_demarrer' => $pretADemarrer,
                 ];
             });
 
@@ -86,6 +93,14 @@ class ProjetController extends Controller
             $canCloturer = $clotureBlockers === null;
         }
 
+        $canMettreEnCours = false;
+        $mettreEnCoursBlockers = null;
+
+        if ($projet->projet_statut === StatutProjet::EnAttenteFinancement) {
+            $mettreEnCoursBlockers = $this->projetService->getBlockersMettreEnCours($projet);
+            $canMettreEnCours = $mettreEnCoursBlockers === null;
+        }
+
         return Inertia::render('daf/Projets/Show', [
             'projet' => [
                 'id' => $projet->id_projet,
@@ -124,11 +139,22 @@ class ProjetController extends Controller
                 'analyse_ecarts' => $this->buildAnalyseEcarts($projet),
                 'can_cloturer' => $canCloturer,
                 'cloture_blockers' => $clotureBlockers,
+                'can_mettre_en_cours' => $canMettreEnCours,
+                'mettre_en_cours_blockers' => $mettreEnCoursBlockers,
                 'bilan_url' => $projet->projet_statut === StatutProjet::Termine
                     ? route('daf.projets.bilan', $projet)
                     : null,
             ],
         ]);
+    }
+
+    public function mettreEnCours(Projet $projet): RedirectResponse
+    {
+        $projet->loadMissing('conventions');
+        $this->projetService->mettreEnCours($projet, auth()->user());
+
+        return redirect()->route('daf.projets.show', $projet)
+            ->with('success', "Le projet « {$projet->projet_titre} » est maintenant en cours. Le porteur peut soumettre des demandes.");
     }
 
     public function cloturer(CloturerProjetRequest $request, Projet $projet): RedirectResponse
@@ -144,7 +170,8 @@ class ProjetController extends Controller
             StatutFinalProjet::from($request->validated('statut_final')),
         );
 
-        return back()->with('success', "Le projet « {$projet->projet_titre} » a été clôturé avec succès.");
+        return redirect()->route('daf.projets.show', $projet)
+            ->with('success', "Le projet « {$projet->projet_titre} » a été clôturé avec succès.");
     }
 
     public function bilan(Projet $projet): Response
@@ -156,6 +183,7 @@ class ProjetController extends Controller
         return Inertia::render('daf/Projets/Bilan', [
             'bilan' => $bilan,
             'pdf_url' => route('daf.projets.bilan.pdf', $projet),
+            'excel_url' => route('daf.projets.bilan.excel', $projet),
         ]);
     }
 
@@ -165,9 +193,21 @@ class ProjetController extends Controller
 
         $bilan = $this->projetService->genererBilan($projet);
 
-        $pdf = Pdf::loadView('pdf.bilan-projet', compact('bilan'))->setPaper('a4');
+        $pdf = Pdf::loadView('pdf.bilan-projet', compact('bilan'))->setPaper('a4', 'landscape');
 
         return $pdf->download("bilan-projet-{$projet->id_projet}.pdf");
+    }
+
+    public function exporterBilanExcel(Projet $projet): mixed
+    {
+        $this->authorize('voirBilan', $projet);
+
+        $bilan = $this->projetService->genererBilan($projet);
+
+        return Excel::download(
+            new BilanProjetExport($bilan),
+            "rapport-financier-{$projet->id_projet}.xlsx"
+        );
     }
 
     /** @return array<string, mixed> */

@@ -22,7 +22,16 @@ class ProjetFactory extends Factory
     {
         return [
             'id_porteur' => Utilisateur::factory()->porteur(),
-            'projet_titre' => fake()->sentence(5),
+            'projet_titre' => fake()->randomElement([
+                "Développement d'Énergies Renouvelables pour l'Autonomisation des Communautés Rurales au Burkina Faso",
+                'Architecture et Urbanisme Durables pour des Villes Résilientes au Burkina Faso',
+                'Renforcement des Capacités Institutionnelles et de la Gouvernance Locale au Burkina Faso',
+                "Promotion de l'Économie Circulaire et Gestion Durable des Déchets au Burkina Faso",
+                "Appui à la Digitalisation des Services Financiers pour l'Inclusion des Populations Rurales",
+                'Renforcement de la Chaîne de Valeur du Mangue et des Produits Forestiers Non Ligneux',
+                'Amélioration de la Résilience des Écosystèmes Aquatiques et des Ressources Halieutiques',
+                "Programme d'Appui à l'Artisanat et aux Métiers Créatifs pour l'Emploi des Jeunes",
+            ]),
             'projet_description' => fake()->paragraph(),
             'projet_objectifs' => fake()->paragraph(),
             'projet_activites' => fake()->paragraph(),

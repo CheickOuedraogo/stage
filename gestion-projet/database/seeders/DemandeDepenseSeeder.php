@@ -19,11 +19,11 @@ class DemandeDepenseSeeder extends Seeder
     {
         $this->createDummyFiles();
 
-        $daf = Utilisateur::where('role_key', 'daf')->first();
-        $ac = Utilisateur::where('role_key', 'ac')->first();
+        $daf = Utilisateur::query()->where('role_key', 'daf')->first();
+        $ac = Utilisateur::query()->where('role_key', 'ac')->first();
 
         // Porteurs chargés par email pour un mapping fiable et explicite
-        $porteurs = Utilisateur::where('role_key', 'porteur')
+        $porteurs = Utilisateur::query()->where('role_key', 'porteur')
             ->where('utilisateur_actif', true)
             ->get()
             ->keyBy('utilisateur_email');
@@ -35,7 +35,7 @@ class DemandeDepenseSeeder extends Seeder
         $boly = $porteurs['s.boly@ujkz.bf'] ?? null;            // ENERGY-SOLAR
 
         // ── 0a. Demandes terminées pour FORMASUP / Dr. Kaboré (pour taux d'exécution à 99%) ──
-        $convFormasup = Convention::where('convention_titre', 'like', '%FORMASUP%')->first();
+        $convFormasup = Convention::query()->where('convention_titre', 'like', '%FORMASUP%')->first();
         $kabore = $porteurs['m.kabore@ujkz.bf'] ?? null;
         if ($convFormasup && $kabore) {
             // Demand 1: "Formations et ateliers pédagogiques"
@@ -97,8 +97,8 @@ class DemandeDepenseSeeder extends Seeder
         }
 
         // ── 0b. Demandes pour PAES-UJKZ / Pr. Cheick (ocheick418@gmail.com) ──
-        $convPaesBm = Convention::where('convention_titre', 'like', '%BM-PAES%')->first();
-        $convPaesAfd = Convention::where('convention_titre', 'like', '%AFD-PAES%')->first();
+        $convPaesBm = Convention::query()->where('convention_titre', 'like', '%BM-PAES%')->first();
+        $convPaesAfd = Convention::query()->where('convention_titre', 'like', '%AFD-PAES%')->first();
         if ($jb) {
             // Demand 1: "Réhabilitation des infrastructures" (BM) -> Terminee
             if ($convPaesBm) {
@@ -168,7 +168,7 @@ class DemandeDepenseSeeder extends Seeder
                 );
 
                 // Demand 4: "Audit et évaluation" (BM) -> ValideeAgentComptable (Approved AC, awaiting payment)
-                $rubriqueAudit = Rubrique::where('id_convention', $convPaesBm->id_convention)
+                $rubriqueAudit = Rubrique::query()->where('id_convention', $convPaesBm->id_convention)
                     ->where('rubrique_libelle', 'like', '%Audit%')
                     ->first();
                 if ($rubriqueAudit) {
@@ -192,7 +192,7 @@ class DemandeDepenseSeeder extends Seeder
 
             // Demand 5: "Achat d'équipements didactiques et numériques" (AFD) -> Soumise (Newly submitted)
             if ($convPaesAfd) {
-                $rubriqueDidactique = Rubrique::where('id_convention', $convPaesAfd->id_convention)
+                $rubriqueDidactique = Rubrique::query()->where('id_convention', $convPaesAfd->id_convention)
                     ->where('rubrique_libelle', 'like', '%didactiques%')
                     ->first();
                 if ($rubriqueDidactique) {
@@ -226,7 +226,7 @@ class DemandeDepenseSeeder extends Seeder
 
         // ── 1. Demande terminée — BIOTECH-BF / Pr. Ouédraogo (JB) ────────────
         $this->creerDemandeParcourue(
-            convention: Convention::where('convention_titre', 'like', '%BM-BIOTECH%')->first(),
+            convention: Convention::query()->where('convention_titre', 'like', '%BM-BIOTECH%')->first(),
             rubriqueLibelle: 'Réactifs et consommables de laboratoire',
             porteur: $jb,
             daf: $daf,
@@ -249,7 +249,7 @@ class DemandeDepenseSeeder extends Seeder
 
         // ── 2. Demande rapport soumis — BIOTECH-BF / Pr. Ouédraogo (JB) ──────
         $this->creerDemandeParcourue(
-            convention: Convention::where('convention_titre', 'like', '%BM-BIOTECH%')->first(),
+            convention: Convention::query()->where('convention_titre', 'like', '%BM-BIOTECH%')->first(),
             rubriqueLibelle: 'Équipements de laboratoire',
             porteur: $jb,
             daf: $daf,
@@ -271,9 +271,9 @@ class DemandeDepenseSeeder extends Seeder
         );
 
         // ── 3. Demande validée AC — AFD-BIOTECH (en attente paiement) ────────
-        $conv = Convention::where('convention_titre', 'like', '%AFD-BIOTECH%')->first();
+        $conv = Convention::query()->where('convention_titre', 'like', '%AFD-BIOTECH%')->first();
         if ($conv && $jb) {
-            $rubrique = Rubrique::where('id_convention', $conv->id_convention)
+            $rubrique = Rubrique::query()->where('id_convention', $conv->id_convention)
                 ->where('rubrique_libelle', 'like', '%Mission%')
                 ->first();
             if ($rubrique) {
@@ -299,7 +299,7 @@ class DemandeDepenseSeeder extends Seeder
 
         // ── 4. Demande terminée — NTIC-EDU / Dr. Sawadogo (cycle précédent) ──
         // Status Terminee pour permettre à demande 5 d'exister sur la même convention
-        $conv = Convention::where('convention_titre', 'like', '%BM-NTIC%')->first();
+        $conv = Convention::query()->where('convention_titre', 'like', '%BM-NTIC%')->first();
         if ($conv && $salamata) {
             $this->creerDemandeParcourue(
                 convention: $conv,
@@ -326,9 +326,9 @@ class DemandeDepenseSeeder extends Seeder
         }
 
         // ── 5. Demande soumise — NTIC-EDU / Dr. Sawadogo (nouvelle demande) ──
-        $conv = Convention::where('convention_titre', 'like', '%BM-NTIC%')->first();
+        $conv = Convention::query()->where('convention_titre', 'like', '%BM-NTIC%')->first();
         if ($conv && $salamata) {
-            $rubrique = Rubrique::where('id_convention', $conv->id_convention)
+            $rubrique = Rubrique::query()->where('id_convention', $conv->id_convention)
                 ->where('rubrique_libelle', 'like', '%Matériel%')
                 ->first();
             if ($rubrique) {
@@ -349,9 +349,9 @@ class DemandeDepenseSeeder extends Seeder
         }
 
         // ── 6. Demande rejetée DAF — ENERGY-SOLAR / Prof. Boly ──────────────
-        $conv = Convention::where('convention_titre', 'like', '%AFD-SOLAR%')->first();
+        $conv = Convention::query()->where('convention_titre', 'like', '%AFD-SOLAR%')->first();
         if ($conv && $boly) {
-            $rubrique = Rubrique::where('id_convention', $conv->id_convention)
+            $rubrique = Rubrique::query()->where('id_convention', $conv->id_convention)
                 ->where('rubrique_libelle', 'like', '%panneaux%')
                 ->first();
             if ($rubrique) {
@@ -375,9 +375,9 @@ class DemandeDepenseSeeder extends Seeder
         }
 
         // ── 7. Nouvelle demande après rejet — ENERGY-SOLAR / Prof. Boly ──────
-        $conv = Convention::where('convention_titre', 'like', '%AFD-SOLAR%')->first();
+        $conv = Convention::query()->where('convention_titre', 'like', '%AFD-SOLAR%')->first();
         if ($conv && $boly) {
-            $rubrique = Rubrique::where('id_convention', $conv->id_convention)
+            $rubrique = Rubrique::query()->where('id_convention', $conv->id_convention)
                 ->where('rubrique_libelle', 'like', '%panneaux%')
                 ->first();
             if ($rubrique) {
@@ -399,9 +399,9 @@ class DemandeDepenseSeeder extends Seeder
         }
 
         // ── 8. Demande terminée — PRESAR / Dr. Traoré (Aminata) ──────────────
-        $conv = Convention::where('convention_titre', 'like', '%UEMOA-PRESAR%')->first();
+        $conv = Convention::query()->where('convention_titre', 'like', '%UEMOA-PRESAR%')->first();
         if ($conv && $aminata) {
-            $rubrique = Rubrique::where('id_convention', $conv->id_convention)
+            $rubrique = Rubrique::query()->where('id_convention', $conv->id_convention)
                 ->where('rubrique_libelle', 'like', '%Enquête%')
                 ->first();
             if ($rubrique) {
@@ -432,9 +432,9 @@ class DemandeDepenseSeeder extends Seeder
         }
 
         // ── 9. Demande soumise — BIODIV-BF / Prof. Rasmané OUÉDRAOGO ─────────
-        $conv = Convention::where('convention_titre', 'like', '%BAD-BIODIV%')->first();
+        $conv = Convention::query()->where('convention_titre', 'like', '%BAD-BIODIV%')->first();
         if ($conv && $rasmane) {
-            $rubrique = Rubrique::where('id_convention', $conv->id_convention)
+            $rubrique = Rubrique::query()->where('id_convention', $conv->id_convention)
                 ->where('rubrique_libelle', 'like', '%Reboisement%')
                 ->first();
             if ($rubrique) {
@@ -456,9 +456,9 @@ class DemandeDepenseSeeder extends Seeder
         }
 
         // ── 10. Paiements directs — BIOTECH-BF / Pr. Ouédraogo (JB) ─────────
-        $conv = Convention::where('convention_titre', 'like', '%BM-BIOTECH%')->first();
+        $conv = Convention::query()->where('convention_titre', 'like', '%BM-BIOTECH%')->first();
         if ($conv && $jb) {
-            $rubrique = Rubrique::where('id_convention', $conv->id_convention)
+            $rubrique = Rubrique::query()->where('id_convention', $conv->id_convention)
                 ->where('rubrique_libelle', 'like', '%Réactifs%')
                 ->first();
 
@@ -490,7 +490,7 @@ class DemandeDepenseSeeder extends Seeder
         }
 
         // ── 11. Paiement direct — ENERGY-SOLAR / Prof. Boly ──────────────────
-        $conv = Convention::where('convention_titre', 'like', '%AFD-SOLAR%')->first();
+        $conv = Convention::query()->where('convention_titre', 'like', '%AFD-SOLAR%')->first();
         if ($conv && $boly) {
             Paiement::create([
                 'type_paiement' => 'direct',
@@ -532,7 +532,7 @@ class DemandeDepenseSeeder extends Seeder
         }
 
         if (! $rubrique && $rubriqueLibelle) {
-            $rubrique = Rubrique::where('id_convention', $convention->id_convention)
+            $rubrique = Rubrique::query()->where('id_convention', $convention->id_convention)
                 ->where('rubrique_libelle', 'like', "%{$rubriqueLibelle}%")
                 ->first();
         }

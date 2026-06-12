@@ -3,10 +3,10 @@ import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer';
 import { clampPercent, conventionStatusClass, formatCurrency, formatDate, projectStatusClass } from '@/lib/utils';
 import { CHART_AXIS_TICK, CHART_MARGIN, CHART_TOOLTIP_STYLE } from '@/lib/charts';
 import { index as dafProjetsIndex, bilan as dafProjetBilan } from '@/routes/daf/projets';
-import { cloturer as cloturerProjet } from '@/actions/App/Http/Controllers/Daf/ProjetController';
+import { cloturer as cloturerProjet, mettreEnCours as mettreEnCoursProjet } from '@/actions/App/Http/Controllers/Daf/ProjetController';
 import { show as dafConventionShow } from '@/routes/daf/projets/conventions';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { ArrowLeftIcon, CheckBadgeIcon, DocumentChartBarIcon, ExclamationTriangleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, CheckBadgeIcon, DocumentChartBarIcon, ExclamationTriangleIcon, InformationCircleIcon, PlayIcon } from '@heroicons/react/24/outline';
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { FormEvent, useState } from 'react';
 
@@ -58,6 +58,8 @@ interface Projet {
     analyse_ecarts: AnalyseEcarts;
     can_cloturer: boolean;
     cloture_blockers: string | null;
+    can_mettre_en_cours: boolean;
+    mettre_en_cours_blockers: string | null;
     bilan_url: string | null;
 }
 
@@ -69,16 +71,26 @@ export default function DafProjetShow({ projet }: Props) {
     const totalConventions = projet.conventions.length;
     const totalRubriques = projet.conventions.reduce((s, c) => s + c.rubriques_count, 0);
     const [showCloture, setShowCloture] = useState(false);
+    const [showMettreEnCours, setShowMettreEnCours] = useState(false);
     const cloturerForm = useForm({
         date_fin_reelle: new Date().toISOString().split('T')[0],
         statut_final: '' as 'succes' | 'echec' | '',
     });
+    const mettreEnCoursForm = useForm({});
     const statusEnCours = projet.statut === 'en_cours';
+    const statusEnAttente = projet.statut === 'en_attente_financement';
 
     const submitCloture = (e: FormEvent) => {
         e.preventDefault();
         cloturerForm.post(cloturerProjet.url(projet.id), {
             onSuccess: () => setShowCloture(false),
+        });
+    };
+
+    const submitMettreEnCours = (e: FormEvent) => {
+        e.preventDefault();
+        mettreEnCoursForm.post(mettreEnCoursProjet.url(projet.id), {
+            onSuccess: () => setShowMettreEnCours(false),
         });
     };
 
@@ -135,6 +147,21 @@ export default function DafProjetShow({ projet }: Props) {
                     <div className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 max-w-xs">
                         <InformationCircleIcon className="w-4 h-4 shrink-0" />
                         <span className="text-xs">{projet.cloture_blockers}</span>
+                    </div>
+                )}
+                {statusEnAttente && projet.can_mettre_en_cours && (
+                    <button
+                        onClick={() => setShowMettreEnCours((v) => !v)}
+                        className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-blue-400 hover:text-blue-700 transition-all"
+                    >
+                        <PlayIcon className="w-4 h-4" />
+                        Mettre en cours
+                    </button>
+                )}
+                {statusEnAttente && !projet.can_mettre_en_cours && projet.mettre_en_cours_blockers && (
+                    <div className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 max-w-xs">
+                        <InformationCircleIcon className="w-4 h-4 shrink-0" />
+                        <span className="text-xs">{projet.mettre_en_cours_blockers}</span>
                     </div>
                 )}
             </div>
@@ -196,6 +223,38 @@ export default function DafProjetShow({ projet }: Props) {
                             <button
                                 type="button"
                                 onClick={() => setShowCloture(false)}
+                                className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                            >
+                                Annuler
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+
+            {/* Panneau mise en cours */}
+            {showMettreEnCours && projet.can_mettre_en_cours && (
+                <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                        <PlayIcon className="w-4 h-4 text-blue-600" />
+                        <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-400">Mettre le projet en cours</h3>
+                    </div>
+                    <p className="text-xs text-blue-700 dark:text-blue-500 mb-4">Cette action change le statut du projet de « En attente de financement » à « En cours ». Le porteur pourra alors soumettre des demandes de dépenses.</p>
+                    {(mettreEnCoursForm.errors as Record<string, string>).projet && (
+                        <p className="text-xs text-red-600 dark:text-red-400 mb-3">{(mettreEnCoursForm.errors as Record<string, string>).projet}</p>
+                    )}
+                    <form onSubmit={submitMettreEnCours} className="space-y-4">
+                        <div className="flex items-center gap-3">
+                            <button
+                                type="submit"
+                                disabled={mettreEnCoursForm.processing}
+                                className="px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 transition-colors"
+                            >
+                                {mettreEnCoursForm.processing ? 'En cours…' : 'Confirmer la mise en cours'}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setShowMettreEnCours(false)}
                                 className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
                             >
                                 Annuler
