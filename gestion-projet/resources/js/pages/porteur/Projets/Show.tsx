@@ -1,10 +1,10 @@
+import { ArrowLeftIcon, BanknotesIcon, BuildingLibraryIcon, DocumentTextIcon, ExclamationTriangleIcon, InformationCircleIcon, LockClosedIcon, PresentationChartBarIcon } from '@heroicons/react/24/outline';
+import { Head, Link } from '@inertiajs/react';
 import AppLayout from '@/components/layout/AppLayout';
 import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer';
 import { formatCurrency, formatDate, projectStatusClass, conventionStatusClass } from '@/lib/utils';
-import { index as projetsIndex, show as projetsShow } from '@/routes/porteur/projets';
+import { index as projetsIndex } from '@/routes/porteur/projets';
 import { show as projetsConventionsShow } from '@/routes/porteur/projets/conventions';
-import { Head, Link } from '@inertiajs/react';
-import { ArrowLeftIcon, BanknotesIcon, BuildingLibraryIcon, DocumentTextIcon, ExclamationTriangleIcon, InformationCircleIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 
 interface Convention {
     id: number;
@@ -34,6 +34,7 @@ interface Projet {
     total_consomme: number;
     disponible_caisse: number;
     pourcentage_financement: number;
+    bilan_url: string | null;
     date_debut: string | null;
     date_fin_prevue: string | null;
     date_fin_reelle: string | null;
@@ -67,6 +68,15 @@ export default function ProjetShow({ projet }: Props) {
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${projectStatusClass(projet.statut)}`}>
                             {projet.libelle_statut}
                         </span>
+                        {projet.bilan_url && (
+                            <Link
+                                href={projet.bilan_url}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                            >
+                                <PresentationChartBarIcon className="w-4 h-4" />
+                                Voir le bilan
+                            </Link>
+                        )}
                     </div>
                     {projet.date_debut && (
                         <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">
@@ -79,7 +89,7 @@ export default function ProjetShow({ projet }: Props) {
             </div>
 
             {/* Banner restriction selon statut */}
-            <StatusBanner statut={projet.statut} libelleStatut={projet.libelle_statut} />
+            <StatusBanner statut={projet.statut} />
 
             {/* Stats cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -206,7 +216,7 @@ function StatCard({ label, value, sub, icon, progressValue, variant }: {
     );
 }
 
-function StatusBanner({ statut, libelleStatut }: { statut: string; libelleStatut: string }) {
+function StatusBanner({ statut }: { statut: string }) {
     const messages: Record<string, { icon: React.ReactNode; title: string; text: string; className: string }> = {
         en_attente_financement: {
             icon: <InformationCircleIcon className="w-4 h-4 shrink-0" />,
@@ -235,7 +245,10 @@ function StatusBanner({ statut, libelleStatut }: { statut: string; libelleStatut
     };
 
     const config = messages[statut];
-    if (!config) return null;
+
+    if (!config) {
+        return null;
+    }
 
     return (
         <div className={`mb-6 flex gap-3 p-4 rounded-xl border ${config.className}`}>

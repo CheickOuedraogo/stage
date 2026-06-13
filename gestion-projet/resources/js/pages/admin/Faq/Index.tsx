@@ -1,12 +1,3 @@
-import AppLayout from '@/components/layout/AppLayout';
-import { ConfirmModal } from '@/components/ui/ConfirmModal';
-import {
-    store as faqStore,
-    update as faqUpdate,
-    destroy as faqDestroy,
-} from '@/actions/App/Http/Controllers/Administrateur/FaqController';
-import type { PageProps } from '@/types';
-import { Head, useForm, usePage } from '@inertiajs/react';
 import {
     CheckIcon,
     PencilIcon,
@@ -14,63 +5,76 @@ import {
     TrashIcon,
     XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { FormEvent, useState } from 'react';
+import { Head, useForm, usePage } from '@inertiajs/react';
+import type { FormEvent } from 'react';
+import { useState } from 'react';
+import {
+    store as faqStore,
+    update as faqUpdate,
+    destroy as faqDestroy,
+} from '@/actions/App/Http/Controllers/Administrateur/FaqController';
+import AppLayout from '@/components/layout/AppLayout';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import type { PageProps } from '@/types';
 
 interface Faq {
     id_faq: number;
     faq_question: string;
     faq_reponse: string;
-    faq_actif: boolean;
-    visible_porteur: boolean;
-    visible_daf: boolean;
-    visible_ac: boolean;
+    role_key: string | null;
+}
+
+interface Role {
+    value: string;
+    label: string;
 }
 
 interface Props extends PageProps {
     items: Faq[];
+    roles: Role[];
 }
 
-function RoleCheckboxes({
-    visiblePorteur,
-    visibleDaf,
-    visibleAc,
+const ROLE_BADGES: Record<string, { label: string; class: string }> = {
+    porteur: { label: 'Porteur', class: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+    daf: { label: 'DAF', class: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
+    ac: { label: 'AC', class: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
+};
+
+function RoleSelect({
+    value,
     onChange,
 }: {
-    visiblePorteur: boolean;
-    visibleDaf: boolean;
-    visibleAc: boolean;
-    onChange: (field: 'visible_porteur' | 'visible_daf' | 'visible_ac', value: boolean) => void;
+    value: string;
+    onChange: (v: string) => void;
 }) {
     return (
         <div>
             <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Visible par</label>
-            <div className="flex flex-wrap gap-3">
-                {([
-                    { field: 'visible_porteur' as const, label: 'Porteur', checked: visiblePorteur },
-                    { field: 'visible_daf' as const, label: 'DAF', checked: visibleDaf },
-                    { field: 'visible_ac' as const, label: 'AC', checked: visibleAc },
-                ]).map(({ field, label, checked }) => (
-                    <label key={field} className="flex items-center gap-1.5 cursor-pointer text-sm text-slate-700 dark:text-slate-300">
-                        <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={(e) => onChange(field, e.target.checked)}
-                            className="rounded text-blue-600"
-                        />
-                        {label}
-                    </label>
+            <select
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            >
+                <option value="" disabled>Choisir un rôle</option>
+                {([{ value: 'porteur', label: 'Porteur' }, { value: 'daf', label: 'DAF' }, { value: 'ac', label: 'AC' }]).map((r) => (
+                    <option key={r.value} value={r.value}>{r.label}</option>
                 ))}
-            </div>
+            </select>
         </div>
     );
 }
 
 function CreateForm({ onCancel }: { onCancel: () => void }) {
-    const form = useForm({ question: '', reponse: '', visible_porteur: true, visible_daf: true, visible_ac: true });
+    const form = useForm({ question: '', reponse: '', role_key: '' });
 
     const submit = (e: FormEvent) => {
         e.preventDefault();
-        form.post(faqStore.url(), { onSuccess: () => { form.reset(); onCancel(); } });
+        form.post(faqStore.url(), {
+            onSuccess: () => {
+                form.reset();
+                onCancel();
+            },
+        });
     };
 
     return (
@@ -105,11 +109,9 @@ function CreateForm({ onCancel }: { onCancel: () => void }) {
                 />
                 {form.errors.reponse && <p className="text-xs text-red-600 mt-1">{form.errors.reponse}</p>}
             </div>
-            <RoleCheckboxes
-                visiblePorteur={form.data.visible_porteur}
-                visibleDaf={form.data.visible_daf}
-                visibleAc={form.data.visible_ac}
-                onChange={(field, value) => form.setData(field, value)}
+            <RoleSelect
+                value={form.data.role_key}
+                onChange={(v) => form.setData('role_key', v)}
             />
             <div className="flex gap-3">
                 <button
@@ -137,10 +139,7 @@ function EditForm({ item, onCancel }: { item: Faq; onCancel: () => void }) {
     const form = useForm({
         question: item.faq_question,
         reponse: item.faq_reponse,
-        is_active: item.faq_actif,
-        visible_porteur: item.visible_porteur,
-        visible_daf: item.visible_daf,
-        visible_ac: item.visible_ac,
+        role_key: item.role_key ?? '',
     });
 
     const submit = (e: FormEvent) => {
@@ -170,20 +169,9 @@ function EditForm({ item, onCancel }: { item: Faq; onCancel: () => void }) {
                     className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 resize-y font-mono"
                 />
             </div>
-            <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                    type="checkbox"
-                    checked={form.data.is_active}
-                    onChange={(e) => form.setData('is_active', e.target.checked)}
-                    className="rounded text-blue-600"
-                />
-                <span className="text-sm text-slate-700 dark:text-slate-300">Visible dans la FAQ</span>
-            </label>
-            <RoleCheckboxes
-                visiblePorteur={form.data.visible_porteur}
-                visibleDaf={form.data.visible_daf}
-                visibleAc={form.data.visible_ac}
-                onChange={(field, value) => form.setData(field, value)}
+            <RoleSelect
+                value={form.data.role_key}
+                onChange={(v) => form.setData('role_key', v)}
             />
             <div className="flex gap-3">
                 <button
@@ -239,6 +227,8 @@ export default function AdminFaqIndex() {
     const [showCreate, setShowCreate] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
 
+    const activeCount = items.filter((i) => i.role_key).length;
+
     return (
         <AppLayout title="Gestion FAQ">
             <Head title="Gestion FAQ — Admin — CIFEU" />
@@ -248,11 +238,15 @@ export default function AdminFaqIndex() {
                     <div>
                         <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Gestion de la FAQ</h2>
                         <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                            {items.length} question{items.length !== 1 ? 's' : ''} — visible{items.filter((i) => i.faq_actif).length !== 1 ? 's' : ''} : {items.filter((i) => i.faq_actif).length}
+                            {items.length} question{items.length !== 1 ? 's' : ''} —
+                            {activeCount} active{activeCount !== 1 ? 's' : ''}
                         </p>
                     </div>
                     <button
-                        onClick={() => { setShowCreate((v) => !v); setEditingId(null); }}
+                        onClick={() => {
+                            setShowCreate((v) => !v);
+                            setEditingId(null);
+                        }}
                         className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
                     >
                         <PlusIcon className="w-4 h-4" />
@@ -279,33 +273,32 @@ export default function AdminFaqIndex() {
                                         <EditForm item={item} onCancel={() => setEditingId(null)} />
                                     </div>
                                 ) : (
-                                    <div className={`px-5 py-4 flex items-center gap-4 group hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors ${!item.faq_actif ? 'opacity-60' : ''}`}>
+                                    <div className={`px-5 py-4 flex items-center gap-4 group hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors ${!item.role_key ? 'opacity-60' : ''}`}>
                                         <span className="shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 text-xs font-bold flex items-center justify-center">
                                             {idx + 1}
                                         </span>
                                         <div className="min-w-0 flex-1">
                                             <div className="flex items-center gap-2 flex-wrap">
                                                 <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{item.faq_question}</p>
-                                                {!item.faq_actif && (
+                                                {!item.role_key && (
                                                     <span className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400">
-                                                        Masquée
+                                                        Inactive
                                                     </span>
                                                 )}
-                                                {([
-                                                    { key: 'visible_porteur', label: 'Porteur', show: item.visible_porteur },
-                                                    { key: 'visible_daf', label: 'DAF', show: item.visible_daf },
-                                                    { key: 'visible_ac', label: 'AC', show: item.visible_ac },
-                                                ]).filter((r) => r.show).map((r) => (
-                                                    <span key={r.key} className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                                                        {r.label}
+                                                {item.role_key && ROLE_BADGES[item.role_key] && (
+                                                    <span className={`shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${ROLE_BADGES[item.role_key].class}`}>
+                                                        {ROLE_BADGES[item.role_key].label}
                                                     </span>
-                                                ))}
+                                                )}
                                             </div>
                                             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 line-clamp-1">{item.faq_reponse.replace(/[#*`]/g, '').slice(0, 90)}…</p>
                                         </div>
                                         <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button
-                                                onClick={() => { setEditingId(item.id_faq); setShowCreate(false); }}
+                                                onClick={() => {
+                                                    setEditingId(item.id_faq);
+                                                    setShowCreate(false);
+                                                }}
                                                 className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                                                 title="Modifier"
                                             >

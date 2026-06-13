@@ -6,15 +6,16 @@ use App\Http\Controllers\Administrateur\JournalAuditController;
 use App\Http\Controllers\Administrateur\MaintenanceController;
 use App\Http\Controllers\Administrateur\MessageChatControleur as AdministrateurMessageChatControleur;
 use App\Http\Controllers\Administrateur\UtilisateurControleur;
+use App\Http\Controllers\AgentComptable\ConventionController as AgentComptableConventionController;
 use App\Http\Controllers\AgentComptable\DemandeDepenseController as AgentComptableDemandeDepenseController;
 use App\Http\Controllers\AgentComptable\MessageChatControleur as AgentComptableMessageChatControleur;
 use App\Http\Controllers\AgentComptable\PaiementController as AgentComptablePaiementController;
+use App\Http\Controllers\AgentComptable\PaiementDirectController as AgentComptablePaiementDirectController;
 use App\Http\Controllers\AgentComptable\ProjetController as AgentComptableProjetController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Daf\ConventionController as DafConventionController;
 use App\Http\Controllers\Daf\DemandeDepenseController as DafDemandeDepenseController;
 use App\Http\Controllers\Daf\MessageChatControleur as DafMessageChatControleur;
-use App\Http\Controllers\Daf\PaiementDirectController as DafPaiementDirectController;
 use App\Http\Controllers\Daf\ProjetController as DafProjetController;
 use App\Http\Controllers\Daf\RapportController as DafRapportController;
 use App\Http\Controllers\Daf\RubriqueController as DafRubriqueController;
@@ -114,10 +115,6 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/projets/{projet}/conventions/{convention}/terminer', [DafConventionController::class, 'terminer'])->name('projets.conventions.terminer');
         Route::patch('/projets/{projet}/conventions/{convention}/annuler', [DafConventionController::class, 'annuler'])->name('projets.conventions.annuler');
 
-        // Paiements directs (enregistrés par le DAF)
-        Route::post('/projets/{projet}/conventions/{convention}/paiements-directs', [DafPaiementDirectController::class, 'store'])->name('projets.conventions.paiements-directs.store');
-        Route::delete('/projets/{projet}/conventions/{convention}/paiements-directs/{paiementDirect}', [DafPaiementDirectController::class, 'destroy'])->name('projets.conventions.paiements-directs.destroy');
-
         // Versements (vue globale)
         Route::get('/versements', [DafVersementController::class, 'index'])->name('versements.index');
 
@@ -148,6 +145,13 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('role:ac')->prefix('ac')->name('ac.')->group(function () {
         Route::get('/tableau-de-bord', [DashboardController::class, 'ac'])->name('dashboard');
 
+        // Conventions (paiements directs)
+        Route::get('/projets/{projet}/conventions/{convention}', [AgentComptableConventionController::class, 'show'])->name('projets.conventions.show');
+
+        // Paiements directs (enregistrés par l'AC)
+        Route::post('/projets/{projet}/conventions/{convention}/paiements-directs', [AgentComptablePaiementDirectController::class, 'store'])->name('projets.conventions.paiements-directs.store');
+        Route::delete('/projets/{projet}/conventions/{convention}/paiements-directs/{paiementDirect}', [AgentComptablePaiementDirectController::class, 'destroy'])->name('projets.conventions.paiements-directs.destroy');
+
         // Bilan projet (lecture seule)
         Route::get('/projets/{projet}/bilan', [AgentComptableProjetController::class, 'bilan'])->name('projets.bilan');
         Route::get('/projets/{projet}/bilan/pdf', [AgentComptableProjetController::class, 'exporterBilanPdf'])->name('projets.bilan.pdf');
@@ -168,8 +172,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/demandes/{demande}/valider', [AgentComptableDemandeDepenseController::class, 'valider'])->name('demandes.valider');
         Route::post('/demandes/{demande}/rejeter', [AgentComptableDemandeDepenseController::class, 'rejeter'])->name('demandes.rejeter');
         Route::post('/demandes/{demande}/paiement', [AgentComptableDemandeDepenseController::class, 'enregistrerPaiement'])->name('demandes.paiement');
-        Route::post('/demandes/{demande}/valider-rapport', [AgentComptableDemandeDepenseController::class, 'validerRapport'])->name('demandes.valider-rapport');
-        Route::post('/demandes/{demande}/rejeter-rapport', [AgentComptableDemandeDepenseController::class, 'rejeterRapport'])->name('demandes.rejeter-rapport');
     });
 
     // ── Porteur ───────────────────────────────────────────────────────────

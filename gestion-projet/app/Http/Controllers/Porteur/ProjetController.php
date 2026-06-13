@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Porteur;
 
+use App\Enums\StatutProjet;
 use App\Exports\BilanProjetExport;
 use App\Http\Controllers\Controller;
 use App\Models\Convention;
@@ -89,6 +90,9 @@ class ProjetController extends Controller
                 'pourcentage_financement' => $projet->projet_montant_estime > 0
                     ? (int) min(100, round(($montantConventions / $projet->projet_montant_estime) * 100))
                     : 0,
+                'bilan_url' => $projet->projet_statut === StatutProjet::Termine
+                    ? route('porteur.projets.bilan', $projet)
+                    : null,
                 'date_debut' => $projet->projet_date_debut?->toDateString(),
                 'date_fin_prevue' => $projet->projet_date_fin_prevue?->toDateString(),
                 'date_fin_reelle' => $projet->projet_date_fin_reelle?->toDateString(),

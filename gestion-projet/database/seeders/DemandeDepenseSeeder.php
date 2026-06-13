@@ -569,7 +569,6 @@ class DemandeDepenseSeeder extends Seeder
         if (in_array($status, [StatutDemande::RapportSoumis, StatutDemande::Terminee])) {
             $data['demande_rapport'] = $rapport;
             $data['demande_rapport_valide_daf'] = $status === StatutDemande::Terminee;
-            $data['demande_rapport_valide_ac'] = $status === StatutDemande::Terminee;
         }
 
         $demande = DemandeDepense::create($data);
@@ -585,7 +584,7 @@ class DemandeDepenseSeeder extends Seeder
                 'paiement_mode' => $paiement['mode']->value,
                 'paiement_reference' => $paiement['ref'],
                 'id_enregistreur_paiement' => $ac?->id_utilisateur,
-                'type_paiement' => 'indirect',
+                'type_paiement' => 'normal',
                 'paiement_objet' => $objet,
             ]);
         }

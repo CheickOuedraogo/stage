@@ -105,24 +105,6 @@ class DemandeDepenseController extends Controller
         return back()->with('success', 'Paiement enregistré avec succès.');
     }
 
-    public function validerRapport(Request $request, DemandeDepense $demande): RedirectResponse
-    {
-        $this->service->validerRapportAgentComptable($demande, $request->user());
-
-        return back()->with('success', 'Rapport validé.');
-    }
-
-    public function rejeterRapport(Request $request, DemandeDepense $demande): RedirectResponse
-    {
-        $validated = $request->validate([
-            'motif' => ['nullable', 'string', 'max:1000'],
-        ]);
-
-        $this->service->rejeterRapport($demande, $request->user(), $validated['motif'] ?? null);
-
-        return back()->with('success', 'Rapport rejeté. Le porteur doit soumettre un nouveau rapport.');
-    }
-
     private function formatDemande(DemandeDepense $d): array
     {
         return [
@@ -156,7 +138,6 @@ class DemandeDepenseController extends Controller
             'possede_rapport' => $d->possede_rapport,
             'rapport_motif_rejet' => $d->demande_rapport_motif_rejet,
             'rapport_validee_daf' => $d->demande_rapport_valide_daf,
-            'rapport_validee_ac' => $d->demande_rapport_valide_ac,
             'validee_daf_at' => $d->demande_date_validation_daf?->toDateTimeString(),
             'validee_ac_at' => $d->demande_date_validation_ac?->toDateTimeString(),
             'validateur_daf' => $d->validateurDaf?->utilisateur_nom,

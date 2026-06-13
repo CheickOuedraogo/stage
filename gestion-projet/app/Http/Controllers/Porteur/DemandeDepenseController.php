@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers\Porteur;
 
+use App\Enums\RoleUtilisateur;
 use App\Enums\StatutConvention;
 use App\Enums\StatutDemande;
 use App\Enums\StatutProjet;
 use App\Http\Controllers\Controller;
 use App\Models\Convention;
 use App\Models\DemandeDepense;
+use App\Models\Notification;
 use App\Models\Projet;
 use App\Models\Rubrique;
+use App\Models\Utilisateur;
 use App\Services\DemandeDepenseService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -119,7 +122,7 @@ class DemandeDepenseController extends Controller
 
         $justificatifPath = $request->file('justificatif')->store('justificatifs', 'private');
 
-        DemandeDepense::create([
+        $demande = DemandeDepense::create([
             'id_rubrique' => $validated['rubrique_id'],
             'id_convention' => $convention->id_convention,
             'id_porteur' => $porteur->id_utilisateur,
@@ -129,6 +132,11 @@ class DemandeDepenseController extends Controller
             'demande_justificatif' => $justificatifPath,
             'demande_statut' => StatutDemande::Soumise,
         ]);
+
+        $demande->load('convention:id_convention,id_projet');
+
+        Utilisateur::parRole(RoleUtilisateur::Daf)->get()
+            ->each(fn (Utilisateur $u) => Notification::pourNouvelleDemande($u, $demande));
 
         return redirect()->route('porteur.demandes.index')
             ->with('success', 'Demande de dépense soumise avec succès.');
@@ -222,7 +230,6 @@ class DemandeDepenseController extends Controller
             'possede_justificatif' => $d->possede_justificatif,
             'possede_rapport' => $d->possede_rapport,
             'rapport_validee_daf' => $d->demande_rapport_valide_daf,
-            'rapport_validee_ac' => $d->demande_rapport_valide_ac,
             'validee_daf_at' => $d->demande_date_validation_daf?->toDateTimeString(),
             'validee_ac_at' => $d->demande_date_validation_ac?->toDateTimeString(),
             'validateur_daf' => $d->validateurDaf?->utilisateur_nom,

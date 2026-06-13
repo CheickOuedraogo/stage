@@ -171,9 +171,9 @@ class ProjetService
 
         $conventions = $projet->conventions->map(function (Convention $c) {
             $totalVersements = $c->versements->sum('versement_montant');
-            $totalPaiementsIndirects = $c->paiements->where('type_paiement', 'indirect')->sum('paiement_montant');
+            $totalPaiementsNormaux = $c->paiements->where('type_paiement', 'normal')->sum('paiement_montant');
             $totalPaiementsDirects = $c->paiements->where('type_paiement', 'direct')->sum('paiement_montant');
-            $totalConsomme = $totalPaiementsIndirects + $totalPaiementsDirects;
+            $totalConsomme = $totalPaiementsNormaux + $totalPaiementsDirects;
 
             return [
                 'id' => $c->id_convention,
@@ -182,13 +182,13 @@ class ProjetService
                 'bailleur_sigle' => $c->bailleur->bailleur_sigle,
                 'montant_fcfa' => $c->montant_fcfa,
                 'total_versements' => $totalVersements,
-                'total_paiements_indirects' => $totalPaiementsIndirects,
+                'total_paiements_normaux' => $totalPaiementsNormaux,
                 'total_paiements_directs' => $totalPaiementsDirects,
                 'total_consomme' => $totalConsomme,
-                'solde_caisse' => $totalVersements - $totalPaiementsIndirects,
+                'solde_caisse' => $totalVersements - $totalPaiementsNormaux,
                 'solde_engagement' => $c->montant_fcfa - $totalConsomme,
                 'taux_execution' => $c->montant_fcfa > 0 ? round(($totalConsomme / $c->montant_fcfa) * 100, 1) : 0,
-                'alerte_depassement' => $totalPaiementsIndirects > $totalVersements,
+                'alerte_depassement' => $totalPaiementsNormaux > $totalVersements,
             ];
         })->values();
 
@@ -214,7 +214,7 @@ class ProjetService
         $budgetPrevu = $projet->conventions->sum(fn ($c) => $c->montant_fcfa);
         $totalVersementsProjet = $conventions->sum('total_versements');
         $totalConsommeProjet = $conventions->sum('total_consomme');
-        $totalPaiementsIndirectsProjet = $conventions->sum('total_paiements_indirects');
+        $totalPaiementsNormauxProjet = $conventions->sum('total_paiements_normaux');
 
         $ecartTemps = null;
         $ecartTempsLabel = null;
@@ -253,15 +253,15 @@ class ProjetService
                 'budget_prevu' => $budgetPrevu,
                 'total_versements' => $totalVersementsProjet,
                 'total_consomme' => $totalConsommeProjet,
-                'total_paiements_indirects' => $totalPaiementsIndirectsProjet,
+                'total_paiements_normaux' => $totalPaiementsNormauxProjet,
                 'ecart_budget' => $budgetPrevu - $totalConsommeProjet,
-                'solde_caisse_global' => $totalVersementsProjet - $totalPaiementsIndirectsProjet,
+                'solde_caisse_global' => $totalVersementsProjet - $totalPaiementsNormauxProjet,
                 'taux_execution' => $budgetPrevu > 0 ? round(($totalConsommeProjet / $budgetPrevu) * 100, 1) : 0,
                 'taux_mobilisation' => $budgetPrevu > 0 ? round(($totalVersementsProjet / $budgetPrevu) * 100, 1) : 0,
                 'conventions_depassent_budget_initial' => $budgetPrevu > $projet->projet_montant_estime,
                 'ecart_temps_jours' => $ecartTemps,
                 'ecart_temps_label' => $ecartTempsLabel,
-                'alerte_tresorerie' => $totalPaiementsIndirectsProjet > $totalVersementsProjet,
+                'alerte_tresorerie' => $totalPaiementsNormauxProjet > $totalVersementsProjet,
             ],
         ];
     }

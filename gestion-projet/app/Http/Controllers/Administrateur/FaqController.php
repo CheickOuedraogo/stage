@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Administrateur;
 
+use App\Enums\RoleUtilisateur;
 use App\Http\Controllers\Controller;
 use App\Models\Faq;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -13,10 +15,14 @@ class FaqController extends Controller
 {
     public function index(): Response
     {
-        $items = Faq::orderBy('id_faq')->get(['id_faq', 'faq_question', 'faq_reponse', 'faq_actif', 'visible_porteur', 'visible_daf', 'visible_ac']);
+        $items = Faq::orderBy('id_faq')->get(['id_faq', 'faq_question', 'faq_reponse', 'role_key']);
 
         return Inertia::render('admin/Faq/Index', [
             'items' => $items,
+            'roles' => collect(RoleUtilisateur::cases())->map(fn ($r) => [
+                'value' => $r->value,
+                'label' => $r->label(),
+            ]),
         ]);
     }
 
@@ -25,17 +31,13 @@ class FaqController extends Controller
         $data = $request->validate([
             'question' => ['required', 'string', 'max:255'],
             'reponse' => ['required', 'string'],
-            'visible_porteur' => ['boolean'],
-            'visible_daf' => ['boolean'],
-            'visible_ac' => ['boolean'],
+            'role_key' => ['required', Rule::enum(RoleUtilisateur::class)],
         ]);
 
         Faq::create([
             'faq_question' => $data['question'],
             'faq_reponse' => $data['reponse'],
-            'visible_porteur' => $data['visible_porteur'] ?? true,
-            'visible_daf' => $data['visible_daf'] ?? true,
-            'visible_ac' => $data['visible_ac'] ?? true,
+            'role_key' => $data['role_key'],
         ]);
 
         return back()->with('success', 'Question ajoutée.');
@@ -46,19 +48,13 @@ class FaqController extends Controller
         $data = $request->validate([
             'question' => ['required', 'string', 'max:255'],
             'reponse' => ['required', 'string'],
-            'is_active' => ['boolean'],
-            'visible_porteur' => ['boolean'],
-            'visible_daf' => ['boolean'],
-            'visible_ac' => ['boolean'],
+            'role_key' => ['nullable', Rule::enum(RoleUtilisateur::class)],
         ]);
 
         $faq->update([
             'faq_question' => $data['question'],
             'faq_reponse' => $data['reponse'],
-            'faq_actif' => $data['is_active'] ?? $faq->faq_actif,
-            'visible_porteur' => $data['visible_porteur'] ?? $faq->visible_porteur,
-            'visible_daf' => $data['visible_daf'] ?? $faq->visible_daf,
-            'visible_ac' => $data['visible_ac'] ?? $faq->visible_ac,
+            'role_key' => $data['role_key'] ?? null,
         ]);
 
         return back()->with('success', 'Question mise à jour.');

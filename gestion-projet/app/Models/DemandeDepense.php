@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Storage;
     'demande_justificatif', 'demande_statut', 'demande_motif_rejet', 'demande_rapport',
     'demande_rapport_motif_rejet',
     'demande_date_validation_daf', 'id_validateur_daf', 'demande_date_validation_ac', 'id_validateur_ac',
-    'demande_rapport_valide_daf', 'demande_rapport_valide_ac',
+    'demande_rapport_valide_daf',
 ])]
 class DemandeDepense extends Model
 {
@@ -40,7 +40,6 @@ class DemandeDepense extends Model
             'demande_date_validation_daf' => 'datetime',
             'demande_date_validation_ac' => 'datetime',
             'demande_rapport_valide_daf' => 'boolean',
-            'demande_rapport_valide_ac' => 'boolean',
         ];
     }
 

@@ -52,9 +52,8 @@ class MessageChatControleur extends Controller
             })
             ->values();
 
-        $faqItems = Faq::active()
+        $faqItems = Faq::pourRole(RoleUtilisateur::Daf)
             ->get()
-            ->filter(fn (Faq $f) => $f->isVisibleFor(RoleUtilisateur::Daf))
             ->map(fn (Faq $f) => ['id' => $f->id_faq, 'question' => $f->faq_question, 'reponse' => $f->faq_reponse])
             ->values();
 

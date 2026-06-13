@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['faq_question', 'faq_reponse', 'faq_actif', 'visible_porteur', 'visible_daf', 'visible_ac'])]
+#[Fillable(['faq_question', 'faq_reponse', 'role_key'])]
 class Faq extends Model
 {
     /** @use HasFactory<FaqFactory> */
@@ -26,25 +26,22 @@ class Faq extends Model
     protected function casts(): array
     {
         return [
-            'faq_actif' => 'boolean',
-            'visible_porteur' => 'boolean',
-            'visible_daf' => 'boolean',
-            'visible_ac' => 'boolean',
+            'role_key' => RoleUtilisateur::class,
         ];
     }
 
-    public function scopeActive(Builder $query): void
+    public function scopePourRole(Builder $query, RoleUtilisateur $role): void
     {
-        $query->where('faq_actif', true)->orderBy('id_faq');
+        $query->where('role_key', $role->value)->orderBy('id_faq');
     }
 
-    public function isVisibleFor(RoleUtilisateur $role): bool
+    public function scopeActif(Builder $query): void
     {
-        return match ($role) {
-            RoleUtilisateur::Porteur => $this->visible_porteur,
-            RoleUtilisateur::Daf => $this->visible_daf,
-            RoleUtilisateur::AgentComptable => $this->visible_ac,
-            default => false,
-        };
+        $query->whereNotNull('role_key')->orderBy('id_faq');
+    }
+
+    public function getEstActifAttribute(): bool
+    {
+        return $this->role_key !== null;
     }
 }

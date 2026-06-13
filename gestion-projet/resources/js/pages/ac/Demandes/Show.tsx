@@ -6,8 +6,6 @@ import {
     valider as validerAction,
     rejeter as rejeterAction,
     enregistrerPaiement as enregistrerPaiementAction,
-    validerRapport as validerRapportAction,
-    rejeterRapport as rejeterRapportAction,
 } from '@/actions/App/Http/Controllers/AgentComptable/DemandeDepenseController';
 import {
     downloadJustificatif as _downloadJustificatif,
@@ -45,7 +43,6 @@ interface Demande {
     possede_rapport: boolean;
     rapport_motif_rejet: string | null;
     rapport_validee_daf: boolean;
-    rapport_validee_ac: boolean;
     validee_daf_at: string | null;
     validee_ac_at: string | null;
     validateur_daf: string | null;
@@ -72,10 +69,8 @@ interface Props {
 
 export default function AcDemandeShow({ demande, modes_paiement }: Props) {
     const [showRejectForm, setShowRejectForm] = useState(false);
-    const [showRapportRejectForm, setShowRapportRejectForm] = useState(false);
     const [showPaiementForm, setShowPaiementForm] = useState(false);
     const rejectForm = useForm({ motif: '' });
-    const rapportRejectForm = useForm({ motif: '' });
     const paiementForm = useForm({
         date_paiement: new Date().toISOString().split('T')[0],
         mode_paiement: '',
@@ -84,7 +79,6 @@ export default function AcDemandeShow({ demande, modes_paiement }: Props) {
 
     const canValidate = demande.statut === 'validee_daf';
     const canPay = demande.statut === 'validee_ac' && !demande.paiement;
-    const canValidateRapport = demande.statut === 'rapport_soumis';
 
     function handleValider() {
         router.post(validerAction.url(demande.id), {}, { preserveScroll: true });
@@ -94,13 +88,6 @@ export default function AcDemandeShow({ demande, modes_paiement }: Props) {
         e.preventDefault();
         rejectForm.post(rejeterAction.url(demande.id), {
             onSuccess: () => setShowRejectForm(false),
-        });
-    }
-
-    function handleRapportRejeter(e: React.FormEvent) {
-        e.preventDefault();
-        rapportRejectForm.post(rejeterRapportAction.url(demande.id), {
-            onSuccess: () => setShowRapportRejectForm(false),
         });
     }
 
@@ -326,59 +313,6 @@ export default function AcDemandeShow({ demande, modes_paiement }: Props) {
                         </div>
                     )}
 
-                    {/* Validation rapport */}
-                    {canValidateRapport && (
-                        <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
-                            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
-                                Validation du rapport d'exécution
-                            </h3>
-                            {!showRapportRejectForm ? (
-                                <div className="flex gap-3">
-                                    <Button
-                                        onClick={() => router.post(validerRapportAction.url(demande.id), {}, { preserveScroll: true })}
-                                        variant="primary"
-                                        disabled={demande.rapport_validee_ac}
-                                    >
-                                        <CheckCircleIcon className="w-4 h-4" />
-                                        {demande.rapport_validee_ac ? 'Rapport déjà validé' : 'Valider le rapport'}
-                                    </Button>
-                                    {!demande.rapport_validee_ac && (
-                                        <Button variant="danger" onClick={() => setShowRapportRejectForm(true)}>
-                                            <XCircleIcon className="w-4 h-4" />
-                                            Rejeter le rapport
-                                        </Button>
-                                    )}
-                                </div>
-                            ) : (
-                                <form onSubmit={handleRapportRejeter} className="space-y-3">
-                                    <div>
-                                        <label htmlFor="motif-rapport" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">
-                                            Motif de rejet <span className="text-red-500">*</span>
-                                        </label>
-                                        <textarea
-                                            id="motif-rapport"
-                                            rows={3}
-                                            value={rapportRejectForm.data.motif}
-                                            onChange={(e) => rapportRejectForm.setData('motif', e.target.value)}
-                                            className="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500/50 resize-none"
-                                            placeholder="Expliquer la raison du rejet…"
-                                        />
-                                        {rapportRejectForm.errors.motif && (
-                                            <p className="mt-1 text-xs text-red-600">{rapportRejectForm.errors.motif}</p>
-                                        )}
-                                    </div>
-                                    <div className="flex gap-3">
-                                        <Button type="submit" variant="danger" loading={rapportRejectForm.processing}>
-                                            Confirmer le rejet
-                                        </Button>
-                                        <Button type="button" variant="ghost" onClick={() => setShowRapportRejectForm(false)}>
-                                            Annuler
-                                        </Button>
-                                    </div>
-                                </form>
-                            )}
-                        </div>
-                    )}
                 </div>
 
                 {/* Sidebar */}

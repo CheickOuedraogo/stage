@@ -137,7 +137,6 @@ class DemandeDepenseController extends Controller
             'possede_rapport' => $d->possede_rapport,
             'rapport_motif_rejet' => $d->demande_rapport_motif_rejet,
             'rapport_validee_daf' => $d->demande_rapport_valide_daf,
-            'rapport_validee_ac' => $d->demande_rapport_valide_ac,
             'validee_daf_at' => $d->demande_date_validation_daf?->toDateTimeString(),
             'validee_ac_at' => $d->demande_date_validation_ac?->toDateTimeString(),
             'validateur_daf' => $d->validateurDaf?->utilisateur_nom,

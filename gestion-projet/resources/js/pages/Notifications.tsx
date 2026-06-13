@@ -1,13 +1,13 @@
-import AppLayout from '@/components/layout/AppLayout';
-import { index as notificationsIndex, readAll as notifReadAll } from '@/routes/notifications';
-import type { PageProps } from '@/types';
-import { EmptyState } from '@/components/ui/EmptyState';
+import { BellIcon, ChatBubbleLeftRightIcon, CheckIcon, ClipboardDocumentListIcon, CreditCardIcon, FolderIcon, PaperAirplaneIcon, UserPlusIcon } from '@heroicons/react/24/outline';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { BellIcon, CheckIcon, ClipboardDocumentListIcon, FolderIcon } from '@heroicons/react/24/outline';
+import AppLayout from '@/components/layout/AppLayout';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { readAll as notifReadAll } from '@/routes/notifications';
+import type { PageProps } from '@/types';
 
 interface Notif {
     id_notification: number;
-    type_notification: 'demande_statut_change' | 'projet_cloture';
+    type_notification: 'demande_statut_change' | 'nouvelle_demande' | 'paiement_effectue' | 'rapport_soumis' | 'projet_cloture' | 'projet_mis_en_cours' | 'message_recu' | 'utilisateur_cree';
     id_demande: number | null;
     id_projet: number | null;
     notification_objet: string | null;
@@ -85,8 +85,27 @@ export default function Notifications() {
                 ) : (
                     <div className="space-y-2">
                         {notifications.data.map((notif) => {
-                            const isProjet = notif.type_notification === 'projet_cloture';
-                            const Icon = isProjet ? FolderIcon : ClipboardDocumentListIcon;
+                            const typeInfo = (() => {
+                                switch (notif.type_notification) {
+                                    case 'projet_cloture':
+                                        return { icon: FolderIcon, badge: 'Projet clôturé', badgeClass: 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400' };
+                                    case 'projet_mis_en_cours':
+                                        return { icon: FolderIcon, badge: 'Projet mis en cours', badgeClass: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' };
+                                    case 'nouvelle_demande':
+                                        return { icon: PaperAirplaneIcon, badge: 'Nouvelle demande', badgeClass: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' };
+                                    case 'paiement_effectue':
+                                        return { icon: CreditCardIcon, badge: 'Paiement effectué', badgeClass: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' };
+                                    case 'rapport_soumis':
+                                        return { icon: ClipboardDocumentListIcon, badge: 'Rapport soumis', badgeClass: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' };
+                                    case 'message_recu':
+                                        return { icon: ChatBubbleLeftRightIcon, badge: 'Nouveau message', badgeClass: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400' };
+                                    case 'utilisateur_cree':
+                                        return { icon: UserPlusIcon, badge: 'Nouvel utilisateur', badgeClass: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' };
+                                    default:
+                                        return { icon: ClipboardDocumentListIcon, badge: null, badgeClass: '' };
+                                }
+                            })();
+                            const Icon = typeInfo.icon;
                             const couleurStatut = notif.notification_libelle_statut
                                 ? (STATUT_COULEURS[notif.notification_libelle_statut] ?? 'bg-slate-100 text-slate-600')
                                 : null;
@@ -107,16 +126,16 @@ export default function Notifications() {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 flex-wrap">
                                             <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
-                                                {notif.notification_objet ?? (isProjet ? 'Projet' : 'Demande de dépense')}
+                                                {notif.notification_objet ?? 'Notification'}
                                             </p>
                                             {notif.notification_libelle_statut && couleurStatut && (
                                                 <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${couleurStatut}`}>
                                                     {notif.notification_libelle_statut}
                                                 </span>
                                             )}
-                                            {isProjet && (
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400">
-                                                    Projet clôturé
+                                            {typeInfo.badge && (
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${typeInfo.badgeClass}`}>
+                                                    {typeInfo.badge}
                                                 </span>
                                             )}
                                             {!notif.lu_le && (

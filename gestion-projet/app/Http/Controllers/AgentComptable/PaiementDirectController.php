@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Daf;
+namespace App\Http\Controllers\AgentComptable;
 
 use App\Enums\StatutProjet;
 use App\Http\Controllers\Controller;

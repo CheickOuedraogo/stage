@@ -285,9 +285,8 @@ class DashboardController extends Controller
     /** @return list<array{id: int, question: string, reponse: string}> */
     private function getFaqForRole(RoleUtilisateur $role): array
     {
-        return Faq::active()
+        return Faq::pourRole($role)
             ->get()
-            ->filter(fn (Faq $f) => $f->isVisibleFor($role))
             ->map(fn (Faq $f) => ['id' => $f->id_faq, 'question' => $f->faq_question, 'reponse' => $f->faq_reponse])
             ->values()
             ->toArray();

@@ -87,7 +87,6 @@ class DemandeDepenseFactory extends Factory
             'id_validateur_ac' => Utilisateur::factory()->ac()->create()->id_utilisateur,
             'demande_rapport' => 'rapports/test-rapport.pdf',
             'demande_rapport_valide_daf' => false,
-            'demande_rapport_valide_ac' => false,
         ]);
     }
 
@@ -101,7 +100,6 @@ class DemandeDepenseFactory extends Factory
             'id_validateur_ac' => Utilisateur::factory()->ac()->create()->id_utilisateur,
             'demande_rapport' => 'rapports/test-rapport.pdf',
             'demande_rapport_valide_daf' => true,
-            'demande_rapport_valide_ac' => true,
         ]);
     }
 }

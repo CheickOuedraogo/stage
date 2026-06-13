@@ -11,7 +11,6 @@ use App\Models\Notification;
 use App\Models\Paiement;
 use App\Models\Rubrique;
 use App\Models\Utilisateur;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class DemandeDepenseService
@@ -138,12 +137,16 @@ class DemandeDepenseService
             'id_convention' => $demande->id_convention,
             'id_rubrique' => $demande->id_rubrique,
             'id_projet' => $demande->convention->id_projet,
-            'type_paiement' => TypePaiement::Indirect,
+            'type_paiement' => TypePaiement::Normal,
         ]);
 
         $demande->update(['demande_statut' => StatutDemande::Payee]);
 
         Notification::pourDemandeStatut($demande->id_porteur, $demande, StatutDemande::Payee->label());
+
+        $demande->load('convention:id_convention,id_projet');
+        Utilisateur::parRole(RoleUtilisateur::Daf)->get()
+            ->each(fn (Utilisateur $u) => Notification::pourPaiementEffectue($u, $demande));
 
         return $paiement;
     }
@@ -157,10 +160,12 @@ class DemandeDepenseService
             'demande_statut' => StatutDemande::RapportSoumis,
             'demande_rapport' => $rapportPath,
             'demande_rapport_valide_daf' => false,
-            'demande_rapport_valide_ac' => false,
         ]);
 
-        $this->notifyDafAgentComptable($demande, StatutDemande::RapportSoumis);
+        $demande->load('convention:id_convention,id_projet');
+        Utilisateur::whereIn('role_key', [RoleUtilisateur::Daf->value, RoleUtilisateur::AgentComptable->value])
+            ->get()
+            ->each(fn (Utilisateur $u) => Notification::pourRapportSoumis($u, $demande));
     }
 
     public function validerRapportDaf(DemandeDepense $demande, Utilisateur $daf): void
@@ -168,49 +173,23 @@ class DemandeDepenseService
         abort_unless($demande->demande_statut === StatutDemande::RapportSoumis, 403);
         abort_unless($daf->role_key === RoleUtilisateur::Daf, 403);
 
-        DB::transaction(function () use ($demande) {
-            $demande->newQuery()->where('id_demande', $demande->id_demande)->lockForUpdate()->sole();
-            $demande->update(['demande_rapport_valide_daf' => true]);
-            $demande->refresh();
+        $demande->update([
+            'demande_rapport_valide_daf' => true,
+            'demande_statut' => StatutDemande::Terminee,
+        ]);
 
-            if ($demande->demande_rapport_valide_daf && $demande->demande_rapport_valide_ac) {
-                $demande->update(['demande_statut' => StatutDemande::Terminee]);
-                Notification::pourDemandeStatut($demande->id_porteur, $demande, StatutDemande::Terminee->label());
-            }
-        });
-    }
-
-    public function validerRapportAgentComptable(DemandeDepense $demande, Utilisateur $ac): void
-    {
-        abort_unless($demande->demande_statut === StatutDemande::RapportSoumis, 403);
-        abort_unless($ac->role_key === RoleUtilisateur::AgentComptable, 403);
-
-        DB::transaction(function () use ($demande) {
-            $demande->newQuery()->where('id_demande', $demande->id_demande)->lockForUpdate()->sole();
-            $demande->update(['demande_rapport_valide_ac' => true]);
-            $demande->refresh();
-
-            if ($demande->demande_rapport_valide_daf && $demande->demande_rapport_valide_ac) {
-                $demande->update(['demande_statut' => StatutDemande::Terminee]);
-                Notification::pourDemandeStatut($demande->id_porteur, $demande, StatutDemande::Terminee->label());
-            }
-        });
+        Notification::pourDemandeStatut($demande->id_porteur, $demande, StatutDemande::Terminee->label());
     }
 
     public function rejeterRapport(DemandeDepense $demande, Utilisateur $user, ?string $motif = null): void
     {
         abort_unless($demande->demande_statut === StatutDemande::RapportSoumis, 403);
-        abort_unless(
-            in_array($user->role_key, [RoleUtilisateur::Daf, RoleUtilisateur::AgentComptable]),
-            403
-        );
+        abort_unless($user->role_key === RoleUtilisateur::Daf, 403);
 
         $demande->update([
-            'demande_statut' => StatutDemande::Payee,
+            'demande_statut' => StatutDemande::RapportSoumis,
             'demande_rapport' => null,
             'demande_rapport_valide_daf' => false,
-            'demande_rapport_valide_ac' => false,
-            'demande_rapport_motif_rejet' => $motif,
         ]);
 
         $message = $motif

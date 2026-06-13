@@ -83,6 +83,42 @@ class Notification extends Model
         ]);
     }
 
+    /** Créer une notification pour nouvelle demande soumise */
+    public static function pourNouvelleDemande(Utilisateur $destinataire, DemandeDepense $demande): self
+    {
+        return self::create([
+            'id_utilisateur' => $destinataire->id_utilisateur,
+            'type_notification' => TypeNotification::NouvelleDemande,
+            'id_demande' => $demande->id_demande,
+            'id_projet' => $demande->convention->id_projet,
+            'notification_objet' => $demande->demande_objet,
+        ]);
+    }
+
+    /** Créer une notification pour un paiement effectué */
+    public static function pourPaiementEffectue(Utilisateur $destinataire, DemandeDepense $demande): self
+    {
+        return self::create([
+            'id_utilisateur' => $destinataire->id_utilisateur,
+            'type_notification' => TypeNotification::PaiementEffectue,
+            'id_demande' => $demande->id_demande,
+            'id_projet' => $demande->convention->id_projet,
+            'notification_objet' => $demande->demande_objet,
+        ]);
+    }
+
+    /** Créer une notification pour soumission de rapport */
+    public static function pourRapportSoumis(Utilisateur $destinataire, DemandeDepense $demande): self
+    {
+        return self::create([
+            'id_utilisateur' => $destinataire->id_utilisateur,
+            'type_notification' => TypeNotification::RapportSoumis,
+            'id_demande' => $demande->id_demande,
+            'id_projet' => $demande->convention->id_projet,
+            'notification_objet' => $demande->demande_objet,
+        ]);
+    }
+
     /** Créer une notification de clôture de projet */
     public static function pourProjetCloture(int $idUtilisateur, Projet $projet): self
     {

@@ -136,7 +136,6 @@
 | demande_date_validation_ac | Horodatage de la validation AC | Timestamp | NULLABLE |
 | id_validateur_ac | Agent Comptable validateur | Entier | FK → utilisateurs(id_utilisateur), NULLABLE, SET NULL |
 | demande_rapport_valide_daf | Rapport validé par la DAF | Booléen | NOT NULL, défaut : false |
-| demande_rapport_valide_ac | Rapport validé par l'Agent Comptable | Booléen | NOT NULL, défaut : false |
 | cree_le | Date et heure de création | Timestamp | NOT NULL, défaut : CURRENT_TIMESTAMP |
 | mis_a_jour_le | Date et heure de la dernière modification | Timestamp | NOT NULL, défaut : CURRENT_TIMESTAMP |
 

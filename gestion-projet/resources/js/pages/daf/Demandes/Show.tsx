@@ -38,7 +38,6 @@ interface Demande {
     possede_rapport: boolean;
     rapport_motif_rejet: string | null;
     rapport_validee_daf: boolean;
-    rapport_validee_ac: boolean;
     validee_daf_at: string | null;
     validee_ac_at: string | null;
     validateur_daf: string | null;

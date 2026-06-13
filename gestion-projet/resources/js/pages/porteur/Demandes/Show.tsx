@@ -44,7 +44,6 @@ interface Demande {
     possede_rapport: boolean;
     rapport_motif_rejet: string | null;
     rapport_validee_daf: boolean;
-    rapport_validee_ac: boolean;
     validee_daf_at: string | null;
     validee_ac_at: string | null;
     validateur_daf: string | null;
@@ -223,23 +222,13 @@ export default function DemandeShow({ demande }: Props) {
                             <h3 className="text-sm font-semibold text-purple-800 dark:text-purple-300 mb-2">
                                 Rapport en cours de validation
                             </h3>
-                            <div className="flex gap-6">
-                                <div className="flex items-center gap-2">
-                                    {demande.rapport_validee_daf
-                                        ? <CheckCircleIcon className="w-4 h-4 text-emerald-500" />
-                                        : <ClockIcon className="w-4 h-4 text-slate-400" />}
-                                    <span className="text-sm text-purple-700 dark:text-purple-300">
-                                        DAF {demande.rapport_validee_daf ? 'validé' : 'en attente'}
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    {demande.rapport_validee_ac
-                                        ? <CheckCircleIcon className="w-4 h-4 text-emerald-500" />
-                                        : <ClockIcon className="w-4 h-4 text-slate-400" />}
-                                    <span className="text-sm text-purple-700 dark:text-purple-300">
-                                        AC {demande.rapport_validee_ac ? 'validé' : 'en attente'}
-                                    </span>
-                                </div>
+                            <div className="flex items-center gap-2">
+                                {demande.rapport_validee_daf
+                                    ? <CheckCircleIcon className="w-4 h-4 text-emerald-500" />
+                                    : <ClockIcon className="w-4 h-4 text-slate-400" />}
+                                <span className="text-sm text-purple-700 dark:text-purple-300">
+                                    DAF {demande.rapport_validee_daf ? 'validé' : 'en attente'}
+                                </span>
                             </div>
                         </div>
                     )}

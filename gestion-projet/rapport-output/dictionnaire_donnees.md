@@ -143,7 +143,6 @@ Sollicitation de fonds par un porteur pour une rubrique.
 | demande_date_validation_ac | Date validation AC | Timestamp | NULLABLE |
 | id_validateur_ac | Agent AC ayant validé | Entier | FK (utilisateurs), NULLABLE |
 | demande_rapport_valide_daf | Rapport approuvé DAF | Booléen | NOT NULL, défaut: false |
-| demande_rapport_valide_ac | Rapport approuvé AC | Booléen | NOT NULL, défaut: false |
 | cree_le | Date de soumission | Timestamp | NOT NULL |
 | mis_a_jour_le | Date de modification | Timestamp | NOT NULL |
 
