@@ -1,11 +1,11 @@
+import { ArrowLeftIcon, DocumentArrowUpIcon, ExclamationTriangleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { Head, Link, useForm, router } from '@inertiajs/react';
+import { useEffect } from 'react';
+import { store as storeAction } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/Button';
 import { formatCurrency } from '@/lib/utils';
-import { store as storeAction } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
 import { show as projetsShow } from '@/routes/porteur/projets';
-import { Head, Link, useForm, router } from '@inertiajs/react';
-import { ArrowLeftIcon, DocumentArrowUpIcon, ExclamationTriangleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
-import { useEffect } from 'react';
 
 interface Rubrique {
     id: number;
@@ -66,7 +66,10 @@ export default function DemandeCreate({ projet, convention, rubriques }: Props) 
         };
 
         const config = messages[statut];
-        if (!config) return null;
+
+        if (!config) {
+return null;
+}
 
         return (
             <div className={`mb-6 flex gap-3 p-4 rounded-xl border ${config.className}`}>

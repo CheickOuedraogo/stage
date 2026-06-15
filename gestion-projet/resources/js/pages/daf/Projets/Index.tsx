@@ -1,10 +1,10 @@
-import AppLayout from '@/components/layout/AppLayout';
-import { formatCurrency, formatDate, projectStatusClass, truncate } from '@/lib/utils';
-import { CHART_AXIS_TICK, CHART_MARGIN, CHART_TOOLTIP_STYLE } from '@/lib/charts';
-import { index as dafProjetsIndex, show as dafProjetsShow } from '@/routes/daf/projets';
-import { Head, router } from '@inertiajs/react';
 import { FolderIcon } from '@heroicons/react/24/outline';
+import { Head, router } from '@inertiajs/react';
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import AppLayout from '@/components/layout/AppLayout';
+import { CHART_AXIS_TICK, CHART_MARGIN, CHART_TOOLTIP_STYLE } from '@/lib/charts';
+import { formatCurrency, formatDate, projectStatusClass, truncate } from '@/lib/utils';
+import { index as dafProjetsIndex, show as dafProjetsShow } from '@/routes/daf/projets';
 
 interface Projet {
     id: number;
@@ -50,12 +50,15 @@ const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#e
 
 function statusDistribution(projets: Projet[]) {
     const map: Record<string, { label: string; count: number; color: string }> = {};
+
     for (const p of projets) {
         if (!map[p.statut]) {
             map[p.statut] = { label: p.libelle_statut, count: 0, color: STATUS_COLORS[p.statut] ?? '#6b7280' };
         }
+
         map[p.statut].count++;
     }
+
     return Object.values(map).filter((v) => v.count > 0);
 }
 

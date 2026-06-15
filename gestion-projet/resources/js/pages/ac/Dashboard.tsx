@@ -1,10 +1,3 @@
-import AppLayout from '@/components/layout/AppLayout';
-import { formatCurrency, formatDate } from '@/lib/utils';
-import { show as demandeShow } from '@/actions/App/Http/Controllers/AgentComptable/DemandeDepenseController';
-import { index as acDemandesIndex } from '@/routes/ac/demandes';
-import { FaqAccordion, type FaqItem } from '@/components/shared/FaqAccordion';
-import type { PageProps } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowRightIcon,
     BanknotesIcon,
@@ -13,6 +6,14 @@ import {
     ClipboardDocumentListIcon,
     CreditCardIcon,
 } from '@heroicons/react/24/outline';
+import { Head, Link, usePage } from '@inertiajs/react';
+import { show as demandeShow } from '@/actions/App/Http/Controllers/AgentComptable/DemandeDepenseController';
+import AppLayout from '@/components/layout/AppLayout';
+import { FaqAccordion  } from '@/components/shared/FaqAccordion';
+import type {FaqItem} from '@/components/shared/FaqAccordion';
+import { formatCurrency, formatDate } from '@/lib/utils';
+import { index as acDemandesIndex } from '@/routes/ac/demandes';
+import type { PageProps } from '@/types';
 
 interface Stats {
     demandes_en_attente: number;

@@ -1,9 +1,10 @@
+import { CameraIcon, CheckIcon, KeyIcon, UserIcon } from '@heroicons/react/24/outline';
+import { Head, useForm, usePage } from '@inertiajs/react';
+import type { FormEvent} from 'react';
+import { useRef, useState } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { password as profilePassword, update as profileUpdate } from '@/routes/profile';
 import type { PageProps } from '@/types';
-import { Head, useForm, usePage } from '@inertiajs/react';
-import { CameraIcon, CheckIcon, KeyIcon, UserIcon } from '@heroicons/react/24/outline';
-import { FormEvent, useRef, useState } from 'react';
 
 function getInitials(name: string) {
     return name
@@ -36,6 +37,7 @@ export default function ProfileEdit() {
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] ?? null;
         profileForm.setData('avatar', file);
+
         if (file) {
             const url = URL.createObjectURL(file);
             setPreviewUrl(url);

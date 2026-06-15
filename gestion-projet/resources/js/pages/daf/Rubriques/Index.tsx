@@ -1,12 +1,13 @@
+import { BookOpenIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import type { FormEvent} from 'react';
+import { useState } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { Pagination } from '@/components/ui/Pagination';
 import { formatCurrency } from '@/lib/utils';
 import { show as conventionShow } from '@/routes/daf/projets/conventions';
 import { index as rubriquesIndex } from '@/routes/daf/rubriques';
 import type { PageProps } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import { BookOpenIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { FormEvent, useState } from 'react';
 
 interface Rubrique {
     id: number;

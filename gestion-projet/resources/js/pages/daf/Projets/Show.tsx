@@ -1,14 +1,15 @@
+import { ArrowLeftIcon, CheckBadgeIcon, DocumentChartBarIcon, ExclamationTriangleIcon, InformationCircleIcon, PlayIcon } from '@heroicons/react/24/outline';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import type { FormEvent} from 'react';
+import { useState } from 'react';
+import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { cloturer as cloturerProjet, mettreEnCours as mettreEnCoursProjet } from '@/actions/App/Http/Controllers/Daf/ProjetController';
 import AppLayout from '@/components/layout/AppLayout';
 import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer';
-import { clampPercent, conventionStatusClass, formatCurrency, formatDate, projectStatusClass } from '@/lib/utils';
 import { CHART_AXIS_TICK, CHART_MARGIN, CHART_TOOLTIP_STYLE } from '@/lib/charts';
+import { clampPercent, conventionStatusClass, formatCurrency, formatDate, projectStatusClass } from '@/lib/utils';
 import { index as dafProjetsIndex, bilan as dafProjetBilan } from '@/routes/daf/projets';
-import { cloturer as cloturerProjet, mettreEnCours as mettreEnCoursProjet } from '@/actions/App/Http/Controllers/Daf/ProjetController';
 import { show as dafConventionShow } from '@/routes/daf/projets/conventions';
-import { Head, Link, router, useForm } from '@inertiajs/react';
-import { ArrowLeftIcon, CheckBadgeIcon, DocumentChartBarIcon, ExclamationTriangleIcon, InformationCircleIcon, PlayIcon } from '@heroicons/react/24/outline';
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { FormEvent, useState } from 'react';
 
 interface Convention {
     id: number;

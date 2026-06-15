@@ -1,6 +1,3 @@
-import AppLayout from '@/components/layout/AppLayout';
-import { Button } from '@/components/ui/Button';
-import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils';
 import {
     index as demandesIndex,
     valider as validerAction,
@@ -11,6 +8,9 @@ import {
     downloadJustificatif as _downloadJustificatif,
     downloadRapport as _downloadRapport,
 } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
+import AppLayout from '@/components/layout/AppLayout';
+import { Button } from '@/components/ui/Button';
+import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils';
 
 const downloadJustificatifAction = _downloadJustificatif['/fichiers/demandes/{demande}/justificatif'];
 const downloadRapportAction = _downloadRapport['/fichiers/demandes/{demande}/rapport'];

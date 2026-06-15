@@ -1,27 +1,3 @@
-import { cn, getInitials } from '@/lib/utils';
-import { useDarkMode } from '@/hooks/useDarkMode';
-import { logout } from '@/routes';
-import { auditLog as adminAuditLog, dashboard as adminDashboard } from '@/routes/admin';
-import { index as usersIndex } from '@/routes/admin/users';
-import { index as adminFaqIndex } from '@/routes/admin/faq';
-import { index as adminChatIndex } from '@/routes/admin/chat';
-import { dashboard as acDashboard } from '@/routes/ac';
-import { index as acDemandesIndex } from '@/routes/ac/demandes';
-import { index as acChatIndex } from '@/routes/ac/chat';
-import { dashboard as dafDashboard } from '@/routes/daf';
-import { index as dafDemandesIndex } from '@/routes/daf/demandes';
-import { index as dafProjetsIndex } from '@/routes/daf/projets';
-import { index as dafRapportsIndex } from '@/routes/daf/rapports';
-import { index as dafChatIndex } from '@/routes/daf/chat';
-import { index as acPaiementsIndex } from '@/routes/ac/paiements';
-import { dashboard as porteurDashboard } from '@/routes/porteur';
-import { index as porteurDemandesIndex } from '@/routes/porteur/demandes';
-import { index as porteurProjetsIndex } from '@/routes/porteur/projets';
-import { index as porteurChatIndex } from '@/routes/porteur/chat';
-import { index as notificationsIndex } from '@/routes/notifications';
-import { edit as profileEdit } from '@/routes/profile';
-import type { User } from '@/types';
-import { Link, router, usePage } from '@inertiajs/react';
 import {
     ArrowRightStartOnRectangleIcon,
     Bars3Icon,
@@ -41,7 +17,32 @@ import {
     UsersIcon,
     XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { type ComponentType, type SVGProps, useState } from 'react';
+import { Link, router, usePage } from '@inertiajs/react';
+import {   useState } from 'react';
+import type {ComponentType, SVGProps} from 'react';
+import { useDarkMode } from '@/hooks/useDarkMode';
+import { cn, getInitials } from '@/lib/utils';
+import { logout } from '@/routes';
+import { dashboard as acDashboard } from '@/routes/ac';
+import { index as acChatIndex } from '@/routes/ac/chat';
+import { index as acDemandesIndex } from '@/routes/ac/demandes';
+import { index as acPaiementsIndex } from '@/routes/ac/paiements';
+import { auditLog as adminAuditLog, dashboard as adminDashboard } from '@/routes/admin';
+import { index as adminChatIndex } from '@/routes/admin/chat';
+import { index as adminFaqIndex } from '@/routes/admin/faq';
+import { index as usersIndex } from '@/routes/admin/users';
+import { dashboard as dafDashboard } from '@/routes/daf';
+import { index as dafChatIndex } from '@/routes/daf/chat';
+import { index as dafDemandesIndex } from '@/routes/daf/demandes';
+import { index as dafProjetsIndex } from '@/routes/daf/projets';
+import { index as dafRapportsIndex } from '@/routes/daf/rapports';
+import { index as notificationsIndex } from '@/routes/notifications';
+import { dashboard as porteurDashboard } from '@/routes/porteur';
+import { index as porteurChatIndex } from '@/routes/porteur/chat';
+import { index as porteurDemandesIndex } from '@/routes/porteur/demandes';
+import { index as porteurProjetsIndex } from '@/routes/porteur/projets';
+import { edit as profileEdit } from '@/routes/profile';
+import type { User } from '@/types';
 
 interface NavItem {
     label: string;
@@ -85,7 +86,10 @@ function getNavItems(role: User['role_key'], notifs: number): NavItem[] {
 }
 
 function isActive(href: string, currentUrl: string): boolean {
-    if (href === '#') return false;
+    if (href === '#') {
+return false;
+}
+
     return currentUrl === href || currentUrl.startsWith(href + '/') || currentUrl.startsWith(href + '?');
 }
 
@@ -127,6 +131,7 @@ export function Navbar({ user }: NavbarProps) {
                     {items.map((item) => {
                         const active = isActive(item.href, url);
                         const Icon = item.icon;
+
                         return (
                             <Link
                                 key={item.label}
@@ -269,6 +274,7 @@ export function Navbar({ user }: NavbarProps) {
                         {items.map((item) => {
                             const active = isActive(item.href, url);
                             const Icon = item.icon;
+
                             return (
                                 <Link
                                     key={item.label}

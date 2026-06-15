@@ -1,12 +1,12 @@
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { Head, Link, useForm } from '@inertiajs/react';
+import type { FormEvent } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { index as usersIndex, store as usersStore, update as usersUpdate } from '@/routes/admin/users';
 import type { Utilisateur } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import { FormEvent } from 'react';
 
 interface Role {
     value: string;
@@ -31,6 +31,7 @@ export default function UtilisateurForm({ user, roles }: UtilisateurFormProps) {
 
     const submit = (e: FormEvent) => {
         e.preventDefault();
+
         if (isEditing && user?.id != null) {
             patch(usersUpdate.url(user.id_utilisateur), { preserveScroll: true });
         } else {

@@ -1,9 +1,9 @@
+import { FolderOpenIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { formatCurrency, projectStatusClass } from '@/lib/utils';
 import { index as projetsIndex, show as projetsShow } from '@/routes/porteur/projets';
-import { Head, Link, router } from '@inertiajs/react';
-import { FolderOpenIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { useState } from 'react';
 
 interface Projet {
     id: number;

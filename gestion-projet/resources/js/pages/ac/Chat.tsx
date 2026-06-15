@@ -1,9 +1,10 @@
-import AppLayout from '@/components/layout/AppLayout';
-import { ContactList, type Contact } from '@/components/shared/ContactList';
-import { index as chatIndex, show as chatShow } from '@/actions/App/Http/Controllers/AgentComptable/MessageChatControleur';
-import type { PageProps } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
 import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
+import { Head, usePage } from '@inertiajs/react';
+import { index as chatIndex, show as chatShow } from '@/actions/App/Http/Controllers/AgentComptable/MessageChatControleur';
+import AppLayout from '@/components/layout/AppLayout';
+import { ContactList  } from '@/components/shared/ContactList';
+import type {Contact} from '@/components/shared/ContactList';
+import type { PageProps } from '@/types';
 
 interface Props extends PageProps {
     contacts: Contact[];

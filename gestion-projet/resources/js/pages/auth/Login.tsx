@@ -1,6 +1,7 @@
-import { login } from '@/routes';
 import { Head, useForm } from '@inertiajs/react';
-import { FormEvent, useState } from 'react';
+import type { FormEvent} from 'react';
+import { useState } from 'react';
+import { login } from '@/routes';
 
 export default function Login() {
     const [showPassword, setShowPassword] = useState(false);

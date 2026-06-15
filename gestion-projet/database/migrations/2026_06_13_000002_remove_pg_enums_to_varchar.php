@@ -36,11 +36,10 @@ return new class extends Migration
         // paiements.paiement_mode
         DB::statement('ALTER TABLE paiements ALTER COLUMN paiement_mode TYPE VARCHAR(50) USING paiement_mode::text');
 
-        // paiements.type_paiement — migrer les données avant de changer le type
-        DB::statement("UPDATE paiements SET type_paiement = 'normal' WHERE type_paiement = 'indirect'");
+        // paiements.type_paiement — convertir directement en VARCHAR (les valeurs 'direct'/'indirect' sont déjà valides)
         DB::statement('ALTER TABLE paiements ALTER COLUMN type_paiement DROP DEFAULT');
         DB::statement('ALTER TABLE paiements ALTER COLUMN type_paiement TYPE VARCHAR(50) USING type_paiement::text');
-        DB::statement("ALTER TABLE paiements ALTER COLUMN type_paiement SET DEFAULT 'normal'");
+        DB::statement("ALTER TABLE paiements ALTER COLUMN type_paiement SET DEFAULT 'direct'");
 
         // notifications.type_notification
         DB::statement('ALTER TABLE notifications ALTER COLUMN type_notification TYPE VARCHAR(50) USING type_notification::text');

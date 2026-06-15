@@ -1,17 +1,18 @@
-import AppLayout from '@/components/layout/AppLayout';
-import { Pagination } from '@/components/ui/Pagination';
-import { formatCurrency, formatDate } from '@/lib/utils';
-import { show as demandeShow } from '@/actions/App/Http/Controllers/AgentComptable/DemandeDepenseController';
-import { index as paiementsIndex } from '@/routes/ac/paiements';
-import type { PageProps } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     BanknotesIcon,
     CreditCardIcon,
     MagnifyingGlassIcon,
     XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { FormEvent, useState } from 'react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import type { FormEvent} from 'react';
+import { useState } from 'react';
+import { show as demandeShow } from '@/actions/App/Http/Controllers/AgentComptable/DemandeDepenseController';
+import AppLayout from '@/components/layout/AppLayout';
+import { Pagination } from '@/components/ui/Pagination';
+import { formatCurrency, formatDate } from '@/lib/utils';
+import { index as paiementsIndex } from '@/routes/ac/paiements';
+import type { PageProps } from '@/types';
 
 interface DemandeATraiter {
     id: number;

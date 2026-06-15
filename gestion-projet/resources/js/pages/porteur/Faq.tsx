@@ -1,9 +1,9 @@
-import AppLayout from '@/components/layout/AppLayout';
-import type { PageProps } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
 import { ChevronDownIcon, MagnifyingGlassIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
+import { Head, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import AppLayout from '@/components/layout/AppLayout';
+import type { PageProps } from '@/types';
 
 interface FaqItem {
     id: number;

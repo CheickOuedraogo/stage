@@ -1,11 +1,3 @@
-import AppLayout from '@/components/layout/AppLayout';
-import { Badge } from '@/components/ui/Badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { auditLog as adminAuditLog } from '@/routes/admin';
-import { index as usersIndex } from '@/routes/admin/users';
-import { update as maintenanceUpdate } from '@/routes/admin/maintenance';
-import type { PageProps } from '@/types';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ClipboardDocumentCheckIcon,
     ClipboardDocumentListIcon,
@@ -13,8 +5,17 @@ import {
     ShieldCheckIcon,
     UsersIcon,
 } from '@heroicons/react/24/outline';
-import { FaqAccordion, type FaqItem } from '@/components/shared/FaqAccordion';
-import { FormEvent } from 'react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import type { FormEvent } from 'react';
+import AppLayout from '@/components/layout/AppLayout';
+import { FaqAccordion  } from '@/components/shared/FaqAccordion';
+import type {FaqItem} from '@/components/shared/FaqAccordion';
+import { Badge } from '@/components/ui/Badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { auditLog as adminAuditLog } from '@/routes/admin';
+import { update as maintenanceUpdate } from '@/routes/admin/maintenance';
+import { index as usersIndex } from '@/routes/admin/users';
+import type { PageProps } from '@/types';
 
 const actionLabels: Record<string, string> = {
     login: 'Connexion',

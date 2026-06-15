@@ -1,10 +1,10 @@
+import { WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
+import { Head, useForm } from '@inertiajs/react';
+import type { FormEvent } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { update as maintenanceUpdate } from '@/routes/admin/maintenance';
-import { Head, useForm } from '@inertiajs/react';
-import { WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
-import { FormEvent } from 'react';
 
 interface MaintenanceStatus {
     active: boolean;

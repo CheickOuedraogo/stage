@@ -1,12 +1,12 @@
-import AppLayout from '@/components/layout/AppLayout';
-import { Button } from '@/components/ui/Button';
-import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils';
 import {
     index as demandesIndex,
     uploadRapport as uploadRapportAction,
     downloadJustificatif as _downloadJustificatif,
     downloadRapport as _downloadRapport,
 } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
+import AppLayout from '@/components/layout/AppLayout';
+import { Button } from '@/components/ui/Button';
+import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils';
 
 const downloadJustificatifAction = _downloadJustificatif['/porteur/demandes/{demande}/justificatif'];
 const downloadRapportAction = _downloadRapport['/porteur/demandes/{demande}/rapport-pdf'];
@@ -71,19 +71,35 @@ const STATUS_ORDER = ['soumise', 'validee_daf', 'validee_ac', 'payee', 'rapport_
 
 function getStepState(stepStatus: string, currentStatus: string): 'done' | 'current' | 'pending' | 'rejected' {
     const isRejected = currentStatus === 'rejetee_daf' || currentStatus === 'rejetee_ac';
+
     if (isRejected) {
         // rejectedAt = the step where rejection occurred (DAF or AC decision step)
         const rejectedAt = currentStatus === 'rejetee_daf' ? 'validee_daf' : 'validee_ac';
         const rejectedIdx = STATUS_ORDER.indexOf(rejectedAt);
         const stepIdx = STATUS_ORDER.indexOf(stepStatus);
-        if (stepIdx < rejectedIdx) return 'done';
-        if (stepIdx === rejectedIdx) return 'rejected';
+
+        if (stepIdx < rejectedIdx) {
+return 'done';
+}
+
+        if (stepIdx === rejectedIdx) {
+return 'rejected';
+}
+
         return 'pending';
     }
+
     const currentIdx = STATUS_ORDER.indexOf(currentStatus);
     const stepIdx = STATUS_ORDER.indexOf(stepStatus);
-    if (stepIdx < currentIdx) return 'done';
-    if (stepIdx === currentIdx) return 'current';
+
+    if (stepIdx < currentIdx) {
+return 'done';
+}
+
+    if (stepIdx === currentIdx) {
+return 'current';
+}
+
     return 'pending';
 }
 
@@ -244,6 +260,7 @@ export default function DemandeShow({ demande }: Props) {
                             {STATUS_STEPS.map((step, idx) => {
                                 const state = getStepState(step.statut, demande.statut);
                                 const Icon = step.icon;
+
                                 return (
                                     <div key={step.statut} className="flex gap-3">
                                         <div className="flex flex-col items-center">

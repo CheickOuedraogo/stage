@@ -1,11 +1,11 @@
-import AppLayout from '@/components/layout/AppLayout';
-import { formatCurrency, formatDate } from '@/lib/utils';
-import { Head } from '@inertiajs/react';
 import {
     ArrowLeftIcon, BanknotesIcon, CalendarDaysIcon, ChartBarIcon,
     CheckCircleIcon, ClockIcon, DocumentArrowDownIcon, ExclamationTriangleIcon,
     InformationCircleIcon, ScaleIcon, UserIcon,
 } from '@heroicons/react/24/outline';
+import { Head } from '@inertiajs/react';
+import AppLayout from '@/components/layout/AppLayout';
+import { formatCurrency, formatDate } from '@/lib/utils';
 
 interface Convention {
     id: number;

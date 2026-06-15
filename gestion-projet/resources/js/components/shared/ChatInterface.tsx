@@ -1,6 +1,7 @@
-import { useForm } from '@inertiajs/react';
 import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { useForm } from '@inertiajs/react';
+import type { FormEvent} from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export interface ChatMsg {
     id: number;
@@ -31,9 +32,11 @@ export function ChatInterface({ messages: initialMessages, sendUrl, pollUrl, con
             const lastInitId = initialMessages.length > 0 ? initialMessages[initialMessages.length - 1].id : 0;
             const extra = current.filter((m) => !initIds.has(m.id) && m.id > lastInitId);
             const merged = [...initialMessages, ...extra];
+
             if (merged.length > 0) {
                 lastIdRef.current = merged[merged.length - 1].id;
             }
+
             return merged;
         });
     }, [initialMessages]);
@@ -50,14 +53,24 @@ export function ChatInterface({ messages: initialMessages, sendUrl, pollUrl, con
                     headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                     credentials: 'same-origin',
                 });
-                if (!res.ok) return;
+
+                if (!res.ok) {
+return;
+}
+
                 const data = await res.json() as { messages: ChatMsg[] };
+
                 if (data.messages.length > 0) {
                     setMessages((prev) => {
                         const ids = new Set(prev.map((m) => m.id));
                         const newMsgs = data.messages.filter((m) => !ids.has(m.id));
-                        if (newMsgs.length === 0) return prev;
+
+                        if (newMsgs.length === 0) {
+return prev;
+}
+
                         lastIdRef.current = Math.max(...newMsgs.map((m) => m.id));
+
                         return [...prev, ...newMsgs];
                     });
                 }
@@ -67,12 +80,17 @@ export function ChatInterface({ messages: initialMessages, sendUrl, pollUrl, con
         };
 
         const interval = setInterval(poll, 3000);
+
         return () => clearInterval(interval);
     }, [pollUrl]);
 
     const handleSend = (e: FormEvent) => {
         e.preventDefault();
-        if (!form.data.message.trim()) return;
+
+        if (!form.data.message.trim()) {
+return;
+}
+
         form.post(sendUrl, {
             preserveScroll: true,
             preserveState: false,
@@ -127,7 +145,9 @@ export function ChatInterface({ messages: initialMessages, sendUrl, pollUrl, con
                         value={form.data.message}
                         onChange={(e) => form.setData('message', e.target.value)}
                         onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(e as unknown as FormEvent); }
+                            if (e.key === 'Enter' && !e.shiftKey) {
+ e.preventDefault(); handleSend(e as unknown as FormEvent); 
+}
                         }}
                         placeholder="Écrivez votre message… (Entrée pour envoyer)"
                         rows={2}

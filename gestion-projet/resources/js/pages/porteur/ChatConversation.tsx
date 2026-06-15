@@ -1,9 +1,10 @@
-import AppLayout from '@/components/layout/AppLayout';
-import { ChatInterface, type ChatMsg } from '@/components/shared/ChatInterface';
-import { index as chatIndex, send as chatSend, poll as chatPoll } from '@/actions/App/Http/Controllers/Porteur/MessageChatControleur';
-import type { PageProps } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { Head, Link, usePage } from '@inertiajs/react';
+import { index as chatIndex, send as chatSend, poll as chatPoll } from '@/actions/App/Http/Controllers/Porteur/MessageChatControleur';
+import AppLayout from '@/components/layout/AppLayout';
+import { ChatInterface  } from '@/components/shared/ChatInterface';
+import type {ChatMsg} from '@/components/shared/ChatInterface';
+import type { PageProps } from '@/types';
 
 interface Contact {
     id: number;

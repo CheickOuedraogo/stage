@@ -1,3 +1,6 @@
+import { MagnifyingGlassIcon, PlusIcon, UserIcon } from '@heroicons/react/24/outline';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -10,9 +13,6 @@ import {
     toggleActive as usersToggleActive,
 } from '@/routes/admin/users';
 import type { PageProps, PaginatedData, Utilisateur } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import { MagnifyingGlassIcon, PlusIcon, UserIcon } from '@heroicons/react/24/outline';
-import { useState } from 'react';
 
 interface Role {
     value: string;
@@ -153,7 +153,10 @@ function UtilisateurRow({ utilisateur }: { utilisateur: Utilisateur & { cree_le:
     const isSelf = auth.utilisateur?.id_utilisateur === utilisateur.id_utilisateur;
 
     const handleToggle = () => {
-        if (isSelf) return;
+        if (isSelf) {
+return;
+}
+
         router.patch(usersToggleActive.url(utilisateur.id_utilisateur), {}, { preserveScroll: true });
     };
 

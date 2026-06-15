@@ -1,10 +1,10 @@
+import { ArrowLeftIcon, CalendarIcon, PlusIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { Head, Link } from '@inertiajs/react';
+import { create as createDemande } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
 import AppLayout from '@/components/layout/AppLayout';
 import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer';
 import { clampPercent, conventionStatusClass, formatCurrency, formatDate } from '@/lib/utils';
-import { create as createDemande } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
 import { show as projetsShow } from '@/routes/porteur/projets';
-import { Head, Link } from '@inertiajs/react';
-import { ArrowLeftIcon, CalendarIcon, PlusIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 
 interface Rubrique {
     id: number;
@@ -209,6 +209,7 @@ export default function ConventionShow({ projet, convention, has_demande_active 
                                     : 0;
                                 const restant = r.montant_prevu - r.montant_depense;
                                 const overBudget = restant < 0;
+
                                 return (
                                     <div key={r.id} className="px-5 py-4">
                                         <div className="flex items-start justify-between gap-4 mb-2">

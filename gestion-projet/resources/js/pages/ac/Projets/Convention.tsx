@@ -1,8 +1,3 @@
-import AppLayout from '@/components/layout/AppLayout';
-import { ConfirmModal } from '@/components/ui/ConfirmModal';
-import { clampPercent, conventionStatusClass, formatCurrency, formatDate } from '@/lib/utils';
-import { store as storePaiementDirect, destroy as destroyPaiementDirect } from '@/routes/ac/projets/conventions/paiements-directs';
-import { Head, useForm, router } from '@inertiajs/react';
 import {
     ArrowLeftIcon,
     BanknotesIcon,
@@ -11,7 +6,12 @@ import {
     TrashIcon,
     XMarkIcon,
 } from '@heroicons/react/24/outline';
+import { Head, useForm, router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
+import AppLayout from '@/components/layout/AppLayout';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { clampPercent, conventionStatusClass, formatCurrency, formatDate } from '@/lib/utils';
+import { store as storePaiementDirect, destroy as destroyPaiementDirect } from '@/routes/ac/projets/conventions/paiements-directs';
 
 interface Rubrique {
     id: number;
@@ -82,7 +82,9 @@ export default function AcConventionShow({ projet, convention }: Props) {
     const handleAddPaiementDirect = (e: React.FormEvent) => {
         e.preventDefault();
         paiementDirectForm.post(storePaiementDirect.url(params), {
-            onSuccess: () => { paiementDirectForm.reset(); setShowAddPaiementDirect(false); },
+            onSuccess: () => {
+ paiementDirectForm.reset(); setShowAddPaiementDirect(false); 
+},
         });
     };
 
@@ -98,7 +100,10 @@ export default function AcConventionShow({ projet, convention }: Props) {
         [convention.rubriques]
     );
 
-    const totalConsomme = totalDepense + convention.paiements_directs.reduce((s, p) => s + p.montant, 0);
+    const directSansRubrique = (convention.paiements_directs ?? [])
+        .filter(p => p.rubrique === null)
+        .reduce((s, p) => s + p.montant, 0);
+    const totalConsomme = totalDepense + directSansRubrique;
     const tauxConsommation = clampPercent(totalConsomme, convention.montant_fcfa);
     const fondsDisponibles = convention.total_versements - totalDepense;
 
@@ -229,6 +234,7 @@ export default function AcConventionShow({ projet, convention }: Props) {
                                     {convention.rubriques.map((r) => {
                                         const restant = r.montant_prevu - r.montant_depense;
                                         const pctDepense = clampPercent(r.montant_depense, r.montant_prevu);
+
                                         return (
                                             <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
                                                 <td className="px-5 py-3">

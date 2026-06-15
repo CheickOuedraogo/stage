@@ -1,17 +1,18 @@
-import AppLayout from '@/components/layout/AppLayout';
-import { formatCurrency } from '@/lib/utils';
-import { show as demandeShow } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
-import { index as demandesIndex } from '@/routes/porteur/demandes';
-import { index as projetsIndex } from '@/routes/porteur/projets';
-import { FaqAccordion, type FaqItem } from '@/components/shared/FaqAccordion';
-import type { PageProps } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowRightIcon,
     BanknotesIcon,
     ClipboardDocumentListIcon,
     FolderIcon,
 } from '@heroicons/react/24/outline';
+import { Head, Link, usePage } from '@inertiajs/react';
+import { show as demandeShow } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
+import AppLayout from '@/components/layout/AppLayout';
+import { FaqAccordion  } from '@/components/shared/FaqAccordion';
+import type {FaqItem} from '@/components/shared/FaqAccordion';
+import { formatCurrency } from '@/lib/utils';
+import { index as demandesIndex } from '@/routes/porteur/demandes';
+import { index as projetsIndex } from '@/routes/porteur/projets';
+import type { PageProps } from '@/types';
 
 interface Stats {
     projets_count: number;
@@ -121,6 +122,7 @@ export default function PorteurDashboard() {
                             const taux = p.versements > 0
                                 ? Math.min(100, Math.round((p.depenses / p.versements) * 100))
                                 : 0;
+
                             return (
                                 <div key={i} className="px-5 py-4">
                                     <div className="flex items-center justify-between mb-2">

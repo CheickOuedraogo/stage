@@ -1,11 +1,11 @@
+import { ChevronDownIcon, FunnelIcon, UserIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Head, Link, router } from '@inertiajs/react';
+import { useState as useLocalState } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { Card, CardContent } from '@/components/ui/Card';
-import { auditLog as adminAuditLog } from '@/routes/admin';
 import { formatDateTime, getInitials } from '@/lib/utils';
+import { auditLog as adminAuditLog } from '@/routes/admin';
 import type { PaginatedData } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
-import { ChevronDownIcon, FunnelIcon, UserIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { useState as useLocalState } from 'react';
 
 interface AuditEntry {
     id: number;
@@ -99,22 +99,36 @@ const FIELD_LABELS: Record<string, string> = {
 };
 
 function formatValue(value: unknown): string {
-    if (value === null || value === undefined) return '—';
-    if (typeof value === 'boolean') return value ? 'Oui' : 'Non';
-    if (typeof value === 'number') return new Intl.NumberFormat('fr-FR').format(value);
+    if (value === null || value === undefined) {
+return '—';
+}
+
+    if (typeof value === 'boolean') {
+return value ? 'Oui' : 'Non';
+}
+
+    if (typeof value === 'number') {
+return new Intl.NumberFormat('fr-FR').format(value);
+}
+
     return String(value);
 }
 
 function ValueDiff({ oldValues, newValues }: { oldValues: Record<string, unknown> | null; newValues: Record<string, unknown> | null; }) {
     const [expanded, setExpanded] = useLocalState(false);
-    if (!oldValues && !newValues) return null;
+
+    if (!oldValues && !newValues) {
+return null;
+}
 
     const allKeys = Array.from(new Set([
         ...Object.keys(oldValues ?? {}),
         ...Object.keys(newValues ?? {}),
     ])).filter((k) => !['id', 'created_at', 'updated_at', 'remember_token', 'password'].includes(k));
 
-    if (allKeys.length === 0) return null;
+    if (allKeys.length === 0) {
+return null;
+}
 
     return (
         <div className="mt-1.5">

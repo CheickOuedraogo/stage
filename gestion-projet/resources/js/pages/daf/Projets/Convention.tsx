@@ -1,13 +1,3 @@
-import AppLayout from '@/components/layout/AppLayout';
-import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer';
-import { ConfirmModal } from '@/components/ui/ConfirmModal';
-import { clampPercent, conventionStatusClass, formatCurrency, formatDate, truncate } from '@/lib/utils';
-import { CHART_PALETTE, CHART_TOOLTIP_STYLE } from '@/lib/charts';
-import { show as dafProjetsShow } from '@/routes/daf/projets';
-import { store as storeRubrique, update as updateRubrique, destroy as destroyRubrique } from '@/routes/daf/projets/conventions/rubriques';
-import { store as storeVersement, destroy as destroyVersement } from '@/routes/daf/projets/conventions/versements';
-import { terminer as terminerConvention, annuler as annulerConvention } from '@/routes/daf/projets/conventions';
-import { Head, useForm, router } from '@inertiajs/react';
 import {
     ArrowLeftIcon,
     CalendarIcon,
@@ -18,8 +8,18 @@ import {
     XCircleIcon,
     XMarkIcon,
 } from '@heroicons/react/24/outline';
+import { Head, useForm, router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
+import AppLayout from '@/components/layout/AppLayout';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer';
+import { CHART_PALETTE, CHART_TOOLTIP_STYLE } from '@/lib/charts';
+import { clampPercent, conventionStatusClass, formatCurrency, formatDate, truncate } from '@/lib/utils';
+import { show as dafProjetsShow } from '@/routes/daf/projets';
+import { terminer as terminerConvention, annuler as annulerConvention } from '@/routes/daf/projets/conventions';
+import { store as storeRubrique, update as updateRubrique, destroy as destroyRubrique } from '@/routes/daf/projets/conventions/rubriques';
+import { store as storeVersement, destroy as destroyVersement } from '@/routes/daf/projets/conventions/versements';
 
 interface Rubrique {
     id: number;
@@ -35,6 +35,14 @@ interface Versement {
     date_reception: string;
     reference: string | null;
     description: string | null;
+}
+
+interface PaiementDirect {
+    id: number;
+    montant: number;
+    objet_depense: string;
+    date_paiement: string;
+    rubrique: { libelle: string } | null;
 }
 
 interface Convention {
@@ -57,6 +65,7 @@ interface Convention {
     total_versements: number;
     rubriques: Rubrique[];
     versements: Versement[];
+    paiements_directs: PaiementDirect[];
 }
 
 interface Props {
@@ -102,7 +111,9 @@ export default function DafConventionShow({ projet, convention }: Props) {
     const handleAddRubrique = (e: React.FormEvent) => {
         e.preventDefault();
         rubriqueForm.post(storeRubrique.url(params), {
-            onSuccess: () => { rubriqueForm.reset(); setShowAddRubrique(false); },
+            onSuccess: () => {
+ rubriqueForm.reset(); setShowAddRubrique(false); 
+},
         });
     };
 
@@ -120,7 +131,9 @@ export default function DafConventionShow({ projet, convention }: Props) {
     const handleAddVersement = (e: React.FormEvent) => {
         e.preventDefault();
         addVersementForm.post(storeVersement.url(params), {
-            onSuccess: () => { addVersementForm.reset(); setShowAddVersement(false); },
+            onSuccess: () => {
+ addVersementForm.reset(); setShowAddVersement(false); 
+},
         });
     };
 
@@ -140,7 +153,10 @@ export default function DafConventionShow({ projet, convention }: Props) {
         [convention.rubriques]
     );
 
-    const totalConsomme = totalDepense;
+    const directSansRubrique = (convention.paiements_directs ?? [])
+        .filter(p => p.rubrique === null)
+        .reduce((s, p) => s + p.montant, 0);
+    const totalConsomme = totalDepense + directSansRubrique;
     const tauxConsommation = clampPercent(totalConsomme, convention.montant_fcfa);
     const fondsDisponibles = convention.total_versements - totalDepense; // Uniquement basé sur ce qui est en caisse
 
@@ -361,6 +377,7 @@ export default function DafConventionShow({ projet, convention }: Props) {
                                     {convention.rubriques.map((r) => {
                                         const restant = r.montant_prevu - r.montant_depense;
                                         const pctDepense = clampPercent(r.montant_depense, r.montant_prevu);
+
                                         return editingId === r.id ? (
                                             <tr key={r.id} className="bg-amber-50 dark:bg-amber-900/20">
                                                 <td colSpan={5} className="px-5 py-3">

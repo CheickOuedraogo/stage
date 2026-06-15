@@ -14,9 +14,9 @@ return new class extends Migration
         });
 
         // Priorité : porteur > daf > ac — pour les items multi-rôles existants
-        DB::statement("UPDATE faq SET role_key = 'porteur' WHERE visible_porteur = 1");
-        DB::statement("UPDATE faq SET role_key = 'daf' WHERE visible_daf = 1 AND role_key IS NULL");
-        DB::statement("UPDATE faq SET role_key = 'ac' WHERE visible_ac = 1 AND role_key IS NULL");
+        DB::statement("UPDATE faq SET role_key = 'porteur' WHERE visible_porteur = true");
+        DB::statement("UPDATE faq SET role_key = 'daf' WHERE visible_daf = true AND role_key IS NULL");
+        DB::statement("UPDATE faq SET role_key = 'ac' WHERE visible_ac = true AND role_key IS NULL");
 
         Schema::table('faq', function (Blueprint $table) {
             $table->dropColumn(['faq_actif', 'visible_porteur', 'visible_daf', 'visible_ac']);
@@ -32,9 +32,9 @@ return new class extends Migration
             $table->boolean('visible_ac')->default(true);
         });
 
-        DB::statement("UPDATE faq SET visible_porteur = 1, faq_actif = 1 WHERE role_key = 'porteur'");
-        DB::statement("UPDATE faq SET visible_daf = 1, faq_actif = 1 WHERE role_key = 'daf'");
-        DB::statement("UPDATE faq SET visible_ac = 1, faq_actif = 1 WHERE role_key = 'ac'");
+        DB::statement("UPDATE faq SET visible_porteur = true, faq_actif = true WHERE role_key = 'porteur'");
+        DB::statement("UPDATE faq SET visible_daf = true, faq_actif = true WHERE role_key = 'daf'");
+        DB::statement("UPDATE faq SET visible_ac = true, faq_actif = true WHERE role_key = 'ac'");
 
         Schema::table('faq', function (Blueprint $table) {
             $table->dropColumn('role_key');

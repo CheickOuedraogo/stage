@@ -10,7 +10,10 @@ function useCountdown(until?: string) {
     const [remaining, setRemaining] = useState<number | null>(null);
 
     useEffect(() => {
-        if (!until) return;
+        if (!until) {
+return;
+}
+
         const target = new Date(until).getTime();
 
         const update = () => {
@@ -20,6 +23,7 @@ function useCountdown(until?: string) {
 
         update();
         const id = setInterval(update, 1000);
+
         return () => clearInterval(id);
     }, [until]);
 
@@ -31,6 +35,7 @@ function formatCountdown(ms: number) {
     const h = Math.floor(totalSec / 3600);
     const m = Math.floor((totalSec % 3600) / 60);
     const s = totalSec % 60;
+
     return { h, m, s };
 }
 

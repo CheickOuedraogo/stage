@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers\AgentComptable;
 
+use App\Enums\StatutDemande;
 use App\Enums\StatutProjet;
 use App\Http\Controllers\Controller;
 use App\Models\Convention;
+use App\Models\DemandeDepense;
 use App\Models\Paiement;
 use App\Models\Projet;
+use App\Models\Rubrique;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class PaiementDirectController extends Controller
 {
@@ -25,6 +29,45 @@ class PaiementDirectController extends Controller
             'description' => ['nullable', 'string', 'max:2000'],
             'date_paiement' => ['required', 'date', 'before_or_equal:today'],
         ]);
+
+        if ($validated['rubrique_id'] ?? null) {
+            $rubrique = Rubrique::findOrFail($validated['rubrique_id']);
+            $consommeDemandes = $rubrique->demandesDepenses()
+                ->whereIn('demande_statut', [
+                    StatutDemande::Soumise->value,
+                    StatutDemande::ValideeDaf->value,
+                    StatutDemande::ValideeAgentComptable->value,
+                    StatutDemande::Payee->value,
+                    StatutDemande::RapportSoumis->value,
+                    StatutDemande::Terminee->value,
+                ])
+                ->sum('demande_montant');
+            $consommeDirects = $rubrique->paiementsDirects()->sum('paiement_montant');
+            $solde = $rubrique->rubrique_montant - $consommeDemandes - $consommeDirects;
+
+            if ($validated['montant'] > $solde) {
+                throw ValidationException::withMessages([
+                    'montant' => "Le montant du paiement direct ({$validated['montant']} FCFA) dépasse le solde disponible de la rubrique ({$solde} FCFA).",
+                ]);
+            }
+        } else {
+            $consommePaiements = Paiement::where('id_convention', $convention->id_convention)
+                ->sum('paiement_montant');
+            $consommeDemandes = DemandeDepense::where('id_convention', $convention->id_convention)
+                ->whereIn('demande_statut', [
+                    StatutDemande::Soumise->value,
+                    StatutDemande::ValideeDaf->value,
+                    StatutDemande::ValideeAgentComptable->value,
+                ])
+                ->sum('demande_montant');
+            $solde = $convention->montant_fcfa - $consommePaiements - $consommeDemandes;
+
+            if ($validated['montant'] > $solde) {
+                throw ValidationException::withMessages([
+                    'montant' => "Le montant du paiement direct ({$validated['montant']} FCFA) dépasse le montant disponible de la convention ({$solde} FCFA).",
+                ]);
+            }
+        }
 
         Paiement::create([
             'type_paiement' => 'direct',

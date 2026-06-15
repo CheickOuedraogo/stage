@@ -1,13 +1,14 @@
-import { Navbar } from '@/components/layout/Navbar';
-import type { PageProps } from '@/types';
-import { router, usePage } from '@inertiajs/react';
-import React, { type ReactNode, useEffect, useState } from 'react';
 import {
     CheckCircleIcon,
     ExclamationCircleIcon,
     ExclamationTriangleIcon,
     XMarkIcon,
 } from '@heroicons/react/20/solid';
+import { router, usePage } from '@inertiajs/react';
+import React, {  useEffect, useState } from 'react';
+import type {ReactNode} from 'react';
+import { Navbar } from '@/components/layout/Navbar';
+import type { PageProps } from '@/types';
 
 interface AppLayoutProps {
     title: string;
@@ -40,10 +41,15 @@ function FlashBanner({ type, message }: FlashBannerProps) {
     useEffect(() => {
         const fadeTimer = setTimeout(() => setFading(true), 3500);
         const hideTimer = setTimeout(() => setVisible(false), 4000);
-        return () => { clearTimeout(fadeTimer); clearTimeout(hideTimer); };
+
+        return () => {
+ clearTimeout(fadeTimer); clearTimeout(hideTimer); 
+};
     }, []);
 
-    if (!visible) return null;
+    if (!visible) {
+return null;
+}
 
     const Icon = FLASH_ICON_COMPONENTS[type];
 
@@ -79,10 +85,14 @@ function NavigationProgress() {
         const offStart = router.on('start', start);
         const offFinish = router.on('finish', finish);
 
-        return () => { offStart(); offFinish(); clearTimeout(timer); };
+        return () => {
+ offStart(); offFinish(); clearTimeout(timer); 
+};
     }, []);
 
-    if (width === 0) return null;
+    if (width === 0) {
+return null;
+}
 
     return (
         <div
