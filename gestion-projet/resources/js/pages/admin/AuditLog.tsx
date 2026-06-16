@@ -93,8 +93,6 @@ const FIELD_LABELS: Record<string, string> = {
     demande_motif_rejet: 'Motif rejet',
     projet_date_fin_reelle: 'Date clôture',
     versement_date_reception: 'Date réception',
-    faq_reponse: 'Réponse',
-    faq_question: 'Question',
     rubrique_libelle: 'Libellé',
 };
 

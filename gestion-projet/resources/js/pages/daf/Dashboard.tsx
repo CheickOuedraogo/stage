@@ -9,8 +9,6 @@ import {
 import { Head, Link, usePage } from '@inertiajs/react';
 import { show as demandeShow } from '@/actions/App/Http/Controllers/Daf/DemandeDepenseController';
 import AppLayout from '@/components/layout/AppLayout';
-import { FaqAccordion  } from '@/components/shared/FaqAccordion';
-import type {FaqItem} from '@/components/shared/FaqAccordion';
 import { formatCurrency } from '@/lib/utils';
 import { index as dafDemandesIndex } from '@/routes/daf/demandes';
 import { index as dafProjetsIndex } from '@/routes/daf/projets';
@@ -42,11 +40,10 @@ interface Demande {
 interface Props extends PageProps {
     stats: Stats;
     demandes_recentes: Demande[];
-    faq_items: FaqItem[];
 }
 
 export default function DafDashboard() {
-    const { auth, stats, demandes_recentes, faq_items } = usePage<Props>().props;
+    const { auth, stats, demandes_recentes } = usePage<Props>().props;
     const firstName = auth.user?.utilisateur_nom.split(' ').find((p) => !p.includes('.')) ?? auth.user?.utilisateur_nom;
     const tauxMobilisation = stats.budget_total > 0
         ? Math.min(100, Math.round((stats.versements_total / stats.budget_total) * 100))
@@ -169,7 +166,6 @@ export default function DafDashboard() {
                     </div>
                 )}
             </div>
-            <FaqAccordion items={faq_items} />
         </AppLayout>
     );
 }

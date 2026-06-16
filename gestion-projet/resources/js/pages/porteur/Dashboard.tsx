@@ -7,8 +7,6 @@ import {
 import { Head, Link, usePage } from '@inertiajs/react';
 import { show as demandeShow } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
 import AppLayout from '@/components/layout/AppLayout';
-import { FaqAccordion  } from '@/components/shared/FaqAccordion';
-import type {FaqItem} from '@/components/shared/FaqAccordion';
 import { formatCurrency } from '@/lib/utils';
 import { index as demandesIndex } from '@/routes/porteur/demandes';
 import { index as projetsIndex } from '@/routes/porteur/projets';
@@ -46,7 +44,6 @@ interface Props extends PageProps {
     stats: Stats;
     demandes_recentes: Demande[];
     projets_budget: ProjetBudget[];
-    faq_items: FaqItem[];
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -66,7 +63,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export default function PorteurDashboard() {
-    const { auth, stats, demandes_recentes, projets_budget, faq_items } = usePage<Props>().props;
+    const { auth, stats, demandes_recentes, projets_budget } = usePage<Props>().props;
     const firstName = auth.user?.utilisateur_nom.split(' ').find((p) => !p.includes('.')) ?? auth.user?.utilisateur_nom;
 
     return (
@@ -191,7 +188,6 @@ export default function PorteurDashboard() {
                     </div>
                 )}
             </div>
-            <FaqAccordion items={faq_items} />
         </AppLayout>
     );
 }

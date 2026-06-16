@@ -14,12 +14,12 @@ interface Role {
 }
 
 interface UtilisateurFormProps {
-    user?: Partial<Utilisateur> & { id?: number };
+    user?: Partial<Utilisateur>;
     roles: Role[];
 }
 
 export default function UtilisateurForm({ user, roles }: UtilisateurFormProps) {
-    const isEditing = !!user?.id;
+    const isEditing = !!user?.id_utilisateur;
 
     const { data, setData, post, patch, processing, errors } = useForm({
         utilisateur_nom: user?.utilisateur_nom ?? '',
@@ -32,7 +32,7 @@ export default function UtilisateurForm({ user, roles }: UtilisateurFormProps) {
     const submit = (e: FormEvent) => {
         e.preventDefault();
 
-        if (isEditing && user?.id != null) {
+        if (isEditing && user?.id_utilisateur != null) {
             patch(usersUpdate.url(user.id_utilisateur), { preserveScroll: true });
         } else {
             post(usersStore.url());

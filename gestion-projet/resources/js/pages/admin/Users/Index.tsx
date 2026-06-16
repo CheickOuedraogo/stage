@@ -150,7 +150,7 @@ export default function UtilisateursIndex({ utilisateurs, filters, roles }: Util
 
 function UtilisateurRow({ utilisateur }: { utilisateur: Utilisateur & { cree_le: string } }) {
     const { auth } = usePage<PageProps>().props;
-    const isSelf = auth.utilisateur?.id_utilisateur === utilisateur.id_utilisateur;
+    const isSelf = auth.user?.id === utilisateur.id_utilisateur;
 
     const handleToggle = () => {
         if (isSelf) {

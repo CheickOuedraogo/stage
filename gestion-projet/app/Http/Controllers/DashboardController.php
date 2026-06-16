@@ -8,12 +8,12 @@ use App\Enums\StatutDemande;
 use App\Enums\StatutProjet;
 use App\Models\Convention;
 use App\Models\DemandeDepense;
-use App\Models\Faq;
 use App\Models\JournalAudit;
 use App\Models\Paiement;
 use App\Models\Projet;
 use App\Models\Rubrique;
 use App\Models\Utilisateur;
+use App\Models\Versement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -55,7 +55,6 @@ class DashboardController extends Controller
                 ])->count(),
             ],
             'recent_audit_logs' => $recentJournalAudits,
-            'faq_items' => $this->getFaqForRole(RoleUtilisateur::Administrateur),
         ]);
     }
 
@@ -149,70 +148,83 @@ class DashboardController extends Controller
             'versements_par_projet' => $versementsParProjet,
             'paiements_par_mois' => $paiementsParMois,
             'top_rubriques' => $topRubriques,
-            'faq_items' => $this->getFaqForRole(RoleUtilisateur::Daf),
         ]);
     }
 
-    public function ac(): Response
+    public function ac(Request $request): Response
     {
         $demandesEnAttente = DemandeDepense::where('demande_statut', StatutDemande::ValideeDaf)->count();
         $rapportsSoumis = DemandeDepense::where('demande_statut', StatutDemande::RapportSoumis)->count();
-        $paiementsEffectues = DemandeDepense::where('demande_statut', StatutDemande::Payee)
-            ->orWhere('demande_statut', StatutDemande::RapportSoumis)
-            ->orWhere('demande_statut', StatutDemande::Terminee)
-            ->count();
-
+        $paiementsEnAttente = DemandeDepense::where('demande_statut', StatutDemande::ValideeAgentComptable)->count();
         $montantPaye = Paiement::sum('paiement_montant');
 
-        $demandesRecentes = DemandeDepense::with([
-            'convention:id_convention,convention_titre',
-            'porteur:id_utilisateur,utilisateur_nom',
-        ])
-            ->whereIn('demande_statut', [StatutDemande::ValideeDaf, StatutDemande::RapportSoumis])
-            ->latest()
-            ->limit(5)
-            ->get()
-            ->map(fn (DemandeDepense $d) => [
-                'id' => $d->id_demande,
-                'objet' => $d->demande_objet,
-                'montant' => $d->demande_montant,
-                'statut' => $d->demande_statut->value,
-                'libelle_statut' => $d->demande_statut->label(),
-                'badge_class' => $d->demande_statut->badgeClass(),
-                'porteur' => $d->porteur->utilisateur_nom,
-                'convention' => $d->convention->convention_titre,
-                'cree_le' => $d->cree_le?->toDateString() ?? '—',
-            ]);
+        $projets = Projet::select('projets.*')
+            ->selectSub(function ($query) {
+                $query->from('conventions')
+                    ->whereColumn('conventions.id_projet', 'projets.id_projet')
+                    ->selectRaw('GREATEST(
+                        (SELECT MAX(paiement_date) FROM paiements WHERE id_convention = conventions.id_convention),
+                        (SELECT MAX(versement_date_reception) FROM versements WHERE id_convention = conventions.id_convention)
+                    )');
+            }, 'last_transaction_date')
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $query->where('projet_titre', 'like', "%{$request->search}%");
+            })
+            ->orderByDesc('last_transaction_date')
+            ->paginate(10)
+            ->withQueryString()
+            ->through(function (Projet $p) {
+                $lastPaiement = Paiement::whereHas('convention', fn ($q) => $q->where('id_projet', $p->id_projet))
+                    ->latest('paiement_date')
+                    ->first();
+                $lastVersement = Versement::whereHas('convention', fn ($q) => $q->where('id_projet', $p->id_projet))
+                    ->latest('versement_date_reception')
+                    ->first();
 
-        $paiementsRecents = Paiement::with([
-            'demande:id_demande,demande_objet,id_porteur,id_convention',
-            'demande.porteur:id_utilisateur,utilisateur_nom',
-            'demande.convention:id_convention,convention_titre',
-        ])
-            ->latest('paiement_date')
-            ->limit(5)
-            ->get()
-            ->map(fn (Paiement $p) => [
-                'id' => $p->id_paiement,
-                'montant' => $p->paiement_montant,
-                'date_paiement' => $p->paiement_date?->toDateString(),
-                'mode_paiement' => $p->paiement_mode?->label() ?? '',
-                'reference' => $p->paiement_reference,
-                'objet' => $p->demande?->demande_objet ?? $p->paiement_objet ?? '',
-                'porteur' => $p->demande?->porteur?->utilisateur_nom ?? '',
-                'convention' => $p->demande?->convention?->convention_titre ?? '',
-            ]);
+                $lastTransaction = null;
+                $transactionType = null;
+                $transactionAmount = null;
+
+                if ($lastPaiement && $lastVersement) {
+                    if ($lastPaiement->paiement_date >= $lastVersement->versement_date_reception) {
+                        $lastTransaction = $lastPaiement->paiement_date;
+                        $transactionType = 'paiement';
+                        $transactionAmount = $lastPaiement->paiement_montant;
+                    } else {
+                        $lastTransaction = $lastVersement->versement_date_reception;
+                        $transactionType = 'versement';
+                        $transactionAmount = $lastVersement->versement_montant;
+                    }
+                } elseif ($lastPaiement) {
+                    $lastTransaction = $lastPaiement->paiement_date;
+                    $transactionType = 'paiement';
+                    $transactionAmount = $lastPaiement->paiement_montant;
+                } elseif ($lastVersement) {
+                    $lastTransaction = $lastVersement->versement_date_reception;
+                    $transactionType = 'versement';
+                    $transactionAmount = $lastVersement->versement_montant;
+                }
+
+                return [
+                    'id' => $p->id_projet,
+                    'titre' => $p->projet_titre,
+                    'statut' => $p->projet_statut->value,
+                    'libelle_statut' => $p->projet_statut->label(),
+                    'montant_estime' => $p->projet_montant_estime,
+                    'last_transaction_date' => $lastTransaction?->toDateString(),
+                    'last_transaction_type' => $transactionType,
+                    'last_transaction_amount' => $transactionAmount,
+                ];
+            });
 
         return Inertia::render('ac/Dashboard', [
             'stats' => [
                 'demandes_en_attente' => $demandesEnAttente,
                 'rapports_soumis' => $rapportsSoumis,
-                'paiements_effectues' => $paiementsEffectues,
+                'paiements_en_attente' => $paiementsEnAttente,
                 'montant_paye' => $montantPaye,
             ],
-            'demandes_recentes' => $demandesRecentes,
-            'paiements_recents' => $paiementsRecents,
-            'faq_items' => $this->getFaqForRole(RoleUtilisateur::AgentComptable),
+            'projets' => $projets,
         ]);
     }
 
@@ -278,17 +290,6 @@ class DashboardController extends Controller
             ],
             'demandes_recentes' => $demandesRecentes,
             'projets_budget' => $projetsBudget,
-            'faq_items' => $this->getFaqForRole(RoleUtilisateur::Porteur),
         ]);
-    }
-
-    /** @return list<array{id: int, question: string, reponse: string}> */
-    private function getFaqForRole(RoleUtilisateur $role): array
-    {
-        return Faq::pourRole($role)
-            ->get()
-            ->map(fn (Faq $f) => ['id' => $f->id_faq, 'question' => $f->faq_question, 'reponse' => $f->faq_reponse])
-            ->values()
-            ->toArray();
     }
 }

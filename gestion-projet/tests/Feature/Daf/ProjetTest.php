@@ -77,4 +77,26 @@ describe('Mise en cours de projet', function () {
         $projet->refresh();
         expect($projet->projet_statut)->toBe(StatutProjet::EnAttenteFinancement);
     });
+
+    it('projet peut être mis en cours par l\'AC', function () {
+        $ac = Utilisateur::factory()->ac()->create();
+        $porteur = Utilisateur::factory()->porteur()->create();
+        $projet = Projet::factory()->create([
+            'id_porteur' => $porteur->id_utilisateur,
+            'projet_statut' => StatutProjet::EnAttenteFinancement->value,
+        ]);
+
+        $convention = Convention::factory()->for($projet)->create([
+            'convention_statut' => StatutConvention::Active->value,
+        ]);
+
+        $response = $this->actingAs($ac)
+            ->post(route('ac.projets.mettre-en-cours', $projet))
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $projet->refresh();
+
+        expect($projet->projet_statut)->toBe(StatutProjet::EnCours);
+    });
 });

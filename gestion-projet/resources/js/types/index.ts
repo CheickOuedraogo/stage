@@ -8,6 +8,7 @@ export interface User {
     url_avatar: string | null;
     utilisateur_telephone: string | null;
     notifications_non_lues: number;
+    actions_a_traiter_count: number;
 }
 
 export interface PageProps {
@@ -28,13 +29,14 @@ export interface PageProps {
 }
 
 export interface Utilisateur {
-    id?: number;
-    id_utilisateur?: number;
-    utilisateur_nom?: string;
-    utilisateur_email?: string;
-    role_key?: 'admin' | 'daf' | 'ac' | 'porteur';
-    utilisateur_telephone?: string | null;
-    utilisateur_actif?: boolean;
+    id_utilisateur: number;
+    utilisateur_nom: string;
+    utilisateur_email: string;
+    role_key: 'admin' | 'daf' | 'ac' | 'porteur';
+    utilisateur_telephone: string | null;
+    utilisateur_actif: boolean;
+    url_avatar?: string | null;
+    label_role?: string;
 }
 
 export interface PaginatedData<T> {

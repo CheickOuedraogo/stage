@@ -8,8 +8,6 @@ import {
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import type { FormEvent } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
-import { FaqAccordion  } from '@/components/shared/FaqAccordion';
-import type {FaqItem} from '@/components/shared/FaqAccordion';
 import { Badge } from '@/components/ui/Badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { auditLog as adminAuditLog } from '@/routes/admin';
@@ -53,7 +51,6 @@ interface AdminDashboardProps {
         demandes_en_cours: number;
     };
     recent_audit_logs: AuditLogEntry[];
-    faq_items: FaqItem[];
 }
 
 type BadgeVariant = 'admin' | 'daf' | 'ac' | 'porteur' | 'default';
@@ -65,7 +62,7 @@ const roleVariants: Record<string, BadgeVariant> = {
     Porteur: 'porteur',
 };
 
-export default function AdminDashboard({ stats, recent_audit_logs, faq_items }: AdminDashboardProps) {
+export default function AdminDashboard({ stats, recent_audit_logs }: AdminDashboardProps) {
     const { auth, maintenance } = usePage<PageProps>().props;
     const inactive = stats.total_users - stats.active_users;
 
@@ -267,7 +264,6 @@ export default function AdminDashboard({ stats, recent_audit_logs, faq_items }: 
                     </div>
                 )}
             </div>
-            <FaqAccordion items={faq_items} />
         </AppLayout>
     );
 }

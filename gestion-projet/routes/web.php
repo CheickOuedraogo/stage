@@ -1,7 +1,6 @@
 <?php
 
 use App\Enums\RoleUtilisateur;
-use App\Http\Controllers\Administrateur\FaqController as AdministrateurFaqController;
 use App\Http\Controllers\Administrateur\JournalAuditController;
 use App\Http\Controllers\Administrateur\MaintenanceController;
 use App\Http\Controllers\Administrateur\MessageChatControleur as AdministrateurMessageChatControleur;
@@ -23,7 +22,6 @@ use App\Http\Controllers\Daf\VersementController as DafVersementController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Porteur\DemandeDepenseController as PorteurDemandeDepenseController;
-use App\Http\Controllers\Porteur\FaqController;
 use App\Http\Controllers\Porteur\MessageChatControleur as PorteurMessageChatControleur;
 use App\Http\Controllers\Porteur\ProjetController as PorteurProjetController;
 use App\Http\Controllers\Profile\ProfileController;
@@ -75,12 +73,6 @@ Route::middleware(['auth'])->group(function () {
 
         // Audit log
         Route::get('/journal-audit', [JournalAuditController::class, 'index'])->name('audit-log');
-
-        // FAQ CRUD
-        Route::get('/faq', [AdministrateurFaqController::class, 'index'])->name('faq.index');
-        Route::post('/faq', [AdministrateurFaqController::class, 'store'])->name('faq.store');
-        Route::patch('/faq/{faq}', [AdministrateurFaqController::class, 'update'])->name('faq.update');
-        Route::delete('/faq/{faq}', [AdministrateurFaqController::class, 'destroy'])->name('faq.destroy');
 
         // Chat admin
         Route::get('/messages', [AdministrateurMessageChatControleur::class, 'index'])->name('chat.index');
@@ -152,6 +144,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/projets/{projet}/conventions/{convention}/paiements-directs', [AgentComptablePaiementDirectController::class, 'store'])->name('projets.conventions.paiements-directs.store');
         Route::delete('/projets/{projet}/conventions/{convention}/paiements-directs/{paiementDirect}', [AgentComptablePaiementDirectController::class, 'destroy'])->name('projets.conventions.paiements-directs.destroy');
 
+        // Projets
+        Route::get('/projets', [AgentComptableProjetController::class, 'index'])->name('projets.index');
+        Route::get('/projets/{projet}', [AgentComptableProjetController::class, 'show'])->name('projets.show');
+        Route::post('/projets/{projet}/cloturer', [AgentComptableProjetController::class, 'cloturer'])->name('projets.cloturer');
+        Route::post('/projets/{projet}/mettre-en-cours', [AgentComptableProjetController::class, 'mettreEnCours'])->name('projets.mettre-en-cours');
+
         // Bilan projet (lecture seule)
         Route::get('/projets/{projet}/bilan', [AgentComptableProjetController::class, 'bilan'])->name('projets.bilan');
         Route::get('/projets/{projet}/bilan/pdf', [AgentComptableProjetController::class, 'exporterBilanPdf'])->name('projets.bilan.pdf');
@@ -195,8 +193,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/demandes/{demande}/justificatif', [PorteurDemandeDepenseController::class, 'downloadJustificatif'])->name('demandes.justificatif');
         Route::get('/demandes/{demande}/rapport-pdf', [PorteurDemandeDepenseController::class, 'downloadRapport'])->name('demandes.rapport-pdf');
 
-        // Chat Porteur + FAQ
-        Route::get('/faq', [FaqController::class, 'index'])->name('faq.index');
+        // Chat Porteur
         Route::get('/assistance', [PorteurMessageChatControleur::class, 'index'])->name('chat.index');
         Route::get('/assistance/{user}', [PorteurMessageChatControleur::class, 'show'])->name('chat.show');
         Route::post('/assistance/{user}', [PorteurMessageChatControleur::class, 'send'])->name('chat.send');

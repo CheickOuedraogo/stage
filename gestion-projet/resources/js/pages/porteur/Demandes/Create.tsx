@@ -84,7 +84,7 @@ return null;
 
     useEffect(() => {
         if (projet.statut !== 'en_cours') {
-            router.visit(route('porteur.projets.show', projet.id), {
+            router.visit(projetsShow.url(projet.id), {
                 onError: () => {},
             });
         }

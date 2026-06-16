@@ -260,4 +260,22 @@ describe('Bilan de clôture', function () {
             ->assertOk()
             ->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     });
+
+    it('l\'AC peut clôturer un projet éligible', function () {
+        ['projet' => $projet] = makeProjetClotureNotificationable();
+        $ac = Utilisateur::factory()->ac()->create();
+
+        $this->actingAs($ac)
+            ->post(route('ac.projets.cloturer', $projet), [
+                'date_fin_reelle' => '2025-12-31',
+                'statut_final' => 'succes',
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $projet->refresh();
+
+        expect($projet->projet_statut)->toBe(StatutProjet::Termine)
+            ->and($projet->projet_date_fin_reelle->toDateString())->toBe('2025-12-31');
+    });
 });

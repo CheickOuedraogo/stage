@@ -76,7 +76,6 @@ class DemandeDepenseService
         ]);
 
         Notification::pourDemandeStatut($demande->id_porteur, $demande, StatutDemande::ValideeDaf->label());
-        $this->notifyAgentComptable($demande, StatutDemande::ValideeDaf);
     }
 
     public function rejeterDaf(DemandeDepense $demande, Utilisateur $daf, string $motif): void
@@ -92,10 +91,28 @@ class DemandeDepenseService
         Notification::pourDemandeStatut($demande->id_porteur, $demande, StatutDemande::RejeteeDaf->label(), $motif);
     }
 
+    public function assertCaisseSuffisante(Convention $convention, int $montant): void
+    {
+        $totalVersements = $convention->versements()->sum('versement_montant');
+        $totalPaiementsNormaux = $convention->paiements()
+            ->where('type_paiement', TypePaiement::Normal->value)
+            ->sum('paiement_montant');
+
+        $disponible = $totalVersements - $totalPaiementsNormaux;
+
+        if ($montant > $disponible) {
+            throw ValidationException::withMessages([
+                'montant' => "Le solde de caisse de la convention ({$disponible} FCFA) est insuffisant pour effectuer ce paiement de {$montant} FCFA. Veuillez d'abord enregistrer un versement.",
+            ]);
+        }
+    }
+
     public function validerAgentComptable(DemandeDepense $demande, Utilisateur $ac): void
     {
         abort_unless($demande->demande_statut === StatutDemande::ValideeDaf, 403);
         abort_unless($ac->role_key === RoleUtilisateur::AgentComptable, 403);
+
+        $this->assertCaisseSuffisante($demande->convention, $demande->demande_montant);
 
         $demande->update([
             'demande_statut' => StatutDemande::ValideeAgentComptable,
@@ -126,6 +143,8 @@ class DemandeDepenseService
     {
         abort_unless($demande->demande_statut === StatutDemande::ValideeAgentComptable, 403);
         abort_unless($ac->role_key === RoleUtilisateur::AgentComptable, 403);
+
+        $this->assertCaisseSuffisante($demande->convention, $demande->demande_montant);
 
         $paiement = Paiement::create([
             'id_demande' => $demande->id_demande,
@@ -163,8 +182,7 @@ class DemandeDepenseService
         ]);
 
         $demande->load('convention:id_convention,id_projet');
-        Utilisateur::whereIn('role_key', [RoleUtilisateur::Daf->value, RoleUtilisateur::AgentComptable->value])
-            ->get()
+        Utilisateur::parRole(RoleUtilisateur::Daf)->get()
             ->each(fn (Utilisateur $u) => Notification::pourRapportSoumis($u, $demande));
     }
 
@@ -204,22 +222,9 @@ class DemandeDepenseService
         );
     }
 
-    private function notifyAgentComptable(DemandeDepense $demande, StatutDemande $statut): void
-    {
-        Utilisateur::parRole(RoleUtilisateur::AgentComptable)->get()
-            ->each(fn (Utilisateur $u) => Notification::pourDemandeStatut($u->id_utilisateur, $demande, $statut->label()));
-    }
-
     private function notifyDaf(DemandeDepense $demande, StatutDemande $statut): void
     {
         Utilisateur::parRole(RoleUtilisateur::Daf)->get()
-            ->each(fn (Utilisateur $u) => Notification::pourDemandeStatut($u->id_utilisateur, $demande, $statut->label()));
-    }
-
-    private function notifyDafAgentComptable(DemandeDepense $demande, StatutDemande $statut): void
-    {
-        Utilisateur::whereIn('role_key', [RoleUtilisateur::Daf->value, RoleUtilisateur::AgentComptable->value])
-            ->get()
             ->each(fn (Utilisateur $u) => Notification::pourDemandeStatut($u->id_utilisateur, $demande, $statut->label()));
     }
 }

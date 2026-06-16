@@ -1,0 +1,77 @@
+<mxfile host="Electron">
+  <diagram name="Page-1" id="iCVqvci_dJv3VU3q_c0V">
+    <mxGraphModel dx="1846" dy="689" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="-ifuhswaQWUkLBRCNL-s-14" edge="1" parent="1" source="-ifuhswaQWUkLBRCNL-s-1" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=12;startSize=8;endSize=8;endArrow=none;endFill=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1170" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-ifuhswaQWUkLBRCNL-s-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=25;" value="Directrice" vertex="1">
+          <mxGeometry height="80" width="280" x="1030" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="-ifuhswaQWUkLBRCNL-s-16" edge="1" parent="1" source="-ifuhswaQWUkLBRCNL-s-2" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;fontSize=12;startSize=8;endSize=8;endArrow=none;endFill=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-ifuhswaQWUkLBRCNL-s-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=22;" value="Directeur adjoint" vertex="1">
+          <mxGeometry height="80" width="410" x="200" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="-ifuhswaQWUkLBRCNL-s-17" edge="1" parent="1" source="-ifuhswaQWUkLBRCNL-s-3" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=12;startSize=8;endSize=8;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="830" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-ifuhswaQWUkLBRCNL-s-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=22;" value="Sécrétaire de direction" vertex="1">
+          <mxGeometry height="80" width="320" x="670" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="-ifuhswaQWUkLBRCNL-s-18" edge="1" parent="1" source="-ifuhswaQWUkLBRCNL-s-4" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=12;startSize=8;endSize=8;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1275" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-ifuhswaQWUkLBRCNL-s-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=21;" value="Sécrétaire principal" vertex="1">
+          <mxGeometry height="80" width="390" x="1080" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="-ifuhswaQWUkLBRCNL-s-19" edge="1" parent="1" source="-ifuhswaQWUkLBRCNL-s-5" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=12;startSize=8;endSize=8;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1800" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-ifuhswaQWUkLBRCNL-s-5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=21;" value="Chef de service administratif et financier" vertex="1">
+          <mxGeometry height="80" width="440" x="1580" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="-ifuhswaQWUkLBRCNL-s-6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=26;" value="Sécrétaire&amp;nbsp;" vertex="1">
+          <mxGeometry height="80" width="160" x="-160" y="475" as="geometry" />
+        </mxCell>
+        <mxCell id="-ifuhswaQWUkLBRCNL-s-7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=24;" value="Chef de Service de la scolarité" vertex="1">
+          <mxGeometry height="80" width="230" x="60" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="-ifuhswaQWUkLBRCNL-s-8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=24;" value="Chef de Service de la bibliothèque" vertex="1">
+          <mxGeometry height="80" width="260" x="350" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="-ifuhswaQWUkLBRCNL-s-9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=24;" value="Chef de service des stages et de l&#39;insertion professionnelle" vertex="1">
+          <mxGeometry height="80" width="290" x="650" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="-ifuhswaQWUkLBRCNL-s-10" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=24;" value="Chef de departement Systèmes d&#39;Information et Aide à la Décision" vertex="1">
+          <mxGeometry height="80" width="350" x="990" y="485" as="geometry" />
+        </mxCell>
+        <mxCell id="-ifuhswaQWUkLBRCNL-s-11" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=24;" value="Chef de departement Reseau Systèmes et Télecoms" vertex="1">
+          <mxGeometry height="90" width="410" x="1400" y="475" as="geometry" />
+        </mxCell>
+        <mxCell id="-ifuhswaQWUkLBRCNL-s-12" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=24;align=center;verticalAlign=middle;" value="Chef de departement Formation continues et innovations" vertex="1">
+          <mxGeometry height="90" width="340" x="1840" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="-ifuhswaQWUkLBRCNL-s-13" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;fontSize=12;startSize=8;endSize=8;curved=1;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="410" y="210" as="sourcePoint" />
+            <mxPoint x="1890" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

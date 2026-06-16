@@ -2,6 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\RoleUtilisateur;
+use App\Enums\StatutDemande;
+use App\Models\DemandeDepense;
 use App\Models\Parametre;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -52,6 +55,7 @@ class HandleInertiaRequests extends Middleware
                     'url_avatar' => $user->url_avatar,
                     'utilisateur_telephone' => $user->utilisateur_telephone,
                     'notifications_non_lues' => $user->notificationsNonLues()->count(),
+                    'actions_a_traiter_count' => $this->getActionsATraiterCount($user),
                 ] : null,
             ],
             'flash' => [
@@ -65,5 +69,24 @@ class HandleInertiaRequests extends Middleware
                 'reason' => Parametre::get('maintenance_reason'),
             ],
         ];
+    }
+
+    private function getActionsATraiterCount($user): int
+    {
+        if ($user->role_key === RoleUtilisateur::Daf) {
+            return DemandeDepense::whereIn('demande_statut', [
+                StatutDemande::Soumise->value,
+                StatutDemande::RapportSoumis->value,
+            ])->count();
+        }
+
+        if ($user->role_key === RoleUtilisateur::AgentComptable) {
+            return DemandeDepense::whereIn('demande_statut', [
+                StatutDemande::ValideeDaf->value,
+                StatutDemande::ValideeAgentComptable->value,
+            ])->count();
+        }
+
+        return 0;
     }
 }

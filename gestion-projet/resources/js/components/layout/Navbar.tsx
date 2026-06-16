@@ -27,9 +27,9 @@ import { dashboard as acDashboard } from '@/routes/ac';
 import { index as acChatIndex } from '@/routes/ac/chat';
 import { index as acDemandesIndex } from '@/routes/ac/demandes';
 import { index as acPaiementsIndex } from '@/routes/ac/paiements';
+import { index as acProjetsIndex } from '@/routes/ac/projets';
 import { auditLog as adminAuditLog, dashboard as adminDashboard } from '@/routes/admin';
 import { index as adminChatIndex } from '@/routes/admin/chat';
-import { index as adminFaqIndex } from '@/routes/admin/faq';
 import { index as usersIndex } from '@/routes/admin/users';
 import { dashboard as dafDashboard } from '@/routes/daf';
 import { index as dafChatIndex } from '@/routes/daf/chat';
@@ -51,27 +51,28 @@ interface NavItem {
     badge?: number;
 }
 
-function getNavItems(role: User['role_key'], notifs: number): NavItem[] {
+function getNavItems(role: User['role_key'], notifs: number, actionsCount: number): NavItem[] {
     const notifBadge = notifs > 0 ? notifs : undefined;
+    const actionsBadge = actionsCount > 0 ? actionsCount : undefined;
 
     const navByRole: Record<User['role_key'], NavItem[]> = {
         admin: [
             { label: 'Tableau de bord', href: adminDashboard.url(), icon: HomeIcon },
             { label: 'Utilisateurs', href: usersIndex.url(), icon: UsersIcon },
             { label: 'Journal d\'audit', href: adminAuditLog.url(), icon: ClipboardDocumentCheckIcon },
-            { label: 'FAQ', href: adminFaqIndex.url(), icon: QuestionMarkCircleIcon },
             { label: 'Messages', href: adminChatIndex.url(), icon: ChatBubbleLeftRightIcon },
         ],
         daf: [
             { label: 'Tableau de bord', href: dafDashboard.url(), icon: ChartBarIcon },
             { label: 'Projets', href: dafProjetsIndex.url(), icon: FolderIcon },
-            { label: 'Demandes', href: dafDemandesIndex.url(), icon: ClipboardDocumentListIcon },
+            { label: 'Demandes', href: dafDemandesIndex.url(), icon: ClipboardDocumentListIcon, badge: actionsBadge },
             { label: 'Rapports', href: dafRapportsIndex.url(), icon: DocumentChartBarIcon },
             { label: 'Assistance', href: dafChatIndex.url(), icon: ChatBubbleLeftRightIcon },
         ],
         ac: [
             { label: 'Tableau de bord', href: acDashboard.url(), icon: HomeIcon },
-            { label: 'Demandes', href: acDemandesIndex.url(), icon: ClipboardDocumentListIcon },
+            { label: 'Projets', href: acProjetsIndex.url(), icon: FolderIcon },
+            { label: 'Demandes', href: acDemandesIndex.url(), icon: ClipboardDocumentListIcon, badge: actionsBadge },
             { label: 'Paiements', href: acPaiementsIndex.url(), icon: CreditCardIcon },
             { label: 'Assistance', href: acChatIndex.url(), icon: ChatBubbleLeftRightIcon },
         ],
@@ -104,7 +105,7 @@ export function Navbar({ user }: NavbarProps) {
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const { isDark, toggle: toggleDark } = useDarkMode();
 
-    const items = getNavItems(user.role_key, user.notifications_non_lues);
+    const items = getNavItems(user.role_key, user.notifications_non_lues, user.actions_a_traiter_count);
 
     const handleLogout = () => {
         router.post(logout.url());

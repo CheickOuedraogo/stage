@@ -8,6 +8,7 @@ use App\Models\Paiement;
 use App\Models\Projet;
 use App\Models\Rubrique;
 use App\Models\Utilisateur;
+use App\Models\Versement;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
@@ -23,6 +24,12 @@ function makeConventionWithRubrique(int $montantRubrique = 10_000_000): array
     $projet = Projet::factory()->enCours()->for($porteur, 'porteur')->create();
     $convention = Convention::factory()->for($projet)->create(['convention_montant' => 20_000_000, 'convention_taux_conversion' => 1.0]);
     $rubrique = Rubrique::factory()->for($convention)->create(['rubrique_montant' => $montantRubrique]);
+
+    Versement::create([
+        'id_convention' => $convention->id_convention,
+        'versement_montant' => 20_000_000,
+        'versement_date_reception' => today()->toDateString(),
+    ]);
 
     return compact('porteur', 'projet', 'convention', 'rubrique');
 }

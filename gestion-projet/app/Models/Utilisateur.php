@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\RoleUtilisateur;
+use App\Enums\StatutDemande;
 use App\Traits\Auditable;
 use Database\Factories\UtilisateurFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -124,7 +125,7 @@ class Utilisateur extends Authenticatable
     }
 
     /** @var list<string> */
-    protected $appends = ['label_role', 'url_avatar'];
+    protected $appends = ['label_role', 'url_avatar', 'demandes_en_attente_count', 'paiements_en_attente_count'];
 
     /** Libellé court pour le rôle */
     public function getLabelRoleAttribute(): ?string
@@ -150,5 +151,17 @@ class Utilisateur extends Authenticatable
     public function getRememberTokenName(): string
     {
         return 'jeton_souvenir';
+    }
+
+    /** Nombre de demandes en attente de validation par l'AC (Validée DAF) */
+    public function getDemandesEnAttenteCountAttribute(): int
+    {
+        return DemandeDepense::where('demande_statut', StatutDemande::ValideeDaf->value)->count();
+    }
+
+    /** Nombre de paiements en attente d'enregistrement par l'AC (Validée AC) */
+    public function getPaiementsEnAttenteCountAttribute(): int
+    {
+        return DemandeDepense::where('demande_statut', StatutDemande::ValideeAgentComptable->value)->count();
     }
 }

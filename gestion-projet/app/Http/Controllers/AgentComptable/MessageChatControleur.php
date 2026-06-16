@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\AgentComptable;
 
+use App\Enums\RoleUtilisateur;
 use App\Http\Controllers\Controller;
 use App\Models\MessageChat;
 use App\Models\Utilisateur;
