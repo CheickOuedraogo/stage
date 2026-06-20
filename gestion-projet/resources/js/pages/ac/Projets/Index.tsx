@@ -1,6 +1,6 @@
 import { FolderIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import AppLayout from '@/components/layout/AppLayout';
 import { CHART_AXIS_TICK, CHART_MARGIN, CHART_TOOLTIP_STYLE } from '@/lib/charts';
@@ -94,16 +94,21 @@ function budgetChartData(projetsList: Projet[]) {
 
 export default function AcProjetsIndex({ projets, stats, filters }: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const applyFilter = (params: Record<string, string | undefined>) => {
-        router.get(acProjetsIndex.url(), { ...filters, ...params }, { preserveState: true });
+        router.get(acProjetsIndex.url(), { ...filters, ...params }, { preserveState: true, preserveScroll: true });
     };
 
-    const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            applyFilter({ search: search || undefined });
-        }
-    };
+    // Dynamic search with 400ms debounce
+    useEffect(() => {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+            applyFilter({ search: search || undefined, page: undefined });
+        }, 400);
+        return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [search]);
 
     const pieData = statusDistribution(projets.data);
     const barData = budgetChartData(projets.data);
@@ -201,7 +206,6 @@ export default function AcProjetsIndex({ projets, stats, filters }: Props) {
                         placeholder="Rechercher par titre de projet ou porteur…"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        onKeyDown={handleSearchKeyDown}
                         aria-label="Rechercher un projet"
                         className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                     />

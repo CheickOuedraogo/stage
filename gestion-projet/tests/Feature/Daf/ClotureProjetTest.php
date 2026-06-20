@@ -1,11 +1,7 @@
 <?php
 
 use App\Enums\StatutConvention;
-use App\Enums\StatutDemande;
-use App\Enums\StatutProjet;
-use App\Enums\TypeNotification;
 use App\Models\Convention;
-use App\Models\DemandeDepense;
 use App\Models\Projet;
 use App\Models\Rubrique;
 use App\Models\Utilisateur;
@@ -29,130 +25,6 @@ function makeProjetClotureNotificationable(): array
 
     return compact('daf', 'porteur', 'projet', 'convention', 'rubrique');
 }
-
-// ── Clôture réussie ──────────────────────────────────────────────────────────
-
-describe('Clôture de projet', function () {
-    it('clôture un projet éligible : statut passe à terminé et date_fin_reelle est remplie', function () {
-        ['daf' => $daf, 'projet' => $projet] = makeProjetClotureNotificationable();
-
-        $this->actingAs($daf)
-            ->post(route('daf.projets.cloturer', $projet), [
-                'date_fin_reelle' => '2025-12-31',
-                'statut_final' => 'succes',
-            ])
-            ->assertRedirect();
-
-        $projet->refresh();
-
-        expect($projet->projet_statut)->toBe(StatutProjet::Termine)
-            ->and($projet->projet_date_fin_reelle->toDateString())->toBe('2025-12-31');
-    });
-
-    it('notifie le porteur à la clôture', function () {
-        ['daf' => $daf, 'porteur' => $porteur, 'projet' => $projet] = makeProjetClotureNotificationable();
-
-        $this->actingAs($daf)
-            ->post(route('daf.projets.cloturer', $projet), [
-                'date_fin_reelle' => '2025-12-31',
-                'statut_final' => 'succes',
-            ]);
-
-        $this->assertDatabaseHas('notifications', [
-            'id_utilisateur' => $porteur->id_utilisateur,
-            'type_notification' => TypeNotification::ProjetCloture,
-            'id_projet' => $projet->id_projet,
-        ]);
-    });
-
-    it('refuse si une demande est encore en cours', function () {
-        ['daf' => $daf, 'porteur' => $porteur, 'projet' => $projet, 'convention' => $convention, 'rubrique' => $rubrique] = makeProjetClotureNotificationable();
-
-        DemandeDepense::factory()->for($convention)->for($rubrique)->create([
-            'id_porteur' => $porteur->id_utilisateur,
-            'demande_statut' => StatutDemande::Soumise,
-        ]);
-
-        $this->actingAs($daf)
-            ->post(route('daf.projets.cloturer', $projet), [
-                'date_fin_reelle' => '2025-12-31',
-                'statut_final' => 'succes',
-            ])
-            ->assertSessionHasErrors('projet');
-
-        expect($projet->fresh()->projet_statut)->toBe(StatutProjet::EnCours);
-    });
-
-    it('refuse si une convention est encore active', function () {
-        ['daf' => $daf, 'projet' => $projet, 'convention' => $convention] = makeProjetClotureNotificationable();
-
-        $convention->update(['convention_statut' => StatutConvention::Active]);
-
-        $this->actingAs($daf)
-            ->post(route('daf.projets.cloturer', $projet), [
-                'date_fin_reelle' => '2025-12-31',
-                'statut_final' => 'succes',
-            ])
-            ->assertSessionHasErrors('projet');
-
-        expect($projet->fresh()->projet_statut)->toBe(StatutProjet::EnCours);
-    });
-
-    it('refuse si le projet n\'est pas en cours', function () {
-        ['daf' => $daf, 'porteur' => $porteur] = makeProjetClotureNotificationable();
-
-        $projet = Projet::factory()->for($porteur, 'porteur')->create([
-            'projet_statut' => StatutProjet::Suspendu,
-        ]);
-        Convention::factory()->for($projet)->create(['convention_statut' => StatutConvention::Terminee]);
-
-        $this->actingAs($daf)
-            ->post(route('daf.projets.cloturer', $projet), [
-                'date_fin_reelle' => '2025-12-31',
-                'statut_final' => 'succes',
-            ])
-            ->assertSessionHasErrors('projet');
-    });
-
-    it('refuse à un porteur (403)', function () {
-        ['porteur' => $porteur, 'projet' => $projet] = makeProjetClotureNotificationable();
-
-        $this->actingAs($porteur)
-            ->post(route('daf.projets.cloturer', $projet), [
-                'date_fin_reelle' => '2025-12-31',
-                'statut_final' => 'succes',
-            ])
-            ->assertForbidden();
-    });
-
-    it('refuse sans date_fin_reelle (validation)', function () {
-        ['daf' => $daf, 'projet' => $projet] = makeProjetClotureNotificationable();
-
-        $this->actingAs($daf)
-            ->post(route('daf.projets.cloturer', $projet), ['statut_final' => 'succes'])
-            ->assertSessionHasErrors('date_fin_reelle');
-    });
-
-    it('refuse sans statut_final (validation)', function () {
-        ['daf' => $daf, 'projet' => $projet] = makeProjetClotureNotificationable();
-
-        $this->actingAs($daf)
-            ->post(route('daf.projets.cloturer', $projet), ['date_fin_reelle' => '2025-12-31'])
-            ->assertSessionHasErrors('statut_final');
-    });
-
-    it('enregistre le statut_final lors de la clôture', function () {
-        ['daf' => $daf, 'projet' => $projet] = makeProjetClotureNotificationable();
-
-        $this->actingAs($daf)
-            ->post(route('daf.projets.cloturer', $projet), [
-                'date_fin_reelle' => '2025-12-31',
-                'statut_final' => 'echec',
-            ]);
-
-        expect($projet->fresh()->statut_final->value)->toBe('echec');
-    });
-});
 
 // ── Bilan ─────────────────────────────────────────────────────────────────────
 
@@ -259,23 +131,5 @@ describe('Bilan de clôture', function () {
             ->get(route('ac.projets.bilan.excel', $projet))
             ->assertOk()
             ->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    });
-
-    it('l\'AC peut clôturer un projet éligible', function () {
-        ['projet' => $projet] = makeProjetClotureNotificationable();
-        $ac = Utilisateur::factory()->ac()->create();
-
-        $this->actingAs($ac)
-            ->post(route('ac.projets.cloturer', $projet), [
-                'date_fin_reelle' => '2025-12-31',
-                'statut_final' => 'succes',
-            ])
-            ->assertRedirect()
-            ->assertSessionHas('success');
-
-        $projet->refresh();
-
-        expect($projet->projet_statut)->toBe(StatutProjet::Termine)
-            ->and($projet->projet_date_fin_reelle->toDateString())->toBe('2025-12-31');
     });
 });

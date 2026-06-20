@@ -205,9 +205,10 @@ class DemandeDepenseService
         abort_unless($user->role_key === RoleUtilisateur::Daf, 403);
 
         $demande->update([
-            'demande_statut' => StatutDemande::RapportSoumis,
+            'demande_statut' => StatutDemande::Payee,
             'demande_rapport' => null,
             'demande_rapport_valide_daf' => false,
+            'demande_rapport_motif_rejet' => $motif,
         ]);
 
         $message = $motif

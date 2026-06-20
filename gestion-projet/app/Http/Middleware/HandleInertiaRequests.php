@@ -56,6 +56,7 @@ class HandleInertiaRequests extends Middleware
                     'utilisateur_telephone' => $user->utilisateur_telephone,
                     'notifications_non_lues' => $user->notificationsNonLues()->count(),
                     'actions_a_traiter_count' => $this->getActionsATraiterCount($user),
+                    'paiements_a_traiter_count' => $this->getPaiementsATraiterCount($user),
                 ] : null,
             ],
             'flash' => [
@@ -81,10 +82,16 @@ class HandleInertiaRequests extends Middleware
         }
 
         if ($user->role_key === RoleUtilisateur::AgentComptable) {
-            return DemandeDepense::whereIn('demande_statut', [
-                StatutDemande::ValideeDaf->value,
-                StatutDemande::ValideeAgentComptable->value,
-            ])->count();
+            return DemandeDepense::where('demande_statut', StatutDemande::ValideeDaf->value)->count();
+        }
+
+        return 0;
+    }
+
+    private function getPaiementsATraiterCount($user): int
+    {
+        if ($user->role_key === RoleUtilisateur::AgentComptable) {
+            return DemandeDepense::where('demande_statut', StatutDemande::ValideeAgentComptable->value)->count();
         }
 
         return 0;

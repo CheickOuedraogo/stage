@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Porteur;
 
-use App\Enums\StatutProjet;
 use App\Exports\BilanProjetExport;
 use App\Http\Controllers\Controller;
 use App\Models\Convention;
+use App\Models\DemandeDepense;
 use App\Models\Paiement;
 use App\Models\Projet;
 use App\Services\ProjetService;
@@ -90,9 +90,7 @@ class ProjetController extends Controller
                 'pourcentage_financement' => $projet->projet_montant_estime > 0
                     ? (int) min(100, round(($montantConventions / $projet->projet_montant_estime) * 100))
                     : 0,
-                'bilan_url' => $projet->projet_statut === StatutProjet::Termine
-                    ? route('porteur.projets.bilan', $projet)
-                    : null,
+                'bilan_url' => route('porteur.projets.bilan', $projet),
                 'date_debut' => $projet->projet_date_debut?->toDateString(),
                 'date_fin_prevue' => $projet->projet_date_fin_prevue?->toDateString(),
                 'date_fin_reelle' => $projet->projet_date_fin_reelle?->toDateString(),
@@ -168,6 +166,20 @@ class ProjetController extends Controller
                     'description' => $v->versement_description,
                 ])->values(),
             ],
+            'demandes' => $convention->demandesDepenses()
+                ->with('rubrique:id_rubrique,rubrique_libelle')
+                ->orderByDesc('cree_le')
+                ->get()
+                ->map(fn (DemandeDepense $d) => [
+                    'id' => $d->id_demande,
+                    'objet' => $d->demande_objet,
+                    'montant' => $d->demande_montant,
+                    'statut' => $d->demande_statut->value,
+                    'libelle_statut' => $d->demande_statut->label(),
+                    'badge_class' => $d->demande_statut->badgeClass(),
+                    'cree_le' => $d->cree_le?->toDateString(),
+                    'rubrique' => $d->rubrique ? ['libelle' => $d->rubrique->rubrique_libelle] : null,
+                ])->values(),
         ]);
     }
 

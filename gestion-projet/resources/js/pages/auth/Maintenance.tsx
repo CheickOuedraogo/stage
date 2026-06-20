@@ -138,12 +138,19 @@ export default function Maintenance({ reason, until }: MaintenanceProps) {
                         </p>
                     )}
 
-                    {finished && (
+                    {finished ? (
                         <a
                             href="/"
                             className="mt-4 px-4 py-2 bg-white text-gray-900 text-sm font-medium rounded-lg hover:bg-gray-100 transition-colors"
                         >
                             Accéder à l'application
+                        </a>
+                    ) : (
+                        <a
+                            href="/connexion"
+                            className="mt-8 px-4 py-2 bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 text-sm font-medium rounded-lg transition-colors"
+                        >
+                            Se connecter (Admin)
                         </a>
                     )}
                 </div>

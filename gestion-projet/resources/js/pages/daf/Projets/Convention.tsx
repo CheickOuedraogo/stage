@@ -1,11 +1,9 @@
 import {
     ArrowLeftIcon,
     CalendarIcon,
-    CheckCircleIcon,
     PencilSquareIcon,
     PlusIcon,
     TrashIcon,
-    XCircleIcon,
     XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { Head, useForm, router } from '@inertiajs/react';
@@ -17,7 +15,6 @@ import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer';
 import { CHART_PALETTE, CHART_TOOLTIP_STYLE } from '@/lib/charts';
 import { clampPercent, conventionStatusClass, formatCurrency, formatDate, truncate } from '@/lib/utils';
 import { show as dafProjetsShow } from '@/routes/daf/projets';
-import { terminer as terminerConvention, annuler as annulerConvention } from '@/routes/daf/projets/conventions';
 import { store as storeRubrique, update as updateRubrique, destroy as destroyRubrique } from '@/routes/daf/projets/conventions/rubriques';
 import { store as storeVersement, destroy as destroyVersement } from '@/routes/daf/projets/conventions/versements';
 
@@ -79,22 +76,12 @@ export default function DafConventionShow({ projet, convention }: Props) {
     const [showAddVersement, setShowAddVersement] = useState(false);
     const [confirmRubrique, setConfirmRubrique] = useState<number | null>(null);
     const [confirmVersement, setConfirmVersement] = useState<number | null>(null);
-    const [confirmTerminer, setConfirmTerminer] = useState(false);
-    const [confirmAnnuler, setConfirmAnnuler] = useState(false);
 
     const rubriqueForm = useForm({ libelle: '', montant_prevu: '', description: '' });
     const addVersementForm = useForm({ montant: '', date_reception: '', reference: '', description: '' });
 
     const params = { projet: projet.id, convention: convention.id };
     const isEditable = convention.statut === 'active' || convention.statut === 'suspendue';
-
-    const handleTerminer = () => {
-        router.patch(terminerConvention.url(params), {}, { onSuccess: () => setConfirmTerminer(false) });
-    };
-
-    const handleAnnuler = () => {
-        router.patch(annulerConvention.url(params), {}, { onSuccess: () => setConfirmAnnuler(false) });
-    };
 
     const startEdit = (r: Rubrique) => {
         setShowAddRubrique(false);
@@ -174,7 +161,7 @@ export default function DafConventionShow({ projet, convention }: Props) {
                 <button
                     type="button"
                     onClick={() => router.visit(dafProjetsShow.url(projet.id))}
-                    className="flex items-center gap-1.5 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white transition-colors"
+                    className="flex items-center gap-1.5 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                 >
                     <ArrowLeftIcon className="w-3.5 h-3.5" />
                     {projet.titre}
@@ -204,26 +191,6 @@ export default function DafConventionShow({ projet, convention }: Props) {
                             <p className="text-xs text-gray-500 dark:text-slate-400">Forme</p>
                             <p className="text-sm font-medium text-gray-900 dark:text-white">{convention.forme_label}</p>
                         </div>
-                        {isEditable && (
-                            <>
-                                <button
-                                    type="button"
-                                    onClick={() => setConfirmTerminer(true)}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-900/50 transition-colors"
-                                >
-                                    <CheckCircleIcon className="w-3.5 h-3.5" />
-                                    Terminer
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setConfirmAnnuler(true)}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-700 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 transition-colors"
-                                >
-                                    <XCircleIcon className="w-3.5 h-3.5" />
-                                    Annuler
-                                </button>
-                            </>
-                        )}
                     </div>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-4 text-xs text-gray-600 dark:text-slate-400">
@@ -641,22 +608,7 @@ export default function DafConventionShow({ projet, convention }: Props) {
                 onConfirm={() => router.delete(destroyVersement.url({ ...params, versement: confirmVersement! }), { onSuccess: () => setConfirmVersement(null), onError: () => setConfirmVersement(null) })}
                 onCancel={() => setConfirmVersement(null)}
             />
-            <ConfirmModal
-                open={confirmTerminer}
-                title="Terminer la convention"
-                message={`La convention « ${convention.titre} » sera marquée comme terminée. Cette action est requise avant de pouvoir clôturer le projet.`}
-                confirmLabel="Terminer"
-                onConfirm={handleTerminer}
-                onCancel={() => setConfirmTerminer(false)}
-            />
-            <ConfirmModal
-                open={confirmAnnuler}
-                title="Annuler la convention"
-                message={`La convention « ${convention.titre} » sera annulée. Les financements associés ne seront plus comptabilisés dans les calculs de clôture.`}
-                confirmLabel="Annuler la convention"
-                onConfirm={handleAnnuler}
-                onCancel={() => setConfirmAnnuler(false)}
-            />
+
         </AppLayout>
     );
 }

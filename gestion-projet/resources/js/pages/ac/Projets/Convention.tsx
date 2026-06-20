@@ -115,7 +115,7 @@ export default function AcConventionShow({ projet, convention }: Props) {
                 <button
                     type="button"
                     onClick={() => router.visit(`/ac/tableau-de-bord`)}
-                    className="flex items-center gap-1.5 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white transition-colors"
+                    className="flex items-center gap-1.5 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                 >
                     <ArrowLeftIcon className="w-3.5 h-3.5" />
                     Tableau de bord

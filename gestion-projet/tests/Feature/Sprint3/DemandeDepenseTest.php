@@ -129,6 +129,31 @@ describe('Porteur – créer une demande', function () {
         ]);
     });
 
+    it('soumet une demande sans justificatif PDF', function () {
+        Storage::fake('private');
+        Notification::fake();
+
+        ['porteur' => $porteur, 'projet' => $projet, 'convention' => $convention, 'rubrique' => $rubrique] = makeConventionWithRubrique(10_000_000);
+
+        $this->actingAs($porteur)
+            ->post(route('porteur.projets.conventions.demandes.store', [$projet, $convention]), [
+                'rubrique_id' => $rubrique->id_rubrique,
+                'montant' => 2_000_000,
+                'objet' => 'AgentComptablehat de matériel sans justificatif',
+                'description' => 'Description détaillée',
+                'justificatif' => null,
+            ])
+            ->assertRedirect(route('porteur.demandes.index'));
+
+        $this->assertDatabaseHas('demandes_depense', [
+            'id_convention' => $convention->id_convention,
+            'id_porteur' => $porteur->id_utilisateur,
+            'demande_montant' => 2_000_000,
+            'demande_justificatif' => null,
+            'demande_statut' => StatutDemande::Soumise->value,
+        ]);
+    });
+
     it('refuse si le montant dépasse le solde de la rubrique', function () {
         Storage::fake('private');
 

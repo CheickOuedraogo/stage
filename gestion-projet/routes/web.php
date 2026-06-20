@@ -88,8 +88,6 @@ Route::middleware(['auth'])->group(function () {
         // Projets
         Route::get('/projets', [DafProjetController::class, 'index'])->name('projets.index');
         Route::get('/projets/{projet}', [DafProjetController::class, 'show'])->name('projets.show');
-        Route::post('/projets/{projet}/cloturer', [DafProjetController::class, 'cloturer'])->name('projets.cloturer');
-        Route::post('/projets/{projet}/mettre-en-cours', [DafProjetController::class, 'mettreEnCours'])->name('projets.mettre-en-cours');
         Route::get('/projets/{projet}/bilan', [DafProjetController::class, 'bilan'])->name('projets.bilan');
         Route::get('/projets/{projet}/bilan/pdf', [DafProjetController::class, 'exporterBilanPdf'])->name('projets.bilan.pdf');
         Route::get('/projets/{projet}/bilan/excel', [DafProjetController::class, 'exporterBilanExcel'])->name('projets.bilan.excel');
@@ -102,11 +100,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/projets/{projet}/conventions/{convention}/versements', [DafConventionController::class, 'storeVersement'])->name('projets.conventions.versements.store');
         Route::patch('/projets/{projet}/conventions/{convention}/versements/{versement}', [DafConventionController::class, 'updateVersement'])->name('projets.conventions.versements.update');
         Route::delete('/projets/{projet}/conventions/{convention}/versements/{versement}', [DafConventionController::class, 'destroyVersement'])->name('projets.conventions.versements.destroy');
-
-        // Changement de statut convention
-        Route::patch('/projets/{projet}/conventions/{convention}/terminer', [DafConventionController::class, 'terminer'])->name('projets.conventions.terminer');
-        Route::patch('/projets/{projet}/conventions/{convention}/annuler', [DafConventionController::class, 'annuler'])->name('projets.conventions.annuler');
-
         // Versements (vue globale)
         Route::get('/versements', [DafVersementController::class, 'index'])->name('versements.index');
 
@@ -147,9 +140,6 @@ Route::middleware(['auth'])->group(function () {
         // Projets
         Route::get('/projets', [AgentComptableProjetController::class, 'index'])->name('projets.index');
         Route::get('/projets/{projet}', [AgentComptableProjetController::class, 'show'])->name('projets.show');
-        Route::post('/projets/{projet}/cloturer', [AgentComptableProjetController::class, 'cloturer'])->name('projets.cloturer');
-        Route::post('/projets/{projet}/mettre-en-cours', [AgentComptableProjetController::class, 'mettreEnCours'])->name('projets.mettre-en-cours');
-
         // Bilan projet (lecture seule)
         Route::get('/projets/{projet}/bilan', [AgentComptableProjetController::class, 'bilan'])->name('projets.bilan');
         Route::get('/projets/{projet}/bilan/pdf', [AgentComptableProjetController::class, 'exporterBilanPdf'])->name('projets.bilan.pdf');

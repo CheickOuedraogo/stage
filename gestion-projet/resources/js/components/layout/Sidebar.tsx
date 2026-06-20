@@ -27,7 +27,7 @@ import { dashboard as dafDashboard } from '@/routes/daf';
 import { index as dafChatIndex } from '@/routes/daf/chat';
 import { index as dafDemandesIndex } from '@/routes/daf/demandes';
 import { index as dafProjetsIndex } from '@/routes/daf/projets';
-import { index as dafRapportsIndex } from '@/routes/daf/rapports';
+
 import { index as dafRubriquesIndex } from '@/routes/daf/rubriques';
 import { index as dafVersementsIndex } from '@/routes/daf/versements';
 import { index as notificationsIndex } from '@/routes/notifications';
@@ -61,7 +61,6 @@ function getNavItems(role: User['role_key'], notifs: number, actionsCount: numbe
             { label: 'Demandes', href: dafDemandesIndex.url(), icon: ClipboardDocumentListIcon, badge: actionsBadge },
             { label: 'Versements', href: dafVersementsIndex.url(), icon: ScaleIcon },
             { label: 'Rubriques', href: dafRubriquesIndex.url(), icon: BookOpenIcon },
-            { label: 'Rapports', href: dafRapportsIndex.url(), icon: ChartBarIcon },
             { label: 'Assistance', href: dafChatIndex.url(), icon: ChatBubbleLeftRightIcon },
             { label: 'Notifications', href: notificationsIndex.url(), icon: BellIcon, badge: notifBadge },
         ],

@@ -9,6 +9,7 @@ export interface User {
     utilisateur_telephone: string | null;
     notifications_non_lues: number;
     actions_a_traiter_count: number;
+    paiements_a_traiter_count: number;
 }
 
 export interface PageProps {

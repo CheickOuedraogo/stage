@@ -89,7 +89,10 @@ class DemandeDepense extends Model
 
     public function scopeEnAttenteDaf(Builder $query): Builder
     {
-        return $query->where('demande_statut', StatutDemande::Soumise);
+        return $query->whereIn('demande_statut', [
+            StatutDemande::Soumise->value,
+            StatutDemande::RapportSoumis->value,
+        ]);
     }
 
     public function scopeEnAttenteAgentComptable(Builder $query): Builder

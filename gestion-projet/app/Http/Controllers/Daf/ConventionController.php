@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Daf;
 
-use App\Enums\StatutConvention;
 use App\Enums\StatutProjet;
 use App\Http\Controllers\Controller;
 use App\Models\Convention;
@@ -70,36 +69,6 @@ class ConventionController extends Controller
         ]);
 
         return back()->with('success', 'Rubrique mise à jour.');
-    }
-
-    public function terminer(Projet $projet, Convention $convention): RedirectResponse
-    {
-        abort_unless($convention->id_projet === $projet->id_projet, 404);
-
-        if (! in_array($convention->convention_statut, [StatutConvention::Active, StatutConvention::Suspendue])) {
-            throw ValidationException::withMessages([
-                'status' => 'Seule une convention active ou suspendue peut être terminée.',
-            ]);
-        }
-
-        $convention->update(['convention_statut' => StatutConvention::Terminee]);
-
-        return back()->with('success', "La convention « {$convention->convention_titre} » est marquée comme terminée.");
-    }
-
-    public function annuler(Projet $projet, Convention $convention): RedirectResponse
-    {
-        abort_unless($convention->id_projet === $projet->id_projet, 404);
-
-        if (! in_array($convention->convention_statut, [StatutConvention::Active, StatutConvention::Suspendue])) {
-            throw ValidationException::withMessages([
-                'status' => 'Seule une convention active ou suspendue peut être annulée.',
-            ]);
-        }
-
-        $convention->update(['convention_statut' => StatutConvention::Annulee]);
-
-        return back()->with('success', "La convention « {$convention->convention_titre} » a été annulée.");
     }
 
     public function destroyRubrique(Projet $projet, Convention $convention, Rubrique $rubrique): RedirectResponse

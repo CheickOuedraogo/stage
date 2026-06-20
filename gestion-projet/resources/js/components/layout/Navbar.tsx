@@ -35,7 +35,7 @@ import { dashboard as dafDashboard } from '@/routes/daf';
 import { index as dafChatIndex } from '@/routes/daf/chat';
 import { index as dafDemandesIndex } from '@/routes/daf/demandes';
 import { index as dafProjetsIndex } from '@/routes/daf/projets';
-import { index as dafRapportsIndex } from '@/routes/daf/rapports';
+
 import { index as notificationsIndex } from '@/routes/notifications';
 import { dashboard as porteurDashboard } from '@/routes/porteur';
 import { index as porteurChatIndex } from '@/routes/porteur/chat';
@@ -51,9 +51,10 @@ interface NavItem {
     badge?: number;
 }
 
-function getNavItems(role: User['role_key'], notifs: number, actionsCount: number): NavItem[] {
+function getNavItems(role: User['role_key'], notifs: number, actionsCount: number, paiementsCount: number): NavItem[] {
     const notifBadge = notifs > 0 ? notifs : undefined;
     const actionsBadge = actionsCount > 0 ? actionsCount : undefined;
+    const paiementsBadge = paiementsCount > 0 ? paiementsCount : undefined;
 
     const navByRole: Record<User['role_key'], NavItem[]> = {
         admin: [
@@ -66,14 +67,13 @@ function getNavItems(role: User['role_key'], notifs: number, actionsCount: numbe
             { label: 'Tableau de bord', href: dafDashboard.url(), icon: ChartBarIcon },
             { label: 'Projets', href: dafProjetsIndex.url(), icon: FolderIcon },
             { label: 'Demandes', href: dafDemandesIndex.url(), icon: ClipboardDocumentListIcon, badge: actionsBadge },
-            { label: 'Rapports', href: dafRapportsIndex.url(), icon: DocumentChartBarIcon },
             { label: 'Assistance', href: dafChatIndex.url(), icon: ChatBubbleLeftRightIcon },
         ],
         ac: [
             { label: 'Tableau de bord', href: acDashboard.url(), icon: HomeIcon },
             { label: 'Projets', href: acProjetsIndex.url(), icon: FolderIcon },
             { label: 'Demandes', href: acDemandesIndex.url(), icon: ClipboardDocumentListIcon, badge: actionsBadge },
-            { label: 'Paiements', href: acPaiementsIndex.url(), icon: CreditCardIcon },
+            { label: 'Paiements', href: acPaiementsIndex.url(), icon: CreditCardIcon, badge: paiementsBadge },
             { label: 'Assistance', href: acChatIndex.url(), icon: ChatBubbleLeftRightIcon },
         ],
         porteur: [
@@ -105,7 +105,7 @@ export function Navbar({ user }: NavbarProps) {
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const { isDark, toggle: toggleDark } = useDarkMode();
 
-    const items = getNavItems(user.role_key, user.notifications_non_lues, user.actions_a_traiter_count);
+    const items = getNavItems(user.role_key, user.notifications_non_lues, user.actions_a_traiter_count, user.paiements_a_traiter_count);
 
     const handleLogout = () => {
         router.post(logout.url());
@@ -148,7 +148,7 @@ export function Navbar({ user }: NavbarProps) {
                                 <Icon className="w-4 h-4 shrink-0" />
                                 {item.label}
                                 {item.badge !== undefined && (
-                                    <span className="ml-0.5 inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold bg-red-500 text-white rounded-full">
+                                    <span className="ml-0.5 inline-flex items-center justify-center min-w-[1rem] px-1 h-4 text-[10px] font-bold bg-red-500 text-white rounded-full">
                                         {item.badge > 9 ? '9+' : item.badge}
                                     </span>
                                 )}
@@ -187,7 +187,7 @@ export function Navbar({ user }: NavbarProps) {
                         <BellIcon className="w-4.5 h-4.5" style={{ width: '1.125rem', height: '1.125rem' }} />
                         {user.notifications_non_lues > 0 && (
                             <span
-                                className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center"
+                                className="absolute top-1 right-1 min-w-[1rem] px-1 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center"
                                 aria-hidden="true"
                             >
                                 {user.notifications_non_lues > 9 ? '9+' : user.notifications_non_lues}
@@ -292,7 +292,7 @@ export function Navbar({ user }: NavbarProps) {
                                     <Icon className="w-5 h-5 shrink-0" />
                                     <span className="flex-1">{item.label}</span>
                                     {item.badge !== undefined && (
-                                        <span className="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold bg-red-500 text-white rounded-full">
+                                        <span className="flex items-center justify-center min-w-5 px-1 h-4 ml-auto text-[10px] font-bold text-white bg-blue-500 rounded-full">
                                             {item.badge > 9 ? '9+' : item.badge}
                                         </span>
                                     )}

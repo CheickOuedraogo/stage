@@ -3,17 +3,15 @@
 namespace App\Http\Controllers\Daf;
 
 use App\Enums\StatutConvention;
-use App\Enums\StatutFinalProjet;
 use App\Enums\StatutProjet;
 use App\Exports\BilanProjetExport;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Daf\CloturerProjetRequest;
 use App\Models\Convention;
 use App\Models\Paiement;
 use App\Models\Projet;
 use App\Services\ProjetService;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -23,13 +21,28 @@ class ProjetController extends Controller
 {
     public function __construct(private readonly ProjetService $projetService) {}
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $projets = Projet::with(['porteur:id_utilisateur,utilisateur_nom', 'conventions.versements'])
-            ->withCount('conventions')
-            ->latest()
-            ->get()
-            ->map(function (Projet $p) {
+        $query = Projet::with(['porteur:id_utilisateur,utilisateur_nom', 'conventions.versements'])
+            ->withCount('conventions');
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('projet_titre', 'like', "%{$search}%")
+                    ->orWhereHas('porteur', function ($qp) use ($search) {
+                        $qp->where('utilisateur_nom', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        if ($request->filled('statut')) {
+            $query->where('projet_statut', $request->input('statut'));
+        }
+
+        $projets = $query->latest()
+            ->paginate(10)
+            ->through(function (Projet $p) {
                 $montantConvs = $p->conventions->sum(fn ($c) => $c->montant_fcfa);
                 $totalConsomme = Paiement::sumForProjet($p->id_projet);
                 $totalVersements = $p->montant_total_versements;
@@ -62,6 +75,7 @@ class ProjetController extends Controller
 
         return Inertia::render('daf/Projets/Index', [
             'projets' => $projets,
+            'filters' => $request->only(['search', 'statut']),
             'stats' => [
                 'total' => Projet::count(),
                 'en_cours' => Projet::where('projet_statut', StatutProjet::EnCours->value)->count(),
@@ -84,22 +98,6 @@ class ProjetController extends Controller
 
         $totalVersements = $projet->conventions->flatMap->versements->sum('versement_montant');
         $montantConventions = $projet->conventions->sum('montant_fcfa');
-
-        $canCloturer = false;
-        $clotureBlockers = null;
-
-        if ($projet->projet_statut === StatutProjet::EnCours) {
-            $clotureBlockers = $this->projetService->getBlockersCloture($projet);
-            $canCloturer = $clotureBlockers === null;
-        }
-
-        $canMettreEnCours = false;
-        $mettreEnCoursBlockers = null;
-
-        if ($projet->projet_statut === StatutProjet::EnAttenteFinancement) {
-            $mettreEnCoursBlockers = $this->projetService->getBlockersMettreEnCours($projet);
-            $canMettreEnCours = $mettreEnCoursBlockers === null;
-        }
 
         return Inertia::render('daf/Projets/Show', [
             'projet' => [
@@ -137,41 +135,9 @@ class ProjetController extends Controller
                     'versements_count' => $c->versements->count(),
                 ]),
                 'analyse_ecarts' => $this->buildAnalyseEcarts($projet),
-                'can_cloturer' => $canCloturer,
-                'cloture_blockers' => $clotureBlockers,
-                'can_mettre_en_cours' => $canMettreEnCours,
-                'mettre_en_cours_blockers' => $mettreEnCoursBlockers,
-                'bilan_url' => $projet->projet_statut === StatutProjet::Termine
-                    ? route('daf.projets.bilan', $projet)
-                    : null,
+                'bilan_url' => route('daf.projets.bilan', $projet),
             ],
         ]);
-    }
-
-    public function mettreEnCours(Projet $projet): RedirectResponse
-    {
-        $projet->loadMissing('conventions');
-        $this->projetService->mettreEnCours($projet, auth()->user());
-
-        return redirect()->route('daf.projets.show', $projet)
-            ->with('success', "Le projet « {$projet->projet_titre} » est maintenant en cours. Le porteur peut soumettre des demandes.");
-    }
-
-    public function cloturer(CloturerProjetRequest $request, Projet $projet): RedirectResponse
-    {
-        $this->authorize('cloturer', $projet);
-
-        $projet->loadMissing('conventions');
-        $this->projetService->verifierConditionsCloture($projet);
-        $this->projetService->cloturer(
-            $projet,
-            auth()->user(),
-            $request->date('date_fin_reelle'),
-            StatutFinalProjet::from($request->validated('statut_final')),
-        );
-
-        return redirect()->route('daf.projets.show', $projet)
-            ->with('success', "Le projet « {$projet->projet_titre} » a été clôturé avec succès.");
     }
 
     public function bilan(Projet $projet): Response

@@ -2,17 +2,14 @@
 
 namespace App\Http\Controllers\AgentComptable;
 
-use App\Enums\StatutFinalProjet;
 use App\Enums\StatutProjet;
 use App\Exports\BilanProjetExport;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Daf\CloturerProjetRequest;
 use App\Models\Convention;
 use App\Models\Paiement;
 use App\Models\Projet;
 use App\Services\ProjetService;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
 use Inertia\Inertia;
@@ -97,22 +94,6 @@ class ProjetController extends Controller
         $totalVersements = $projet->conventions->flatMap->versements->sum('versement_montant');
         $montantConventions = $projet->conventions->sum('montant_fcfa');
 
-        $canCloturer = false;
-        $clotureBlockers = null;
-
-        if ($projet->projet_statut === StatutProjet::EnCours) {
-            $clotureBlockers = $this->projetService->getBlockersCloture($projet);
-            $canCloturer = $clotureBlockers === null;
-        }
-
-        $canMettreEnCours = false;
-        $mettreEnCoursBlockers = null;
-
-        if ($projet->projet_statut === StatutProjet::EnAttenteFinancement) {
-            $mettreEnCoursBlockers = $this->projetService->getBlockersMettreEnCours($projet);
-            $canMettreEnCours = $mettreEnCoursBlockers === null;
-        }
-
         return Inertia::render('ac/Projets/Show', [
             'projet' => [
                 'id' => $projet->id_projet,
@@ -149,41 +130,9 @@ class ProjetController extends Controller
                     'versements_count' => $c->versements->count(),
                 ]),
                 'analyse_ecarts' => $this->buildAnalyseEcarts($projet),
-                'can_cloturer' => $canCloturer,
-                'cloture_blockers' => $clotureBlockers,
-                'can_mettre_en_cours' => $canMettreEnCours,
-                'mettre_en_cours_blockers' => $mettreEnCoursBlockers,
-                'bilan_url' => $projet->projet_statut === StatutProjet::Termine
-                    ? route('ac.projets.bilan', $projet)
-                    : null,
+                'bilan_url' => route('ac.projets.bilan', $projet),
             ],
         ]);
-    }
-
-    public function mettreEnCours(Projet $projet): RedirectResponse
-    {
-        $projet->loadMissing('conventions');
-        $this->projetService->mettreEnCours($projet, auth()->user());
-
-        return redirect()->route('ac.projets.show', $projet)
-            ->with('success', "Le projet « {$projet->projet_titre} » est maintenant en cours. Le porteur peut soumettre des demandes.");
-    }
-
-    public function cloturer(CloturerProjetRequest $request, Projet $projet): RedirectResponse
-    {
-        $this->authorize('cloturer', $projet);
-
-        $projet->loadMissing('conventions');
-        $this->projetService->verifierConditionsCloture($projet);
-        $this->projetService->cloturer(
-            $projet,
-            auth()->user(),
-            $request->date('date_fin_reelle'),
-            StatutFinalProjet::from($request->validated('statut_final')),
-        );
-
-        return redirect()->route('ac.projets.show', $projet)
-            ->with('success', "Le projet « {$projet->projet_titre} » a été clôturé avec succès.");
     }
 
     public function bilan(Projet $projet): Response

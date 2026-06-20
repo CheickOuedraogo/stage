@@ -214,7 +214,7 @@ return null;
                         {/* Justificatif PDF */}
                         <div>
                             <label htmlFor="justificatif" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">
-                                Justificatif (PDF) <span className="text-red-500">*</span>
+                                Justificatif (PDF) <span className="text-gray-400">(optionnel)</span>
                             </label>
                             <div className="relative">
                                 <input

@@ -111,7 +111,7 @@ class DemandeDepenseController extends Controller
             'montant' => ['required', 'integer', 'min:1'],
             'objet' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
-            'justificatif' => ['required', 'file', 'mimes:pdf', 'max:10240'],
+            'justificatif' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
         ]);
 
         $this->service->assertConventionARubriques($convention);
@@ -120,7 +120,10 @@ class DemandeDepenseController extends Controller
         $rubrique = Rubrique::findOrFail($validated['rubrique_id']);
         $this->service->assertBudgetSuffisant($rubrique, $validated['montant']);
 
-        $justificatifPath = $request->file('justificatif')->store('justificatifs', 'private');
+        $justificatifPath = null;
+        if ($request->hasFile('justificatif')) {
+            $justificatifPath = $request->file('justificatif')->store('justificatifs', 'private');
+        }
 
         $demande = DemandeDepense::create([
             'id_rubrique' => $validated['rubrique_id'],
@@ -184,6 +187,13 @@ class DemandeDepenseController extends Controller
         );
         abort_unless($demande->demande_justificatif && Storage::disk('private')->exists($demande->demande_justificatif), 404);
 
+        if ($request->query('inline')) {
+            return Storage::disk('private')->response($demande->demande_justificatif, 'justificatif.pdf', [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="justificatif.pdf"',
+            ]);
+        }
+
         return Storage::disk('private')->download($demande->demande_justificatif, 'justificatif.pdf');
     }
 
@@ -195,6 +205,13 @@ class DemandeDepenseController extends Controller
             403
         );
         abort_unless($demande->demande_rapport && Storage::disk('private')->exists($demande->demande_rapport), 404);
+
+        if ($request->query('inline')) {
+            return Storage::disk('private')->response($demande->demande_rapport, 'rapport_execution.pdf', [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="rapport_execution.pdf"',
+            ]);
+        }
 
         return Storage::disk('private')->download($demande->demande_rapport, 'rapport_execution.pdf');
     }

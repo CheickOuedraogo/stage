@@ -124,28 +124,28 @@ export default function Notifications() {
                                     </div>
 
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 flex-wrap">
-                                            <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
+                                        <div className="flex items-start gap-2 flex-wrap">
+                                            <p className="text-sm font-semibold text-slate-900 dark:text-white">
                                                 {notif.notification_objet ?? 'Notification'}
                                             </p>
                                             {notif.notification_libelle_statut && couleurStatut && (
-                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${couleurStatut}`}>
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${couleurStatut}`}>
                                                     {notif.notification_libelle_statut}
                                                 </span>
                                             )}
                                             {typeInfo.badge && (
-                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${typeInfo.badgeClass}`}>
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${typeInfo.badgeClass}`}>
                                                     {typeInfo.badge}
                                                 </span>
                                             )}
                                             {!notif.lu_le && (
-                                                <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+                                                <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0 mt-1" />
                                             )}
                                         </div>
 
                                         {notif.notification_motif && (
-                                            <p className="text-xs text-red-600 dark:text-red-400 mt-0.5">
-                                                Motif : {notif.notification_motif}
+                                            <p className="text-xs text-red-600 dark:text-red-400 mt-1 leading-relaxed">
+                                                <span className="font-medium">Motif :</span> {notif.notification_motif}
                                             </p>
                                         )}
 
