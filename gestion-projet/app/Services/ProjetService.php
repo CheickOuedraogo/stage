@@ -195,6 +195,7 @@ class ProjetService
         $demandes = $projet->conventions->flatMap(fn (Convention $c) => $c->rubriques->flatMap(fn ($r) => $r->demandesDepenses->map(fn (DemandeDepense $d) => [
             'objet' => $d->demande_objet,
             'montant' => $d->demande_montant,
+            'montant_prevu_rubrique' => $r->rubrique_montant,
             'rubrique' => $r->rubrique_libelle,
             'convention' => $c->bailleur->bailleur_sigle ?? $c->bailleur->bailleur_nom,
             'date_paiement' => $d->paiement?->paiement_date?->toDateString(),

@@ -105,7 +105,12 @@ return null;
 
 export default function AppLayout({ title, children }: AppLayoutProps) {
     const { auth, flash } = usePage<PageProps>().props;
-    const user = auth.user!;
+
+    if (!auth.user) {
+        return null;
+    }
+
+    const user = auth.user;
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex flex-col">

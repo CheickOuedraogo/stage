@@ -55,10 +55,7 @@ class LoginController extends Controller
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return Inertia::render('auth/Maintenance', [
-                'reason' => Parametre::get('maintenance_reason'),
-                'until' => Parametre::get('maintenance_until'),
-            ])->toResponse($request)->setStatusCode(503);
+            return redirect()->route('maintenance');
         }
 
         JournalAudit::log('login', $user, description: "Connexion de {$user->utilisateur_nom}");

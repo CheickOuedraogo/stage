@@ -14,7 +14,7 @@ enum RoleUtilisateur: string
     {
         return match ($this) {
             self::Administrateur => 'Administrateur',
-            self::Daf => 'Direction Administrateuristration et Finances',
+            self::Daf => 'Direction Administrative et Finances',
             self::AgentComptable => 'Agent Comptable',
             self::Porteur => 'Porteur de projet',
         };

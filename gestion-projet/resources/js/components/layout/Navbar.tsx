@@ -3,7 +3,6 @@ import {
     Bars3Icon,
     BellIcon,
     ChartBarIcon,
-    ChatBubbleLeftRightIcon,
     ClipboardDocumentCheckIcon,
     ClipboardDocumentListIcon,
     CreditCardIcon,
@@ -24,21 +23,17 @@ import { useDarkMode } from '@/hooks/useDarkMode';
 import { cn, getInitials } from '@/lib/utils';
 import { logout } from '@/routes';
 import { dashboard as acDashboard } from '@/routes/ac';
-import { index as acChatIndex } from '@/routes/ac/chat';
 import { index as acDemandesIndex } from '@/routes/ac/demandes';
 import { index as acPaiementsIndex } from '@/routes/ac/paiements';
 import { index as acProjetsIndex } from '@/routes/ac/projets';
-import { auditLog as adminAuditLog, dashboard as adminDashboard } from '@/routes/admin';
-import { index as adminChatIndex } from '@/routes/admin/chat';
+import { dashboard as adminDashboard } from '@/routes/admin';
 import { index as usersIndex } from '@/routes/admin/users';
 import { dashboard as dafDashboard } from '@/routes/daf';
-import { index as dafChatIndex } from '@/routes/daf/chat';
 import { index as dafDemandesIndex } from '@/routes/daf/demandes';
 import { index as dafProjetsIndex } from '@/routes/daf/projets';
 
 import { index as notificationsIndex } from '@/routes/notifications';
 import { dashboard as porteurDashboard } from '@/routes/porteur';
-import { index as porteurChatIndex } from '@/routes/porteur/chat';
 import { index as porteurDemandesIndex } from '@/routes/porteur/demandes';
 import { index as porteurProjetsIndex } from '@/routes/porteur/projets';
 import { edit as profileEdit } from '@/routes/profile';
@@ -60,26 +55,21 @@ function getNavItems(role: User['role_key'], notifs: number, actionsCount: numbe
         admin: [
             { label: 'Tableau de bord', href: adminDashboard.url(), icon: HomeIcon },
             { label: 'Utilisateurs', href: usersIndex.url(), icon: UsersIcon },
-            { label: 'Journal d\'audit', href: adminAuditLog.url(), icon: ClipboardDocumentCheckIcon },
-            { label: 'Messages', href: adminChatIndex.url(), icon: ChatBubbleLeftRightIcon },
         ],
         daf: [
             { label: 'Tableau de bord', href: dafDashboard.url(), icon: ChartBarIcon },
             { label: 'Projets', href: dafProjetsIndex.url(), icon: FolderIcon },
             { label: 'Demandes', href: dafDemandesIndex.url(), icon: ClipboardDocumentListIcon, badge: actionsBadge },
-            { label: 'Assistance', href: dafChatIndex.url(), icon: ChatBubbleLeftRightIcon },
         ],
         ac: [
             { label: 'Tableau de bord', href: acDashboard.url(), icon: HomeIcon },
             { label: 'Projets', href: acProjetsIndex.url(), icon: FolderIcon },
             { label: 'Demandes', href: acDemandesIndex.url(), icon: ClipboardDocumentListIcon, badge: actionsBadge },
             { label: 'Paiements', href: acPaiementsIndex.url(), icon: CreditCardIcon, badge: paiementsBadge },
-            { label: 'Assistance', href: acChatIndex.url(), icon: ChatBubbleLeftRightIcon },
         ],
         porteur: [
             { label: 'Mes projets', href: porteurProjetsIndex.url(), icon: FolderIcon },
             { label: 'Mes demandes', href: porteurDemandesIndex.url(), icon: ClipboardDocumentListIcon },
-            { label: 'Assistance', href: porteurChatIndex.url(), icon: QuestionMarkCircleIcon },
         ],
     };
 

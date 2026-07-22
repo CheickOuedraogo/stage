@@ -14,16 +14,20 @@ class MaintenanceService
      */
     public function activer(string $raison, ?string $jusqua = null): void
     {
-        Parametre::set('maintenance_mode', 'true');
-        Parametre::set('maintenance_reason', $raison);
-        Parametre::set('maintenance_until', $jusqua ?? '');
+        DB::transaction(function () use ($raison, $jusqua): void {
+            Parametre::set('maintenance_mode', 'true');
+            Parametre::set('maintenance_reason', $raison);
+            Parametre::set('maintenance_until', $jusqua ?? '');
 
-        // Invalider toutes les sessions sauf admin
-        $adminIds = Utilisateur::parRole(RoleUtilisateur::Administrateur)->pluck('id_utilisateur');
+            // L'invalidation globale n'est possible que pour le driver database.
+            if (config('session.driver') === 'database') {
+                $adminIds = Utilisateur::parRole(RoleUtilisateur::Administrateur)->pluck('id_utilisateur');
 
-        DB::table('sessions')
-            ->whereNotIn('user_id', $adminIds)
-            ->delete();
+                DB::table(config('session.table', 'sessions'))
+                    ->whereNotIn('user_id', $adminIds)
+                    ->delete();
+            }
+        });
     }
 
     /**

@@ -2,42 +2,26 @@ import {
     ClipboardDocumentCheckIcon,
     ClipboardDocumentListIcon,
     FolderIcon,
-    ShieldCheckIcon,
     UsersIcon,
 } from '@heroicons/react/24/outline';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import type { FormEvent } from 'react';
+import { useEffect, type FormEvent } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { Badge } from '@/components/ui/Badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { auditLog as adminAuditLog } from '@/routes/admin';
 import { update as maintenanceUpdate } from '@/routes/admin/maintenance';
 import { index as usersIndex } from '@/routes/admin/users';
 import type { PageProps } from '@/types';
 
-const actionLabels: Record<string, string> = {
-    login: 'Connexion',
-    logout: 'Déconnexion',
-    created: 'Création',
-    updated: 'Modification',
-    deleted: 'Suppression',
-    maintenance_enabled: 'Maintenance',
-    maintenance_disabled: 'Maintenance',
-    password_changed: 'Mot de passe',
-    profile_updated: 'Profil',
-    avatar_updated: 'Avatar',
-    user_activated: 'Activé',
-    user_deactivated: 'Désactivé',
-    user_status_change: 'Statut',
-};
+function toMaintenanceDateTime(value: string | null): string {
+    if (!value) return '';
 
-interface AuditLogEntry {
-    id: number;
-    action: string;
-    description: string | null;
-    user: string;
-    user_role: string | null;
-    cree_le: string;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+
+    const pad = (number: number) => String(number).padStart(2, '0');
+
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 interface AdminDashboardProps {
@@ -50,7 +34,6 @@ interface AdminDashboardProps {
         total_conventions: number;
         demandes_en_cours: number;
     };
-    recent_audit_logs: AuditLogEntry[];
 }
 
 type BadgeVariant = 'admin' | 'daf' | 'ac' | 'porteur' | 'default';
@@ -62,15 +45,24 @@ const roleVariants: Record<string, BadgeVariant> = {
     Porteur: 'porteur',
 };
 
-export default function AdminDashboard({ stats, recent_audit_logs }: AdminDashboardProps) {
+export default function AdminDashboard({ stats }: AdminDashboardProps) {
     const { auth, maintenance } = usePage<PageProps>().props;
     const inactive = stats.total_users - stats.active_users;
-
-    const { data, setData, patch, processing } = useForm({
+    const { data, setData, patch, processing, errors } = useForm({
         active: maintenance.active,
         reason: maintenance.reason ?? '',
-        until: maintenance.until ?? '',
+        until: toMaintenanceDateTime(maintenance.until),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     });
+
+    useEffect(() => {
+        setData({
+            active: maintenance.active,
+            reason: maintenance.reason ?? '',
+            until: toMaintenanceDateTime(maintenance.until),
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        });
+    }, [maintenance.active, maintenance.reason, maintenance.until, setData]);
 
     const submitMaintenance = (e: FormEvent) => {
         e.preventDefault();
@@ -180,7 +172,7 @@ export default function AdminDashboard({ stats, recent_audit_logs }: AdminDashbo
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={submitMaintenance} className="space-y-3" noValidate>
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between gap-4">
                                 <p className="text-sm text-gray-600 dark:text-slate-400">
                                     {data.active ? 'Les utilisateurs sont bloqués.' : 'Système accessible à tous.'}
                                 </p>
@@ -192,7 +184,7 @@ export default function AdminDashboard({ stats, recent_audit_logs }: AdminDashbo
                                     className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-900 focus:ring-amber-500 ${
                                         data.active ? 'bg-amber-500' : 'bg-gray-300 dark:bg-slate-600'
                                     }`}
-                                    aria-label="Activer/désactiver le mode maintenance"
+                                    aria-label="Activer ou désactiver le mode maintenance"
                                 >
                                     <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
                                         data.active ? 'translate-x-6' : 'translate-x-1'
@@ -208,14 +200,22 @@ export default function AdminDashboard({ stats, recent_audit_logs }: AdminDashbo
                                         rows={2}
                                         required
                                         placeholder="Raison de la maintenance…"
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none"
+                                        aria-invalid={!!errors.reason}
+                                        className="w-full px-3 py-2 text-sm leading-5 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none"
                                     />
+                                    {errors.reason && <p className="text-xs text-red-600 dark:text-red-400">{errors.reason}</p>}
                                     <input
-                                        type="datetime-local"
+                                        type="text"
                                         value={data.until}
                                         onChange={(e) => setData('until', e.target.value)}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                        inputMode="numeric"
+                                        pattern="\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}"
+                                        placeholder="AAAA-MM-JJ HH:MM"
+                                        aria-invalid={!!errors.until}
+                                        className="w-full px-3 py-2 text-sm leading-5 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                                     />
+                                    {errors.until && <p className="text-xs text-red-600 dark:text-red-400">{errors.until}</p>}
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">Format obligatoire : AAAA-MM-JJ HH:MM (ex. 2026-10-15 03:00).</p>
                                 </>
                             )}
 
@@ -231,39 +231,6 @@ export default function AdminDashboard({ stats, recent_audit_logs }: AdminDashbo
                 </Card>
             </div>
 
-            {/* Mini journal d'audit */}
-            <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
-                <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <ShieldCheckIcon className="w-4 h-4 text-indigo-500" />
-                        <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Dernières actions du système</h3>
-                    </div>
-                    <Link href={adminAuditLog.url()} className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium">
-                        Journal complet →
-                    </Link>
-                </div>
-                {recent_audit_logs.length === 0 ? (
-                    <p className="p-8 text-center text-sm text-slate-500">Aucune action enregistrée</p>
-                ) : (
-                    <div className="divide-y divide-gray-100 dark:divide-slate-800">
-                        {recent_audit_logs.map((log) => (
-                            <div key={log.id} className="flex items-start gap-4 px-5 py-3">
-                                <div className="shrink-0 w-2 h-2 mt-1.5 rounded-full bg-indigo-400" />
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-sm text-slate-900 dark:text-white">
-                                        <span className="font-medium">{log.user}</span>
-                                        {log.user_role && (
-                                            <span className="ml-1.5 text-xs text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">{log.user_role}</span>
-                                        )}
-                                        {log.description && <span className="text-slate-500 dark:text-slate-400"> — {log.description}</span>}
-                                    </p>
-                                    <p className="text-xs text-slate-400 mt-0.5">{actionLabels[log.action] ?? log.action} · {log.cree_le}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
         </AppLayout>
     );
 }

@@ -312,7 +312,7 @@ export default function AcDemandeShow({ demande, modes_paiement }: Props) {
                                 title="Enregistrement du paiement"
                             >
                                 <form onSubmit={handlePaiement} className="space-y-4">
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">
                                                 Montant
@@ -336,7 +336,7 @@ export default function AcDemandeShow({ demande, modes_paiement }: Props) {
                                             {paiementForm.errors.date_paiement && <p className="mt-1 text-xs text-red-600">{paiementForm.errors.date_paiement}</p>}
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                         <div>
                                             <label htmlFor="mode" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">
                                                 Mode <span className="text-red-500">*</span>

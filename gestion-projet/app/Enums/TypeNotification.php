@@ -10,7 +10,6 @@ enum TypeNotification: string
     case RapportSoumis = 'rapport_soumis';
     case ProjetCloture = 'projet_cloture';
     case ProjetMisEnCours = 'projet_mis_en_cours';
-    case MessageRecu = 'message_recu';
     case UtilisateurCree = 'utilisateur_cree';
 
     public function label(): string
@@ -22,7 +21,6 @@ enum TypeNotification: string
             self::RapportSoumis => 'Rapport soumis',
             self::ProjetCloture => 'Clôture de projet',
             self::ProjetMisEnCours => 'Projet mis en cours',
-            self::MessageRecu => 'Nouveau message',
             self::UtilisateurCree => 'Nouvel utilisateur',
         };
     }

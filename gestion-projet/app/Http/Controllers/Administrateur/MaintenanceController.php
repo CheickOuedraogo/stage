@@ -3,49 +3,44 @@
 namespace App\Http\Controllers\Administrateur;
 
 use App\Http\Controllers\Controller;
-use App\Models\JournalAudit;
 use App\Services\MaintenanceService;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
 
 class MaintenanceController extends Controller
 {
     public function __construct(private readonly MaintenanceService $maintenanceService) {}
-
-    public function index(): Response
-    {
-        return Inertia::render('admin/Maintenance', [
-            'maintenance' => $this->maintenanceService->getStatut(),
-        ]);
-    }
 
     public function update(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'active' => ['required', 'boolean'],
             'reason' => ['required_if:active,true', 'nullable', 'string', 'max:500'],
-            'until' => ['nullable', 'date', 'after:now'],
+            'until' => ['nullable', 'date_format:Y-m-d H:i', 'after:now'],
+            'timezone' => ['nullable', 'timezone'],
         ], [
             'reason.required_if' => 'La raison de la maintenance est obligatoire.',
+            'until.date_format' => 'Utilisez le format AAAA-MM-JJ HH:MM.',
             'until.after' => 'La date de fin doit être dans le futur.',
         ]);
 
         if ($validated['active']) {
             $this->maintenanceService->activer(
                 raison: $validated['reason'] ?? 'Maintenance en cours.',
-                jusqua: $validated['until'] ?? null,
+                jusqua: isset($validated['until'])
+                    ? Carbon::createFromFormat(
+                        'Y-m-d H:i',
+                        $validated['until'],
+                        $validated['timezone'] ?? config('app.timezone'),
+                    )->utc()->toIso8601String()
+                    : null,
             );
-
-            JournalAudit::log('maintenance_enabled', description: 'Mode maintenance activé par '.auth()->user()->utilisateur_nom);
 
             return back()->with('success', 'Mode maintenance activé. Tous les utilisateurs ont été déconnectés.');
         }
 
         $this->maintenanceService->desactiver();
-
-        JournalAudit::log('maintenance_disabled', description: 'Mode maintenance désactivé par '.auth()->user()->utilisateur_nom);
 
         return back()->with('success', 'Mode maintenance désactivé.');
     }

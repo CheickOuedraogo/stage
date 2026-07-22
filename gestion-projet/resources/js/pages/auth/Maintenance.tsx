@@ -15,6 +15,10 @@ return;
 }
 
         const target = new Date(until).getTime();
+        if (Number.isNaN(target)) {
+            setRemaining(null);
+            return;
+        }
 
         const update = () => {
             const diff = target - Date.now();
@@ -32,11 +36,12 @@ return;
 
 function formatCountdown(ms: number) {
     const totalSec = Math.floor(ms / 1000);
-    const h = Math.floor(totalSec / 3600);
+    const d = Math.floor(totalSec / 86_400);
+    const h = Math.floor((totalSec % 86_400) / 3600);
     const m = Math.floor((totalSec % 3600) / 60);
     const s = totalSec % 60;
 
-    return { h, m, s };
+    return { d, h, m, s };
 }
 
 function CountUnit({ value, label }: { value: number; label: string }) {
@@ -54,7 +59,7 @@ function CountUnit({ value, label }: { value: number; label: string }) {
 
 export default function Maintenance({ reason, until }: MaintenanceProps) {
     const remaining = useCountdown(until);
-    const { h, m, s } = remaining != null ? formatCountdown(remaining) : { h: 0, m: 0, s: 0 };
+    const { d, h, m, s } = remaining != null ? formatCountdown(remaining) : { d: 0, h: 0, m: 0, s: 0 };
     const finished = remaining === 0;
 
     return (
@@ -123,6 +128,12 @@ export default function Maintenance({ reason, until }: MaintenanceProps) {
                         <div className="mb-8">
                             <p className="text-xs text-white/30 uppercase tracking-widest mb-4">Reprise dans</p>
                             <div className="flex items-end gap-3">
+                                {d > 0 && (
+                                    <>
+                                        <CountUnit value={d} label="j" />
+                                        <span className="text-white/30 text-xl font-mono mb-4">:</span>
+                                    </>
+                                )}
                                 <CountUnit value={h} label="h" />
                                 <span className="text-white/30 text-xl font-mono mb-4">:</span>
                                 <CountUnit value={m} label="min" />

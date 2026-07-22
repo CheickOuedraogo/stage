@@ -17,12 +17,34 @@ describe('Mode maintenance', function () {
             ->patch(route('admin.maintenance.update'), [
                 'active' => true,
                 'reason' => 'Mise à jour du système',
-                'until' => now()->addHours(2)->format('Y-m-d\TH:i'),
+                'until' => now()->addHours(2)->format('Y-m-d H:i'),
             ])
             ->assertRedirect();
 
         expect(Parametre::isMaintenanceActive())->toBeTrue();
         expect(Parametre::get('maintenance_reason'))->toBe('Mise à jour du système');
+    });
+
+    it('active la maintenance sans date de fin', function () {
+        $this->actingAs($this->admin)
+            ->patch(route('admin.maintenance.update'), [
+                'active' => true,
+                'reason' => 'Intervention non planifiée',
+            ])
+            ->assertRedirect();
+
+        expect(Parametre::isMaintenanceActive())->toBeTrue();
+        expect(Parametre::getMaintenanceUntil())->toBeNull();
+    });
+
+    it('refuse une date ambiguë selon la langue du navigateur', function () {
+        $this->actingAs($this->admin)
+            ->patch(route('admin.maintenance.update'), [
+                'active' => true,
+                'reason' => 'Intervention planifiée',
+                'until' => '10/15/2026 03:00',
+            ])
+            ->assertSessionHasErrors('until');
     });
 
     it('désactive le mode maintenance', function () {
@@ -46,7 +68,16 @@ describe('Mode maintenance', function () {
 
         $this->actingAs($porteur)
             ->get(route('porteur.dashboard'))
-            ->assertStatus(503);
+            ->assertRedirect(route('maintenance'));
+    });
+
+    it('affiche la page de maintenance publique', function () {
+        Parametre::set('maintenance_mode', 'true');
+        Parametre::set('maintenance_reason', 'Maintenance test');
+
+        $this->get(route('maintenance'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->component('auth/Maintenance'));
     });
 
     it('laisse passer l\'admin en maintenance', function () {

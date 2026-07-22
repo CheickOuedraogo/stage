@@ -81,7 +81,7 @@ describe('Connexion', function () {
         $this->post(route('login'), [
             'utilisateur_email' => $porteur->utilisateur_email,
             'utilisateur_mot_de_passe' => 'utilisateur_mot_de_passe',
-        ]);
+        ])->assertRedirect(route('maintenance'));
 
         $this->assertGuest();
     });

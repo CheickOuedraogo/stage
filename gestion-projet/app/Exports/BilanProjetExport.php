@@ -88,16 +88,17 @@ class BilanProjetExport implements FromArray, ShouldAutoSize, WithEvents, WithTi
         $totalPrev = 0;
         $totalDep = 0;
         foreach ($demandes as $d) {
-            $totalPrev += $d['montant'];
+            $totalPrev += $d['montant_prevu_rubrique'];
             $totalDep += $d['montant'];
+            $taux = $d['montant_prevu_rubrique'] > 0 ? ($d['montant'] / $d['montant_prevu_rubrique']) : 0;
             $rows[] = [
                 $i++,
                 $d['objet'],
                 $d['rubrique'] ?? '—',
                 $d['convention'],
+                $d['montant_prevu_rubrique'],
                 $d['montant'],
-                $d['montant'],
-                1.0, // 100%
+                min(1.0, $taux),
                 $d['date_paiement'] ?? '—',
             ];
         }

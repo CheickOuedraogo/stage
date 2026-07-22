@@ -125,7 +125,7 @@ class Utilisateur extends Authenticatable
     }
 
     /** @var list<string> */
-    protected $appends = ['label_role', 'url_avatar', 'demandes_en_attente_count', 'paiements_en_attente_count'];
+    protected $appends = ['label_role', 'url_avatar'];
 
     /** Libellé court pour le rôle */
     public function getLabelRoleAttribute(): ?string

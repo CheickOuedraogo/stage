@@ -8,7 +8,6 @@ use App\Enums\StatutDemande;
 use App\Enums\StatutProjet;
 use App\Models\Convention;
 use App\Models\DemandeDepense;
-use App\Models\JournalAudit;
 use App\Models\Paiement;
 use App\Models\Projet;
 use App\Models\Rubrique;
@@ -22,19 +21,6 @@ class DashboardController extends Controller
 {
     public function admin(): Response
     {
-        $recentJournalAudits = JournalAudit::with('utilisateur:id_utilisateur,utilisateur_nom,role_key')
-            ->latest('cree_le')
-            ->limit(8)
-            ->get()
-            ->map(fn (JournalAudit $log) => [
-                'id' => $log->id_audit,
-                'action' => $log->audit_action,
-                'description' => $log->audit_description,
-                'user' => $log->utilisateur?->utilisateur_nom ?? 'Système',
-                'user_role' => $log->utilisateur?->role_key?->shortLabel(),
-                'cree_le' => $log->cree_le?->diffForHumans() ?? '—',
-            ]);
-
         return Inertia::render('admin/Dashboard', [
             'stats' => [
                 'total_users' => Utilisateur::count(),
@@ -53,13 +39,12 @@ class DashboardController extends Controller
                     StatutDemande::Terminee->value,
                 ])->count(),
             ],
-            'recent_audit_logs' => $recentJournalAudits,
         ]);
     }
 
     public function daf(): Response
     {
-        $projetsAgentComptabletifs = Projet::where('projet_statut', StatutProjet::EnCours)->count();
+        $projetsEnCours = Projet::where('projet_statut', StatutProjet::EnCours)->count();
         $conventionsActives = Convention::where('convention_statut', StatutConvention::Active)->count();
 
         $demandesEnAttente = DemandeDepense::where('demande_statut', StatutDemande::Soumise)->count();
@@ -135,7 +120,7 @@ class DashboardController extends Controller
 
         return Inertia::render('daf/Dashboard', [
             'stats' => [
-                'projets_actifs' => $projetsAgentComptabletifs,
+                'projets_actifs' => $projetsEnCours,
                 'conventions_actives' => $conventionsActives,
                 'demandes_en_attente' => $demandesEnAttente,
                 'demandes_en_attente_ac' => $demandesEnAttenteAgentComptable,
@@ -213,7 +198,7 @@ class DashboardController extends Controller
         $porteur = $request->user();
 
         $projetsCount = Projet::pourPorteur($porteur->id_utilisateur)->count();
-        $projetsAgentComptabletifsCount = Projet::pourPorteur($porteur->id_utilisateur)->where('projet_statut', StatutProjet::EnCours)->count();
+        $projetsEnCoursCount = Projet::pourPorteur($porteur->id_utilisateur)->where('projet_statut', StatutProjet::EnCours)->count();
 
         $demandesActives = DemandeDepense::where('id_porteur', $porteur->id_utilisateur)
             ->whereNotIn('demande_statut', [StatutDemande::RejeteeDaf, StatutDemande::RejeteeAgentComptable, StatutDemande::Terminee])
@@ -264,7 +249,7 @@ class DashboardController extends Controller
         return Inertia::render('porteur/Dashboard', [
             'stats' => [
                 'projets_count' => $projetsCount,
-                'projets_actifs' => $projetsAgentComptabletifsCount,
+                'projets_actifs' => $projetsEnCoursCount,
                 'demandes_actives' => $demandesActives,
                 'demandes_total' => $demandesTotal,
             ],

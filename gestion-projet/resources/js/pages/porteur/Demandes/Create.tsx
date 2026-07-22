@@ -119,7 +119,7 @@ return null;
             {/* Status banner */}
             <StatusBanner statut={projet.statut} libelleStatut={projet.libelle_statut} />
 
-            <div className="max-w-2xl">
+            <div className="mx-auto w-full max-w-2xl">
                 <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
                         Nouvelle demande de dépense

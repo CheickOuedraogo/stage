@@ -22,13 +22,13 @@ class StatutDemandeChange extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'demande_id' => $this->demande->id_utilisateur,
-            'objet' => $this->demande->objet,
+            'demande_id' => $this->demande->id_demande,
+            'objet' => $this->demande->demande_objet,
             'status' => $this->newStatus->value,
             'status_label' => $this->newStatus->label(),
             'motif' => $this->motif,
-            'convention_id' => $this->demande->convention_id,
-            'projet_id' => $this->demande->convention->projet_id ?? null,
+            'convention_id' => $this->demande->id_convention,
+            'projet_id' => $this->demande->convention->id_projet ?? null,
         ];
     }
 }

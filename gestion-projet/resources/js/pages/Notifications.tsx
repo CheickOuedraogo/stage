@@ -1,4 +1,4 @@
-import { BellIcon, ChatBubbleLeftRightIcon, CheckIcon, ClipboardDocumentListIcon, CreditCardIcon, FolderIcon, PaperAirplaneIcon, UserPlusIcon } from '@heroicons/react/24/outline';
+import { BellIcon, CheckIcon, ClipboardDocumentListIcon, CreditCardIcon, FolderIcon, PaperAirplaneIcon, UserPlusIcon } from '@heroicons/react/24/outline';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import AppLayout from '@/components/layout/AppLayout';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -7,7 +7,7 @@ import type { PageProps } from '@/types';
 
 interface Notif {
     id_notification: number;
-    type_notification: 'demande_statut_change' | 'nouvelle_demande' | 'paiement_effectue' | 'rapport_soumis' | 'projet_cloture' | 'projet_mis_en_cours' | 'message_recu' | 'utilisateur_cree';
+    type_notification: 'demande_statut_change' | 'nouvelle_demande' | 'paiement_effectue' | 'rapport_soumis' | 'projet_cloture' | 'projet_mis_en_cours' | 'utilisateur_cree';
     id_demande: number | null;
     id_projet: number | null;
     notification_objet: string | null;
@@ -97,8 +97,6 @@ export default function Notifications() {
                                         return { icon: CreditCardIcon, badge: 'Paiement effectué', badgeClass: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' };
                                     case 'rapport_soumis':
                                         return { icon: ClipboardDocumentListIcon, badge: 'Rapport soumis', badgeClass: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' };
-                                    case 'message_recu':
-                                        return { icon: ChatBubbleLeftRightIcon, badge: 'Nouveau message', badgeClass: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400' };
                                     case 'utilisateur_cree':
                                         return { icon: UserPlusIcon, badge: 'Nouvel utilisateur', badgeClass: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' };
                                     default:

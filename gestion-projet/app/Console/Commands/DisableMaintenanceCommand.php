@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\JournalAudit;
 use App\Models\Parametre;
+use App\Services\MaintenanceService;
 use Illuminate\Console\Command;
 
 class DisableMaintenanceCommand extends Command
@@ -21,13 +21,10 @@ class DisableMaintenanceCommand extends Command
         }
 
         if ($until && $until->isPast()) {
-            Parametre::set('maintenance_mode', 'false');
-            Parametre::set('maintenance_reason', '');
-            Parametre::set('maintenance_until', '');
+            app(MaintenanceService::class)->desactiver();
 
             $this->info('Mode maintenance désactivé automatiquement.');
 
-            JournalAudit::log('maintenance_disabled', description: 'Mode maintenance désactivé automatiquement (heure prévue atteinte).');
         }
 
         return self::SUCCESS;

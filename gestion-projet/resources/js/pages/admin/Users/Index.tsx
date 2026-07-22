@@ -5,7 +5,6 @@ import AppLayout from '@/components/layout/AppLayout';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { formatDate, getInitials } from '@/lib/utils';
-import { auditLog as adminAuditLog } from '@/routes/admin';
 import {
     create as usersCreate,
     edit as usersEdit,
@@ -188,9 +187,6 @@ return;
             </td>
             <td className="px-6 py-4">
                 <div className="flex items-center justify-end gap-2">
-                    <Link href={adminAuditLog.url({ query: { id_utilisateur: utilisateur.id_utilisateur } })}>
-                        <Button variant="ghost" size="sm" aria-label={`Journal de ${utilisateur.utilisateur_nom}`}>Journal</Button>
-                    </Link>
                     <Link href={usersEdit.url(utilisateur.id_utilisateur)}>
                         <Button variant="ghost" size="sm" aria-label={`Modifier ${utilisateur.utilisateur_nom}`}>Modifier</Button>
                     </Link>

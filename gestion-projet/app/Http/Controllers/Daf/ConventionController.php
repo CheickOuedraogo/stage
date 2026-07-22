@@ -214,7 +214,7 @@ class ConventionController extends Controller
             'versements' => $convention->versements->map(fn ($v) => [
                 'id' => $v->id_versement,
                 'montant' => $v->versement_montant,
-                'date_reception' => $v->versement_date_reception->toDateString(),
+                'date_reception' => $v->versement_date_reception?->toDateString(),
                 'reference' => $v->versement_reference,
                 'description' => $v->versement_description,
             ])->values(),
@@ -222,7 +222,7 @@ class ConventionController extends Controller
                 'id' => $p->id_paiement,
                 'montant' => $p->paiement_montant,
                 'objet_depense' => $p->paiement_objet,
-                'date_paiement' => $p->paiement_date->toDateString(),
+                'date_paiement' => $p->paiement_date?->toDateString(),
                 'rubrique' => $p->rubrique ? ['libelle' => $p->rubrique->rubrique_libelle] : null,
             ])->values(),
         ];

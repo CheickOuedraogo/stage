@@ -29,7 +29,7 @@ class UpdateProfileRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Le nom est obligatoire.',
+            'utilisateur_nom.required' => 'Le nom est obligatoire.',
             'avatar.image' => 'Le fichier doit être une image.',
             'avatar.max' => "L'image ne doit pas dépasser 2 Mo.",
         ];

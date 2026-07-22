@@ -18,7 +18,12 @@ function getInitials(name: string) {
 
 export default function ProfileEdit() {
     const { auth } = usePage<PageProps>().props;
-    const user = auth.user!;
+
+    if (!auth.user) {
+        return null;
+    }
+
+    const user = auth.user;
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 

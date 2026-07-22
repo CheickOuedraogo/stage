@@ -354,7 +354,7 @@ export default function AcConventionShow({ projet, convention }: Props) {
                                     />
                                     {paiementDirectForm.errors.objet_depense && <p className="text-xs text-red-600 mt-1">{paiementDirectForm.errors.objet_depense}</p>}
                                 </div>
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                     <div>
                                         <label className="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Montant (FCFA) *</label>
                                         <input

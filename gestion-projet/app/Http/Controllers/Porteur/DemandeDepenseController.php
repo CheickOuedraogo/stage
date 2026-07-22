@@ -182,7 +182,7 @@ class DemandeDepenseController extends Controller
     {
         abort_unless(
             $demande->id_porteur === $request->user()->id_utilisateur
-            || in_array($request->user()->role_key->value, ['daf', 'ac']),
+            || in_array($request->user()->role_key, [RoleUtilisateur::Daf, RoleUtilisateur::AgentComptable]),
             403
         );
         abort_unless($demande->demande_justificatif && Storage::disk('private')->exists($demande->demande_justificatif), 404);
@@ -201,7 +201,7 @@ class DemandeDepenseController extends Controller
     {
         abort_unless(
             $demande->id_porteur === $request->user()->id_utilisateur
-            || in_array($request->user()->role_key->value, ['daf', 'ac']),
+            || in_array($request->user()->role_key, [RoleUtilisateur::Daf, RoleUtilisateur::AgentComptable]),
             403
         );
         abort_unless($demande->demande_rapport && Storage::disk('private')->exists($demande->demande_rapport), 404);

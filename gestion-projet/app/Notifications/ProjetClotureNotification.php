@@ -17,10 +17,10 @@ class ProjetClotureNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'projet_id' => $this->projet->id_utilisateur,
-            'titre' => $this->projet->titre,
-            'date_cloture' => $this->projet->date_fin_reelle?->toDateString(),
-            'message' => "Le projet « {$this->projet->titre} » a été clôturé.",
+            'projet_id' => $this->projet->id_projet,
+            'titre' => $this->projet->projet_titre,
+            'date_cloture' => $this->projet->projet_date_fin_reelle?->toDateString(),
+            'message' => "Le projet « {$this->projet->projet_titre} » a été clôturé.",
         ];
     }
 }
