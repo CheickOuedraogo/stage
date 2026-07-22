@@ -3,13 +3,19 @@
 namespace App\Models;
 
 use App\Enums\ModePaiement;
+use App\Enums\TypePaiement;
 use Database\Factories\PaiementFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['id_demande', 'paiement_montant', 'paiement_date', 'paiement_mode', 'paiement_reference', 'id_enregistreur_paiement'])]
+#[Fillable([
+    'id_demande', 'paiement_montant', 'paiement_date', 'paiement_mode',
+    'paiement_reference', 'id_enregistreur_paiement',
+    'type_paiement', 'id_convention', 'id_rubrique',
+    'paiement_objet', 'paiement_description', 'id_projet',
+])]
 class Paiement extends Model
 {
     /** @use HasFactory<PaiementFactory> */
@@ -29,6 +35,7 @@ class Paiement extends Model
             'paiement_montant' => 'integer',
             'paiement_date' => 'date',
             'paiement_mode' => ModePaiement::class,
+            'type_paiement' => TypePaiement::class,
         ];
     }
 
@@ -37,8 +44,38 @@ class Paiement extends Model
         return $this->belongsTo(DemandeDepense::class, 'id_demande');
     }
 
+    public function convention(): BelongsTo
+    {
+        return $this->belongsTo(Convention::class, 'id_convention');
+    }
+
+    public function rubrique(): BelongsTo
+    {
+        return $this->belongsTo(Rubrique::class, 'id_rubrique');
+    }
+
+    public function projet(): BelongsTo
+    {
+        return $this->belongsTo(Projet::class, 'id_projet');
+    }
+
     public function enregistreur(): BelongsTo
     {
         return $this->belongsTo(Utilisateur::class, 'id_enregistreur_paiement');
+    }
+
+    public static function sumForProjet(int $idProjet): int
+    {
+        return (int) self::where('id_projet', $idProjet)->sum('paiement_montant');
+    }
+
+    public static function sumForConvention(int $idConvention): int
+    {
+        return (int) self::where('id_convention', $idConvention)->sum('paiement_montant');
+    }
+
+    public static function sumForRubrique(int $idRubrique): int
+    {
+        return (int) self::where('id_rubrique', $idRubrique)->sum('paiement_montant');
     }
 }

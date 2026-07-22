@@ -1,9 +1,10 @@
+import { CameraIcon, CheckIcon, KeyIcon, UserIcon } from '@heroicons/react/24/outline';
+import { Head, useForm, usePage } from '@inertiajs/react';
+import type { FormEvent} from 'react';
+import { useRef, useState } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { password as profilePassword, update as profileUpdate } from '@/routes/profile';
 import type { PageProps } from '@/types';
-import { Head, useForm, usePage } from '@inertiajs/react';
-import { CameraIcon, CheckIcon, KeyIcon, UtilisateurIcon } from '@heroicons/react/24/outline';
-import { FormEvent, useRef, useState } from 'react';
 
 function getInitials(name: string) {
     return name
@@ -17,7 +18,12 @@ function getInitials(name: string) {
 
 export default function ProfileEdit() {
     const { auth } = usePage<PageProps>().props;
-    const user = auth.user!;
+
+    if (!auth.user) {
+        return null;
+    }
+
+    const user = auth.user;
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -29,13 +35,14 @@ export default function ProfileEdit() {
 
     const passwordForm = useForm({
         current_password: '',
-        password: '',
-        password_confirmation: '',
+        utilisateur_mot_de_passe: '',
+        utilisateur_mot_de_passe_confirmation: '',
     });
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] ?? null;
         profileForm.setData('avatar', file);
+
         if (file) {
             const url = URL.createObjectURL(file);
             setPreviewUrl(url);
@@ -120,7 +127,7 @@ export default function ProfileEdit() {
                         <div>
                             <p className="text-lg font-semibold text-gray-900 dark:text-white">{user.utilisateur_nom}</p>
                             <p className="text-sm text-gray-500 dark:text-slate-400">{user.utilisateur_email}</p>
-                            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{roleLabels[user.utilisateur_role] ?? user.label_role}</p>
+                            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{roleLabels[user.role_key] ?? user.label_role}</p>
                             {previewUrl && (
                                 <p className="text-xs text-blue-600 mt-1 font-medium">
                                     Nouvelle photo sélectionnée — enregistrez pour appliquer
@@ -134,7 +141,7 @@ export default function ProfileEdit() {
                 <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
                     <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100 dark:border-slate-800">
                         <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
-                            <UtilisateurIcon className="w-4 h-4 text-gray-600 dark:text-slate-400" />
+                            <UserIcon className="w-4 h-4 text-gray-600 dark:text-slate-400" />
                         </div>
                         <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Informations personnelles</h3>
                     </div>
@@ -258,16 +265,16 @@ export default function ProfileEdit() {
                                 <input
                                     id="new_password"
                                     type="password"
-                                    value={passwordForm.data.password}
-                                    onChange={(e) => passwordForm.setData('password', e.target.value)}
+                                    value={passwordForm.data.utilisateur_mot_de_passe}
+                                    onChange={(e) => passwordForm.setData('utilisateur_mot_de_passe', e.target.value)}
                                     autoComplete="new-password"
                                     required
-                                    aria-invalid={!!passwordForm.errors.password}
+                                    aria-invalid={!!passwordForm.errors.utilisateur_mot_de_passe}
                                     placeholder="Min. 8 caractères"
                                     className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
                                 />
-                                {passwordForm.errors.password && (
-                                    <p className="text-xs text-red-600">{passwordForm.errors.password}</p>
+                                {passwordForm.errors.utilisateur_mot_de_passe && (
+                                    <p className="text-xs text-red-600">{passwordForm.errors.utilisateur_mot_de_passe}</p>
                                 )}
                             </div>
 
@@ -278,15 +285,15 @@ export default function ProfileEdit() {
                                 <input
                                     id="password_confirmation"
                                     type="password"
-                                    value={passwordForm.data.password_confirmation}
-                                    onChange={(e) => passwordForm.setData('password_confirmation', e.target.value)}
+                                    value={passwordForm.data.utilisateur_mot_de_passe_confirmation}
+                                    onChange={(e) => passwordForm.setData('utilisateur_mot_de_passe_confirmation', e.target.value)}
                                     autoComplete="new-password"
                                     required
-                                    aria-invalid={!!passwordForm.errors.password_confirmation}
+                                    aria-invalid={!!passwordForm.errors.utilisateur_mot_de_passe_confirmation}
                                     className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors"
                                 />
-                                {passwordForm.errors.password_confirmation && (
-                                    <p className="text-xs text-red-600">{passwordForm.errors.password_confirmation}</p>
+                                {passwordForm.errors.utilisateur_mot_de_passe_confirmation && (
+                                    <p className="text-xs text-red-600">{passwordForm.errors.utilisateur_mot_de_passe_confirmation}</p>
                                 )}
                             </div>
                         </div>

@@ -1,11 +1,3 @@
-import AppLayout from '@/components/layout/AppLayout';
-import { formatCurrency } from '@/lib/utils';
-import { show as demandeShow } from '@/actions/App/Http/Controllers/Daf/DemandeDepenseController';
-import { index as dafDemandesIndex } from '@/routes/daf/demandes';
-import { index as dafProjetsIndex } from '@/routes/daf/projets';
-import { index as dafRapportsIndex } from '@/routes/daf/rapports';
-import type { PageProps } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowRightIcon,
     BanknotesIcon,
@@ -14,6 +6,14 @@ import {
     ClipboardDocumentListIcon,
     FolderIcon,
 } from '@heroicons/react/24/outline';
+import { Head, Link, usePage } from '@inertiajs/react';
+import { show as demandeShow } from '@/actions/App/Http/Controllers/Daf/DemandeDepenseController';
+import AppLayout from '@/components/layout/AppLayout';
+import { formatCurrency } from '@/lib/utils';
+import { index as dafDemandesIndex } from '@/routes/daf/demandes';
+import { index as dafProjetsIndex } from '@/routes/daf/projets';
+import { index as dafRapportsIndex } from '@/routes/daf/rapports';
+import type { PageProps } from '@/types';
 
 interface Stats {
     projets_actifs: number;

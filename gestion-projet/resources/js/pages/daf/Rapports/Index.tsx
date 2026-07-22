@@ -1,13 +1,14 @@
-import AppLayout from '@/components/layout/AppLayout';
-import { executionBudgetaire, cloture as clotureRapport } from '@/actions/App/Http/Controllers/Daf/RapportController';
-import type { PageProps } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
 import {
     ArrowDownTrayIcon,
     ChartBarIcon,
     DocumentChartBarIcon,
 } from '@heroicons/react/24/outline';
-import { FormEvent, useState } from 'react';
+import { Head, usePage } from '@inertiajs/react';
+import type { FormEvent} from 'react';
+import { useState } from 'react';
+import { executionBudgetaire, cloture as clotureRapport } from '@/actions/App/Http/Controllers/Daf/RapportController';
+import AppLayout from '@/components/layout/AppLayout';
+import type { PageProps } from '@/types';
 
 interface Projet {
     id: number;
@@ -40,7 +41,11 @@ function RapportForm({
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        if (!projetId) return;
+
+        if (!projetId) {
+return;
+}
+
         const url = action({ query: { projet_id: projetId, format } }).url;
         window.open(url, '_blank');
     };

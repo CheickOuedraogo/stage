@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['id_convention', 'rubrique_libelle', 'rubrique_montant_prevu', 'rubrique_description'])]
+#[Fillable(['id_convention', 'rubrique_libelle', 'rubrique_montant', 'rubrique_description'])]
 class Rubrique extends Model
 {
     /** @use HasFactory<RubriqueFactory> */
@@ -26,7 +26,7 @@ class Rubrique extends Model
     protected function casts(): array
     {
         return [
-            'rubrique_montant_prevu' => 'integer',
+            'rubrique_montant' => 'integer',
         ];
     }
 
@@ -40,8 +40,13 @@ class Rubrique extends Model
         return $this->hasMany(DemandeDepense::class, 'id_rubrique');
     }
 
+    public function paiements(): HasMany
+    {
+        return $this->hasMany(Paiement::class, 'id_rubrique');
+    }
+
     public function paiementsDirects(): HasMany
     {
-        return $this->hasMany(PaiementDirect::class, 'id_rubrique');
+        return $this->hasMany(Paiement::class, 'id_rubrique')->where('type_paiement', 'direct');
     }
 }

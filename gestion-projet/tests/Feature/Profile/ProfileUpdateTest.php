@@ -30,7 +30,7 @@ describe('Profil utilisateur', function () {
             ])
             ->assertRedirect();
 
-        $this->assertDatabaseHas('users', [
+        $this->assertDatabaseHas('utilisateurs', [
             'id_utilisateur' => $this->user->id_utilisateur,
             'utilisateur_nom' => 'Nouveau Nom',
             'utilisateur_telephone' => '+226 71 11 11 11',
@@ -58,8 +58,8 @@ describe('Profil utilisateur', function () {
                 'avatar' => UploadedFile::fake()->image('avatar.jpg'),
             ]);
 
-        expect($this->user->fresh()->avatar_path)->not->toBeNull();
-        Storage::disk('public')->assertExists($this->user->fresh()->avatar_path);
+        expect($this->user->fresh()->utilisateur_avatar_chemin)->not->toBeNull();
+        Storage::disk('public')->assertExists($this->user->fresh()->utilisateur_avatar_chemin);
     });
 
     it('change le mot de passe', function () {

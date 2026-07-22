@@ -1,12 +1,12 @@
-import AppLayout from '@/components/layout/AppLayout';
-import { Button } from '@/components/ui/Button';
-import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils';
 import {
     index as demandesIndex,
     uploadRapport as uploadRapportAction,
     downloadJustificatif as _downloadJustificatif,
     downloadRapport as _downloadRapport,
 } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
+import AppLayout from '@/components/layout/AppLayout';
+import { Button } from '@/components/ui/Button';
+import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils';
 
 const downloadJustificatifAction = _downloadJustificatif['/porteur/demandes/{demande}/justificatif'];
 const downloadRapportAction = _downloadRapport['/porteur/demandes/{demande}/rapport-pdf'];
@@ -19,6 +19,7 @@ import {
     XCircleIcon,
     ClockIcon,
     BanknotesIcon,
+    EyeIcon,
 } from '@heroicons/react/24/outline';
 
 interface Paiement {
@@ -42,8 +43,8 @@ interface Demande {
     motif_rejet: string | null;
     possede_justificatif: boolean;
     possede_rapport: boolean;
+    rapport_motif_rejet: string | null;
     rapport_validee_daf: boolean;
-    rapport_validee_ac: boolean;
     validee_daf_at: string | null;
     validee_ac_at: string | null;
     validateur_daf: string | null;
@@ -58,45 +59,72 @@ interface Props {
     demande: Demande;
 }
 
-const STATUS_STEPS = [
-    { statut: 'soumise', label: 'Soumise', icon: ClockIcon },
-    { statut: 'validee_daf', label: 'Validée DAF', icon: CheckCircleIcon },
-    { statut: 'validee_ac', label: 'Validée AC', icon: CheckCircleIcon },
-    { statut: 'payee', label: 'Payée', icon: BanknotesIcon },
-    { statut: 'rapport_soumis', label: 'Rapport soumis', icon: DocumentArrowUpIcon },
-    { statut: 'terminee', label: 'Terminée', icon: CheckCircleIcon },
-];
+/** Toutes les étapes possibles dans l'ordre chronologique */
+const ALL_STEPS = [
+    { statut: 'soumise',        label: 'Initiation',           icon: ClockIcon },
+    { statut: 'validee_daf',    label: 'Validation DAF',       icon: CheckCircleIcon },
+    { statut: 'validee_ac',     label: 'Validation AC',        icon: CheckCircleIcon },
+    { statut: 'payee',          label: 'Paiement effectué',    icon: BanknotesIcon },
+    { statut: 'rapport_soumis', label: 'Soumission rapport',   icon: DocumentArrowUpIcon },
+    { statut: 'terminee',       label: 'Demande clôturée',    icon: CheckCircleIcon },
+] as const;
 
-const STATUS_ORDER = ['soumise', 'validee_daf', 'validee_ac', 'payee', 'rapport_soumis', 'terminee'];
+type StepStatut = typeof ALL_STEPS[number]['statut'];
 
-function getStepState(stepStatus: string, currentStatus: string): 'done' | 'current' | 'pending' | 'rejected' {
-    const isRejected = currentStatus === 'rejetee_daf' || currentStatus === 'rejetee_ac';
-    if (isRejected) {
-        // rejectedAt = the step where rejection occurred (DAF or AC decision step)
-        const rejectedAt = currentStatus === 'rejetee_daf' ? 'validee_daf' : 'validee_ac';
-        const rejectedIdx = STATUS_ORDER.indexOf(rejectedAt);
-        const stepIdx = STATUS_ORDER.indexOf(stepStatus);
-        if (stepIdx < rejectedIdx) return 'done';
-        if (stepIdx === rejectedIdx) return 'rejected';
-        return 'pending';
+/**
+ * Retourne les étapes à afficher dynamiquement selon le statut courant.
+ * Affiche uniquement les étapes déjà atteintes + l'étape en cours (ou de rejet).
+ */
+function buildTimeline(statut: string): Array<{
+    statut?: string;
+    label: string;
+    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+    state: 'done' | 'current' | 'rejected';
+    isLast: boolean;
+}> {
+    const STEP_ORDER: StepStatut[] = ['soumise', 'validee_daf', 'validee_ac', 'payee', 'rapport_soumis', 'terminee'];
+    const STEP_MAP = Object.fromEntries(ALL_STEPS.map(s => [s.statut, s]));
+
+    // Cas rejet demande DAF
+    if (statut === 'rejetee_daf') {
+        const reached = STEP_ORDER.slice(0, STEP_ORDER.indexOf('validee_daf'));
+        const steps: ReturnType<typeof buildTimeline> = reached.map(s => ({ ...STEP_MAP[s], state: 'done' as const, isLast: false }));
+        steps.push({ label: 'Refusé DAF', icon: XCircleIcon, state: 'rejected' as const, isLast: true });
+        if (steps.length > 1) steps[steps.length - 2].isLast = false;
+        return steps;
     }
-    const currentIdx = STATUS_ORDER.indexOf(currentStatus);
-    const stepIdx = STATUS_ORDER.indexOf(stepStatus);
-    if (stepIdx < currentIdx) return 'done';
-    if (stepIdx === currentIdx) return 'current';
-    return 'pending';
+
+    // Cas rejet demande AC
+    if (statut === 'rejetee_ac') {
+        const reached = STEP_ORDER.slice(0, STEP_ORDER.indexOf('validee_ac'));
+        const steps: ReturnType<typeof buildTimeline> = reached.map(s => ({ ...STEP_MAP[s], state: 'done' as const, isLast: false }));
+        steps.push({ label: 'Refusé AC', icon: XCircleIcon, state: 'rejected' as const, isLast: true });
+        return steps;
+    }
+
+    const currentIdx = STEP_ORDER.indexOf(statut as StepStatut);
+    if (currentIdx === -1) return [];
+
+    return STEP_ORDER.slice(0, currentIdx + 1).map((s, i, arr) => ({
+        ...STEP_MAP[s],
+        statut: s,
+        state: i < arr.length - 1 ? 'done' as const : 'current' as const,
+        isLast: i === arr.length - 1,
+    }));
 }
 
 export default function DemandeShow({ demande }: Props) {
     const rapportForm = useForm<{ rapport: File | null }>({ rapport: null });
 
-    const isRejected = demande.statut === 'rejetee_daf' || demande.statut === 'rejetee_ac';
+    // Payee = paiement fait, en attente rapport (y compris après rejet de rapport)
     const canUploadRapport = demande.statut === 'payee';
 
     function handleRapportSubmit(e: React.FormEvent) {
         e.preventDefault();
         rapportForm.post(uploadRapportAction.url(demande.id), { forceFormData: true });
     }
+
+    const timeline = buildTimeline(demande.statut);
 
     return (
         <AppLayout title={demande.objet}>
@@ -141,7 +169,7 @@ export default function DemandeShow({ demande }: Props) {
                             </p>
                         )}
 
-                        {isRejected && demande.motif_rejet && (
+                        {(demande.statut === 'rejetee_daf' || demande.statut === 'rejetee_ac') && demande.motif_rejet && (
                             <div className="mt-4 flex gap-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
                                 <XCircleIcon className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
                                 <div>
@@ -152,29 +180,75 @@ export default function DemandeShow({ demande }: Props) {
                         )}
                     </div>
 
-                    {/* Téléchargements */}
+                    {/* Documents */}
                     <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Documents</h3>
-                        <div className="flex flex-wrap gap-3">
-                            {demande.possede_justificatif && (
-                                <a
-                                    href={downloadJustificatifAction.url(demande.id)}
-                                    className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-lg transition-colors"
-                                >
-                                    <DocumentArrowDownIcon className="w-4 h-4" />
-                                    Justificatif PDF
-                                </a>
-                            )}
-                            {demande.possede_rapport && (
-                                <a
-                                    href={downloadRapportAction.url(demande.id)}
-                                    className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-lg transition-colors"
-                                >
-                                    <DocumentArrowDownIcon className="w-4 h-4" />
-                                    Rapport d'exécution
-                                </a>
-                            )}
-                        </div>
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Documents associés</h3>
+                        {!demande.possede_justificatif && !demande.possede_rapport ? (
+                            <p className="text-sm text-gray-500 dark:text-slate-400">Aucun document n'a été soumis.</p>
+                        ) : (
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left text-sm border-collapse">
+                                    <thead>
+                                        <tr className="text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-transparent">
+                                            <th className="py-2 pr-4">Type de document</th>
+                                            <th className="py-2 px-4 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-transparent">
+                                        {demande.possede_justificatif && (
+                                            <tr>
+                                                <td className="py-2.5 pr-4 font-medium text-slate-850 dark:text-slate-200">
+                                                    Justificatif de dépense (PDF)
+                                                </td>
+                                                <td className="py-2.5 px-4 text-right space-x-2">
+                                                    <a
+                                                        href={`${downloadJustificatifAction.url(demande.id)}?inline=1`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 text-xs font-medium rounded-lg transition-colors"
+                                                    >
+                                                        <EyeIcon className="w-3.5 h-3.5" />
+                                                        Voir
+                                                    </a>
+                                                    <a
+                                                        href={downloadJustificatifAction.url(demande.id)}
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-medium rounded-lg transition-colors"
+                                                    >
+                                                        <DocumentArrowDownIcon className="w-3.5 h-3.5" />
+                                                        Télécharger
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        )}
+                                        {demande.possede_rapport && (
+                                            <tr>
+                                                <td className="py-2.5 pr-4 font-medium text-slate-850 dark:text-slate-200">
+                                                    Rapport d'exécution
+                                                </td>
+                                                <td className="py-2.5 px-4 text-right space-x-2">
+                                                    <a
+                                                        href={`${downloadRapportAction.url(demande.id)}?inline=1`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 text-xs font-medium rounded-lg transition-colors"
+                                                    >
+                                                        <EyeIcon className="w-3.5 h-3.5" />
+                                                        Voir
+                                                    </a>
+                                                    <a
+                                                        href={downloadRapportAction.url(demande.id)}
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-medium rounded-lg transition-colors"
+                                                    >
+                                                        <DocumentArrowDownIcon className="w-3.5 h-3.5" />
+                                                        Télécharger
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
 
                     {/* Upload rapport */}
@@ -183,6 +257,17 @@ export default function DemandeShow({ demande }: Props) {
                             <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-1">
                                 Rapport d'exécution requis
                             </h3>
+
+                            {demande.rapport_motif_rejet && (
+                                <div className="flex gap-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-4">
+                                    <XCircleIcon className="w-5 h-5 text-red-500 shrink-0" />
+                                    <div>
+                                        <p className="text-sm font-medium text-red-800 dark:text-red-300">Rapport rejeté</p>
+                                        <p className="text-sm text-red-700 dark:text-red-400 mt-0.5">{demande.rapport_motif_rejet}</p>
+                                    </div>
+                                </div>
+                            )}
+
                             <p className="text-sm text-amber-700 dark:text-amber-400 mb-4">
                                 Le paiement a été effectué. Veuillez soumettre le rapport d'exécution (PDF).
                             </p>
@@ -211,71 +296,72 @@ export default function DemandeShow({ demande }: Props) {
                             <h3 className="text-sm font-semibold text-purple-800 dark:text-purple-300 mb-2">
                                 Rapport en cours de validation
                             </h3>
-                            <div className="flex gap-6">
-                                <div className="flex items-center gap-2">
-                                    {demande.rapport_validee_daf
-                                        ? <CheckCircleIcon className="w-4 h-4 text-emerald-500" />
-                                        : <ClockIcon className="w-4 h-4 text-slate-400" />}
-                                    <span className="text-sm text-purple-700 dark:text-purple-300">
-                                        DAF {demande.rapport_validee_daf ? 'validé' : 'en attente'}
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    {demande.rapport_validee_ac
-                                        ? <CheckCircleIcon className="w-4 h-4 text-emerald-500" />
-                                        : <ClockIcon className="w-4 h-4 text-slate-400" />}
-                                    <span className="text-sm text-purple-700 dark:text-purple-300">
-                                        AC {demande.rapport_validee_ac ? 'validé' : 'en attente'}
-                                    </span>
-                                </div>
+                            <div className="flex items-center gap-2">
+                                {demande.rapport_validee_daf
+                                    ? <CheckCircleIcon className="w-4 h-4 text-emerald-500" />
+                                    : <ClockIcon className="w-4 h-4 text-slate-400" />}
+                                <span className="text-sm text-purple-700 dark:text-purple-300">
+                                    DAF {demande.rapport_validee_daf ? 'validé' : 'en attente'}
+                                </span>
                             </div>
                         </div>
                     )}
                 </div>
 
-                {/* Colonne droite - Timeline & Paiement */}
+                {/* Colonne droite - Timeline dynamique */}
                 <div className="space-y-6">
-                    {/* Timeline */}
                     <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
                         <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-5">
                             Suivi du circuit
                         </h3>
-                        <div className="space-y-4">
-                            {STATUS_STEPS.map((step, idx) => {
-                                const state = getStepState(step.statut, demande.statut);
+                        <div className="space-y-0">
+                            {timeline.map((step, idx) => {
                                 const Icon = step.icon;
+                                const isRejectedStep = step.state === 'rejected';
+
                                 return (
-                                    <div key={step.statut} className="flex gap-3">
+                                    <div key={idx} className="flex gap-3">
                                         <div className="flex flex-col items-center">
                                             <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-colors ${
-                                                state === 'done' ? 'bg-emerald-500 text-white' :
-                                                state === 'current' ? 'bg-blue-500 text-white' :
-                                                state === 'rejected' ? 'bg-red-500 text-white' :
-                                                'bg-slate-200 dark:bg-slate-700 text-slate-400'
+                                                step.state === 'done' ? 'bg-emerald-500 text-white' :
+                                                step.state === 'current' ? 'bg-blue-500 text-white' :
+                                                'bg-red-500 text-white'
                                             }`}>
-                                                {state === 'rejected'
+                                                {isRejectedStep
                                                     ? <XCircleIcon className="w-4 h-4" />
                                                     : <Icon className="w-4 h-4" />}
                                             </div>
-                                            {idx < STATUS_STEPS.length - 1 && (
-                                                <div className={`w-0.5 h-8 mt-1 ${state === 'done' ? 'bg-emerald-200 dark:bg-emerald-800' : 'bg-slate-200 dark:bg-slate-700'}`} />
+                                            {!step.isLast && (
+                                                <div className={`w-0.5 h-8 mt-1 ${
+                                                    step.state === 'done' ? 'bg-emerald-200 dark:bg-emerald-800' : 'bg-slate-200 dark:bg-slate-700'
+                                                }`} />
                                             )}
                                         </div>
                                         <div className="pb-4">
                                             <p className={`text-sm font-medium ${
-                                                state === 'pending' ? 'text-slate-400 dark:text-slate-600' : 'text-slate-800 dark:text-slate-200'
+                                                isRejectedStep ? 'text-red-600 dark:text-red-400' : 'text-slate-800 dark:text-slate-200'
                                             }`}>
                                                 {step.label}
                                             </p>
+                                            {step.statut === 'soumise' && (
+                                                <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                                                    {demande.cree_le}
+                                                </p>
+                                            )}
                                             {step.statut === 'validee_daf' && demande.validee_daf_at && (
                                                 <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                                                    {formatDateTime(demande.validee_daf_at)} · {demande.validateur_daf}
+                                                    {formatDateTime(demande.validee_daf_at)}
+                                                    {demande.validateur_daf ? ` · ${demande.validateur_daf}` : ''}
                                                 </p>
                                             )}
                                             {step.statut === 'validee_ac' && demande.validee_ac_at && (
                                                 <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                                                    {formatDateTime(demande.validee_ac_at)} · {demande.validateur_ac}
+                                                    {formatDateTime(demande.validee_ac_at)}
+                                                    {demande.validateur_ac ? ` · ${demande.validateur_ac}` : ''}
                                                 </p>
+                                            )}
+                                            {isRejectedStep && demande.motif_rejet && (
+                                                <p className="text-xs text-red-500 dark:text-red-400 mt-0.5">{demande.motif_rejet}</p>
                                             )}
                                         </div>
                                     </div>
@@ -283,41 +369,48 @@ export default function DemandeShow({ demande }: Props) {
                             })}
                         </div>
                     </div>
-
-                    {/* Paiement */}
-                    {demande.paiement && (
-                        <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
-                            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
-                                Paiement effectué
-                            </h3>
-                            <dl className="space-y-3 text-sm">
-                                <div className="flex justify-between">
-                                    <dt className="text-slate-500 dark:text-slate-400">Montant</dt>
-                                    <dd className="font-mono font-semibold text-gray-900 dark:text-white">{formatCurrency(demande.paiement.montant)}</dd>
-                                </div>
-                                <div className="flex justify-between">
-                                    <dt className="text-slate-500 dark:text-slate-400">Date</dt>
-                                    <dd className="text-gray-700 dark:text-slate-300">{formatDate(demande.paiement.date_paiement)}</dd>
-                                </div>
-                                <div className="flex justify-between">
-                                    <dt className="text-slate-500 dark:text-slate-400">Mode</dt>
-                                    <dd className="text-gray-700 dark:text-slate-300">{demande.paiement.mode_paiement_label}</dd>
-                                </div>
-                                {demande.paiement.reference && (
-                                    <div className="flex justify-between">
-                                        <dt className="text-slate-500 dark:text-slate-400">Référence</dt>
-                                        <dd className="font-mono text-gray-700 dark:text-slate-300">{demande.paiement.reference}</dd>
-                                    </div>
-                                )}
-                                <div className="flex justify-between">
-                                    <dt className="text-slate-500 dark:text-slate-400">Enregistré par</dt>
-                                    <dd className="text-gray-700 dark:text-slate-300">{demande.paiement.enregistre_par}</dd>
-                                </div>
-                            </dl>
-                        </div>
-                    )}
                 </div>
             </div>
+
+            {/* Paiement — pleine largeur en bas */}
+            {demande.paiement && (
+                <div className="mt-6 bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-800 rounded-xl overflow-hidden">
+                    <div className="flex items-center gap-3 px-6 py-4 bg-emerald-50 dark:bg-emerald-900/20 border-b border-emerald-100 dark:border-emerald-800">
+                        <div className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-800 flex items-center justify-center shrink-0">
+                            <BanknotesIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">
+                                Paiement effectué
+                            </h3>
+                            <p className="text-xs text-emerald-600 dark:text-emerald-400">
+                                Paiement enregistré le {formatDate(demande.paiement.date_paiement)}
+                            </p>
+                        </div>
+                        <span className="ml-auto font-mono text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                            {formatCurrency(demande.paiement.montant)}
+                        </span>
+                    </div>
+                    <div className="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Mode de paiement</p>
+                            <p className="text-sm font-medium text-slate-900 dark:text-white">{demande.paiement.mode_paiement_label}</p>
+                        </div>
+                        <div>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Référence</p>
+                            <p className="text-sm font-mono text-slate-900 dark:text-white">{demande.paiement.reference ?? '—'}</p>
+                        </div>
+                        <div>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Date de paiement</p>
+                            <p className="text-sm font-medium text-slate-900 dark:text-white">{formatDate(demande.paiement.date_paiement)}</p>
+                        </div>
+                        <div>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Enregistré par</p>
+                            <p className="text-sm font-medium text-slate-900 dark:text-white">{demande.paiement.enregistre_par}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AppLayout>
     );
 }

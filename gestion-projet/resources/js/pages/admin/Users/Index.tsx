@@ -1,8 +1,10 @@
+import { MagnifyingGlassIcon, PlusIcon, UserIcon } from '@heroicons/react/24/outline';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { formatDate, getInitials } from '@/lib/utils';
-import { auditLog as adminAuditLog } from '@/routes/admin';
 import {
     create as usersCreate,
     edit as usersEdit,
@@ -10,9 +12,6 @@ import {
     toggleActive as usersToggleActive,
 } from '@/routes/admin/users';
 import type { PageProps, PaginatedData, Utilisateur } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import { MagnifyingGlassIcon, PlusIcon, UtilisateurIcon } from '@heroicons/react/24/outline';
-import { useState } from 'react';
 
 interface Role {
     value: string;
@@ -107,7 +106,7 @@ export default function UtilisateursIndex({ utilisateurs, filters, roles }: Util
                             {utilisateurs.data.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="px-6 py-16 text-center text-gray-400 dark:text-slate-500">
-                                        <UtilisateurIcon className="w-10 h-10 mx-auto mb-2 opacity-40" />
+                                        <UserIcon className="w-10 h-10 mx-auto mb-2 opacity-40" />
                                         <p>Aucun utilisateur trouvé</p>
                                     </td>
                                 </tr>
@@ -150,10 +149,13 @@ export default function UtilisateursIndex({ utilisateurs, filters, roles }: Util
 
 function UtilisateurRow({ utilisateur }: { utilisateur: Utilisateur & { cree_le: string } }) {
     const { auth } = usePage<PageProps>().props;
-    const isSelf = auth.utilisateur?.id_utilisateur === utilisateur.id_utilisateur;
+    const isSelf = auth.user?.id === utilisateur.id_utilisateur;
 
     const handleToggle = () => {
-        if (isSelf) return;
+        if (isSelf) {
+return;
+}
+
         router.patch(usersToggleActive.url(utilisateur.id_utilisateur), {}, { preserveScroll: true });
     };
 
@@ -174,7 +176,7 @@ function UtilisateurRow({ utilisateur }: { utilisateur: Utilisateur & { cree_le:
                     </div>
                 </div>
             </td>
-            <td className="px-6 py-4"><Badge variant={utilisateur.utilisateur_role as any}>{utilisateur.label_role}</Badge></td>
+            <td className="px-6 py-4"><Badge variant={utilisateur.role_key as any}>{utilisateur.label_role}</Badge></td>
             <td className="px-6 py-4">
                 <Badge variant={utilisateur.utilisateur_actif ? 'success' : 'muted'} dot>
                     {utilisateur.utilisateur_actif ? 'Actif' : 'Désactivé'}
@@ -185,9 +187,6 @@ function UtilisateurRow({ utilisateur }: { utilisateur: Utilisateur & { cree_le:
             </td>
             <td className="px-6 py-4">
                 <div className="flex items-center justify-end gap-2">
-                    <Link href={adminAuditLog.url({ query: { id_utilisateur: utilisateur.id_utilisateur } })}>
-                        <Button variant="ghost" size="sm" aria-label={`Journal de ${utilisateur.utilisateur_nom}`}>Journal</Button>
-                    </Link>
                     <Link href={usersEdit.url(utilisateur.id_utilisateur)}>
                         <Button variant="ghost" size="sm" aria-label={`Modifier ${utilisateur.utilisateur_nom}`}>Modifier</Button>
                     </Link>

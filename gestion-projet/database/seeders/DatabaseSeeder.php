@@ -13,7 +13,6 @@ class DatabaseSeeder extends Seeder
             ParametreSeeder::class,
             ProjetSeeder::class,
             DemandeDepenseSeeder::class,
-            FaqSeeder::class,
         ]);
     }
 }

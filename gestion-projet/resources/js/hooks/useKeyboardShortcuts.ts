@@ -11,9 +11,18 @@ export function useKeyboardShortcuts(shortcuts: ShortcutMap): void {
         const handler = (e: KeyboardEvent) => {
             const parts: string[] = [];
 
-            if (e.ctrlKey || e.metaKey) parts.push('ctrl');
-            if (e.shiftKey) parts.push('shift');
-            if (e.altKey) parts.push('alt');
+            if (e.ctrlKey || e.metaKey) {
+parts.push('ctrl');
+}
+
+            if (e.shiftKey) {
+parts.push('shift');
+}
+
+            if (e.altKey) {
+parts.push('alt');
+}
+
             parts.push(e.key.toLowerCase());
 
             const key = parts.join('+');
@@ -23,7 +32,10 @@ export function useKeyboardShortcuts(shortcuts: ShortcutMap): void {
                 // Don't trigger if user is typing in an input/textarea
                 const target = e.target as HTMLElement;
                 const isInputField = ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName);
-                if (isInputField && key !== 'escape') return;
+
+                if (isInputField && key !== 'escape') {
+return;
+}
 
                 e.preventDefault();
                 shortcutFn(e);

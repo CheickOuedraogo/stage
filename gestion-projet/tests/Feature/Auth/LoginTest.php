@@ -28,12 +28,12 @@ describe('Connexion', function () {
             'utilisateur_mot_de_passe' => 'utilisateur_mot_de_passe',
         ]);
 
-        $response->assertRedirect(route('porteur.dashboard'));
         $this->assertAuthenticatedAs($user);
+        $response->assertRedirect(route('porteur.dashboard'));
     });
 
     it('redirige vers le bon dashboard selon le rôle', function (RoleUtilisateur $role, string $routeTableauBord) {
-        $user = Utilisateur::factory()->state(['utilisateur_role' => $role])->create([
+        $user = Utilisateur::factory()->state(['role_key' => $role])->create([
             'utilisateur_mot_de_passe' => bcrypt('utilisateur_mot_de_passe'),
         ]);
 
@@ -81,7 +81,7 @@ describe('Connexion', function () {
         $this->post(route('login'), [
             'utilisateur_email' => $porteur->utilisateur_email,
             'utilisateur_mot_de_passe' => 'utilisateur_mot_de_passe',
-        ]);
+        ])->assertRedirect(route('maintenance'));
 
         $this->assertGuest();
     });
@@ -123,21 +123,21 @@ describe('Blocage par tentatives (backoff exponentiel)', function () {
         ]);
 
         $response->assertSessionHasErrors('utilisateur_email');
-        expect(session('errors')->first('utilisateur_email'))->toContain('2 tentative(s)');
+        expect(session('errors')->first('utilisateur_email'))->toContain('4 tentative(s)');
     });
 
-    it('bloque après 3 échecs avec message de temps d\'attente', function () {
+    it('bloque après 5 échecs avec message de temps d\'attente', function () {
         $user = Utilisateur::factory()->create(['utilisateur_mot_de_passe' => bcrypt('utilisateur_mot_de_passe')]);
 
-        // 3 tentatives échouées
-        for ($i = 0; $i < 3; $i++) {
+        // 5 tentatives échouées
+        for ($i = 0; $i < 5; $i++) {
             $this->post(route('login'), [
                 'utilisateur_email' => $user->utilisateur_email,
                 'utilisateur_mot_de_passe' => 'mauvais',
             ]);
         }
 
-        // 4e tentative — doit être bloquée
+        // 6e tentative — doit être bloquée
         $response = $this->post(route('login'), [
             'utilisateur_email' => $user->utilisateur_email,
             'utilisateur_mot_de_passe' => 'utilisateur_mot_de_passe',

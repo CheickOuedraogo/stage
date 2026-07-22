@@ -18,16 +18,14 @@ class MaintenanceMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         // Auto-disable maintenance if scheduled end time has passed
-        $until = Parametre::getMaintenanceUntil();
+        $until = Parametre::getMaintenanceJusqua();
 
-        if ($until && $until->isPast() && Parametre::isMaintenanceActive()) {
-            Parametre::set('maintenance_mode', 'false');
-            Parametre::set('maintenance_reason', '');
-            Parametre::set('maintenance_until', '');
+        if ($until && $until->isPast() && Parametre::estMaintenanceActive()) {
+            app(\App\Services\MaintenanceService::class)->desactiver();
         }
 
         // Check if maintenance is still active after potential auto-disable
-        if (! Parametre::isMaintenanceActive()) {
+        if (! Parametre::estMaintenanceActive()) {
             return $next($request);
         }
 
@@ -36,17 +34,11 @@ class MaintenanceMiddleware
             return $next($request);
         }
 
-        // Allow access to the login routes (GET + POST) to show maintenance message and allow admin login
-        if ($request->routeIs('login') || $request->is('connexion')) {
+        // Permettre la connexion des administrateurs et la page publique de maintenance.
+        if ($request->routeIs('login', 'maintenance') || $request->is('connexion')) {
             return $next($request);
         }
 
-        $reason = Parametre::get('maintenance_reason', 'Maintenance en cours.');
-        $maintenanceUntil = Parametre::get('maintenance_until');
-
-        return inertia('auth/Maintenance', [
-            'reason' => $reason,
-            'until' => $maintenanceUntil,
-        ])->toResponse($request)->setStatusCode(503);
+        return redirect()->route('maintenance');
     }
 }

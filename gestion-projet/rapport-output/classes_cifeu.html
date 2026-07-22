@@ -138,7 +138,7 @@
     <tr><td><code>validerDemande(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Valide la demande soumise — passe le statut a validee_daf</td></tr>
     <tr><td><code>rejeterDemande(demande: DemandeDepense, motif: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Rejette la demande avec motif obligatoire — statut rejetee_daf</td></tr>
     <tr><td><code>validerRapport(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Valide le rapport d'execution soumis par le porteur</td></tr>
-    <tr><td><code>rejeterRapport(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Rejette le rapport — le porteur doit en soumettre un nouveau</td></tr>
+    <tr><td><code>rejeterRapport(demande: DemandeDepense, motif: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Rejette le rapport avec motif optionnel — le porteur doit en soumettre un nouveau</td></tr>
     <tr><td><code>enregistrerVersement(convention: Convention, montant: Integer, date: Date)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Versement</code></td><td>Enregistre un versement recu du bailleur sur la convention</td></tr>
     <tr><td><code>ajouterRubrique(convention: Convention, libelle: String, montant: Integer)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Rubrique</code></td><td>Cree une ligne budgetaire sur la convention</td></tr>
     <tr><td><code>enregistrerPaiementDirect(convention: Convention, rubrique: Rubrique, montant: Integer, objet: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>PaiementDirect</code></td><td>Enregistre un paiement direct sans circuit de validation</td></tr>
@@ -160,7 +160,7 @@
     <tr><td><code>rejeterDemande(demande: DemandeDepense, motif: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Rejette la demande avec motif — statut rejetee_ac</td></tr>
     <tr><td><code>enregistrerPaiement(demande: DemandeDepense, montant: Integer, mode: ModePaiement, date: Date)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Paiement</code></td><td>Cree le paiement et passe la demande au statut payee</td></tr>
     <tr><td><code>validerRapport(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Valide le rapport d'execution soumis par le porteur</td></tr>
-    <tr><td><code>rejeterRapport(demande: DemandeDepense)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Rejette le rapport — le porteur doit en soumettre un nouveau</td></tr>
+    <tr><td><code>rejeterRapport(demande: DemandeDepense, motif: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Rejette le rapport avec motif optionnel — le porteur doit en soumettre un nouveau</td></tr>
     <tr><td><code>envoyerMessage(destinataire: Utilisateur, contenu: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>MessageChat</code></td><td>Envoie un message via le chat interne</td></tr>
   </table>
 </div>
@@ -272,7 +272,7 @@
     <tr><th>Propriété</th><th>Type UML</th><th>Vis.</th><th>Description</th></tr>
     <tr><td><code>id_rubrique</code> <span class="badge b-pk">PK</span></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pri">—</span></td><td>Identifiant unique</td></tr>
     <tr><td><code>rubrique_libelle</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Intitulé de la ligne budgétaire</td></tr>
-    <tr><td><code>rubrique_montant_prevu</code></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pub">+</span></td><td>Budget alloué en FCFA</td></tr>
+    <tr><td><code>rubrique_montant</code></td><td><span class="badge b-int">Integer</span></td><td><span class="vis-pub">+</span></td><td>Budget alloué en FCFA</td></tr>
     <tr><td><code>rubrique_description</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Description (nullable)</td></tr>
   </table>
   <div class="section-title">Méthodes</div>
@@ -318,10 +318,10 @@
     <tr><td><code>demande_statut</code></td><td><span class="badge b-enum">Enum</span> <code>StatutDemande</code></td><td><span class="vis-pub">+</span></td><td>soumise / validee_daf / rejetee_daf / validee_ac / rejetee_ac / payee / rapport_soumis / terminee</td></tr>
     <tr><td><code>demande_motif_rejet</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Motif de rejet (nullable)</td></tr>
     <tr><td><code>demande_rapport</code></td><td><span class="badge b-str">String</span></td><td><span class="vis-pub">+</span></td><td>Chemin rapport exécution PDF (nullable)</td></tr>
+    <tr><td><code>demande_rapport_motif_rejet</code></td><td><span class="badge b-text">Text</span></td><td><span class="vis-pub">+</span></td><td>Motif de rejet du rapport (nullable)</td></tr>
     <tr><td><code>demande_date_validation_daf</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatage validation DAF (nullable)</td></tr>
     <tr><td><code>demande_date_validation_ac</code></td><td><span class="badge b-date">DateTime</span></td><td><span class="vis-pub">+</span></td><td>Horodatage validation AC (nullable)</td></tr>
     <tr><td><code>demande_rapport_valide_daf</code></td><td><span class="badge b-bool">Boolean</span></td><td><span class="vis-pub">+</span></td><td>Rapport validé par la DAF (défaut : false)</td></tr>
-    <tr><td><code>demande_rapport_valide_ac</code></td><td><span class="badge b-bool">Boolean</span></td><td><span class="vis-pub">+</span></td><td>Rapport validé par l'AC (défaut : false)</td></tr>
   </table>
   <div class="section-title">Méthodes</div>
   <table>
@@ -331,6 +331,8 @@
     <tr><td><code>rejeter(validateur: Utilisateur, motif: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Change le statut a rejetee_daf ou rejetee_ac avec motif</td></tr>
     <tr><td><code>payer(ac: Utilisateur, montant: Integer, mode: ModePaiement, date: Date)</code></td><td><span class="badge b-vis">instance</span></td><td><code>Paiement</code></td><td>AC cree le paiement et passe la demande au statut payee</td></tr>
     <tr><td><code>soumettreRapport(porteur: Utilisateur, cheminFichier: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>Porteur depose le rapport apres reception du paiement</td></tr>
+    <tr><td><code>validerRapport(validateur: Utilisateur)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>DAF ou AC valide le rapport — passe a terminee si les deux ont valide</td></tr>
+    <tr><td><code>rejeterRapport(validateur: Utilisateur, motif: String)</code></td><td><span class="badge b-vis">instance</span></td><td><code>void</code></td><td>DAF ou AC rejette le rapport avec motif — retour au statut payee</td></tr>
     <tr><td><code>possedeJustificatif()</code></td><td><span class="badge b-vis">instance</span></td><td><code>Boolean</code></td><td>Verifie que le fichier justificatif existe sur le disque</td></tr>
     <tr><td><code>possedeRapport()</code></td><td><span class="badge b-vis">instance</span></td><td><code>Boolean</code></td><td>Verifie que le fichier rapport existe sur le disque</td></tr>
   </table>

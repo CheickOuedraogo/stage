@@ -7,7 +7,6 @@ use App\Enums\StatutDemande;
 use App\Models\Convention;
 use App\Models\DemandeDepense;
 use App\Models\Paiement;
-use App\Models\PaiementDirect;
 use App\Models\Rubrique;
 use App\Models\Utilisateur;
 use Carbon\Carbon;
@@ -20,296 +19,246 @@ class DemandeDepenseSeeder extends Seeder
     {
         $this->createDummyFiles();
 
-        $daf = Utilisateur::where('utilisateur_role', 'daf')->first();
-        $ac = Utilisateur::where('utilisateur_role', 'ac')->first();
+        $daf = Utilisateur::query()->where('role_key', 'daf')->first();
+        $ac = Utilisateur::query()->where('role_key', 'ac')->first();
 
         // Porteurs chargés par email pour un mapping fiable et explicite
-        $porteurs = Utilisateur::where('utilisateur_role', 'porteur')
+        $porteurs = Utilisateur::query()->where('role_key', 'porteur')
             ->where('utilisateur_actif', true)
             ->get()
             ->keyBy('utilisateur_email');
 
-        $jb = $porteurs['ocheick418@gmail.com'] ?? null;        // BIOTECH-BF + PAES-UJKZ
-        $aminata = $porteurs['a.traore@ujkz.bf'] ?? null;       // PRESAR
-        $rasmane = $porteurs['r.ouedraogo@ujkz.bf'] ?? null;    // BIODIV-BF
-        $salamata = $porteurs['s.sawadogo@ujkz.bf'] ?? null;    // NTIC-EDU
-        $boly = $porteurs['s.boly@ujkz.bf'] ?? null;            // ENERGY-SOLAR
+        // ==== 1. PROJET TERMINE AVEC 100% D'EXECUTION : NUTRITION-LOC ====
+        $convDdcNut = Convention::query()->where('convention_titre', 'like', '%DDC-NUTRITION%')->first();
+        $convAfdNut = Convention::query()->where('convention_titre', 'like', '%AFD-NUTRITION%')->first();
+        $aTraore = $porteurs['a.traore@ujkz.bf'] ?? null;
 
-        // ── 1. Demande terminée — BIOTECH-BF / Pr. Ouédraogo (JB) ────────────
-        $this->creerDemandeParcourue(
-            convention: Convention::where('convention_titre', 'like', '%BM-BIOTECH%')->first(),
-            rubriqueLibelle: 'Réactifs et consommables de laboratoire',
-            porteur: $jb,
-            daf: $daf,
-            ac: $ac,
-            montant: 8_500_000,
-            objet: 'AgentComptablequisition de réactifs pour les analyses génomiques — Lot 1',
-            description: 'Commande de réactifs PCR (Polymerase Chain Reaction) auprès du fournisseur BIORAD pour les analyses de 400 échantillons. '
-                ."Inclus : amorces spécifiques, Taq polymérase, tampons de réaction et kits d'extraction d'ADN.",
-            justificatif: 'justificatifs/biotech-lot1-facture-proforma.pdf',
-            rapport: 'rapports/biotech-lot1-rapport-execution.pdf',
-            status: StatutDemande::Terminee,
-            dateCreation: '2024-03-10',
-            paiement: [
-                'montant' => 8_500_000,
-                'date' => '2024-04-05',
-                'mode' => ModePaiement::Virement,
-                'ref' => 'VIR-BM-2024-0410',
-            ],
-        );
-
-        // ── 2. Demande rapport soumis — BIOTECH-BF / Pr. Ouédraogo (JB) ──────
-        $this->creerDemandeParcourue(
-            convention: Convention::where('convention_titre', 'like', '%BM-BIOTECH%')->first(),
-            rubriqueLibelle: 'Équipements de laboratoire',
-            porteur: $jb,
-            daf: $daf,
-            ac: $ac,
-            montant: 22_000_000,
-            objet: 'AgentComptablequisition spectrophotomètre UV-Vis et centrifugeuse réfrigérée',
-            description: 'AgentComptablehat de deux équipements critiques : (1) spectrophotomètre UV-Vis NanoDrop 2000 pour la quantification des acides nucléiques '
-                .'et (2) centrifugeuse réfrigérée Eppendorf 5804R pour la préparation des échantillons biologiques.',
-            justificatif: 'justificatifs/biotech-equipements-devis.pdf',
-            rapport: 'rapports/biotech-equipements-rapport.pdf',
-            status: StatutDemande::RapportSoumis,
-            dateCreation: '2024-06-15',
-            paiement: [
-                'montant' => 22_000_000,
-                'date' => '2024-07-22',
-                'mode' => ModePaiement::Virement,
-                'ref' => 'VIR-BM-2024-0722',
-            ],
-        );
-
-        // ── 3. Demande validée AC — AFD-BIOTECH (en attente paiement) ────────
-        $conv = Convention::where('convention_titre', 'like', '%AFD-BIOTECH%')->first();
-        if ($conv && $jb) {
-            $rubrique = Rubrique::where('id_convention', $conv->id_utilisateur)
-                ->where('rubrique_libelle', 'like', '%Mission%')
-                ->first();
-            if ($rubrique) {
-                DemandeDepense::create([
-                    'id_rubrique' => $rubrique->id_utilisateur,
-                    'id_convention' => $conv->id_utilisateur,
-                    'id_porteur' => $jb->id_utilisateur,
-                    'demande_montant' => 6_800_000,
-                    'demande_objet' => 'Mission de collecte d\'échantillons — régions du Sahel et du Nord',
-                    'demande_description' => 'Mission scientifique de 15 jours dans les régions du Sahel (Dori) et du Nord (Ouahigouya) '
-                        ."pour la collecte d'échantillons de sols et de végétaux. Équipe de 4 chercheurs + 2 techniciens. "
-                        .'Inclut : transport, hébergement, per diem et frais de collecte terrain.',
-                    'demande_justificatif' => 'justificatifs/biotech-mission-ordre-mission.pdf',
-                    'demande_statut' => StatutDemande::ValideeAgentComptable,
-                    'demande_date_validation_daf' => now()->subDays(12),
-                    'id_validateur_daf' => $daf?->id_utilisateur,
-                    'demande_date_validation_ac' => now()->subDays(5),
-                    'id_validateur_ac' => $ac?->id_utilisateur,
-                    'created_at' => now()->subDays(20),
-                ]);
-            }
-        }
-
-        // ── 4. Demande terminée — NTIC-EDU / Dr. Sawadogo (cycle précédent) ──
-        // Status Terminee pour permettre à demande 5 d'exister sur la même convention
-        $conv = Convention::where('convention_titre', 'like', '%BM-NTIC%')->first();
-        if ($conv && $salamata) {
+        if ($convDdcNut && $aTraore) {
+            // DDC - Rubrique 1 : Développement d'aliments (50M)
             $this->creerDemandeParcourue(
-                convention: $conv,
-                rubriqueLibelle: 'Infrastructure réseau et connectivité',
-                porteur: $salamata,
-                daf: $daf,
-                ac: $ac,
-                montant: 35_000_000,
-                objet: 'Installation réseau fibre optique — Bâtiment pédagogique UFR/SEA',
-                description: "Déploiement d'un réseau LAN fibre optique 10 Gbps dans le bâtiment principal de l'UFR/SEA : "
-                    .'câblage structuré Cat6A, baie de brassage 48 ports, 80 prises réseau, switch Cisco Catalyst 2960 '
-                    .'et configuration du routage VLAN. Prestataire : TECHNET Burkina Faso.',
-                justificatif: 'justificatifs/ntic-fibre-devis-technet.pdf',
-                rapport: 'rapports/ntic-fibre-rapport-reception.pdf',
+                convention: $convDdcNut,
+                rubriqueLibelle: 'aliments enrichis',
+                porteur: $aTraore, daf: $daf, ac: $ac,
+                montant: 50_000_000,
+                objet: 'Recherche et développement d\'aliments enrichis à base de mil et niébé',
+                description: 'Prestation du laboratoire de biochimie pour le développement et la certification de 5 nouvelles formules de compléments alimentaires locaux.',
+                justificatif: 'justificatifs/nut-dev-aliments.pdf',
+                rapport: 'rapports/nut-dev-aliments-rapport.pdf',
                 status: StatutDemande::Terminee,
-                dateCreation: '2024-03-01',
-                paiement: [
-                    'montant' => 35_000_000,
-                    'date' => '2024-04-18',
-                    'mode' => ModePaiement::Virement,
-                    'ref' => 'VIR-BM-2024-0418',
-                ],
+                dateCreation: '2022-10-15',
+                paiement: ['montant' => 50_000_000, 'date' => '2022-11-20', 'mode' => ModePaiement::Virement, 'ref' => 'VIR-DDC-NUT-001']
             );
-        }
 
-        // ── 5. Demande soumise — NTIC-EDU / Dr. Sawadogo (nouvelle demande) ──
-        $conv = Convention::where('convention_titre', 'like', '%BM-NTIC%')->first();
-        if ($conv && $salamata) {
-            $rubrique = Rubrique::where('id_convention', $conv->id_utilisateur)
-                ->where('rubrique_libelle', 'like', '%Matériel%')
-                ->first();
-            if ($rubrique) {
-                DemandeDepense::create([
-                    'id_rubrique' => $rubrique->id_utilisateur,
-                    'id_convention' => $conv->id_utilisateur,
-                    'id_porteur' => $salamata->id_utilisateur,
-                    'demande_montant' => 18_500_000,
-                    'demande_objet' => 'AgentComptablequisition de 25 ordinateurs portables et 5 serveurs — Salle informatique B3',
-                    'demande_description' => "Dotation de la salle informatique B3 de l'UJKZ : 25 laptops Dell Latitude 5540 (i7, 16Go RAM, 512Go SSD) "
-                        .'pour les étudiants en master, et 5 serveurs HP ProLiant DL380 pour les TP de virtualisation. '
-                        .'Inclut les licences Windows 11 Pro et le déploiement SCCM.',
-                    'demande_justificatif' => 'justificatifs/ntic-materiel-bon-commande.pdf',
-                    'demande_statut' => StatutDemande::Soumise,
-                    'created_at' => now()->subDays(2),
+            // DDC - Rubrique 2 : Formation de mères éducatrices (35M)
+            $this->creerDemandeParcourue(
+                convention: $convDdcNut,
+                rubriqueLibelle: 'mères éducatrices',
+                porteur: $aTraore, daf: $daf, ac: $ac,
+                montant: 35_000_000,
+                objet: 'Sessions de formation de 2000 mères éducatrices',
+                description: 'Organisation de 40 sessions de formation dans les communes rurales. Inclut per diem, logistique, et kits de démonstration culinaire.',
+                justificatif: 'justificatifs/nut-formation-meres.pdf',
+                rapport: 'rapports/nut-formation-meres-rapport.pdf',
+                status: StatutDemande::Terminee,
+                dateCreation: '2023-02-10',
+                paiement: ['montant' => 35_000_000, 'date' => '2023-03-05', 'mode' => ModePaiement::Cheque, 'ref' => 'CHQ-DDC-NUT-002']
+            );
+
+            // DDC - Rubrique 3 : Magasins de stockage (20M)
+            $this->creerDemandeParcourue(
+                convention: $convDdcNut,
+                rubriqueLibelle: 'magasins de stockage',
+                porteur: $aTraore, daf: $daf, ac: $ac,
+                montant: 20_000_000,
+                objet: 'Construction de 60 petits magasins communautaires de stockage',
+                description: 'Travaux de construction des magasins avec les artisans locaux (matériaux locaux, banco stabilisé).',
+                justificatif: 'justificatifs/nut-magasins.pdf',
+                rapport: 'rapports/nut-magasins-rapport.pdf',
+                status: StatutDemande::Terminee,
+                dateCreation: '2023-05-15',
+                paiement: ['montant' => 20_000_000, 'date' => '2023-06-20', 'mode' => ModePaiement::Virement, 'ref' => 'VIR-DDC-NUT-003']
+            );
+
+            // DDC - Rubrique 4 : Évaluation finale (15M) -> Paiement direct
+            $rubEval = Rubrique::query()->where('id_convention', $convDdcNut->id_convention)->where('rubrique_libelle', 'like', '%Évaluation%')->first();
+            if ($rubEval) {
+                Paiement::create([
+                    'type_paiement' => 'direct', 'id_convention' => $convDdcNut->id_convention, 'id_projet' => $convDdcNut->id_projet, 'id_rubrique' => $rubEval->id_rubrique,
+                    'paiement_montant' => 15_000_000, 'paiement_date' => '2024-12-10', 'paiement_mode' => ModePaiement::Virement->value, 'paiement_reference' => 'DIR-DDC-NUT-EVAL',
+                    'paiement_objet' => 'Paiement direct au cabinet d\'évaluation', 'paiement_description' => 'La DDC a payé directement le cabinet suisse d\'évaluation d\'impact.',
+                    'id_enregistreur_paiement' => $daf->id_utilisateur,
                 ]);
             }
         }
 
-        // ── 6. Demande rejetée DAF — ENERGY-SOLAR / Prof. Boly ──────────────
-        $conv = Convention::where('convention_titre', 'like', '%AFD-SOLAR%')->first();
-        if ($conv && $boly) {
-            $rubrique = Rubrique::where('id_convention', $conv->id_utilisateur)
-                ->where('rubrique_libelle', 'like', '%panneaux%')
-                ->first();
-            if ($rubrique) {
-                DemandeDepense::create([
-                    'id_rubrique' => $rubrique->id_utilisateur,
-                    'id_convention' => $conv->id_utilisateur,
-                    'id_porteur' => $boly->id_utilisateur,
-                    'demande_montant' => 45_000_000,
-                    'demande_objet' => 'AgentComptablequisition 120 panneaux solaires 400Wc — Campus de Koudougou',
-                    'demande_description' => "Commande de 120 panneaux solaires monocristallins 400Wc (marque LONGi Solar) pour l'installation "
-                        .'sur les toitures du campus de Koudougou. Puissance totale : 48 kWc. '
-                        .'Inclut le transport depuis Abidjan et le dédouanement.',
-                    'demande_justificatif' => 'justificatifs/solar-panneaux-facture-proforma.pdf',
-                    'demande_statut' => StatutDemande::RejeteeDaf,
-                    'demande_motif_rejet' => 'Le devis présenté est incomplet : il manque les spécifications techniques détaillées (rendement, garantie constructeur) '
-                        .'et le certificat de conformité CEI 61215. Merci de fournir un devis révisé conforme aux exigences du manuel opérationnel du projet.',
-                    'created_at' => now()->subDays(30),
-                    'updated_at' => now()->subDays(22),
+        if ($convAfdNut && $aTraore) {
+            // AFD - Rubrique 1 : Plaidoyer (35M)
+            $this->creerDemandeParcourue(
+                convention: $convAfdNut, rubriqueLibelle: 'Plaidoyer', porteur: $aTraore, daf: $daf, ac: $ac,
+                montant: 35_000_000, objet: 'Ateliers de plaidoyer pour les cantines', description: 'Rencontres avec les autorités locales, maires et députés.',
+                justificatif: 'justificatifs/nut-plaidoyer.pdf', rapport: 'rapports/nut-plaidoyer-rapport.pdf',
+                status: StatutDemande::Terminee, dateCreation: '2022-11-05',
+                paiement: ['montant' => 35_000_000, 'date' => '2022-12-01', 'mode' => ModePaiement::Virement, 'ref' => 'VIR-AFD-NUT-001']
+            );
+            // AFD - Rubrique 2 : Campagnes radio (25M)
+            $this->creerDemandeParcourue(
+                convention: $convAfdNut, rubriqueLibelle: 'Campagnes radio', porteur: $aTraore, daf: $daf, ac: $ac,
+                montant: 25_000_000, objet: 'Diffusion d\'émissions radio sur la nutrition', description: 'Contrats avec 15 radios communautaires pour 6 mois de diffusion.',
+                justificatif: 'justificatifs/nut-radio.pdf', rapport: 'rapports/nut-radio-rapport.pdf',
+                status: StatutDemande::Terminee, dateCreation: '2023-01-20',
+                paiement: ['montant' => 25_000_000, 'date' => '2023-02-15', 'mode' => ModePaiement::Virement, 'ref' => 'VIR-AFD-NUT-002']
+            );
+            // AFD - Rubrique 3 : Enquêtes (12M)
+            $this->creerDemandeParcourue(
+                convention: $convAfdNut, rubriqueLibelle: 'Enquêtes', porteur: $aTraore, daf: $daf, ac: $ac,
+                montant: 12_000_000, objet: 'Enquête nutritionnelle de base', description: 'Collecte de données anthropométriques des enfants.',
+                justificatif: 'justificatifs/nut-enquete.pdf', rapport: 'rapports/nut-enquete-rapport.pdf',
+                status: StatutDemande::Terminee, dateCreation: '2022-10-01',
+                paiement: ['montant' => 12_000_000, 'date' => '2022-10-25', 'mode' => ModePaiement::Cheque, 'ref' => 'CHQ-AFD-NUT-003']
+            );
+            // AFD - Rubrique 4 : Capitalisation (8M) -> Paiement direct
+            $rubCap = Rubrique::query()->where('id_convention', $convAfdNut->id_convention)->where('rubrique_libelle', 'like', '%Capitalisation%')->first();
+            if ($rubCap) {
+                Paiement::create([
+                    'type_paiement' => 'direct', 'id_convention' => $convAfdNut->id_convention, 'id_projet' => $convAfdNut->id_projet, 'id_rubrique' => $rubCap->id_rubrique,
+                    'paiement_montant' => 8_000_000, 'paiement_date' => '2024-11-20', 'paiement_mode' => ModePaiement::Virement->value, 'paiement_reference' => 'DIR-AFD-NUT-CAP',
+                    'paiement_objet' => 'Impression et diffusion du livret de capitalisation', 'paiement_description' => 'Paiement direct de l\'imprimeur par l\'AFD.',
+                    'id_enregistreur_paiement' => $daf->id_utilisateur,
                 ]);
             }
         }
 
-        // ── 7. Nouvelle demande après rejet — ENERGY-SOLAR / Prof. Boly ──────
-        $conv = Convention::where('convention_titre', 'like', '%AFD-SOLAR%')->first();
-        if ($conv && $boly) {
-            $rubrique = Rubrique::where('id_convention', $conv->id_utilisateur)
-                ->where('rubrique_libelle', 'like', '%panneaux%')
-                ->first();
-            if ($rubrique) {
+        // ==== 2. PROJET EN COURS : EMPLOI-JEUNES (Différents statuts) ====
+        $convBmEmploi = Convention::query()->where('convention_titre', 'like', '%BM-EMPLOI%')->first();
+        $sSanogo = $porteurs['seydou.sanogo@gmail.com'] ?? null;
+
+        if ($convBmEmploi && $sSanogo) {
+            // Validée DAF : Équipement de 10 centres (30M / 60M)
+            $rubEq = Rubrique::query()->where('id_convention', $convBmEmploi->id_convention)->where('rubrique_libelle', 'like', '%Équipement%')->first();
+            if ($rubEq) {
                 DemandeDepense::create([
-                    'id_rubrique' => $rubrique->id_utilisateur,
-                    'id_convention' => $conv->id_utilisateur,
-                    'id_porteur' => $boly->id_utilisateur,
-                    'demande_montant' => 46_200_000,
-                    'demande_objet' => 'AgentComptablequisition 120 panneaux solaires 400Wc — Campus Koudougou (dossier révisé)',
-                    'demande_description' => 'Dossier révisé suite au rejet DAF du 15/03/2025. '
-                        .'Commande de 120 panneaux LONGi Solar Hi-MO6 400Wc avec certificats CEI 61215 et CEI 61730. '
-                        .'Garantie produit 12 ans, garantie performance 30 ans. Transport Abidjan-Ouagadougou inclus. '
-                        .'Devis N° TECHSUN-BF-2025-089 daté du 08/04/2025.',
-                    'demande_justificatif' => 'justificatifs/solar-panneaux-devis-revise.pdf',
-                    'demande_statut' => StatutDemande::Soumise,
-                    'created_at' => now()->subDays(4),
+                    'id_rubrique' => $rubEq->id_rubrique, 'id_convention' => $convBmEmploi->id_convention, 'id_porteur' => $sSanogo->id_utilisateur,
+                    'demande_montant' => 30_000_000, 'demande_objet' => 'Achat d\'équipements pour les centres de Koudougou et Bobo',
+                    'demande_description' => 'Machines-outils pour la menuiserie bois et métallique.', 'demande_justificatif' => 'justificatifs/emploi-equip.pdf',
+                    'demande_statut' => StatutDemande::ValideeDaf, 'demande_date_validation_daf' => now()->subDays(2), 'id_validateur_daf' => $daf->id_utilisateur,
+                    'cree_le' => now()->subDays(5),
                 ]);
             }
-        }
 
-        // ── 8. Demande terminée — PRESAR / Dr. Traoré (Aminata) ──────────────
-        $conv = Convention::where('convention_titre', 'like', '%UEMOA-PRESAR%')->first();
-        if ($conv && $aminata) {
-            $rubrique = Rubrique::where('id_convention', $conv->id_utilisateur)
-                ->where('rubrique_libelle', 'like', '%Enquête%')
-                ->first();
-            if ($rubrique) {
+            // Rejetée DAF (avec motif) : Conception parcours (15M / 40M)
+            $rubParcours = Rubrique::query()->where('id_convention', $convBmEmploi->id_convention)->where('rubrique_libelle', 'like', '%parcours%')->first();
+            if ($rubParcours) {
+                DemandeDepense::create([
+                    'id_rubrique' => $rubParcours->id_rubrique, 'id_convention' => $convBmEmploi->id_convention, 'id_porteur' => $sSanogo->id_utilisateur,
+                    'demande_montant' => 15_000_000, 'demande_objet' => 'Ateliers d\'ingénierie pédagogique',
+                    'demande_description' => 'Élaboration de 5 parcours certifiants en énergie renouvelable.', 'demande_justificatif' => 'justificatifs/emploi-parcours.pdf',
+                    'demande_statut' => StatutDemande::RejeteeDaf, 'demande_motif_rejet' => 'Le devis du consultant expert est expiré. Veuillez joindre un devis actualisé datant de moins de 3 mois.',
+                    'cree_le' => now()->subDays(10), 'mis_a_jour_le' => now()->subDays(8),
+                ]);
+            }
+
+            // Payée (Rapport Rejeté) : Suivi-insertion (10M / 20M)
+            $rubSuivi = Rubrique::query()->where('id_convention', $convBmEmploi->id_convention)->where('rubrique_libelle', 'like', '%Suivi-insertion%')->first();
+            if ($rubSuivi) {
+                $d = DemandeDepense::create([
+                    'id_rubrique' => $rubSuivi->id_rubrique, 'id_convention' => $convBmEmploi->id_convention, 'id_porteur' => $sSanogo->id_utilisateur,
+                    'demande_montant' => 10_000_000, 'demande_objet' => 'Déploiement de l\'application de suivi des diplômés',
+                    'demande_description' => 'Développement d\'une plateforme web pour tracer l\'insertion des 5000 jeunes formés.', 'demande_justificatif' => 'justificatifs/emploi-suivi.pdf',
+                    'demande_rapport' => 'rapports/emploi-suivi-rapport.pdf',
+                    'demande_statut' => StatutDemande::Payee, // Reste Payée si rapport rejeté
+                    'demande_rapport_valide_daf' => false, 'demande_rapport_motif_rejet' => 'Le rapport d\'exécution manque de captures d\'écran de la plateforme fonctionnelle et la liste des modules livrés.',
+                    'demande_date_validation_daf' => now()->subDays(40), 'id_validateur_daf' => $daf->id_utilisateur,
+                    'demande_date_validation_ac' => now()->subDays(35), 'id_validateur_ac' => $ac->id_utilisateur,
+                    'cree_le' => now()->subDays(45),
+                ]);
+                Paiement::create([
+                    'id_demande' => $d->id_demande, 'id_projet' => $convBmEmploi->id_projet, 'id_convention' => $convBmEmploi->id_convention, 'id_rubrique' => $rubSuivi->id_rubrique,
+                    'paiement_montant' => 10_000_000, 'paiement_date' => now()->subDays(30), 'paiement_mode' => ModePaiement::Virement->value, 'paiement_reference' => 'VIR-BM-EMPLOI-001',
+                    'id_enregistreur_paiement' => $ac->id_utilisateur, 'type_paiement' => 'normal', 'paiement_objet' => 'Déploiement de l\'application',
+                ]);
+            }
+
+            // Payée (Rapport Soumis, en attente de validation) : Fonds d'amorçage (20M / 30M)
+            $rubFonds = Rubrique::query()->where('id_convention', $convBmEmploi->id_convention)->where('rubrique_libelle', 'like', '%Fonds%')->first();
+            if ($rubFonds) {
                 $this->creerDemandeParcourue(
-                    convention: $conv,
-                    rubriqueLibelle: null,
-                    porteur: $aminata,
-                    daf: $daf,
-                    ac: $ac,
-                    montant: 20_000_000,
-                    objet: 'Enquête de référence sur la sécurité alimentaire — 5 provinces du Centre-Nord',
-                    description: 'Enquête quantitative auprès de 1 200 ménages dans les provinces du Bam, Namentenga, Sanmatenga, Kaya et Kongoussi. '
-                        .'Protocole SDAM (Score de Diversité Alimentaire des Ménages). Équipe de 24 enquêteurs + 6 superviseurs formés à Koudougou. '
-                        .'Inclut frais de terrain, saisie des données sur ODK et contrôle qualité.',
-                    justificatif: 'justificatifs/presar-enquete-protocole-budget.pdf',
-                    rapport: 'rapports/presar-enquete-rapport-final.pdf',
-                    status: StatutDemande::Terminee,
-                    dateCreation: '2023-10-05',
-                    paiement: [
-                        'montant' => 20_000_000,
-                        'date' => '2023-11-20',
-                        'mode' => ModePaiement::Cheque,
-                        'ref' => 'CHQ-PRESAR-2023-011',
-                    ],
-                    rubrique: $rubrique,
+                    convention: $convBmEmploi, rubriqueLibelle: null, porteur: $sSanogo, daf: $daf, ac: $ac,
+                    montant: 20_000_000, objet: 'Subvention de démarrage pour 40 micro-entreprises', description: 'Octroi de micro-crédits de 500 000 FCFA à 40 jeunes diplômés.',
+                    justificatif: 'justificatifs/emploi-fonds.pdf', rapport: 'rapports/emploi-fonds-rapport.pdf',
+                    status: StatutDemande::RapportSoumis, dateCreation: now()->subDays(60)->toDateString(),
+                    paiement: ['montant' => 20_000_000, 'date' => now()->subDays(45)->toDateString(), 'mode' => ModePaiement::Virement, 'ref' => 'VIR-BM-EMPLOI-002'],
+                    rubrique: $rubFonds
                 );
             }
         }
 
-        // ── 9. Demande soumise — BIODIV-BF / Prof. Rasmané OUÉDRAOGO ─────────
-        $conv = Convention::where('convention_titre', 'like', '%BAD-BIODIV%')->first();
-        if ($conv && $rasmane) {
-            $rubrique = Rubrique::where('id_convention', $conv->id_utilisateur)
-                ->where('rubrique_libelle', 'like', '%Reboisement%')
-                ->first();
-            if ($rubrique) {
+        // ==== 3. PROJET EN COURS : AGRO-TRANSF ====
+        $convBadAgro = Convention::query()->where('convention_titre', 'like', '%BAD-AGRO%')->first();
+        $hDiallo = $porteurs['halimatou.diallo@gmail.com'] ?? null;
+
+        if ($convBadAgro && $hDiallo) {
+            // Payée : Équipements (60M / 80M)
+            $this->creerDemandeParcourue(
+                convention: $convBadAgro, rubriqueLibelle: 'équipements de transformation', porteur: $hDiallo, daf: $daf, ac: $ac,
+                montant: 60_000_000, objet: 'Acquisition de 5 séchoirs industriels pour mangues', description: 'Achat de 5 séchoirs à gaz de grande capacité pour les coopératives de Orodara.',
+                justificatif: 'justificatifs/agro-sechoirs.pdf', rapport: null,
+                status: StatutDemande::Payee, dateCreation: now()->subDays(90)->toDateString(),
+                paiement: ['montant' => 60_000_000, 'date' => now()->subDays(80)->toDateString(), 'mode' => ModePaiement::Virement, 'ref' => 'VIR-BAD-AGRO-001']
+            );
+
+            // Validée AC : Certification (15M / 40M)
+            $rubCert = Rubrique::query()->where('id_convention', $convBadAgro->id_convention)->where('rubrique_libelle', 'like', '%Certification%')->first();
+            if ($rubCert) {
                 DemandeDepense::create([
-                    'id_rubrique' => $rubrique->id_utilisateur,
-                    'id_convention' => $conv->id_utilisateur,
-                    'id_porteur' => $rasmane->id_utilisateur,
-                    'demande_montant' => 25_000_000,
-                    'demande_objet' => 'Production de 150 000 plants forestiers — Pépinières de Ouagadougou et Bobo-Dioulasso',
-                    'demande_description' => "Production en pépinière de 150 000 plants d'espèces forestières locales (Karité, Néré, Caïlcédrat, Vène) "
-                        .'pour le reboisement de 300 hectares dans les forêts classées du Nakambé. '
-                        .'Prestataires : AGRO-PEPS Ouagadougou (80 000 plants) et VERDURE-BF Bobo (70 000 plants). '
-                        .'Durée : 4 mois (mai-août 2025).',
-                    'demande_justificatif' => 'justificatifs/biodiv-pepinieres-contrats.pdf',
-                    'demande_statut' => StatutDemande::Soumise,
-                    'created_at' => now()->subDay(),
+                    'id_rubrique' => $rubCert->id_rubrique, 'id_convention' => $convBadAgro->id_convention, 'id_porteur' => $hDiallo->id_utilisateur,
+                    'demande_montant' => 15_000_000, 'demande_objet' => 'Audit de certification ISO 22000',
+                    'demande_description' => 'Frais d\'intervention du cabinet certificateur ECOCERT pour 3 unités pilotes.', 'demande_justificatif' => 'justificatifs/agro-certif.pdf',
+                    'demande_statut' => StatutDemande::ValideeAgentComptable, 'demande_date_validation_daf' => now()->subDays(15), 'id_validateur_daf' => $daf->id_utilisateur,
+                    'demande_date_validation_ac' => now()->subDays(10), 'id_validateur_ac' => $ac->id_utilisateur, 'cree_le' => now()->subDays(20),
+                ]);
+            }
+
+            // Soumise : HACCP (20M / 60M)
+            $rubHaccp = Rubrique::query()->where('id_convention', $convBadAgro->id_convention)->where('rubrique_libelle', 'like', '%HACCP%')->first();
+            if ($rubHaccp) {
+                DemandeDepense::create([
+                    'id_rubrique' => $rubHaccp->id_rubrique, 'id_convention' => $convBadAgro->id_convention, 'id_porteur' => $hDiallo->id_utilisateur,
+                    'demande_montant' => 20_000_000, 'demande_objet' => 'Formation du personnel aux normes HACCP',
+                    'demande_description' => 'Séminaires de formation pour les responsables qualité des 15 unités de transformation.', 'demande_justificatif' => 'justificatifs/agro-haccp.pdf',
+                    'demande_statut' => StatutDemande::Soumise, 'cree_le' => now()->subDays(2),
                 ]);
             }
         }
 
-        // ── 10. Paiements directs — BIOTECH-BF / Pr. Ouédraogo (JB) ─────────
-        $conv = Convention::where('convention_titre', 'like', '%BM-BIOTECH%')->first();
-        if ($conv && $jb) {
-            $rubrique = Rubrique::where('id_convention', $conv->id_utilisateur)
-                ->where('rubrique_libelle', 'like', '%Réactifs%')
-                ->first();
+        // ==== 4. PROJET SUSPENDU : GOUV-MINES ====
+        $convBmGouv = Convention::query()->where('convention_titre', 'like', '%BM-GOUV%')->first();
+        $rOuedraogo = $porteurs['r.ouedraogo@ujkz.bf'] ?? null;
 
-            PaiementDirect::create([
-                'id_convention' => $conv->id_utilisateur,
-                'id_rubrique' => $rubrique?->id_utilisateur,
-                'paiement_direct_montant' => 4_200_000,
-                'paiement_direct_objet' => 'Règlement direct fournisseur — Azote liquide SONABHY (2 bonbonnes de 50L)',
-                'paiement_direct_description' => 'Paiement effectué directement par la Banque Mondiale auprès de SONABHY pour la fourniture '
-                    ."d'azote liquide destiné à la conservation des échantillons biologiques à -196°C.",
-                'paiement_direct_date' => '2024-05-12',
-                'id_enregistreur_paiement_direct' => $jb->id_utilisateur,
-            ]);
-
-            PaiementDirect::create([
-                'id_convention' => $conv->id_utilisateur,
-                'id_rubrique' => null,
-                'paiement_direct_montant' => 1_500_000,
-                'paiement_direct_objet' => 'Frais de douane — équipements importés USA',
-                'paiement_direct_description' => 'Paiement des frais de douane pour le dédouanement du spectrophotomètre NanoDrop 2000 '
-                    .'importé des États-Unis (DGTCP/DRF Ouagadougou). Taxe de mise à la consommation + droits TEC CEDEAO.',
-                'paiement_direct_date' => '2024-07-30',
-                'id_enregistreur_paiement_direct' => $jb->id_utilisateur,
-            ]);
+        if ($convBmGouv && $rOuedraogo) {
+            // Terminée : Cartographie (30M)
+            $this->creerDemandeParcourue(
+                convention: $convBmGouv, rubriqueLibelle: 'Cartographie', porteur: $rOuedraogo, daf: $daf, ac: $ac,
+                montant: 30_000_000, objet: 'Mission de recensement des sites d\'orpaillage au Nord', description: 'Géoréférencement de 120 sites avant la suspension du projet.',
+                justificatif: 'justificatifs/gouv-carto.pdf', rapport: 'rapports/gouv-carto-rapport.pdf',
+                status: StatutDemande::Terminee, dateCreation: '2024-11-10',
+                paiement: ['montant' => 30_000_000, 'date' => '2024-12-05', 'mode' => ModePaiement::Virement, 'ref' => 'VIR-BM-GOUV-001']
+            );
         }
 
-        // ── 11. Paiement direct — ENERGY-SOLAR / Prof. Boly ──────────────────
-        $conv = Convention::where('convention_titre', 'like', '%AFD-SOLAR%')->first();
-        if ($conv && $boly) {
-            PaiementDirect::create([
-                'id_convention' => $conv->id_utilisateur,
-                'id_rubrique' => null,
-                'paiement_direct_montant' => 3_800_000,
-                'paiement_direct_objet' => 'Frais de mission expert AFD — Évaluation technique mi-parcours',
-                'paiement_direct_description' => "Prise en charge directe par l'AFD des frais de mission de l'expert évaluateur M. Laurent Dupont "
-                    ."(Ingénieur en énergies renouvelables, Paris) pour la mission d'évaluation technique du projet "
-                    .'du 03 au 14 novembre 2024 à Ouagadougou et Koudougou.',
-                'paiement_direct_date' => '2024-11-14',
-                'id_enregistreur_paiement_direct' => $boly->id_utilisateur,
-            ]);
+        // ==== 5. PROJET EN ATTENTE : ROUTES-RESIL (Juste un paiement direct pour l'étude) ====
+        $convBadRoutes = Convention::query()->where('convention_titre', 'like', '%BAD-ROUTES%')->first();
+        $aOuattara = $porteurs['aissata.ouattara@gmail.com'] ?? null;
+
+        if ($convBadRoutes && $aOuattara) {
+            $rubEtudes = Rubrique::query()->where('id_convention', $convBadRoutes->id_convention)->where('rubrique_libelle', 'like', '%Études%')->first();
+            if ($rubEtudes) {
+                Paiement::create([
+                    'type_paiement' => 'direct', 'id_convention' => $convBadRoutes->id_convention, 'id_projet' => $convBadRoutes->id_projet, 'id_rubrique' => $rubEtudes->id_rubrique,
+                    'paiement_montant' => 25_000_000, 'paiement_date' => now()->subDays(10)->toDateString(), 'paiement_mode' => ModePaiement::Virement->value, 'paiement_reference' => 'DIR-BAD-ROUTES-ETUDE',
+                    'paiement_objet' => 'Étude de faisabilité technique', 'paiement_description' => 'Paiement direct du cabinet d\'ingénierie par la BAD avant le démarrage effectif des travaux.',
+                    'id_enregistreur_paiement' => $daf->id_utilisateur,
+                ]);
+            }
         }
     }
 
@@ -337,7 +286,7 @@ class DemandeDepenseSeeder extends Seeder
         }
 
         if (! $rubrique && $rubriqueLibelle) {
-            $rubrique = Rubrique::where('id_convention', $convention->id_utilisateur)
+            $rubrique = Rubrique::query()->where('id_convention', $convention->id_convention)
                 ->where('rubrique_libelle', 'like', "%{$rubriqueLibelle}%")
                 ->first();
         }
@@ -349,16 +298,16 @@ class DemandeDepenseSeeder extends Seeder
         $created = Carbon::parse($dateCreation);
 
         $data = [
-            'id_rubrique' => $rubrique->id_utilisateur,
-            'id_convention' => $convention->id_utilisateur,
+            'id_rubrique' => $rubrique->id_rubrique,
+            'id_convention' => $convention->id_convention,
             'id_porteur' => $porteur->id_utilisateur,
             'demande_montant' => $montant,
             'demande_objet' => $objet,
             'demande_description' => $description,
             'demande_justificatif' => $justificatif,
             'demande_statut' => $status,
-            'created_at' => $created,
-            'updated_at' => $created,
+            'cree_le' => $created,
+            'mis_a_jour_le' => $created,
         ];
 
         if (! in_array($status, [StatutDemande::Soumise, StatutDemande::RejeteeDaf])) {
@@ -374,19 +323,23 @@ class DemandeDepenseSeeder extends Seeder
         if (in_array($status, [StatutDemande::RapportSoumis, StatutDemande::Terminee])) {
             $data['demande_rapport'] = $rapport;
             $data['demande_rapport_valide_daf'] = $status === StatutDemande::Terminee;
-            $data['demande_rapport_valide_ac'] = $status === StatutDemande::Terminee;
         }
 
         $demande = DemandeDepense::create($data);
 
         if ($paiement && in_array($status, [StatutDemande::Payee, StatutDemande::RapportSoumis, StatutDemande::Terminee])) {
             Paiement::create([
-                'id_demande' => $demande->id_utilisateur,
+                'id_demande' => $demande->id_demande,
+                'id_projet' => $convention->id_projet,
+                'id_convention' => $convention->id_convention,
+                'id_rubrique' => $rubrique->id_rubrique,
                 'paiement_montant' => $paiement['montant'],
                 'paiement_date' => $paiement['date'],
                 'paiement_mode' => $paiement['mode']->value,
                 'paiement_reference' => $paiement['ref'],
                 'id_enregistreur_paiement' => $ac?->id_utilisateur,
+                'type_paiement' => 'normal',
+                'paiement_objet' => $objet,
             ]);
         }
     }
@@ -399,19 +352,29 @@ class DemandeDepenseSeeder extends Seeder
             ."xref\n0 4\n0000000000 65535 f \ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n190\n%%EOF\n";
 
         $paths = [
-            'justificatifs/biotech-lot1-facture-proforma.pdf',
-            'justificatifs/biotech-equipements-devis.pdf',
-            'justificatifs/biotech-mission-ordre-mission.pdf',
-            'justificatifs/ntic-fibre-devis-technet.pdf',
-            'justificatifs/ntic-materiel-bon-commande.pdf',
-            'justificatifs/solar-panneaux-facture-proforma.pdf',
-            'justificatifs/solar-panneaux-devis-revise.pdf',
-            'justificatifs/presar-enquete-protocole-budget.pdf',
-            'justificatifs/biodiv-pepinieres-contrats.pdf',
-            'rapports/biotech-lot1-rapport-execution.pdf',
-            'rapports/biotech-equipements-rapport.pdf',
-            'rapports/ntic-fibre-rapport-reception.pdf',
-            'rapports/presar-enquete-rapport-final.pdf',
+            'justificatifs/nut-dev-aliments.pdf',
+            'justificatifs/nut-formation-meres.pdf',
+            'justificatifs/nut-magasins.pdf',
+            'justificatifs/nut-plaidoyer.pdf',
+            'justificatifs/nut-radio.pdf',
+            'justificatifs/nut-enquete.pdf',
+            'justificatifs/emploi-equip.pdf',
+            'justificatifs/emploi-parcours.pdf',
+            'justificatifs/emploi-suivi.pdf',
+            'justificatifs/emploi-fonds.pdf',
+            'justificatifs/agro-sechoirs.pdf',
+            'justificatifs/agro-certif.pdf',
+            'justificatifs/agro-haccp.pdf',
+            'justificatifs/gouv-carto.pdf',
+            'rapports/nut-dev-aliments-rapport.pdf',
+            'rapports/nut-formation-meres-rapport.pdf',
+            'rapports/nut-magasins-rapport.pdf',
+            'rapports/nut-plaidoyer-rapport.pdf',
+            'rapports/nut-radio-rapport.pdf',
+            'rapports/nut-enquete-rapport.pdf',
+            'rapports/emploi-suivi-rapport.pdf',
+            'rapports/emploi-fonds-rapport.pdf',
+            'rapports/gouv-carto-rapport.pdf',
         ];
 
         foreach ($paths as $path) {

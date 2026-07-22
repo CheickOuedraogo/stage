@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers\Porteur;
 
+use App\Enums\RoleUtilisateur;
 use App\Enums\StatutConvention;
 use App\Enums\StatutDemande;
 use App\Enums\StatutProjet;
 use App\Http\Controllers\Controller;
 use App\Models\Convention;
 use App\Models\DemandeDepense;
+use App\Models\Notification;
 use App\Models\Projet;
 use App\Models\Rubrique;
+use App\Models\Utilisateur;
 use App\Services\DemandeDepenseService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,11 +42,11 @@ class DemandeDepenseController extends Controller
             ->map(fn (DemandeDepense $d) => $this->formatDemande($d));
 
         $conventions = Convention::whereHas('projet', fn ($q) => $q->where('id_porteur', $porteur->id_utilisateur))
-            ->select('id', 'convention_titre', 'id_projet')
+            ->select('id_convention', 'convention_titre', 'id_projet')
             ->with('projet:id_projet,projet_titre')
             ->get()
             ->map(fn ($c) => [
-                'id' => $c->id_utilisateur,
+                'id' => $c->id_convention,
                 'titre' => $c->convention_titre,
                 'projet_titre' => $c->projet->projet_titre,
             ]);
@@ -62,26 +65,32 @@ class DemandeDepenseController extends Controller
     public function create(Request $request, Projet $projet, Convention $convention): Response
     {
         $porteur = $request->user();
-        abort_unless($projet->id_utilisateur_porteur === $porteur->id_utilisateur, 403);
-        abort_unless($convention->id_utilisateur_projet === $projet->id_utilisateur, 404);
+        abort_unless($projet->id_porteur === $porteur->id_utilisateur, 403);
+        abort_unless($convention->id_projet === $projet->id_projet, 404);
         abort_unless($projet->projet_statut === StatutProjet::EnCours, 403);
         abort_unless($convention->convention_statut === StatutConvention::Active, 403);
 
+        $this->service->assertConventionARubriques($convention);
         $this->service->assertPasDeDemandeActive($convention);
 
         $rubriques = $convention->rubriques()
             ->get()
             ->map(fn (Rubrique $r) => [
-                'id' => $r->id_utilisateur,
+                'id' => $r->id_rubrique,
                 'libelle' => $r->rubrique_libelle,
-                'montant_prevu' => $r->rubrique_montant_prevu,
+                'montant_prevu' => $r->rubrique_montant,
                 'description' => $r->rubrique_description,
             ]);
 
         return Inertia::render('porteur/Demandes/Create', [
-            'projet' => ['id' => $projet->id_utilisateur, 'titre' => $projet->projet_titre],
+            'projet' => [
+                'id' => $projet->id_projet,
+                'titre' => $projet->projet_titre,
+                'statut' => $projet->projet_statut->value,
+                'libelle_statut' => $projet->projet_statut->label(),
+            ],
             'convention' => [
-                'id' => $convention->id_utilisateur,
+                'id' => $convention->id_convention,
                 'titre' => $convention->convention_titre,
                 'montant_fcfa' => $convention->montant_fcfa,
             ],
@@ -92,29 +101,33 @@ class DemandeDepenseController extends Controller
     public function store(Request $request, Projet $projet, Convention $convention): RedirectResponse
     {
         $porteur = $request->user();
-        abort_unless($projet->id_utilisateur_porteur === $porteur->id_utilisateur, 403);
-        abort_unless($convention->id_utilisateur_projet === $projet->id_utilisateur, 404);
+        abort_unless($projet->id_porteur === $porteur->id_utilisateur, 403);
+        abort_unless($convention->id_projet === $projet->id_projet, 404);
         abort_unless($projet->projet_statut === StatutProjet::EnCours, 403);
         abort_unless($convention->convention_statut === StatutConvention::Active, 403);
 
         $validated = $request->validate([
-            'rubrique_id' => ['required', 'integer', Rule::exists('rubriques', 'id_rubrique')->where('id_convention', $convention->id_utilisateur)],
+            'rubrique_id' => ['required', 'integer', Rule::exists('rubriques', 'id_rubrique')->where('id_convention', $convention->id_convention)],
             'montant' => ['required', 'integer', 'min:1'],
             'objet' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
-            'justificatif' => ['required', 'file', 'mimes:pdf', 'max:10240'],
+            'justificatif' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
         ]);
 
+        $this->service->assertConventionARubriques($convention);
         $this->service->assertPasDeDemandeActive($convention);
 
         $rubrique = Rubrique::findOrFail($validated['rubrique_id']);
         $this->service->assertBudgetSuffisant($rubrique, $validated['montant']);
 
-        $justificatifPath = $request->file('justificatif')->store('justificatifs', 'private');
+        $justificatifPath = null;
+        if ($request->hasFile('justificatif')) {
+            $justificatifPath = $request->file('justificatif')->store('justificatifs', 'private');
+        }
 
-        DemandeDepense::create([
+        $demande = DemandeDepense::create([
             'id_rubrique' => $validated['rubrique_id'],
-            'id_convention' => $convention->id_utilisateur,
+            'id_convention' => $convention->id_convention,
             'id_porteur' => $porteur->id_utilisateur,
             'demande_montant' => $validated['montant'],
             'demande_objet' => $validated['objet'],
@@ -123,19 +136,24 @@ class DemandeDepenseController extends Controller
             'demande_statut' => StatutDemande::Soumise,
         ]);
 
+        $demande->load('convention:id_convention,id_projet');
+
+        Utilisateur::parRole(RoleUtilisateur::Daf)->get()
+            ->each(fn (Utilisateur $u) => Notification::pourNouvelleDemande($u, $demande));
+
         return redirect()->route('porteur.demandes.index')
             ->with('success', 'Demande de dépense soumise avec succès.');
     }
 
     public function show(Request $request, DemandeDepense $demande): Response
     {
-        abort_unless($demande->id_utilisateur_porteur === $request->user()->id_utilisateur, 403);
+        abort_unless($demande->id_porteur === $request->user()->id_utilisateur, 403);
 
         $demande->load([
             'convention.projet:id_projet,projet_titre',
             'convention:id_convention,convention_titre,id_projet',
-            'rubrique:id_rubrique,rubrique_libelle,rubrique_montant_prevu',
-            'paiement.enregistrePar:id_utilisateur,utilisateur_nom',
+            'rubrique:id_rubrique,rubrique_libelle,rubrique_montant',
+            'paiement.enregistreur:id_utilisateur,utilisateur_nom',
             'validateurDaf:id_utilisateur,utilisateur_nom',
             'validateurAgentComptable:id_utilisateur,utilisateur_nom',
         ]);
@@ -147,7 +165,7 @@ class DemandeDepenseController extends Controller
 
     public function uploadRapport(Request $request, DemandeDepense $demande): RedirectResponse
     {
-        abort_unless($demande->id_utilisateur_porteur === $request->user()->id_utilisateur, 403);
+        abort_unless($demande->id_porteur === $request->user()->id_utilisateur, 403);
 
         $request->validate([
             'rapport' => ['required', 'file', 'mimes:pdf', 'max:10240'],
@@ -163,11 +181,18 @@ class DemandeDepenseController extends Controller
     public function downloadJustificatif(Request $request, DemandeDepense $demande)
     {
         abort_unless(
-            $demande->id_utilisateur_porteur === $request->user()->id_utilisateur
-            || in_array($request->user()->utilisateur_role->value, ['daf', 'ac']),
+            $demande->id_porteur === $request->user()->id_utilisateur
+            || in_array($request->user()->role_key, [RoleUtilisateur::Daf, RoleUtilisateur::AgentComptable]),
             403
         );
         abort_unless($demande->demande_justificatif && Storage::disk('private')->exists($demande->demande_justificatif), 404);
+
+        if ($request->query('inline')) {
+            return Storage::disk('private')->response($demande->demande_justificatif, 'justificatif.pdf', [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="justificatif.pdf"',
+            ]);
+        }
 
         return Storage::disk('private')->download($demande->demande_justificatif, 'justificatif.pdf');
     }
@@ -175,11 +200,18 @@ class DemandeDepenseController extends Controller
     public function downloadRapport(Request $request, DemandeDepense $demande)
     {
         abort_unless(
-            $demande->id_utilisateur_porteur === $request->user()->id_utilisateur
-            || in_array($request->user()->utilisateur_role->value, ['daf', 'ac']),
+            $demande->id_porteur === $request->user()->id_utilisateur
+            || in_array($request->user()->role_key, [RoleUtilisateur::Daf, RoleUtilisateur::AgentComptable]),
             403
         );
         abort_unless($demande->demande_rapport && Storage::disk('private')->exists($demande->demande_rapport), 404);
+
+        if ($request->query('inline')) {
+            return Storage::disk('private')->response($demande->demande_rapport, 'rapport_execution.pdf', [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="rapport_execution.pdf"',
+            ]);
+        }
 
         return Storage::disk('private')->download($demande->demande_rapport, 'rapport_execution.pdf');
     }
@@ -187,19 +219,19 @@ class DemandeDepenseController extends Controller
     private function formatDemande(DemandeDepense $d): array
     {
         return [
-            'id' => $d->id_utilisateur,
+            'id' => $d->id_demande,
             'objet' => $d->demande_objet,
             'montant' => $d->demande_montant,
             'statut' => $d->demande_statut->value,
             'libelle_statut' => $d->demande_statut->label(),
             'badge_class' => $d->demande_statut->badgeClass(),
-            'cree_le' => $d->created_at->toDateString(),
+            'cree_le' => $d->cree_le?->toDateString(),
             'convention' => [
-                'id' => $d->convention->id_utilisateur,
+                'id' => $d->convention->id_convention,
                 'titre' => $d->convention->convention_titre,
             ],
             'projet' => [
-                'id' => $d->convention->projet->id_utilisateur,
+                'id' => $d->convention->projet->id_projet,
                 'titre' => $d->convention->projet->projet_titre,
             ],
             'rubrique' => ['libelle' => $d->rubrique->rubrique_libelle],
@@ -215,18 +247,17 @@ class DemandeDepenseController extends Controller
             'possede_justificatif' => $d->possede_justificatif,
             'possede_rapport' => $d->possede_rapport,
             'rapport_validee_daf' => $d->demande_rapport_valide_daf,
-            'rapport_validee_ac' => $d->demande_rapport_valide_ac,
             'validee_daf_at' => $d->demande_date_validation_daf?->toDateTimeString(),
             'validee_ac_at' => $d->demande_date_validation_ac?->toDateTimeString(),
             'validateur_daf' => $d->validateurDaf?->utilisateur_nom,
             'validateur_ac' => $d->validateurAgentComptable?->utilisateur_nom,
             'paiement' => $d->paiement ? [
                 'montant' => $d->paiement->paiement_montant,
-                'date_paiement' => $d->paiement->paiement_date->toDateString(),
-                'mode_paiement' => $d->paiement->paiement_mode->value,
-                'mode_paiement_label' => $d->paiement->paiement_mode->label(),
+                'date_paiement' => $d->paiement->paiement_date?->toDateString(),
+                'mode_paiement' => $d->paiement->paiement_mode?->value ?? '',
+                'mode_paiement_label' => $d->paiement->paiement_mode?->label() ?? '',
                 'reference' => $d->paiement->paiement_reference,
-                'enregistre_par' => $d->paiement->enregistrePar->utilisateur_nom,
+                'enregistre_par' => $d->paiement->enregistreur->utilisateur_nom,
             ] : null,
         ];
     }

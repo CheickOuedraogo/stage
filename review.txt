@@ -1,0 +1,3 @@
+diagramme de classe projet, remplacer statut_final par projet_status_final
+voir si diagramme on doit passer de float a decimal
+chager type_notif en notif_type et lu le en notif lu le

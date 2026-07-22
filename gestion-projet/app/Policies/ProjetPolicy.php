@@ -7,17 +7,12 @@ use App\Models\Utilisateur;
 
 class ProjetPolicy
 {
-    public function cloturer(Utilisateur $user, Projet $projet): bool
-    {
-        return $user->estDaf();
-    }
-
     public function voirBilan(Utilisateur $user, Projet $projet): bool
     {
-        if ($user->estDaf() || $user->isAgentComptable()) {
+        if ($user->estDaf() || $user->estAgentComptable()) {
             return true;
         }
 
-        return $user->estPorteur() && $projet->id_utilisateur_porteur === $user->id_utilisateur;
+        return $user->estPorteur() && $projet->id_porteur === $user->id_utilisateur;
     }
 }

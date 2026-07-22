@@ -1,0 +1,123 @@
+<mxfile host="Electron">
+  <diagram name="Page-1" id="1J7kf9B8Y95jYS9NepR7">
+    <mxGraphModel dx="2035" dy="1375" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Ge6RXDIf1IRkJcxvmaXj-1" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlActor;verticalAlign=bottom;labelPosition=center;verticalLabelPosition=top;align=center;size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);fontSize=13;" value="Porteur" vertex="1">
+          <mxGeometry height="820" width="35" x="20" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="Ge6RXDIf1IRkJcxvmaXj-29" parent="Ge6RXDIf1IRkJcxvmaXj-1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="690" width="10" x="12.5" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Ge6RXDIf1IRkJcxvmaXj-2" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlActor;verticalAlign=bottom;labelPosition=center;verticalLabelPosition=top;align=center;size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);fontSize=13;" value="DAF" vertex="1">
+          <mxGeometry height="810" width="35" x="220" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="Ge6RXDIf1IRkJcxvmaXj-30" parent="Ge6RXDIf1IRkJcxvmaXj-2" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="690" width="10" x="12.5" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Ge6RXDIf1IRkJcxvmaXj-4" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);fontSize=13;" value="CIFEU" vertex="1">
+          <mxGeometry height="820" width="150" x="580" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="Ge6RXDIf1IRkJcxvmaXj-32" parent="Ge6RXDIf1IRkJcxvmaXj-4" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="700" width="10" x="70" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Ge6RXDIf1IRkJcxvmaXj-8" parent="1" style="shape=umlFrame;pointerEvents=0;dropTarget=0;strokeColor=#000000;height=20;width=30;fillColor=light-dark(#eeeeee,#1f2020);fontColor=light-dark(#333333,#cccccc);strokeWidth=2;fontSize=13;" value="alt" vertex="1">
+          <mxGeometry height="300" width="680" x="20" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="Ge6RXDIf1IRkJcxvmaXj-9" parent="Ge6RXDIf1IRkJcxvmaXj-8" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=14;fontStyle=1" value="[Validation par le DAF]" vertex="1">
+          <mxGeometry height="7.832898172323757" width="651.4285714285713" x="100.95238095238092" y="6" as="geometry" />
+        </mxCell>
+        <mxCell id="Ge6RXDIf1IRkJcxvmaXj-10" parent="Ge6RXDIf1IRkJcxvmaXj-8" style="shape=line;whiteSpace=wrap;verticalAlign=top;labelPosition=center;verticalLabelPosition=middle;align=center;strokeColor=#000000;strokeWidth=1;fontSize=13;" value="" vertex="1">
+          <mxGeometry height="206.68" width="680" y="23.32" as="geometry" />
+        </mxCell>
+        <mxCell id="Ge6RXDIf1IRkJcxvmaXj-11" edge="1" parent="1" source="Ge6RXDIf1IRkJcxvmaXj-29" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;fontSize=13;" target="Ge6RXDIf1IRkJcxvmaXj-32" value="Accéder à la demande payée">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="440" y="176" />
+            </Array>
+            <mxPoint x="40" y="176" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Ge6RXDIf1IRkJcxvmaXj-13" edge="1" parent="1" source="Ge6RXDIf1IRkJcxvmaXj-29" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;fontSize=13;" target="Ge6RXDIf1IRkJcxvmaXj-32" value="Valider le dépôt">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="440" y="280" />
+            </Array>
+            <mxPoint x="38" y="280" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Ge6RXDIf1IRkJcxvmaXj-14" edge="1" parent="1" source="Ge6RXDIf1IRkJcxvmaXj-32" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;fontSize=13;" target="Ge6RXDIf1IRkJcxvmaXj-30" value="Notifier (rapport à examiner)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="543" y="332" />
+            </Array>
+            <mxPoint x="250" y="332" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Ge6RXDIf1IRkJcxvmaXj-15" edge="1" parent="1" source="Ge6RXDIf1IRkJcxvmaXj-30" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;fontSize=13;" target="Ge6RXDIf1IRkJcxvmaXj-32" value="Consulter le rapport">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="540" y="384" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Ge6RXDIf1IRkJcxvmaXj-16" edge="1" parent="1" source="Ge6RXDIf1IRkJcxvmaXj-32" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;fontSize=13;" target="Ge6RXDIf1IRkJcxvmaXj-30" value="Afficher le rapport et les détails de la demande">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="543" y="436" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Ge6RXDIf1IRkJcxvmaXj-17" edge="1" parent="1" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;fontSize=13;" value="Valider le rapport">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="540" y="500" />
+            </Array>
+            <mxPoint x="242.5" y="500" as="sourcePoint" />
+            <mxPoint x="650" y="500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Ge6RXDIf1IRkJcxvmaXj-18" edge="1" parent="1" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;fontSize=13;" value="Notifier (Demande clôturée)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="443" y="540" />
+            </Array>
+            <mxPoint x="650" y="540" as="sourcePoint" />
+            <mxPoint x="42.5" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Ge6RXDIf1IRkJcxvmaXj-26" edge="1" parent="1" source="Ge6RXDIf1IRkJcxvmaXj-30" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;fontSize=13;" target="Ge6RXDIf1IRkJcxvmaXj-32" value="Rejeter avec motif">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="540" y="630" />
+            </Array>
+            <mxPoint x="236.57142857142844" y="630" as="sourcePoint" />
+            <mxPoint x="654.5000000000005" y="630" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Ge6RXDIf1IRkJcxvmaXj-27" edge="1" parent="1" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;fontSize=13;" value="Notifier (rapport rejeté + motif)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="443" y="667.79" />
+            </Array>
+            <mxPoint x="650" y="667.79" as="sourcePoint" />
+            <mxPoint x="42.50000000000023" y="667.79" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Ge6RXDIf1IRkJcxvmaXj-34" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=14;fontStyle=1" value="&lt;span&gt;[Rejet par la DAF]&lt;/span&gt;" vertex="1">
+          <mxGeometry height="30" width="160" x="350" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="Ge6RXDIf1IRkJcxvmaXj-37" edge="1" parent="1" source="Ge6RXDIf1IRkJcxvmaXj-29" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;fontSize=13;" target="Ge6RXDIf1IRkJcxvmaXj-32" value="Téléverser le rapport d&#39;exécution (PDF)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="440" y="220" />
+            </Array>
+            <mxPoint x="40" y="220" as="sourcePoint" />
+            <mxPoint x="762" y="220" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

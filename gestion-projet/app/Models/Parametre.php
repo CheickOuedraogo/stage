@@ -41,7 +41,7 @@ class Parametre extends Model
      */
     public static function estMaintenanceActive(): bool
     {
-        return static::get('maintenance_mode', 'false') === 'true';
+        return filter_var(static::get('maintenance_mode', false), FILTER_VALIDATE_BOOLEAN);
     }
 
     /**
@@ -51,6 +51,24 @@ class Parametre extends Model
     {
         $valeur = static::get('maintenance_until');
 
-        return $valeur ? Carbon::parse($valeur) : null;
+        if (blank($valeur)) {
+            return null;
+        }
+
+        try {
+            return Carbon::parse($valeur);
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    public static function isMaintenanceActive(): bool
+    {
+        return static::estMaintenanceActive();
+    }
+
+    public static function getMaintenanceUntil(): ?Carbon
+    {
+        return static::getMaintenanceJusqua();
     }
 }

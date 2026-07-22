@@ -49,6 +49,11 @@ class Projet extends Model
         return $this->hasMany(Convention::class, 'id_projet');
     }
 
+    public function paiements(): HasManyThrough
+    {
+        return $this->hasManyThrough(Paiement::class, Convention::class, 'id_projet', 'id_convention');
+    }
+
     public function versements(): HasManyThrough
     {
         return $this->hasManyThrough(Versement::class, Convention::class, 'id_projet', 'id_convention');
@@ -66,7 +71,7 @@ class Projet extends Model
     }
 
     /** Pourcentage de financement mobilisé */
-    public function getPourcentageFinancementAttribute(): int
+    public function getPourcentageAvancementVersementsAttribute(): int
     {
         if ($this->projet_montant_estime === 0) {
             return 0;
@@ -75,5 +80,47 @@ class Projet extends Model
         $totalVersements = $this->versements()->sum('versement_montant');
 
         return (int) min(100, round(($totalVersements / $this->projet_montant_estime) * 100));
+    }
+
+    /** Analyse des délais (retard ou jours restants) */
+    public function getAnalyseDelaisAttribute(): array
+    {
+        if (! $this->projet_date_fin_prevue) {
+            return [
+                'jours' => null,
+                'label' => 'Date de fin non définie',
+                'en_retard' => false,
+            ];
+        }
+
+        $dateRef = $this->projet_date_fin_reelle ?? now();
+        $ecartTemps = (int) $this->projet_date_fin_prevue->diffInDays($dateRef, false);
+
+        if ($ecartTemps > 0) {
+            $label = $ecartTemps === 1 ? '1 jour de retard' : "{$ecartTemps} jours de retard";
+
+            return [
+                'jours' => $ecartTemps,
+                'label' => $label,
+                'en_retard' => true,
+            ];
+        }
+
+        if ($ecartTemps < 0) {
+            $joursRestants = abs($ecartTemps);
+            $label = $joursRestants === 1 ? '1 jour restant' : "{$joursRestants} jours restants";
+
+            return [
+                'jours' => $ecartTemps,
+                'label' => $label,
+                'en_retard' => false,
+            ];
+        }
+
+        return [
+            'jours' => 0,
+            'label' => 'Échéance aujourd\'hui',
+            'en_retard' => false,
+        ];
     }
 }

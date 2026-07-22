@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('utilisateur_email')->unique();
             $table->timestamp('email_verifie_le')->nullable();
             $table->string('utilisateur_mot_de_passe');
-            $table->rememberToken()->comment('jeton_souvenir'); // Laravel expects remember_token name for some internal logic, but we map it in model
+            $table->string('jeton_souvenir', 100)->nullable()->comment('Remember token');
             $table->timestamp('cree_le')->useCurrent();
             $table->timestamp('mis_a_jour_le')->useCurrent();
 

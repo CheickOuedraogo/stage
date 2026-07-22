@@ -55,7 +55,7 @@ class LoginController extends Controller
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect()->route('login')->with('maintenance', true);
+            return redirect()->route('maintenance');
         }
 
         JournalAudit::log('login', $user, description: "Connexion de {$user->utilisateur_nom}");

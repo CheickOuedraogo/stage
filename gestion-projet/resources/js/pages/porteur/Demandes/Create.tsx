@@ -1,10 +1,11 @@
+import { ArrowLeftIcon, DocumentArrowUpIcon, ExclamationTriangleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { Head, Link, useForm, router } from '@inertiajs/react';
+import { useEffect } from 'react';
+import { store as storeAction } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/Button';
 import { formatCurrency } from '@/lib/utils';
-import { store as storeAction } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
 import { show as projetsShow } from '@/routes/porteur/projets';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeftIcon, DocumentArrowUpIcon } from '@heroicons/react/24/outline';
 
 interface Rubrique {
     id: number;
@@ -14,7 +15,7 @@ interface Rubrique {
 }
 
 interface Props {
-    projet: { id: number; titre: string };
+    projet: { id: number; titre: string; statut: string; libelle_statut: string };
     convention: { id: number; titre: string; montant_fcfa: number };
     rubriques: Rubrique[];
 }
@@ -35,6 +36,59 @@ export default function DemandeCreate({ projet, convention, rubriques }: Props) 
     });
 
     const selectedRubrique = rubriques.find((r) => r.id === Number(data.rubrique_id));
+
+    function StatusBanner({ statut, libelleStatut }: { statut: string; libelleStatut: string }) {
+        const messages: Record<string, { icon: React.ReactNode; title: string; text: string; className: string }> = {
+            en_attente_financement: {
+                icon: <InformationCircleIcon className="w-4 h-4 shrink-0" />,
+                title: 'Projet en attente de mise en cours',
+                text: 'Le DAF doit mettre le projet en cours pour que vous puissiez soumettre des demandes.',
+                className: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-400',
+            },
+            termine: {
+                icon: <ExclamationTriangleIcon className="w-4 h-4 shrink-0" />,
+                title: 'Projet terminé',
+                text: 'Ce projet est clôturé. Aucune nouvelle demande de dépense ne peut être soumise.',
+                className: 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-400',
+            },
+            annule: {
+                icon: <ExclamationTriangleIcon className="w-4 h-4 shrink-0" />,
+                title: 'Projet annulé',
+                text: 'Ce projet a été annulé. Aucune nouvelle demande de dépense ne peut être soumise.',
+                className: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-400',
+            },
+            suspendu: {
+                icon: <ExclamationTriangleIcon className="w-4 h-4 shrink-0" />,
+                title: 'Projet suspendu',
+                text: 'Ce projet est suspendu temporairement. Les demandes de dépenses sont bloquées jusqu\'à la reprise.',
+                className: 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-400',
+            },
+        };
+
+        const config = messages[statut];
+
+        if (!config) {
+return null;
+}
+
+        return (
+            <div className={`mb-6 flex gap-3 p-4 rounded-xl border ${config.className}`}>
+                {config.icon}
+                <div className="flex-1 min-w-0">
+                    <h3 className="text-sm font-semibold">{config.title}</h3>
+                    <p className="text-xs mt-0.5">{config.text}</p>
+                </div>
+            </div>
+        );
+    }
+
+    useEffect(() => {
+        if (projet.statut !== 'en_cours') {
+            router.visit(projetsShow.url(projet.id), {
+                onError: () => {},
+            });
+        }
+    }, [projet.statut]);
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -62,7 +116,10 @@ export default function DemandeCreate({ projet, convention, rubriques }: Props) 
                 <span className="text-gray-900 dark:text-white font-medium">Nouvelle demande</span>
             </div>
 
-            <div className="max-w-2xl">
+            {/* Status banner */}
+            <StatusBanner statut={projet.statut} libelleStatut={projet.libelle_statut} />
+
+            <div className="mx-auto w-full max-w-2xl">
                 <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
                         Nouvelle demande de dépense
@@ -157,7 +214,7 @@ export default function DemandeCreate({ projet, convention, rubriques }: Props) 
                         {/* Justificatif PDF */}
                         <div>
                             <label htmlFor="justificatif" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">
-                                Justificatif (PDF) <span className="text-red-500">*</span>
+                                Justificatif (PDF) <span className="text-gray-400">(optionnel)</span>
                             </label>
                             <div className="relative">
                                 <input

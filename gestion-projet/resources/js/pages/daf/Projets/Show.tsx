@@ -1,14 +1,12 @@
+import { ArrowLeftIcon, DocumentChartBarIcon } from '@heroicons/react/24/outline';
+import { Head, Link, router } from '@inertiajs/react';
+import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import AppLayout from '@/components/layout/AppLayout';
 import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer';
-import { clampPercent, conventionStatusClass, formatCurrency, formatDate, projectStatusClass } from '@/lib/utils';
 import { CHART_AXIS_TICK, CHART_MARGIN, CHART_TOOLTIP_STYLE } from '@/lib/charts';
-import { index as dafProjetsIndex, bilan as dafProjetBilan } from '@/routes/daf/projets';
-import { cloturer as cloturerProjet } from '@/actions/App/Http/Controllers/Daf/ProjetController';
+import { clampPercent, conventionStatusClass, formatCurrency, formatDate, projectStatusClass } from '@/lib/utils';
+import { index as dafProjetsIndex } from '@/routes/daf/projets';
 import { show as dafConventionShow } from '@/routes/daf/projets/conventions';
-import { Head, Link, router, useForm } from '@inertiajs/react';
-import { ArrowLeftIcon, CheckBadgeIcon, DocumentChartBarIcon, ExclamationTriangleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { FormEvent, useState } from 'react';
 
 interface Convention {
     id: number;
@@ -30,6 +28,7 @@ interface AnalyseEcarts {
     total_versements: number;
     total_depenses: number;
     ecart_budget: number;
+    solde_caisse: number;
     taux_execution: number;
     date_fin_prevue: string | null;
     date_fin_reelle: string | null;
@@ -55,8 +54,6 @@ interface Projet {
     porteur: { nom: string; utilisateur_email: string; utilisateur_telephone: string | null };
     conventions: Convention[];
     analyse_ecarts: AnalyseEcarts;
-    can_cloturer: boolean;
-    cloture_blockers: string | null;
     bilan_url: string | null;
 }
 
@@ -67,19 +64,6 @@ interface Props {
 export default function DafProjetShow({ projet }: Props) {
     const totalConventions = projet.conventions.length;
     const totalRubriques = projet.conventions.reduce((s, c) => s + c.rubriques_count, 0);
-    const [showCloture, setShowCloture] = useState(false);
-    const cloturerForm = useForm({
-        date_fin_reelle: new Date().toISOString().split('T')[0],
-        statut_final: '' as 'succes' | 'echec' | '',
-    });
-    const statusEnCours = projet.statut === 'en_cours';
-
-    const submitCloture = (e: FormEvent) => {
-        e.preventDefault();
-        cloturerForm.post(cloturerProjet.url(projet.id), {
-            onSuccess: () => setShowCloture(false),
-        });
-    };
 
     const conventionsChartData = projet.conventions.map((c) => ({
         name: (c.bailleur.sigle ?? c.bailleur.nom).slice(0, 12),
@@ -121,88 +105,10 @@ export default function DafProjetShow({ projet }: Props) {
                         Voir le bilan
                     </Link>
                 )}
-                {statusEnCours && projet.can_cloturer && (
-                    <button
-                        onClick={() => setShowCloture((v) => !v)}
-                        className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-emerald-400 hover:text-emerald-700 transition-all"
-                    >
-                        <CheckBadgeIcon className="w-4 h-4" />
-                        Clôturer
-                    </button>
-                )}
-                {statusEnCours && !projet.can_cloturer && projet.cloture_blockers && (
-                    <div className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 max-w-xs">
-                        <InformationCircleIcon className="w-4 h-4 shrink-0" />
-                        <span className="text-xs">{projet.cloture_blockers}</span>
-                    </div>
-                )}
+
             </div>
 
-            {/* Panneau clôture */}
-            {showCloture && projet.can_cloturer && (
-                <div className="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-5">
-                    <div className="flex items-center gap-2 mb-3">
-                        <ExclamationTriangleIcon className="w-4 h-4 text-amber-600" />
-                        <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-400">Clôturer ce projet</h3>
-                    </div>
-                    <p className="text-xs text-amber-700 dark:text-amber-500 mb-4">Cette action marque le projet comme terminé et enregistre la date de clôture réelle.</p>
-                    {(cloturerForm.errors as Record<string, string>).projet && (
-                        <p className="text-xs text-red-600 dark:text-red-400 mb-3">{(cloturerForm.errors as Record<string, string>).projet}</p>
-                    )}
-                    <form onSubmit={submitCloture} className="space-y-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-xs font-medium text-amber-800 dark:text-amber-400 mb-1">
-                                    Date de clôture réelle <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="date"
-                                    value={cloturerForm.data.date_fin_reelle}
-                                    onChange={(e) => cloturerForm.setData('date_fin_reelle', e.target.value)}
-                                    max={new Date().toISOString().split('T')[0]}
-                                    className="w-full px-3 py-2 text-sm border border-amber-300 dark:border-amber-700 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50"
-                                />
-                                {cloturerForm.errors.date_fin_reelle && (
-                                    <p className="text-xs text-red-600 mt-1">{cloturerForm.errors.date_fin_reelle}</p>
-                                )}
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-amber-800 dark:text-amber-400 mb-1">
-                                    Statut final <span className="text-red-500">*</span>
-                                </label>
-                                <select
-                                    value={cloturerForm.data.statut_final}
-                                    onChange={(e) => cloturerForm.setData('statut_final', e.target.value as 'succes' | 'echec' | '')}
-                                    className="w-full px-3 py-2 text-sm border border-amber-300 dark:border-amber-700 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50"
-                                >
-                                    <option value="">Choisir…</option>
-                                    <option value="succes">Succès</option>
-                                    <option value="echec">Échec</option>
-                                </select>
-                                {cloturerForm.errors.statut_final && (
-                                    <p className="text-xs text-red-600 mt-1">{cloturerForm.errors.statut_final}</p>
-                                )}
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <button
-                                type="submit"
-                                disabled={cloturerForm.processing || !cloturerForm.data.statut_final}
-                                className="px-4 py-2 text-sm font-medium rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50 transition-colors"
-                            >
-                                {cloturerForm.processing ? 'En cours…' : 'Confirmer la clôture'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setShowCloture(false)}
-                                className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
-                            >
-                                Annuler
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
+
 
             {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -296,7 +202,17 @@ export default function DafProjetShow({ projet }: Props) {
                             {projet.analyse_ecarts.ecart_budget >= 0 ? '+' : ''}{formatCurrency(projet.analyse_ecarts.ecart_budget)}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
-                            {projet.analyse_ecarts.ecart_budget >= 0 ? 'Sous-consommation' : 'Dépassement'}
+                            Reliquat budget prévu
+                        </p>
+                    </div>
+                    {/* Solde Caisse */}
+                    <div>
+                        <p className="text-xs text-gray-500 dark:text-slate-400 mb-1">Solde Caisse</p>
+                        <p className={`text-base font-bold font-mono ${projet.analyse_ecarts.solde_caisse >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                            {formatCurrency(projet.analyse_ecarts.solde_caisse)}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
+                            Fonds disponibles en caisse
                         </p>
                     </div>
                     {/* Total dépensé */}

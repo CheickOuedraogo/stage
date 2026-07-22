@@ -1,12 +1,12 @@
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { Head, Link, useForm } from '@inertiajs/react';
+import type { FormEvent } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { index as usersIndex, store as usersStore, update as usersUpdate } from '@/routes/admin/users';
 import type { Utilisateur } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import { FormEvent } from 'react';
 
 interface Role {
     value: string;
@@ -14,24 +14,25 @@ interface Role {
 }
 
 interface UtilisateurFormProps {
-    user?: Partial<Utilisateur> & { id?: number };
+    user?: Partial<Utilisateur>;
     roles: Role[];
 }
 
 export default function UtilisateurForm({ user, roles }: UtilisateurFormProps) {
-    const isEditing = !!user?.id;
+    const isEditing = !!user?.id_utilisateur;
 
     const { data, setData, post, patch, processing, errors } = useForm({
         utilisateur_nom: user?.utilisateur_nom ?? '',
         utilisateur_email: user?.utilisateur_email ?? '',
         utilisateur_mot_de_passe: '',
-        utilisateur_role: user?.utilisateur_role ?? 'porteur',
+        role_key: user?.role_key ?? 'porteur',
         utilisateur_telephone: user?.utilisateur_telephone ?? '',
     });
 
     const submit = (e: FormEvent) => {
         e.preventDefault();
-        if (isEditing && user?.id != null) {
+
+        if (isEditing && user?.id_utilisateur != null) {
             patch(usersUpdate.url(user.id_utilisateur), { preserveScroll: true });
         } else {
             post(usersStore.url());
@@ -84,22 +85,22 @@ export default function UtilisateurForm({ user, roles }: UtilisateurFormProps) {
                             />
 
                             <div className="space-y-1">
-                                <label htmlFor="utilisateur_role" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
+                                <label htmlFor="role_key" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
                                     Rôle <span className="text-red-500" aria-hidden="true">*</span>
                                 </label>
                                 <select
-                                    id="utilisateur_role"
-                                    value={data.utilisateur_role}
-                                    onChange={(e) => setData('utilisateur_role', e.target.value as Utilisateur['utilisateur_role'])}
+                                    id="role_key"
+                                    value={data.role_key}
+                                    onChange={(e) => setData('role_key', e.target.value as Utilisateur['role_key'])}
                                     aria-label="Sélectionner le rôle"
-                                    aria-invalid={!!errors.utilisateur_role}
+                                    aria-invalid={!!errors.role_key}
                                     className="w-full px-3.5 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                                 >
                                     {roles.map((r) => (
                                         <option key={r.value} value={r.value}>{r.label}</option>
                                     ))}
                                 </select>
-                                {errors.utilisateur_role && <p className="text-xs text-red-600">{errors.utilisateur_role}</p>}
+                                {errors.role_key && <p className="text-xs text-red-600">{errors.role_key}</p>}
                             </div>
 
                             <Input

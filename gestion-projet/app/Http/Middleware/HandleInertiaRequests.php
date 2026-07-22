@@ -2,6 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\RoleUtilisateur;
+use App\Enums\StatutDemande;
+use App\Models\DemandeDepense;
 use App\Models\Parametre;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -46,12 +49,14 @@ class HandleInertiaRequests extends Middleware
                     'id' => $user->id_utilisateur,
                     'utilisateur_nom' => $user->utilisateur_nom,
                     'utilisateur_email' => $user->utilisateur_email,
-                    'utilisateur_role' => $user->utilisateur_role?->value,
-                    'label_role' => $user->utilisateur_role?->shortLabel(),
+                    'role_key' => $user->role_key?->value,
+                    'label_role' => $user->role_key?->shortLabel(),
                     'utilisateur_actif' => $user->utilisateur_actif,
                     'url_avatar' => $user->url_avatar,
                     'utilisateur_telephone' => $user->utilisateur_telephone,
                     'notifications_non_lues' => $user->notificationsNonLues()->count(),
+                    'actions_a_traiter_count' => $this->getActionsATraiterCount($user),
+                    'paiements_a_traiter_count' => $this->getPaiementsATraiterCount($user),
                 ] : null,
             ],
             'flash' => [
@@ -65,5 +70,30 @@ class HandleInertiaRequests extends Middleware
                 'reason' => Parametre::get('maintenance_reason'),
             ],
         ];
+    }
+
+    private function getActionsATraiterCount($user): int
+    {
+        if ($user->role_key === RoleUtilisateur::Daf) {
+            return DemandeDepense::whereIn('demande_statut', [
+                StatutDemande::Soumise->value,
+                StatutDemande::RapportSoumis->value,
+            ])->count();
+        }
+
+        if ($user->role_key === RoleUtilisateur::AgentComptable) {
+            return DemandeDepense::where('demande_statut', StatutDemande::ValideeDaf->value)->count();
+        }
+
+        return 0;
+    }
+
+    private function getPaiementsATraiterCount($user): int
+    {
+        if ($user->role_key === RoleUtilisateur::AgentComptable) {
+            return DemandeDepense::where('demande_statut', StatutDemande::ValideeAgentComptable->value)->count();
+        }
+
+        return 0;
     }
 }

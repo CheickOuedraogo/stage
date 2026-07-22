@@ -1,10 +1,11 @@
+import { ArrowLeftIcon, CalendarIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { Head, Link } from '@inertiajs/react';
+import { create as createDemande } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
+import { show as demandesShow } from '@/routes/porteur/demandes';
 import AppLayout from '@/components/layout/AppLayout';
 import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer';
 import { clampPercent, conventionStatusClass, formatCurrency, formatDate } from '@/lib/utils';
-import { create as createDemande } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
 import { show as projetsShow } from '@/routes/porteur/projets';
-import { Head, Link } from '@inertiajs/react';
-import { ArrowLeftIcon, CalendarIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 interface Rubrique {
     id: number;
@@ -44,13 +45,25 @@ interface Convention {
     versements: Versement[];
 }
 
-interface Props {
-    projet: { id: number; titre: string };
-    convention: Convention;
-    has_demande_active: boolean;
+interface Demande {
+    id: number;
+    objet: string;
+    montant: number;
+    statut: string;
+    libelle_statut: string;
+    badge_class: string;
+    cree_le: string | null;
+    rubrique: { libelle: string } | null;
 }
 
-export default function ConventionShow({ projet, convention, has_demande_active }: Props) {
+interface Props {
+    projet: { id: number; titre: string; statut: string; libelle_statut: string };
+    convention: Convention;
+    has_demande_active: boolean;
+    demandes: Demande[];
+}
+
+export default function ConventionShow({ projet, convention, has_demande_active, demandes }: Props) {
     const tauxCouverture = clampPercent(convention.total_versements, convention.montant_fcfa);
     const totalDepense = convention.rubriques.reduce((s, r) => s + r.montant_depense, 0);
     const tauxConsomme = clampPercent(totalDepense, convention.total_rubriques);
@@ -161,18 +174,36 @@ export default function ConventionShow({ projet, convention, has_demande_active 
 
                 {/* Bouton nouvelle demande */}
                 <div className="flex items-center justify-end">
-                    <Link
-                        href={createDemande.url({ projet: projet.id, convention: convention.id })}
-                        className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                            has_demande_active
-                                ? 'bg-slate-100 text-slate-400 cursor-not-allowed pointer-events-none dark:bg-slate-800 dark:text-slate-600'
-                                : 'bg-blue-600 hover:bg-blue-700 text-white motion-safe:hover:scale-[1.02] active:scale-[0.98]'
-                        }`}
-                        aria-disabled={has_demande_active}
-                    >
-                        <PlusIcon className="w-4 h-4" />
-                        {has_demande_active ? 'Demande en cours' : 'Nouvelle demande'}
-                    </Link>
+                    {projet.statut !== 'en_cours' && (
+                        <div className="relative inline-flex items-center">
+                            <button
+                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-slate-100 text-slate-400 cursor-not-allowed pointer-events-none dark:bg-slate-800 dark:text-slate-600"
+                                disabled
+                                aria-disabled="true"
+                            >
+                                <PlusIcon className="w-4 h-4" />
+                                Nouvelle demande
+                            </button>
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 text-xs text-white bg-gray-900 rounded shadow-lg whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                                Projet <strong>{projet.libelle_statut}</strong> : Le DAF doit mettre le projet en cours pour autoriser les demandes.
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+                            </div>
+                        </div>
+                    )}
+                    {projet.statut === 'en_cours' && (
+                        <Link
+                            href={createDemande.url({ projet: projet.id, convention: convention.id })}
+                            className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                                has_demande_active
+                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed pointer-events-none dark:bg-slate-800 dark:text-slate-600'
+                                    : 'bg-blue-600 hover:bg-blue-700 text-white motion-safe:hover:scale-[1.02] active:scale-[0.98]'
+                            }`}
+                            aria-disabled={has_demande_active}
+                        >
+                            <PlusIcon className="w-4 h-4" />
+                            {has_demande_active ? 'Demande en cours' : 'Nouvelle demande'}
+                        </Link>
+                    )}
                 </div>
 
                 {/* Rubriques */}
@@ -191,6 +222,7 @@ export default function ConventionShow({ projet, convention, has_demande_active 
                                     : 0;
                                 const restant = r.montant_prevu - r.montant_depense;
                                 const overBudget = restant < 0;
+
                                 return (
                                     <div key={r.id} className="px-5 py-4">
                                         <div className="flex items-start justify-between gap-4 mb-2">
@@ -235,6 +267,53 @@ export default function ConventionShow({ projet, convention, has_demande_active 
                                     <span className="text-emerald-600">{formatCurrency(convention.total_rubriques - totalDepense)}</span>
                                 </div>
                             </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Demandes associées */}
+                <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                    <div className="px-5 py-3.5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Demandes de dépense</h3>
+                        <span className="text-xs text-gray-500 dark:text-slate-400">{demandes.length} demande{demandes.length !== 1 ? 's' : ''}</span>
+                    </div>
+                    {demandes.length === 0 ? (
+                        <p className="p-5 text-sm text-gray-500 dark:text-slate-400 text-center">Aucune demande pour cette convention</p>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800">
+                                        <th className="text-left px-5 py-3 text-xs font-semibold text-gray-600 dark:text-slate-400">Objet</th>
+                                        <th className="text-left px-5 py-3 text-xs font-semibold text-gray-600 dark:text-slate-400">Rubrique</th>
+                                        <th className="text-left px-5 py-3 text-xs font-semibold text-gray-600 dark:text-slate-400">Statut</th>
+                                        <th className="text-right px-5 py-3 text-xs font-semibold text-gray-600 dark:text-slate-400">Montant</th>
+                                        <th className="px-5 py-3"></th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
+                                    {demandes.map((d) => (
+                                        <tr key={d.id} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
+                                            <td className="px-5 py-3 font-medium text-gray-900 dark:text-white max-w-xs truncate">{d.objet}</td>
+                                            <td className="px-5 py-3 text-gray-600 dark:text-slate-400 text-xs">{d.rubrique?.libelle ?? '—'}</td>
+                                            <td className="px-5 py-3">
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${d.badge_class}`}>
+                                                    {d.libelle_statut}
+                                                </span>
+                                            </td>
+                                            <td className="px-5 py-3 text-right font-mono font-semibold text-gray-900 dark:text-white">{formatCurrency(d.montant)}</td>
+                                            <td className="px-5 py-3 text-right">
+                                                <Link
+                                                    href={demandesShow.url(d.id)}
+                                                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                                                >
+                                                    Voir
+                                                </Link>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     )}
                 </div>

@@ -11,7 +11,7 @@ use Illuminate\Validation\ValidationException;
 class LoginRequest extends FormRequest
 {
     /** Max failed attempts before lockout */
-    private const MAX_ATTEMPTS = 3;
+    private const MAX_ATTEMPTS = 5;
 
     /** Base lockout duration in seconds (5 minutes) */
     private const BASE_LOCKOUT_SECONDS = 300;
@@ -30,7 +30,7 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'utilisateur_email' => ['required', 'string', 'utilisateur_email'],
+            'utilisateur_email' => ['required', 'string', 'email'],
             'utilisateur_mot_de_passe' => ['required', 'string'],
         ];
     }
@@ -41,9 +41,9 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required' => "L'adresse e-mail est obligatoire.",
-            'email.email' => "L'adresse e-mail n'est pas valide.",
-            'password.required' => 'Le mot de passe est obligatoire.',
+            'utilisateur_email.required' => "L'adresse e-mail est obligatoire.",
+            'utilisateur_email.email' => "L'adresse e-mail n'est pas valide.",
+            'utilisateur_mot_de_passe.required' => 'Le mot de passe est obligatoire.',
         ];
     }
 
@@ -51,7 +51,10 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotLocked();
 
-        if (! Auth::attempt($this->only('utilisateur_email', 'utilisateur_mot_de_passe'), $this->boolean('remember'))) {
+        if (! Auth::attempt([
+            'utilisateur_email' => $this->input('utilisateur_email'),
+            'password' => $this->input('utilisateur_mot_de_passe'),
+        ], $this->boolean('remember'))) {
             $this->recordFailedAttempt();
 
             $remaining = self::MAX_ATTEMPTS - $this->currentAttempts();

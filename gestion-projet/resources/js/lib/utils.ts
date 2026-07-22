@@ -1,4 +1,5 @@
-import { clsx, type ClassValue } from 'clsx';
+import { clsx  } from 'clsx';
+import type {ClassValue} from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]): string {
@@ -65,7 +66,10 @@ export function getInitials(name: string): string {
 }
 
 export function clampPercent(part: number, total: number): number {
-    if (total === 0) return 0;
+    if (total === 0) {
+return 0;
+}
+
     return Math.min(100, Math.round((part / total) * 100));
 }
 

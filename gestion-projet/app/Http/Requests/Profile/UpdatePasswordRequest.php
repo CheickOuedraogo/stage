@@ -31,8 +31,8 @@ class UpdatePasswordRequest extends FormRequest
         return [
             'current_password.required' => 'Le mot de passe actuel est obligatoire.',
             'current_password.current_password' => 'Le mot de passe actuel est incorrect.',
-            'password.required' => 'Le nouveau mot de passe est obligatoire.',
-            'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
+            'utilisateur_mot_de_passe.required' => 'Le nouveau mot de passe est obligatoire.',
+            'utilisateur_mot_de_passe.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
         ];
     }
 }

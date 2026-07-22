@@ -1,9 +1,3 @@
-import AppLayout from '@/components/layout/AppLayout';
-import { formatCurrency, formatDate } from '@/lib/utils';
-import { show as demandeShow } from '@/actions/App/Http/Controllers/Ac/DemandeDepenseController';
-import { index as acDemandesIndex } from '@/routes/ac/demandes';
-import type { PageProps } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowRightIcon,
     BanknotesIcon,
@@ -12,6 +6,12 @@ import {
     ClipboardDocumentListIcon,
     CreditCardIcon,
 } from '@heroicons/react/24/outline';
+import { Head, Link, usePage } from '@inertiajs/react';
+import { show as demandeShow } from '@/actions/App/Http/Controllers/AgentComptable/DemandeDepenseController';
+import AppLayout from '@/components/layout/AppLayout';
+import { formatCurrency, formatDate } from '@/lib/utils';
+import { index as acDemandesIndex } from '@/routes/ac/demandes';
+import type { PageProps } from '@/types';
 
 interface Stats {
     demandes_en_attente: number;
@@ -97,7 +97,7 @@ export default function AcDashboard() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6">
 
                 {/* Demandes en attente */}
                 <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">

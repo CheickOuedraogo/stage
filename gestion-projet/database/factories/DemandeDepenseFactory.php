@@ -34,6 +34,13 @@ class DemandeDepenseFactory extends Factory
         ];
     }
 
+    public function soumise(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'demande_statut' => StatutDemande::Soumise,
+        ]);
+    }
+
     public function valideeDaf(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -54,6 +61,35 @@ class DemandeDepenseFactory extends Factory
         ]);
     }
 
+    public function valideAgentComptable(): static
+    {
+        return $this->valideeAc();
+    }
+
+    public function payee(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'demande_statut' => StatutDemande::Payee,
+            'demande_date_validation_daf' => now(),
+            'id_validateur_daf' => Utilisateur::factory()->daf()->create()->id_utilisateur,
+            'demande_date_validation_ac' => now(),
+            'id_validateur_ac' => Utilisateur::factory()->ac()->create()->id_utilisateur,
+        ]);
+    }
+
+    public function rapportSoumis(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'demande_statut' => StatutDemande::RapportSoumis,
+            'demande_date_validation_daf' => now(),
+            'id_validateur_daf' => Utilisateur::factory()->daf()->create()->id_utilisateur,
+            'demande_date_validation_ac' => now(),
+            'id_validateur_ac' => Utilisateur::factory()->ac()->create()->id_utilisateur,
+            'demande_rapport' => 'rapports/test-rapport.pdf',
+            'demande_rapport_valide_daf' => false,
+        ]);
+    }
+
     public function terminee(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -62,8 +98,8 @@ class DemandeDepenseFactory extends Factory
             'id_validateur_daf' => Utilisateur::factory()->daf()->create()->id_utilisateur,
             'demande_date_validation_ac' => now(),
             'id_validateur_ac' => Utilisateur::factory()->ac()->create()->id_utilisateur,
+            'demande_rapport' => 'rapports/test-rapport.pdf',
             'demande_rapport_valide_daf' => true,
-            'demande_rapport_valide_ac' => true,
         ]);
     }
 }

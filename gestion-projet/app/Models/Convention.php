@@ -69,15 +69,20 @@ class Convention extends Model
         return $this->hasMany(DemandeDepense::class, 'id_convention');
     }
 
+    public function paiements(): HasMany
+    {
+        return $this->hasMany(Paiement::class, 'id_convention');
+    }
+
     public function paiementsDirects(): HasMany
     {
-        return $this->hasMany(PaiementDirect::class, 'id_convention');
+        return $this->hasMany(Paiement::class, 'id_convention')->where('type_paiement', 'direct');
     }
 
     /** Somme des rubriques budgétaires */
     public function getMontantTotalRubriquesAttribute(): int
     {
-        return $this->rubriques()->sum('rubrique_montant_prevu');
+        return $this->rubriques()->sum('rubrique_montant');
     }
 
     /** Somme des versements reçus */

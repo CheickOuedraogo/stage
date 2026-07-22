@@ -1,0 +1,110 @@
+<mxfile host="Electron">
+  <diagram name="Page-1" id="60LI0YvdHiD5LYfQfIiQ">
+    <mxGraphModel dx="1323" dy="894" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="t98FVlG28DegcT7Trdgc-1" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlActor;verticalAlign=bottom;labelPosition=center;verticalLabelPosition=top;align=center;size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);fontSize=13;" value="AC" vertex="1">
+          <mxGeometry height="650" width="35" x="20" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="t98FVlG28DegcT7Trdgc-16" parent="t98FVlG28DegcT7Trdgc-1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};fontSize=13;" value="" vertex="1">
+          <mxGeometry height="580" width="10" x="12.5" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="t98FVlG28DegcT7Trdgc-2" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlActor;verticalAlign=bottom;labelPosition=center;verticalLabelPosition=top;align=center;size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);fontSize=13;" value="PP" vertex="1">
+          <mxGeometry height="650" width="35" x="220" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="t98FVlG28DegcT7Trdgc-18" parent="t98FVlG28DegcT7Trdgc-2" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};fontSize=13;" value="" vertex="1">
+          <mxGeometry height="580" width="10" x="12.5" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="t98FVlG28DegcT7Trdgc-3" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;fillColor=light-dark(#eeeeee,#1f2020);strokeColor=light-dark(#999999,#cccccc);fontColor=light-dark(#333333,#cccccc);fontSize=13;" value="CIFEU" vertex="1">
+          <mxGeometry height="650" width="150" x="641" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="t98FVlG28DegcT7Trdgc-19" parent="t98FVlG28DegcT7Trdgc-3" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};fontSize=13;" value="" vertex="1">
+          <mxGeometry height="570" width="10" x="70" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="t98FVlG28DegcT7Trdgc-4" parent="1" style="shape=umlFrame;pointerEvents=0;dropTarget=0;strokeColor=default;height=20;width=30;fillColor=light-dark(#eeeeee,#1f2020);fontColor=light-dark(#333333,#cccccc);strokeWidth=2;fontSize=13;fontStyle=1" value="alt" vertex="1">
+          <mxGeometry height="248" width="717" x="10" y="407" as="geometry" />
+        </mxCell>
+        <mxCell id="t98FVlG28DegcT7Trdgc-5" parent="t98FVlG28DegcT7Trdgc-4" style="text;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=14;fontStyle=1" value="[Données valides]" vertex="1">
+          <mxGeometry height="20" width="683.547433903577" x="33.45256609642302" as="geometry" />
+        </mxCell>
+        <mxCell id="t98FVlG28DegcT7Trdgc-6" parent="t98FVlG28DegcT7Trdgc-4" style="shape=line;whiteSpace=wrap;verticalAlign=top;labelPosition=center;verticalLabelPosition=middle;align=center;strokeColor=#000000;fontSize=13;fontStyle=1" value="[Données invalides]" vertex="1">
+          <mxGeometry height="4" width="717" y="155" as="geometry" />
+        </mxCell>
+        <mxCell id="t98FVlG28DegcT7Trdgc-7" edge="1" parent="1" source="t98FVlG28DegcT7Trdgc-16" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;fontSize=13;" target="t98FVlG28DegcT7Trdgc-19" value="Accéder à la liste des demandes en attente de paiement">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="414" y="127" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t98FVlG28DegcT7Trdgc-9" edge="1" parent="1" source="t98FVlG28DegcT7Trdgc-16" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;fontSize=13;" target="t98FVlG28DegcT7Trdgc-19" value="Sélectionner une demande">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="414" y="231" />
+            </Array>
+            <mxPoint x="40" y="231" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t98FVlG28DegcT7Trdgc-10" edge="1" parent="1" source="t98FVlG28DegcT7Trdgc-19" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;fontSize=13;" target="t98FVlG28DegcT7Trdgc-16" value="Afficher les détails">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="417" y="283" />
+            </Array>
+            <mxPoint x="40" y="283" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t98FVlG28DegcT7Trdgc-11" edge="1" parent="1" source="t98FVlG28DegcT7Trdgc-16" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;fontSize=13;" target="t98FVlG28DegcT7Trdgc-19" value="Saisir les informations sur le paiement">
+          <mxGeometry relative="1" x="0.0012" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="414" y="335" />
+            </Array>
+            <mxPoint x="40" y="335" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t98FVlG28DegcT7Trdgc-12" edge="1" parent="1" source="t98FVlG28DegcT7Trdgc-16" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;fontSize=13;" target="t98FVlG28DegcT7Trdgc-19" value="Valider l&#39;enregistrement">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="414" y="387" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t98FVlG28DegcT7Trdgc-13" edge="1" parent="1" source="t98FVlG28DegcT7Trdgc-19" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;fontSize=13;" target="t98FVlG28DegcT7Trdgc-16" value="Confirmer (statut : payée)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="60" y="490" />
+            </Array>
+            <mxPoint x="702.48" y="490" as="sourcePoint" />
+            <mxPoint x="50" y="490" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t98FVlG28DegcT7Trdgc-14" edge="1" parent="1" source="t98FVlG28DegcT7Trdgc-19" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;fontSize=13;" target="t98FVlG28DegcT7Trdgc-18" value="Notifier (paiement effectué — déposer le rapport)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="517" y="537" />
+            </Array>
+            <mxPoint x="260" y="537" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t98FVlG28DegcT7Trdgc-15" edge="1" parent="1" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;fontSize=13;" target="t98FVlG28DegcT7Trdgc-16" value="Afficher le message d&#39;erreur">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="417" y="635" />
+            </Array>
+            <mxPoint x="710" y="635" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t98FVlG28DegcT7Trdgc-21" edge="1" parent="1" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;fontSize=13;" target="t98FVlG28DegcT7Trdgc-16" value="Afficher les demandes (statut : en attente de paiement)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="414" y="170" />
+            </Array>
+            <mxPoint x="708" y="170" as="sourcePoint" />
+            <mxPoint x="40" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

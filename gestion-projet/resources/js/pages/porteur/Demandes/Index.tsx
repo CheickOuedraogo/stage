@@ -1,14 +1,14 @@
-import AppLayout from '@/components/layout/AppLayout';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { demandeStatusClass, formatCurrency, formatDate } from '@/lib/utils';
+import { ClipboardDocumentListIcon, FolderOpenIcon } from '@heroicons/react/24/outline';
+import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 import {
     index as demandesIndex,
     show as demandeShow,
 } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
+import AppLayout from '@/components/layout/AppLayout';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { demandeStatusClass, formatCurrency, formatDate } from '@/lib/utils';
 import { index as projetsIndex } from '@/routes/porteur/projets';
-import { Head, Link, router } from '@inertiajs/react';
-import { ClipboardDocumentListIcon, FolderOpenIcon } from '@heroicons/react/24/outline';
-import { useState } from 'react';
 
 interface Demande {
     id: number;
@@ -89,6 +89,7 @@ export default function DemandesIndex({ demandes, conventions, filters, statuses
                     <option value="">Toutes les conventions</option>
                     {conventions.map((c) => {
                         const label = `${c.projet_titre} — ${c.titre}`;
+
                         return (
                             <option key={c.id} value={c.id} title={label}>
                                 {label.length > 60 ? label.slice(0, 57) + '…' : label}

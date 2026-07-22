@@ -21,7 +21,7 @@ class RubriqueFactory extends Factory
         return [
             'id_convention' => Convention::factory(),
             'rubrique_libelle' => fake()->words(3, true),
-            'rubrique_montant_prevu' => fake()->numberBetween(1000000, 20000000),
+            'rubrique_montant' => fake()->numberBetween(1000000, 20000000),
             'rubrique_description' => fake()->sentence(),
             'cree_le' => now(),
             'mis_a_jour_le' => now(),

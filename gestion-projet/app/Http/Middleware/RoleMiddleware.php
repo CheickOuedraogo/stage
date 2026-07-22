@@ -23,8 +23,8 @@ class RoleMiddleware
 
         $user = Auth::user();
 
-        if (! in_array($user->utilisateur_role->value, $roles, true)) {
-            abort(403, 'AgentComptablecès non autorisé.');
+        if (! in_array($user->role_key->value, $roles, true)) {
+            abort(403, 'Accès non autorisé.');
         }
 
         return $next($request);

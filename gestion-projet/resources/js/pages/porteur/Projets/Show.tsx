@@ -1,10 +1,10 @@
+import { ArrowLeftIcon, BanknotesIcon, BuildingLibraryIcon, DocumentTextIcon, ExclamationTriangleIcon, InformationCircleIcon, LockClosedIcon, PresentationChartBarIcon } from '@heroicons/react/24/outline';
+import { Head, Link } from '@inertiajs/react';
 import AppLayout from '@/components/layout/AppLayout';
 import { MarkdownRenderer } from '@/components/ui/MarkdownRenderer';
 import { formatCurrency, formatDate, projectStatusClass, conventionStatusClass } from '@/lib/utils';
-import { index as projetsIndex, show as projetsShow } from '@/routes/porteur/projets';
+import { index as projetsIndex } from '@/routes/porteur/projets';
 import { show as projetsConventionsShow } from '@/routes/porteur/projets/conventions';
-import { Head, Link } from '@inertiajs/react';
-import { ArrowLeftIcon, BanknotesIcon, BuildingLibraryIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 
 interface Convention {
     id: number;
@@ -31,7 +31,10 @@ interface Projet {
     montant_estime: number;
     montant_conventions: number;
     total_versements: number;
+    total_consomme: number;
+    disponible_caisse: number;
     pourcentage_financement: number;
+    bilan_url: string | null;
     date_debut: string | null;
     date_fin_prevue: string | null;
     date_fin_reelle: string | null;
@@ -65,6 +68,15 @@ export default function ProjetShow({ projet }: Props) {
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${projectStatusClass(projet.statut)}`}>
                             {projet.libelle_statut}
                         </span>
+                        {projet.bilan_url && (
+                            <Link
+                                href={projet.bilan_url}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                            >
+                                <PresentationChartBarIcon className="w-4 h-4" />
+                                Voir le bilan
+                            </Link>
+                        )}
                     </div>
                     {projet.date_debut && (
                         <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">
@@ -76,15 +88,13 @@ export default function ProjetShow({ projet }: Props) {
                 </div>
             </div>
 
+            {/* Banner restriction selon statut */}
+            <StatusBanner statut={projet.statut} />
+
             {/* Stats cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 <StatCard
-                    label="Montant estimé"
-                    value={formatCurrency(projet.montant_estime)}
-                    icon={<BanknotesIcon className="w-5 h-5 text-gray-400 dark:text-slate-500" />}
-                />
-                <StatCard
-                    label="Fonds mobilisés (conventions)"
+                    label="Fonds mobilisés"
                     value={formatCurrency(projet.montant_conventions)}
                     sub={`${projet.pourcentage_financement}% du budget estimé`}
                     icon={<BuildingLibraryIcon className="w-5 h-5 text-gray-400 dark:text-slate-500" />}
@@ -94,8 +104,21 @@ export default function ProjetShow({ projet }: Props) {
                     label="Versements reçus"
                     value={formatCurrency(projet.total_versements)}
                     sub={`${tauxVersements}% des conventions`}
-                    icon={<DocumentTextIcon className="w-5 h-5 text-gray-400 dark:text-slate-500" />}
+                    icon={<BanknotesIcon className="w-5 h-5 text-gray-400 dark:text-slate-500" />}
                     progressValue={tauxVersements}
+                />
+                <StatCard
+                    label="Dépensé total"
+                    value={formatCurrency(projet.total_consomme)}
+                    sub="Paiements effectués"
+                    icon={<DocumentTextIcon className="w-5 h-5 text-blue-400" />}
+                />
+                <StatCard
+                    label="Disponible en caisse"
+                    value={formatCurrency(projet.disponible_caisse)}
+                    sub="Fonds réellement dépensables"
+                    icon={<BanknotesIcon className="w-5 h-5 text-emerald-400" />}
+                    variant={projet.disponible_caisse < 0 ? 'danger' : 'success'}
                 />
             </div>
 
@@ -164,12 +187,13 @@ export default function ProjetShow({ projet }: Props) {
     );
 }
 
-function StatCard({ label, value, sub, icon, progressValue }: {
+function StatCard({ label, value, sub, icon, progressValue, variant }: {
     label: string;
     value: string;
     sub?: string;
     icon: React.ReactNode;
     progressValue?: number;
+    variant?: 'success' | 'danger' | 'default';
 }) {
     return (
         <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-5">
@@ -177,13 +201,62 @@ function StatCard({ label, value, sub, icon, progressValue }: {
                 {icon}
                 <p className="text-xs text-gray-500 dark:text-slate-400">{label}</p>
             </div>
-            <p className="text-lg font-mono font-bold text-gray-900 dark:text-white">{value}</p>
+            <p className={`text-lg font-mono font-bold ${
+                variant === 'danger' ? 'text-red-600' : 
+                variant === 'success' ? 'text-emerald-600' : 
+                'text-gray-900 dark:text-white'
+            }`}>{value}</p>
             {sub && <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{sub}</p>}
             {progressValue !== undefined && (
                 <div className="mt-2 w-full h-1.5 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
                     <div className="h-full bg-blue-500 dark:bg-blue-400 rounded-full" style={{ width: `${progressValue}%` }} />
                 </div>
             )}
+        </div>
+    );
+}
+
+function StatusBanner({ statut }: { statut: string }) {
+    const messages: Record<string, { icon: React.ReactNode; title: string; text: string; className: string }> = {
+        en_attente_financement: {
+            icon: <InformationCircleIcon className="w-4 h-4 shrink-0" />,
+            title: 'Projet en attente de mise en cours',
+            text: 'Le DAF doit mettre le projet en cours pour que vous puissiez soumettre des demandes de dépenses. Les conventions peuvent être signées et des versements reçus, mais aucune demande ne peut être créée tant que le statut n\'est pas « En cours ».',
+            className: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-400',
+        },
+        termine: {
+            icon: <LockClosedIcon className="w-4 h-4 shrink-0" />,
+            title: 'Projet terminé',
+            text: 'Ce projet est clôturé. Aucune nouvelle demande de dépense ne peut être soumise.',
+            className: 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-400',
+        },
+        annule: {
+            icon: <ExclamationTriangleIcon className="w-4 h-4 shrink-0" />,
+            title: 'Projet annulé',
+            text: 'Ce projet a été annulé. Aucune nouvelle demande de dépense ne peut être soumise.',
+            className: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-400',
+        },
+        suspendu: {
+            icon: <ExclamationTriangleIcon className="w-4 h-4 shrink-0" />,
+            title: 'Projet suspendu',
+            text: 'Ce projet est suspendu temporairement. Les demandes de dépenses sont bloquées jusqu\'à la reprise.',
+            className: 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-400',
+        },
+    };
+
+    const config = messages[statut];
+
+    if (!config) {
+        return null;
+    }
+
+    return (
+        <div className={`mb-6 flex gap-3 p-4 rounded-xl border ${config.className}`}>
+            {config.icon}
+            <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-semibold">{config.title}</h3>
+                <p className="text-xs mt-0.5">{config.text}</p>
+            </div>
         </div>
     );
 }

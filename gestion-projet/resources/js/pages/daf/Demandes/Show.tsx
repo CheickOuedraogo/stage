@@ -1,6 +1,3 @@
-import AppLayout from '@/components/layout/AppLayout';
-import { Button } from '@/components/ui/Button';
-import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils';
 import {
     index as demandesIndex,
     valider as validerAction,
@@ -12,6 +9,10 @@ import {
     downloadJustificatif as _downloadJustificatif,
     downloadRapport as _downloadRapport,
 } from '@/actions/App/Http/Controllers/Porteur/DemandeDepenseController';
+import AppLayout from '@/components/layout/AppLayout';
+import { Button } from '@/components/ui/Button';
+import { Modal } from '@/components/ui/Modal';
+import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils';
 
 const downloadJustificatifAction = _downloadJustificatif['/fichiers/demandes/{demande}/justificatif'];
 const downloadRapportAction = _downloadRapport['/fichiers/demandes/{demande}/rapport'];
@@ -21,6 +22,7 @@ import {
     CheckCircleIcon,
     XCircleIcon,
     DocumentArrowDownIcon,
+    EyeIcon,
 } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 
@@ -36,14 +38,14 @@ interface Demande {
     motif_rejet: string | null;
     possede_justificatif: boolean;
     possede_rapport: boolean;
+    rapport_motif_rejet: string | null;
     rapport_validee_daf: boolean;
-    rapport_validee_ac: boolean;
     validee_daf_at: string | null;
     validee_ac_at: string | null;
     validateur_daf: string | null;
     validateur_ac: string | null;
     porteur_email: string;
-    rubrique_montant_prevu: number;
+    rubrique_montant: number;
     convention: { id: number; titre: string };
     projet: { id: number; titre: string };
     rubrique: { libelle: string };
@@ -64,7 +66,9 @@ interface Props {
 
 export default function DafDemandeShow({ demande }: Props) {
     const [showRejectForm, setShowRejectForm] = useState(false);
+    const [showRapportRejectForm, setShowRapportRejectForm] = useState(false);
     const rejectForm = useForm({ motif: '' });
+    const rapportRejectForm = useForm({ motif: '' });
 
     const canValidate = demande.statut === 'soumise';
     const canValidateRapport = demande.statut === 'rapport_soumis';
@@ -77,6 +81,13 @@ export default function DafDemandeShow({ demande }: Props) {
         e.preventDefault();
         rejectForm.post(rejeterAction.url(demande.id), {
             onSuccess: () => setShowRejectForm(false),
+        });
+    }
+
+    function handleRapportRejeter(e: React.FormEvent) {
+        e.preventDefault();
+        rapportRejectForm.post(rejeterRapportAction.url(demande.id), {
+            onSuccess: () => setShowRapportRejectForm(false),
         });
     }
 
@@ -123,7 +134,7 @@ export default function DafDemandeShow({ demande }: Props) {
                             </div>
                             <div>
                                 <dt className="text-slate-500 dark:text-slate-400 mb-0.5">Montant prévu rubrique</dt>
-                                <dd className="font-mono font-medium text-gray-800 dark:text-slate-200">{formatCurrency(demande.rubrique_montant_prevu)}</dd>
+                                <dd className="font-mono font-medium text-gray-800 dark:text-slate-200">{formatCurrency(demande.rubrique_montant)}</dd>
                             </div>
                             <div>
                                 <dt className="text-slate-500 dark:text-slate-400 mb-0.5">Date de soumission</dt>
@@ -153,27 +164,73 @@ export default function DafDemandeShow({ demande }: Props) {
 
                     {/* Documents */}
                     <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-6">
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Documents</h3>
-                        <div className="flex flex-wrap gap-3">
-                            {demande.possede_justificatif && (
-                                <a
-                                    href={downloadJustificatifAction.url(demande.id)}
-                                    className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 dark:text-slate-200 text-sm font-medium rounded-lg transition-colors"
-                                >
-                                    <DocumentArrowDownIcon className="w-4 h-4" />
-                                    Justificatif PDF
-                                </a>
-                            )}
-                            {demande.possede_rapport && (
-                                <a
-                                    href={downloadRapportAction.url(demande.id)}
-                                    className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 dark:text-slate-200 text-sm font-medium rounded-lg transition-colors"
-                                >
-                                    <DocumentArrowDownIcon className="w-4 h-4" />
-                                    Rapport d'exécution
-                                </a>
-                            )}
-                        </div>
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Documents associés</h3>
+                        {!demande.possede_justificatif && !demande.possede_rapport ? (
+                            <p className="text-sm text-gray-500 dark:text-slate-400">Aucun document n'a été soumis.</p>
+                        ) : (
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left text-sm border-collapse">
+                                    <thead>
+                                        <tr className="text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-transparent">
+                                            <th className="py-2 pr-4">Type de document</th>
+                                            <th className="py-2 px-4 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-transparent">
+                                        {demande.possede_justificatif && (
+                                            <tr>
+                                                <td className="py-2.5 pr-4 font-medium text-slate-850 dark:text-slate-200">
+                                                    Justificatif de dépense (PDF)
+                                                </td>
+                                                <td className="py-2.5 px-4 text-right space-x-2">
+                                                    <a
+                                                        href={`${downloadJustificatifAction.url(demande.id)}?inline=1`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 text-xs font-medium rounded-lg transition-colors"
+                                                    >
+                                                        <EyeIcon className="w-3.5 h-3.5" />
+                                                        Voir
+                                                    </a>
+                                                    <a
+                                                        href={downloadJustificatifAction.url(demande.id)}
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-medium rounded-lg transition-colors"
+                                                    >
+                                                        <DocumentArrowDownIcon className="w-3.5 h-3.5" />
+                                                        Télécharger
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        )}
+                                        {demande.possede_rapport && (
+                                            <tr>
+                                                <td className="py-2.5 pr-4 font-medium text-slate-850 dark:text-slate-200">
+                                                    Rapport d'exécution
+                                                </td>
+                                                <td className="py-2.5 px-4 text-right space-x-2">
+                                                    <a
+                                                        href={`${downloadRapportAction.url(demande.id)}?inline=1`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 text-xs font-medium rounded-lg transition-colors"
+                                                    >
+                                                        <EyeIcon className="w-3.5 h-3.5" />
+                                                        Voir
+                                                    </a>
+                                                    <a
+                                                        href={downloadRapportAction.url(demande.id)}
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-medium rounded-lg transition-colors"
+                                                    >
+                                                        <DocumentArrowDownIcon className="w-3.5 h-3.5" />
+                                                        Télécharger
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
 
                     {/* Actions validation DAF */}
@@ -182,45 +239,49 @@ export default function DafDemandeShow({ demande }: Props) {
                             <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
                                 Décision (1er niveau — conformité & budget)
                             </h3>
-                            {!showRejectForm ? (
-                                <div className="flex gap-3">
-                                    <Button onClick={handleValider} variant="primary">
-                                        <CheckCircleIcon className="w-4 h-4" />
-                                        Valider la demande
-                                    </Button>
-                                    <Button variant="danger" onClick={() => setShowRejectForm(true)}>
-                                        <XCircleIcon className="w-4 h-4" />
-                                        Rejeter
-                                    </Button>
-                                </div>
-                            ) : (
-                                <form onSubmit={handleRejeter} className="space-y-3">
+                            <div className="flex gap-3">
+                                <Button onClick={handleValider} variant="primary">
+                                    <CheckCircleIcon className="w-4 h-4" />
+                                    Valider la demande
+                                </Button>
+                                <Button variant="danger" onClick={() => setShowRejectForm(true)}>
+                                    <XCircleIcon className="w-4 h-4" />
+                                    Rejeter
+                                </Button>
+                            </div>
+
+                            <Modal
+                                open={showRejectForm}
+                                onClose={() => setShowRejectForm(false)}
+                                title="Rejeter la demande"
+                            >
+                                <form onSubmit={handleRejeter} className="space-y-4">
                                     <div>
                                         <label htmlFor="motif" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">
                                             Motif de rejet <span className="text-red-500">*</span>
                                         </label>
                                         <textarea
                                             id="motif"
-                                            rows={3}
+                                            rows={4}
                                             value={rejectForm.data.motif}
                                             onChange={(e) => rejectForm.setData('motif', e.target.value)}
                                             className="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500/50 resize-none"
-                                            placeholder="Expliquer la raison du rejet…"
+                                            placeholder="Expliquer la raison du rejet en détail…"
                                         />
                                         {rejectForm.errors.motif && (
                                             <p className="mt-1 text-xs text-red-600">{rejectForm.errors.motif}</p>
                                         )}
                                     </div>
-                                    <div className="flex gap-3">
-                                        <Button type="submit" variant="danger" loading={rejectForm.processing}>
-                                            Confirmer le rejet
-                                        </Button>
+                                    <div className="flex justify-end gap-3 pt-2">
                                         <Button type="button" variant="ghost" onClick={() => setShowRejectForm(false)}>
                                             Annuler
                                         </Button>
+                                        <Button type="submit" variant="danger" loading={rejectForm.processing}>
+                                            Confirmer le rejet
+                                        </Button>
                                     </div>
                                 </form>
-                            )}
+                            </Modal>
                         </div>
                     )}
 
@@ -240,15 +301,45 @@ export default function DafDemandeShow({ demande }: Props) {
                                     {demande.rapport_validee_daf ? 'Rapport déjà validé' : 'Valider le rapport'}
                                 </Button>
                                 {!demande.rapport_validee_daf && (
-                                    <Button
-                                        onClick={() => router.post(rejeterRapportAction.url(demande.id), {}, { preserveScroll: true })}
-                                        variant="danger"
-                                    >
+                                    <Button variant="danger" onClick={() => setShowRapportRejectForm(true)}>
                                         <XCircleIcon className="w-4 h-4" />
                                         Rejeter le rapport
                                     </Button>
                                 )}
                             </div>
+
+                            <Modal
+                                open={showRapportRejectForm}
+                                onClose={() => setShowRapportRejectForm(false)}
+                                title="Rejeter le rapport d'exécution"
+                            >
+                                <form onSubmit={handleRapportRejeter} className="space-y-4">
+                                    <div>
+                                        <label htmlFor="motif-rapport" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1.5">
+                                            Motif de rejet <span className="text-red-500">*</span>
+                                        </label>
+                                        <textarea
+                                            id="motif-rapport"
+                                            rows={4}
+                                            value={rapportRejectForm.data.motif}
+                                            onChange={(e) => rapportRejectForm.setData('motif', e.target.value)}
+                                            className="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-red-500/50 resize-none"
+                                            placeholder="Expliquer pourquoi le rapport est rejeté…"
+                                        />
+                                        {rapportRejectForm.errors.motif && (
+                                            <p className="mt-1 text-xs text-red-600">{rapportRejectForm.errors.motif}</p>
+                                        )}
+                                    </div>
+                                    <div className="flex justify-end gap-3 pt-2">
+                                        <Button type="button" variant="ghost" onClick={() => setShowRapportRejectForm(false)}>
+                                            Annuler
+                                        </Button>
+                                        <Button type="submit" variant="danger" loading={rapportRejectForm.processing}>
+                                            Confirmer le rejet
+                                        </Button>
+                                    </div>
+                                </form>
+                            </Modal>
                         </div>
                     )}
                 </div>

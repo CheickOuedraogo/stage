@@ -1,12 +1,12 @@
-import AppLayout from '@/components/layout/AppLayout';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { ClipboardDocumentCheckIcon } from '@heroicons/react/24/outline';
+import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 import {
     show as demandeShow,
     valider as validerAction,
 } from '@/actions/App/Http/Controllers/Daf/DemandeDepenseController';
-import { Head, Link, router } from '@inertiajs/react';
-import { ClipboardDocumentCheckIcon } from '@heroicons/react/24/outline';
-import { useState } from 'react';
+import AppLayout from '@/components/layout/AppLayout';
+import { formatCurrency, formatDate } from '@/lib/utils';
 
 interface Demande {
     id: number;
@@ -72,8 +72,13 @@ export default function DafDemandesIndex({ en_attente, historique, filters, stat
                         id={`tab-${tab}`}
                         onClick={() => setActiveTab(tab)}
                         onKeyDown={(e) => {
-                            if (e.key === 'ArrowRight') setActiveTab('historique');
-                            if (e.key === 'ArrowLeft') setActiveTab('attente');
+                            if (e.key === 'ArrowRight') {
+setActiveTab('historique');
+}
+
+                            if (e.key === 'ArrowLeft') {
+setActiveTab('attente');
+}
                         }}
                         className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
                             activeTab === tab
