@@ -19,7 +19,7 @@ class UpdateProfileRequest extends FormRequest
         return [
             'utilisateur_nom' => ['required', 'string', 'max:255'],
             'utilisateur_telephone' => ['nullable', 'string', 'max:20'],
-            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:5120'],
         ];
     }
 
@@ -31,7 +31,7 @@ class UpdateProfileRequest extends FormRequest
         return [
             'utilisateur_nom.required' => 'Le nom est obligatoire.',
             'avatar.image' => 'Le fichier doit être une image.',
-            'avatar.max' => "L'image ne doit pas dépasser 2 Mo.",
+            'avatar.max' => "L'image ne doit pas dépasser 5 Mo.",
         ];
     }
 }

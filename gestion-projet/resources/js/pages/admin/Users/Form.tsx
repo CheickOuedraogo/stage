@@ -55,7 +55,7 @@ export default function UtilisateurForm({ user, roles }: UtilisateurFormProps) {
                 </h2>
             </div>
 
-            <div className="max-w-lg">
+            <div className="mx-auto max-w-lg">
                 <Card>
                     <CardHeader>
                         <CardTitle>Informations du compte</CardTitle>

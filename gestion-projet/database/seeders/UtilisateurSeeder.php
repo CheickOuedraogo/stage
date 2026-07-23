@@ -13,37 +13,37 @@ class UtilisateurSeeder extends Seeder
     {
         // ── Administrateur ───────────────────────────────────────────────────────────
         Utilisateur::create([
-            'utilisateur_nom' => 'Administrateur CIFEU',
-            'utilisateur_email' => 'hcheick77@gmail.com',
-            'utilisateur_mot_de_passe' => Hash::make('password'),
-            'role_key' => RoleUtilisateur::Administrateur,
-            'utilisateur_actif' => true,
-            'utilisateur_telephone' => '+226 56 19 74 06',
-        ]);
-
-        // ── DAF ─────────────────────────────────────────────────────────────
-        Utilisateur::create([
-            'utilisateur_nom' => 'Ouedraogo Bonaventure',
-            'utilisateur_email' => 'hcheick75@gmail.com',
-            'utilisateur_mot_de_passe' => Hash::make('password'),
-            'role_key' => RoleUtilisateur::Daf,
-            'utilisateur_actif' => true,
-            'utilisateur_telephone' => '+226 25 30 70 01',
-        ]);
-
-        // ── AC ──────────────────────────────────────────────────────────────
-        Utilisateur::create([
-            'utilisateur_nom' => 'Savadofo Kader',
+            'utilisateur_nom' => 'Bouedraogo Salifou',
             'utilisateur_email' => 'bouedraogo0412@gmail.com',
             'utilisateur_mot_de_passe' => Hash::make('password'),
-            'role_key' => RoleUtilisateur::AgentComptable,
+            'role_key' => RoleUtilisateur::Administrateur,
             'utilisateur_actif' => true,
             'utilisateur_telephone' => '+226 25 30 70 02',
         ]);
 
+        // ── DAF ─────────────────────────────────────────────────────────────
+        Utilisateur::create([
+            'utilisateur_nom' => 'Herve Cheick',
+            'utilisateur_email' => 'hcheick77@gmail.com',
+            'utilisateur_mot_de_passe' => Hash::make('password'),
+            'role_key' => RoleUtilisateur::Daf,
+            'utilisateur_actif' => true,
+            'utilisateur_telephone' => '+226 56 19 74 06',
+        ]);
+
+        // ── AC ──────────────────────────────────────────────────────────────
+        Utilisateur::create([
+            'utilisateur_nom' => 'Ouedraogo Bonaventure',
+            'utilisateur_email' => 'hcheick75@gmail.com',
+            'utilisateur_mot_de_passe' => Hash::make('password'),
+            'role_key' => RoleUtilisateur::AgentComptable,
+            'utilisateur_actif' => true,
+            'utilisateur_telephone' => '+226 25 30 70 01',
+        ]);
+
         // ── Porteur de projet ───────────────────────────────────────────────
         Utilisateur::create([
-            'utilisateur_nom' => 'Pr. Jean-Baptiste OUÉDRAOGO',
+            'utilisateur_nom' => 'Mr Yilpapoin Ouedraogo',
             'utilisateur_email' => 'ocheick418@gmail.com',
             'utilisateur_mot_de_passe' => Hash::make('password'),
             'role_key' => RoleUtilisateur::Porteur,

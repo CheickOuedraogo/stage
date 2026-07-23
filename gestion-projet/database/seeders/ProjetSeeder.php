@@ -248,6 +248,18 @@ class ProjetSeeder extends Seeder
                 'activites' => "## Activités réalisées\n\n- Enquêtes nutritionnelles dans 200 ménages par commune\n- Développement de recettes enrichies avec les groupements féminins\n- Construction de 60 magasins de stockage de produits locaux\n- Campagnes radio et théâtres-forums sur les bonnes pratiques alimentaires\n- Évaluation finale d'impact nutritionnel",
             ],
             [
+                'sigle' => 'LAB-IA-BF',
+                'porteur_email' => 'ocheick418@gmail.com',
+                'titre' => 'Laboratoire d\'Intelligence Artificielle du Burkina Faso',
+                'status' => StatutProjet::EnCours,
+                'montant_estime' => 500_000_000,
+                'date_debut' => '2025-01-15',
+                'date_fin_prevue' => '2027-12-31',
+                'bailleur_description' => "## Présentation\n\nLe projet **LAB-IA-BF** vise à créer un centre de recherche en intelligence artificielle à Ouagadougou, capable de développer des solutions IA adaptées aux défis du Burkina Faso : agriculture de précision, santé publique, éducation et gouvernance numérique. Sous la direction de **Mr Yilpapoin Ouedraogo**, ingénieur informaticien formé en France, le laboratoire combinera recherche fondamentale, développement de prototypes et formation d'une nouvelle génération d'experts en IA au Sahel.\n\n## Histoire\n\nDe retour dans son pays natal après 10 ans d'expérience en Europe, Mr Ouedraogo a l'ambition de démocratiser l'accès à l'intelligence artificielle pour les pays en développement. En partenariat avec 4 bailleurs internationaux (BAD, UEMOA, AFD, DDC), il a obtenu un financement de 500 millions de FCFA pour bâtir un écosystème IA complet : du serveur au logiciel, de la formation à la recherche appliquée.",
+                'objectifs' => "## Objectifs\n\n1. Déployer une infrastructure GPU compute pour l'entraînement de modèles d'IA à grande échelle\n2. Développer des plateformes logicielles d'IA open-source adaptées au contexte ouest-africain\n3. Former 100 ingénieurs spécialisés en IA et Machine Learning\n4. Publier des recherches scientifiques dans les meilleures conférences internationales\n5. Créer des solutions concrètes : reconnaissance d'images agricoles, analyse de données sanitaires, éducation intelligente",
+                'activites' => "## Activités prévues\n\n- Installation d'un cluster de serveurs GPU (NVIDIA A100) dans un datacenter local\n- Construction d'un laboratoire de recherche et d'un espace de coworking\n- Développement d'un framework ML léger optimisé pour les données africaines\n- Formation d'experts en deep learning, NLP et computer vision\n- Organisation d'ateliers et conférences sur l'IA au Sahel\n- Partenariats avec les universités burkinabè et internationales",
+            ],
+            [
                 'sigle' => 'FAB-LAB-BF',
                 'porteur_email' => 'moussa.coulibaly@gmail.com',
                 'titre' => 'Réseau de Laboratoires de Fabrication Numérique et d\'Innovation Technologique pour la Jeunesse Burkinabè',
@@ -937,6 +949,89 @@ class ProjetSeeder extends Seeder
                 ],
                 'versements' => [
                     ['montant' => 80_000_000, 'date' => '2022-11-01', 'ref' => 'VRS-AFD-NUT-2022-001'],
+                ],
+            ],
+
+            // ══════════════════════════════════════════════
+            //  LAB-IA-BF — 500 000 000 FCFA
+            //  BAD 200M + UEMOA 120M + AFD 100M + DDC 80M = 500M ✓
+            // ══════════════════════════════════════════════
+            [
+                'projet' => 'LAB-IA-BF',
+                'bailleur' => 'bad',
+                'titre' => 'Convention BAD-LABIA-2025-001 — Infrastructure et Équipement du Laboratoire IA',
+                'montant_fcfa' => 200_000_000,
+                'forme' => FormeConvention::Pret,
+                'status' => StatutConvention::Active,
+                'date_signature' => '2025-01-10',
+                'date_debut' => '2025-01-15',
+                'date_fin' => '2027-12-31',
+                'bailleur_description' => "## Contexte\n\nLa **Banque Africaine de Développement** accorde un prêt concessionnaire au titre de son programme *Innovation Numérique pour le Développement* pour financer l'infrastructure matérielle du laboratoire d'IA : datacenter, serveurs GPU, climatisation et mobilier.",
+                'rubriques' => [
+                    ['libelle' => 'Serveurs et infrastructure cloud GPU',    'montant_prevu' => 80_000_000],
+                    ['libelle' => 'Construction du laboratoire IA',         'montant_prevu' => 80_000_000],
+                    ['libelle' => 'Mobilier et équipements',                'montant_prevu' => 40_000_000],
+                ],
+                'versements' => [
+                    ['montant' => 150_000_000, 'date' => '2025-03-01', 'ref' => 'VRS-BAD-LABIA-2025-001'],
+                ],
+            ],
+            [
+                'projet' => 'LAB-IA-BF',
+                'bailleur' => 'uemoa',
+                'titre' => 'Convention UEMOA-LABIA-2025-002 — Développement Logiciel et Plateformes IA',
+                'montant_fcfa' => 120_000_000,
+                'forme' => FormeConvention::Don,
+                'status' => StatutConvention::Active,
+                'date_signature' => '2025-02-15',
+                'date_debut' => '2025-03-01',
+                'date_fin' => '2027-09-30',
+                'bailleur_description' => "## Contexte\n\nLa **Commission de l'UEMOA** finance le développement des plateformes logicielles d'IA et l'intégration de données ouvertes ouest-africaines via son programme régional de transformation numérique.",
+                'rubriques' => [
+                    ['libelle' => 'Développement plateforme Machine Learning',  'montant_prevu' => 60_000_000],
+                    ['libelle' => 'Intégration données ouvertes UEMOA',         'montant_prevu' => 30_000_000],
+                    ['libelle' => 'Tests, déploiement et maintenance',          'montant_prevu' => 30_000_000],
+                ],
+                'versements' => [
+                    ['montant' => 80_000_000, 'date' => '2025-04-15', 'ref' => 'VRS-UEMOA-LABIA-2025-001'],
+                ],
+            ],
+            [
+                'projet' => 'LAB-IA-BF',
+                'bailleur' => 'afd',
+                'titre' => 'Convention AFD-LABIA-2025-003 — Construction et Formation des Ingénieurs IA',
+                'montant_fcfa' => 100_000_000,
+                'forme' => FormeConvention::Don,
+                'status' => StatutConvention::Active,
+                'date_signature' => '2025-03-01',
+                'date_debut' => '2025-03-15',
+                'date_fin' => '2027-06-30',
+                'bailleur_description' => "## Contexte\n\nL'**Agence Française de Développement** finance la construction du bâtiment principal et la formation d'une équipe d'ingénieurs IA dans le cadre de son programme *Innovation et Numérique en Afrique*.",
+                'rubriques' => [
+                    ['libelle' => 'Bâtiment principal du laboratoire',          'montant_prevu' => 60_000_000],
+                    ['libelle' => 'Formation des ingénieurs IA',                'montant_prevu' => 40_000_000],
+                ],
+                'versements' => [
+                    ['montant' => 60_000_000, 'date' => '2025-05-01', 'ref' => 'VRS-AFD-LABIA-2025-001'],
+                ],
+            ],
+            [
+                'projet' => 'LAB-IA-BF',
+                'bailleur' => 'ddc',
+                'titre' => 'Convention DDC-LABIA-2025-004 — Recherche Appliquée et Diffusion Scientifique',
+                'montant_fcfa' => 80_000_000,
+                'forme' => FormeConvention::Don,
+                'status' => StatutConvention::Active,
+                'date_signature' => '2025-04-01',
+                'date_debut' => '2025-05-01',
+                'date_fin' => '2027-12-31',
+                'bailleur_description' => "## Contexte\n\nLa **Coopération suisse (DDC)** finance les activités de recherche appliquée et de diffusion scientifique du laboratoire, incluant les publications, les conférences et les partenariats académiques internationaux.",
+                'rubriques' => [
+                    ['libelle' => 'Projets de recherche appliquée IA',          'montant_prevu' => 50_000_000],
+                    ['libelle' => 'Publications et conférences scientifiques',  'montant_prevu' => 30_000_000],
+                ],
+                'versements' => [
+                    ['montant' => 40_000_000, 'date' => '2025-06-01', 'ref' => 'VRS-DDC-LABIA-2025-001'],
                 ],
             ],
 
